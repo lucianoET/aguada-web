@@ -1,0 +1,88 @@
+<h2>Escopo de Páginas — Fase 1</h2>
+<p class="subtitle">Selecione todas as páginas que entram no redesign desta fase. Pode selecionar múltiplas.</p>
+
+<div class="options" data-multiselect style="margin-top: 1.5rem;">
+
+  <div class="option" data-choice="dashboard" onclick="toggleSelect(this)">
+    <div class="letter">📊</div>
+    <div class="content">
+      <h3>Dashboard</h3>
+      <p>Visão geral: KPIs, cards de reservatórios, status do gateway, gráfico de barras</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="scada" onclick="toggleSelect(this)">
+    <div class="letter">⚙</div>
+    <div class="content">
+      <h3>SCADA</h3>
+      <p>Controle manual de bombas, válvulas, hidrômetros. Diagrama de fluxo SVG.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="mapa" onclick="toggleSelect(this)">
+    <div class="letter">🗺</div>
+    <div class="content">
+      <h3>Mapa</h3>
+      <p>Rede hidráulica com posições corrigidas, ícones, tubulação. <em>Sem ETE nesta fase.</em></p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="historico" onclick="toggleSelect(this)">
+    <div class="letter">📈</div>
+    <div class="content">
+      <h3>Histórico</h3>
+      <p>Gráficos de nível/volume por reservatório e período (Chart.js offline)</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="consumo" onclick="toggleSelect(this)">
+    <div class="letter">🚰</div>
+    <div class="content">
+      <h3>Consumo</h3>
+      <p>Análise de consumo diário/semanal/mensal por reservatório</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="abastecimento" onclick="toggleSelect(this)">
+    <div class="letter">💧</div>
+    <div class="content">
+      <h3>Abastecimento</h3>
+      <p>Registros de abastecimento (entrada d'água), eventos e tendências</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="relatorio" onclick="toggleSelect(this)">
+    <div class="letter">📄</div>
+    <div class="content">
+      <h3>Relatório</h3>
+      <p>Relatório diário — visualização web + download PDF (WeasyPrint)</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="dispositivos" onclick="toggleSelect(this)">
+    <div class="letter">📡</div>
+    <div class="content">
+      <h3>Dispositivos</h3>
+      <p>Lista de nós ESP32, RSSI, firmware, uptime, status de conexão</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="dados" onclick="toggleSelect(this)">
+    <div class="letter">🗄</div>
+    <div class="content">
+      <h3>Dados</h3>
+      <p>Tabela de leituras brutas, filtros, exportação CSV</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="documentacao" onclick="toggleSelect(this)">
+    <div class="letter">📚</div>
+    <div class="content">
+      <h3>Documentação</h3>
+      <p>Página estática com manual de operação, normas técnicas</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top: 1.2rem; font-size: 0.8rem;">Selecione múltiplas. Responda também no terminal se quiser comentar.</p>

@@ -1,0 +1,10 @@
+{
+  "name": "aguada-web",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./frontend/tailwind.input.css -o ./frontend/assets/tailwind.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

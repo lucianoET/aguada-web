@@ -1,0 +1,15 @@
+[Unit]
+Description=Aguada Web – abre navegador após o backend subir
+After=aguada-web-backend.service graphical-session.target
+Wants=aguada-web-backend.service
+PartOf=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=__PROJECT_ROOT__/tools/open_browser.sh
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=%h/.Xauthority
+RemainAfterExit=no
+
+[Install]
+WantedBy=graphical-session.target

@@ -1,0 +1,15 @@
+[Unit]
+Description=Aguada Web Backend (FastAPI + serial bridge)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=__PROJECT_ROOT__
+ExecStart=__PROJECT_ROOT__/tools/start_backend.sh
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR" x-data="historyApp()" x-init="init()" :class="{ 'dark': darkMode }">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aguada — Histórico</title>
+  <link rel="stylesheet" href="assets/tailwind.css?v=1" />
+  <script src="assets/shared.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+  <style>
+    [x-cloak] { display: none; }
+    .card-hover {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    #historyChart { display: block; }
+  </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen" x-cloak>
+
+  <!-- Header -->
+  <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">A</div>
+          <span class="font-semibold text-lg text-gray-800 dark:text-gray-100">Aguada CMASM</span>
+        </div>
+        <nav class="hidden md:flex items-center gap-1">
+          <a href="index.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dashboard</a>
+          <a href="scada.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">SCADA</a>
+          <a href="history.html" class="px-4 py-2 rounded-md text-sm font-medium bg-blue-600 text-white">Histórico</a>
+          <a href="consumption.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Consumo</a>
+          <a href="abastecimento.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Abastecimento</a>
+          <a href="dados.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dados</a>
+          <a href="report.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Relatório</a>
+          <a href="dispositivos.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dispositivos</a>
+          <a href="documentacao.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Documentação</a>
+        </nav>
+        <div class="flex items-center gap-3">
+          <button @click="toggleDark()" class="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Alternar tema">
+            <svg x-show="!darkMode" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+            <svg x-show="darkMode" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1m15.07-6.07l-.71.71M6.34 17.66l-.71.71M17.66 17.66l-.71-.71M6.34 6.34l-.71-.71M12 7a5 5 0 100 10A5 5 0 0012 7z" /></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <h1 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Histórico de Leituras</h1>
+
+    <!-- Filter Bar -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6 flex flex-wrap items-center gap-4">
+      <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-600 dark:text-gray-300">Reservatório</label>
+        <select x-model="alias" @change="load()" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="CON">CON — Castelo Consumo</option>
+          <option value="CAV">CAV — Castelo Incêndio</option>
+          <option value="CB31">CB31 — Casa Bombas Nº3</option>
+          <option value="CB32">CB32 — Casa Bombas Nº3</option>
+          <option value="CIE1">CIE1 — Cisterna IE</option>
+          <option value="CIE2">CIE2 — Cisterna IE</option>
+          <option value="CBIF1">CBIF1 — Casa Bombas IF</option>
+          <option value="CBIF2">CBIF2 — Casa Bombas IF</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-1">
+        <span class="text-sm font-medium text-gray-600 dark:text-gray-300 mr-1">Período</span>
+        <template x-for="p in ['24h','7d','30d']" :key="p">
+          <button @click="period = p; load()"
+            :class="period === p ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+            class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+            x-text="p">
+          </button>
+        </template>
+      </div>
+
+      <div class="flex items-center gap-1">
+        <span class="text-sm font-medium text-gray-600 dark:text-gray-300 mr-1">Linhas</span>
+        <template x-for="limit in rowLimitOptions" :key="limit">
+          <button @click="setRowLimit(limit)"
+            :class="rowLimit === limit ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+            class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+            x-text="limit">
+          </button>
+        </template>
+      </div>
+
+      <div x-show="loading" class="ml-auto flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+        <svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        Carregando...
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
+      <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Volume ao longo do tempo</h2>
+      <div x-show="!chartReady && !loading" class="flex items-center justify-center h-64 text-gray-400 dark:text-gray-600 text-sm">
+        Nenhum dado disponível
+      </div>
+      <div x-show="chartReady || loading" style="position:relative; height:280px;">
+        <canvas id="historyChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Leituras</h2>
+        <span class="text-xs text-gray-400 dark:text-gray-500" x-text="summaryText()"></span>
+      </div>
+
+      <div x-show="rows.length === 0 && !loading" class="p-8 text-center text-gray-400 dark:text-gray-600">
+        <p>Nenhum dado encontrado para o período selecionado.</p>
+      </div>
+
+      <div x-show="rows.length > 0" class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400 tracking-wide">
+              <th class="px-4 py-3 text-left">Timestamp</th>
+              <th class="px-4 py-3 text-right">Nível (cm)</th>
+              <th class="px-4 py-3 text-right">Volume (L)</th>
+              <th class="px-4 py-3 text-right">Nível %</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            <template x-for="(row, i) in visibleTableRows()" :key="`${row.ts ?? 'row'}-${i}`">
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                <td class="px-4 py-2.5 text-gray-600 dark:text-gray-300" x-text="formatTs(row.ts)"></td>
+                <td class="px-4 py-2.5 text-right font-mono" x-text="row.level_cm != null ? row.level_cm : '—'"></td>
+                <td class="px-4 py-2.5 text-right font-mono" x-text="row.volume_l != null ? Math.round(row.volume_l) : '—'"></td>
+                <td class="px-4 py-2.5 text-right">
+                  <span class="font-medium"
+                    :class="{
+                      'text-green-600': row.pct >= 80,
+                      'text-blue-500': row.pct >= 50 && row.pct < 80,
+                      'text-yellow-500': row.pct >= 20 && row.pct < 50,
+                      'text-red-500': row.pct < 20
+                    }"
+                    x-text="row.pct != null ? row.pct + '%' : '—'">
+                  </span>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Chart.js carregado por último, sem defer, para garantir disponibilidade -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    function historyApp() {
+      const chartStore = { instance: null };
+      return {
+        darkMode: localStorage.getItem('darkMode') === 'true',
+        alias: 'CON',
+        period: '24h',
+        rowLimit: 50,
+        rowLimitOptions: [50, 100, 200],
+        rows: [],
+        chartRows: [],
+        loading: false,
+        chartReady: false,
+
+        init() {
+          const params = new URLSearchParams(location.search);
+          const aliasParam = params.get('alias');
+          if (aliasParam && ORDERED_ALIASES.includes(aliasParam.toUpperCase())) {
+            this.alias = aliasParam.toUpperCase();
+          }
+          this.load();
+        },
+
+        toggleDark() {
+          this.darkMode = !this.darkMode;
+          localStorage.setItem('darkMode', this.darkMode);
+          if (this.rows.length > 0) {
+            this.$nextTick(() => this.renderChart());
+          }
+        },
+
+        setRowLimit(limit) {
+          this.rowLimit = limit;
+        },
+
+        async load() {
+          this.loading = true;
+          try {
+            const res = await fetch(`/api/history/${encodeURIComponent(this.alias)}?period=${this.period}`);
+            if (res.ok) {
+              const rawRows = await res.json() || [];
+              this.rows = [...rawRows].filter(r => Number.isFinite(r?.ts)).sort((a, b) => a.ts - b.ts);
+              this.chartRows = this.buildFixedSeries(this.rows);
+              this.chartReady = this.chartRows.some(r => r.volume_l != null);
+              this.$nextTick(() => this.renderChart());
+            }
+          } catch (e) {
+            console.error('History load error:', e);
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        renderChart() {
+          const visibleRows = this.chartRows;
+
+          if (visibleRows.length === 0) {
+            if (chartStore.instance) {
+              try {
+                chartStore.instance.stop();
+                chartStore.instance.destroy();
+              } catch (e) {
+                console.warn('Falha ao destruir gráfico de histórico:', e);
+              } finally {
+                chartStore.instance = null;
+              }
+            }
+            return;
+          }
+
+          if (typeof Chart === 'undefined') {
+            console.error('Chart.js não disponível');
+            return;
+          }
+
+          const canvas = document.getElementById('historyChart');
+          const ctx = canvas?.getContext?.('2d');
+          if (!ctx) return;
+
+          const isDark = this.darkMode;
+          const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+          const textColor = isDark ? '#9ca3af' : '#6b7280';
+
+          const labels = visibleRows.map(r => {
+            const d = new Date(r.ts * 1000);
+            if (this.period === '24h') {
+              return d.toLocaleString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            }
+            return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+          });
+          const data = visibleRows.map(r => r.volume_l != null ? Math.round(r.volume_l) : null);
+
+          const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { labels: { color: textColor, font: { size: 12 } } },
+              tooltip: { mode: 'index' }
+            },
+            scales: {
+              x: {
+                ticks: { color: textColor, maxTicksLimit: 10, maxRotation: 30 },
+                grid: { color: gridColor }
+              },
+              y: {
+                ticks: { color: textColor },
+                grid: { color: gridColor },
+                title: { display: true, text: 'Volume (L)', color: textColor }
+              }
+            }
+          };
+
+          if (chartStore.instance) {
+            chartStore.instance.data.labels = labels;
+            chartStore.instance.data.datasets[0] = {
+              ...chartStore.instance.data.datasets[0],
+              label: `Volume (L) — ${this.alias}`,
+              data,
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59,130,246,0.15)',
+              borderWidth: 2,
+              pointRadius: visibleRows.length > 200 ? 0 : 2,
+              tension: 0.3,
+              fill: true,
+              spanGaps: true
+            };
+            chartStore.instance.options = chartOptions;
+            chartStore.instance.update('none');
+            return;
+          }
+
+          chartStore.instance = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                label: `Volume (L) — ${this.alias}`,
+                data,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59,130,246,0.15)',
+                borderWidth: 2,
+                pointRadius: visibleRows.length > 200 ? 0 : 2,
+                tension: 0.3,
+                fill: true,
+                spanGaps: true
+              }]
+            },
+            options: chartOptions
+          });
+        },
+
+        getPeriodConfig() {
+          const now = Math.floor(Date.now() / 1000);
+          if (this.period === '24h') {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const startTs = Math.floor(today.getTime() / 1000);
+            const endTs = startTs + 86400 - 1;
+            return { startTs, endTs, points: 49 };
+          }
+          const seconds = { '7d': 7 * 86400, '30d': 30 * 86400 };
+          const startTs = now - (seconds[this.period] || 86400);
+          const points = { '7d': 169, '30d': 241 }[this.period] || 169;
+          return { startTs, endTs: now, points };
+        },
+
+        buildFixedSeries(rows) {
+          const { startTs, endTs, points } = this.getPeriodConfig();
+          if (points <= 1 || endTs <= startTs) return [];
+
+          const step = (endTs - startTs) / (points - 1);
+          const fixed = [];
+          let cursor = 0;
+
+          for (let i = 0; i < points; i++) {
+            const targetTs = i === points - 1 ? endTs : Math.round(startTs + i * step);
+            const slotStart = i === 0 ? startTs : Math.round(startTs + (i - 1) * step);
+
+            let slotReading = null;
+            while (cursor < rows.length && rows[cursor].ts <= targetTs) {
+              if (rows[cursor].ts >= slotStart) slotReading = rows[cursor];
+              cursor++;
+            }
+
+            fixed.push({
+              ts: targetTs,
+              level_cm: slotReading?.level_cm ?? null,
+              volume_l: slotReading?.volume_l ?? null,
+              pct:      slotReading?.pct ?? null,
+            });
+          }
+
+          return fixed;
+        },
+
+        visibleRows() {
+          return this.rows.slice(0, this.rowLimit);
+        },
+
+        visibleTableRows() {
+          return [...this.rows]
+            .sort((a, b) => (b?.ts ?? 0) - (a?.ts ?? 0))
+            .slice(0, this.rowLimit);
+        },
+
+        summaryText() {
+          const shown = Math.min(this.rowLimit, this.rows.length);
+          return this.rows.length > this.rowLimit
+            ? `Mostrando ${shown} de ${this.rows.length} registros`
+            : `${this.rows.length} registros`;
+        },
+
+        formatTs(ts) {
+          if (!ts) return '—';
+          return new Date(ts * 1000).toLocaleString('pt-BR', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+          });
+        }
+      };
+    }
+  </script>
+</body>
+</html>

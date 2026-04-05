@@ -1,0 +1,36 @@
+<h2>Aguada — Redesign do Frontend</h2>
+<p class="subtitle">Companion visual ativo. As próximas perguntas de design aparecerão aqui.</p>
+
+<div class="section" style="margin-top: 2rem;">
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+    <div style="padding: 1.2rem; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border);">
+      <div class="label">aguada-web (base)</div>
+      <h3 style="margin-top: 0.5rem;">FastAPI + SQLite</h3>
+      <p style="font-size: 0.85rem; color: var(--muted);">Backend Python, WebSocket ao vivo, Docker, Tailwind CSS + Alpine.js. 9 páginas HTML puras.</p>
+      <ul style="font-size: 0.82rem; color: var(--muted); margin-top: 0.6rem; padding-left: 1rem; line-height: 1.8;">
+        <li>Dashboard, SCADA, Histórico</li>
+        <li>Consumo, Abastecimento</li>
+        <li>Dados, Relatório, Dispositivos</li>
+        <li>Modos claro/escuro ✓</li>
+        <li>CDN externo (Alpine, Chart.js)</li>
+      </ul>
+    </div>
+    <div style="padding: 1.2rem; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border);">
+      <div class="label">aguada3 (referência de estilo)</div>
+      <h3 style="margin-top: 0.5rem;">PHP + MySQL</h3>
+      <p style="font-size: 0.85rem; color: var(--muted);">CSS escuro com variáveis, sidebar fixa, tipografia monospace, cards SCADA. Estilo industrial.</p>
+      <ul style="font-size: 0.82rem; color: var(--muted); margin-top: 0.6rem; padding-left: 1rem; line-height: 1.8;">
+        <li>Dashboard, Mapa, SCADA</li>
+        <li>Histórico, Diário, Dispositivos</li>
+        <li>CSS puro (100% offline) ✓</li>
+        <li>Tema escuro apenas</li>
+        <li>Assets JS locais ✓</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 1.5rem; padding: 1rem; background: var(--surface2); border-radius: 8px; border-left: 3px solid var(--accent);">
+  <div class="label">Objetivo</div>
+  <p style="margin-top: 0.4rem; font-size: 0.9rem;">Manter o backend do aguada-web (Docker/FastAPI). Renovar o frontend combinando o <strong>estilo visual do aguada3</strong> com as funcionalidades do aguada-web. Adicionar páginas faltantes (mapa, ETE, qualidade da água). Tudo offline, ISA-101, responsivo.</p>
+</div>

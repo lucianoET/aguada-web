@@ -8,10 +8,11 @@
 
 ## Contexto
 
-O sistema Aguada monitora reservatórios hidráulicos da CMASM via sensores ESP32-C3 (ESP-NOW). Existem duas versões ativas:
+O sistema Aguada monitora reservatórios hidráulicos da CMASM via sensores ESP32-C3 (ESP-NOW). Versões de referência:
 
 - **aguada-web** — backend Python/FastAPI, SQLite, Docker, WebSocket ao vivo. Frontend: HTML puro + Alpine.js + Tailwind CSS. **Base do projeto.**
 - **aguada3** — backend PHP/MySQL. Frontend com CSS escuro próprio, sidebar fixa, estilo industrial. **Referência visual.**
+- **aguada2** (`/home/luc/Dev/aguada2-main`) — versão PHP com CSS próprio (aguada2.css), sidebar fixa, diagrama SCADA SVG completo com topologia real (Ilha das Flores → linha submarina → Ilha do Engenho). **Referência para o SCADA SVG e CSS.** Coordenadas da CMASM: `[-22.84, -43.10]`.
 - **xAguada** (GitHub: luctronics-ET/xAguada) — versão anterior com topologia de rede completa em JSON (`network_topology.json`, `reservoirs.json`). **Referência de dados/domínio.**
 
 O redesign mantém todo o backend do aguada-web e migra o frontend para o estilo visual do aguada3.
@@ -206,7 +207,7 @@ scripts/
 - Tiles OSM servidos de `assets/leaflet-tiles/` (fallback: OSM online se arquivo não existir)
 - `lat`/`lng` dos reservatórios lidos de `/api/reservoirs` (adicionados ao `reservoirs.yaml`)
 
-**Coordenadas:** baseadas nas posições corretas da CMASM (referência: versão aguada no GitHub/histórico do projeto).
+**Coordenadas da CMASM:** centro em `[-22.84, -43.10]` (confirmado no aguada2/mapa.php). Posições individuais de cada reservatório a serem adicionadas ao `reservoirs.yaml` — usuário pode gerar export atualizado do OSM para confirmar posições exatas.
 
 ---
 
@@ -219,10 +220,12 @@ scripts/
 ```
 
 **Diagrama SVG:**
-- Baseado na topologia do `xAguada/firmware/config/network_topology.json`
-- Elementos: reservatórios (retângulos com barra de nível animada + %), bombas (círculos), válvulas (losangos), tubos (linhas com `stroke-dasharray` animado quando há fluxo)
+- Baseado no diagrama do `aguada2/scada.php` (topologia completa já implementada em SVG): Ilha das Flores (CBIFA, CBIFB, bombas BIF-ELE/BIF-DIE, hidrômetro HID-IF) → linha submarina animada → Ilha do Engenho (CIE1, CIE2, CB03A, CB03B, castelos CON e CAV, bombas B03-ELE/B03-DIE/B02-ELE, hidrômetro HID-PRAIA)
+- Ícones PNG de `aguada2/assets/icons/` aproveitados: `pump.png`, `valve.png`, `hydrometer.png`, junções
+- Elementos SVG: reservatórios como retângulos/formas trapeziodais com barra de nível animada + %, bombas como círculos, válvulas como losangos, tubos com `stroke-dasharray` animado quando há fluxo
 - Cores ISA-101: verde=normal/ligado/aberto, amarelo=atenção, vermelho=crítico/falha, cinza=offline
 - Atualização via WebSocket — estados dos equipamentos atualizados sem redesenhar o SVG
+- Melhoria sobre aguada2: adicionar estado dinâmico de válvulas (abertas/fechadas) e cores ISA-101 nos tubos
 
 **Painel lateral:**
 - Lista de bombas e válvulas com status badge

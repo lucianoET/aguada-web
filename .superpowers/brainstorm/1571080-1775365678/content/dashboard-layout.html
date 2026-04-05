@@ -1,0 +1,184 @@
+<h2>Layout do Dashboard Integrado</h2>
+<p class="subtitle">Como distribuir mapa, reservatórios e SCADA em 16:9?</p>
+
+<div class="cards" style="margin-top: 1.5rem;">
+
+  <!-- Opção A: Mapa dominante -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden; border-radius: 6px 6px 0 0; background: #0b0f14;">
+      <div style="display: flex; height: 210px; font-size: 10px;">
+        <!-- Sidebar colapsada -->
+        <div style="width: 36px; background: #111820; border-right: 1px solid #1e2d3d; display: flex; flex-direction: column; align-items: center; padding-top: 8px; gap: 8px; flex-shrink: 0;">
+          <div style="width: 22px; height: 22px; background: #1e3a5f; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px;">⬛</div>
+          <div style="font-size: 10px; color: #3d556e;">🗺</div>
+          <div style="font-size: 10px; color: #3d556e;">📈</div>
+          <div style="font-size: 10px; color: #3d556e;">📄</div>
+        </div>
+        <!-- Conteúdo principal -->
+        <div style="flex: 1; display: flex; flex-direction: column;">
+          <!-- KPI strip -->
+          <div style="background: #111820; border-bottom: 1px solid #1e2d3d; padding: 4px 8px; display: flex; gap: 8px;">
+            <div style="background: #192030; border: 1px solid #1e2d3d; border-radius: 3px; padding: 3px 8px; font-size: 9px; color: #c9d4e0;"><span style="color:#6b82a0;">Reserv </span><b>8</b></div>
+            <div style="background: #192030; border: 1px solid #1e2d3d; border-radius: 3px; padding: 3px 8px; font-size: 9px; color: #22c55e;"><span style="color:#6b82a0;">Vol médio </span><b>74%</b></div>
+            <div style="background: #192030; border: 1px solid #1e2d3d; border-radius: 3px; padding: 3px 8px; font-size: 9px; color: #ef4444;"><span style="color:#6b82a0;">Críticos </span><b>1</b></div>
+            <div style="background: #192030; border: 1px solid #1e2d3d; border-radius: 3px; padding: 3px 8px; font-size: 9px; color: #c9d4e0;"><span style="color:#6b82a0;">Online </span><b>7/8</b></div>
+          </div>
+          <!-- Área principal: mapa grande -->
+          <div style="flex: 1; display: flex; gap: 0;">
+            <!-- Mapa OSM (grande) -->
+            <div style="flex: 1; background: #1a2535; position: relative; overflow: hidden;">
+              <!-- Simulação de mapa -->
+              <div style="position: absolute; inset: 0; background: linear-gradient(135deg, #1a2535 0%, #1e3040 50%, #1a2535 100%);">
+                <!-- Ruas simuladas -->
+                <svg width="100%" height="100%" style="position: absolute; opacity: 0.3;">
+                  <line x1="20%" y1="0" x2="35%" y2="100%" stroke="#334155" stroke-width="1.5"/>
+                  <line x1="60%" y1="0" x2="70%" y2="100%" stroke="#334155" stroke-width="1"/>
+                  <line x1="0" y1="40%" x2="100%" y2="45%" stroke="#334155" stroke-width="2"/>
+                  <line x1="0" y1="70%" x2="100%" y2="65%" stroke="#334155" stroke-width="1"/>
+                  <line x1="40%" y1="0" x2="50%" y2="100%" stroke="#334155" stroke-width="1"/>
+                </svg>
+                <!-- Marcadores de reservatório -->
+                <div style="position: absolute; top: 25%; left: 30%; transform: translate(-50%,-50%);">
+                  <div style="background: #22c55e; border: 2px solid #166534; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 0 8px rgba(34,197,94,0.5);">CON<br><span style="font-size:8px">74%</span></div>
+                </div>
+                <div style="position: absolute; top: 55%; left: 55%; transform: translate(-50%,-50%);">
+                  <div style="background: #ef4444; border: 2px solid #7f1d1d; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: white; font-weight: bold; box-shadow: 0 0 8px rgba(239,68,68,0.5);">CAV<br><span style="font-size:8px">12%</span></div>
+                </div>
+                <div style="position: absolute; top: 35%; left: 65%; transform: translate(-50%,-50%);">
+                  <div style="background: #f59e0b; border: 2px solid #78350f; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: white; font-weight: bold; box-shadow: 0 0 6px rgba(245,158,11,0.4);">CB31<br><span style="font-size:7px">28%</span></div>
+                </div>
+                <div style="position: absolute; top: 70%; left: 25%; transform: translate(-50%,-50%);">
+                  <div style="background: #3b82f6; border: 2px solid #1e3a5f; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: white; font-weight: bold;">CIE1<br><span style="font-size:7px">61%</span></div>
+                </div>
+                <div style="position: absolute; top: 20%; left: 75%; transform: translate(-50%,-50%);">
+                  <div style="background: #3b82f6; border: 2px solid #1e3a5f; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: white; font-weight: bold;">CBIF<br><span style="font-size:7px">55%</span></div>
+                </div>
+                <!-- Label OSM -->
+                <div style="position: absolute; bottom: 4px; right: 6px; font-size: 8px; color: #3d556e; opacity: 0.7;">© OpenStreetMap</div>
+              </div>
+            </div>
+            <!-- Painel SCADA lateral (estreito) -->
+            <div style="width: 120px; background: #111820; border-left: 1px solid #1e2d3d; padding: 6px; overflow: hidden; flex-shrink: 0;">
+              <div style="font-size: 8px; color: #3d556e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">SCADA</div>
+              <div style="background: #192030; border: 1px solid #1e2d3d; border-radius: 3px; padding: 4px; margin-bottom: 4px;">
+                <div style="font-size: 8px; color: #6b82a0; font-family: monospace;">BBA-01</div>
+                <div style="font-size: 9px; color: #c9d4e0;">Bomba Abast.</div>
+                <div style="margin-top: 3px; font-size: 8px; background: #14532d; color: #22c55e; border-radius: 2px; padding: 1px 4px; display: inline-block;">LIGADA</div>
+              </div>
+              <div style="background: #192030; border: 1px solid #1e2d3d; border-radius: 3px; padding: 4px; margin-bottom: 4px;">
+                <div style="font-size: 8px; color: #6b82a0; font-family: monospace;">VGA-01</div>
+                <div style="font-size: 9px; color: #c9d4e0;">Válvula Geral</div>
+                <div style="margin-top: 3px; font-size: 8px; background: #14532d; color: #22c55e; border-radius: 2px; padding: 1px 4px; display: inline-block;">ABERTA</div>
+              </div>
+              <div style="background: #192030; border: 1px solid #1e2d3d; border-radius: 3px; padding: 4px;">
+                <div style="font-size: 8px; color: #6b82a0; font-family: monospace;">BBT-01</div>
+                <div style="font-size: 9px; color: #c9d4e0;">Bomba Transf.</div>
+                <div style="margin-top: 3px; font-size: 8px; background: #111820; color: #6b82a0; border-radius: 2px; padding: 1px 4px; display: inline-block;">DESLIG.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Mapa dominante + SCADA lateral</h3>
+      <p>Mapa OSM ocupa ~75% da área. SCADA fica em painel fixo à direita (lista de equipamentos). KPIs em faixa no topo. Clique no marcador → modal.</p>
+    </div>
+  </div>
+
+  <!-- Opção B: Grid equilibrado -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden; border-radius: 6px 6px 0 0; background: #0b0f14;">
+      <div style="display: flex; height: 210px; font-size: 10px;">
+        <div style="width: 36px; background: #111820; border-right: 1px solid #1e2d3d; display: flex; flex-direction: column; align-items: center; padding-top: 8px; gap: 8px; flex-shrink: 0;">
+          <div style="width: 22px; height: 22px; background: #1e3a5f; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px;">⬛</div>
+          <div style="font-size: 10px; color: #3d556e;">📈</div>
+          <div style="font-size: 10px; color: #3d556e;">📄</div>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column;">
+          <!-- KPI strip -->
+          <div style="background: #111820; border-bottom: 1px solid #1e2d3d; padding: 4px 8px; display: flex; gap: 8px;">
+            <div style="background: #192030; border: 1px solid #1e2d3d; border-radius: 3px; padding: 3px 8px; font-size: 9px; color: #22c55e;"><b>74%</b> <span style="color:#6b82a0;">vol médio</span></div>
+            <div style="background: #192030; border: 1px solid #1e2d3d; border-radius: 3px; padding: 3px 8px; font-size: 9px; color: #ef4444;"><b>1</b> <span style="color:#6b82a0;">crítico</span></div>
+            <div style="background: #192030; border: 1px solid #1e2d3d; border-radius: 3px; padding: 3px 8px; font-size: 9px; color: #c9d4e0;"><b>7/8</b> <span style="color:#6b82a0;">online</span></div>
+          </div>
+          <!-- Split: mapa esq, direita dividida -->
+          <div style="flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0;">
+            <!-- Mapa (ocupa col 1, ambas linhas) -->
+            <div style="grid-row: 1 / 3; background: #1a2535; position: relative; border-right: 1px solid #1e2d3d; overflow: hidden;">
+              <svg width="100%" height="100%" style="position:absolute; opacity: 0.25;"><line x1="20%" y1="0" x2="35%" y2="100%" stroke="#334155" stroke-width="1.5"/><line x1="60%" y1="0" x2="70%" y2="100%" stroke="#334155" stroke-width="1"/><line x1="0" y1="40%" x2="100%" y2="45%" stroke="#334155" stroke-width="2"/><line x1="0" y1="70%" x2="100%" y2="65%" stroke="#334155" stroke-width="1"/></svg>
+              <div style="position:absolute; top:20%; left:25%; transform:translate(-50%,-50%);"><div style="background:#22c55e;border:2px solid #166534;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:6px;color:white;font-weight:bold;">CON<br>74%</div></div>
+              <div style="position:absolute; top:55%; left:60%; transform:translate(-50%,-50%);"><div style="background:#ef4444;border:2px solid #7f1d1d;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:6px;color:white;font-weight:bold;">CAV<br>12%</div></div>
+              <div style="position:absolute; top:35%; left:70%; transform:translate(-50%,-50%);"><div style="background:#f59e0b;border:2px solid #78350f;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:6px;color:white;font-weight:bold;">CB31<br>28%</div></div>
+              <div style="position:absolute; top:75%; left:30%; transform:translate(-50%,-50%);"><div style="background:#3b82f6;border:2px solid #1e3a5f;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:6px;color:white;font-weight:bold;">CIE1<br>61%</div></div>
+              <div style="position:absolute; bottom:4px; right:4px; font-size:7px; color:#3d556e;">© OSM</div>
+            </div>
+            <!-- Top direito: cards de reservatórios -->
+            <div style="background: #0b0f14; padding: 5px; border-bottom: 1px solid #1e2d3d; overflow: hidden;">
+              <div style="font-size: 8px; color: #3d556e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Reservatórios</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px;">
+                <div style="background:#192030;border:1px solid #1e2d3d;border-radius:3px;padding:3px 5px;border-left:2px solid #22c55e;"><div style="font-size:7px;color:#6b82a0;font-family:monospace;">CON</div><div style="font-size:11px;color:#22c55e;font-weight:bold;">74%</div><div style="font-size:7px;color:#3d556e;">182 m³</div></div>
+                <div style="background:#192030;border:1px solid #1e2d3d;border-radius:3px;padding:3px 5px;border-left:2px solid #ef4444;"><div style="font-size:7px;color:#6b82a0;font-family:monospace;">CAV</div><div style="font-size:11px;color:#ef4444;font-weight:bold;">12%</div><div style="font-size:7px;color:#3d556e;">6 m³</div></div>
+                <div style="background:#192030;border:1px solid #1e2d3d;border-radius:3px;padding:3px 5px;border-left:2px solid #f59e0b;"><div style="font-size:7px;color:#6b82a0;font-family:monospace;">CB31</div><div style="font-size:11px;color:#f59e0b;font-weight:bold;">28%</div><div style="font-size:7px;color:#3d556e;">14 m³</div></div>
+                <div style="background:#192030;border:1px solid #1e2d3d;border-radius:3px;padding:3px 5px;border-left:2px solid #3b82f6;"><div style="font-size:7px;color:#6b82a0;font-family:monospace;">CIE1</div><div style="font-size:11px;color:#3b82f6;font-weight:bold;">61%</div><div style="font-size:7px;color:#3d556e;">76 m³</div></div>
+              </div>
+            </div>
+            <!-- Bottom direito: SCADA simplificado -->
+            <div style="background: #0b0f14; padding: 5px; overflow: hidden;">
+              <div style="font-size: 8px; color: #3d556e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Equipamentos</div>
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="background:#192030;border:1px solid #1e2d3d;border-radius:3px;padding:3px 5px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:8px;color:#c9d4e0;">BBA-01 Bomba</span><span style="font-size:7px;background:#14532d;color:#22c55e;border-radius:2px;padding:1px 4px;">LIGADA</span></div>
+                <div style="background:#192030;border:1px solid #1e2d3d;border-radius:3px;padding:3px 5px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:8px;color:#c9d4e0;">VGA-01 Válvula</span><span style="font-size:7px;background:#14532d;color:#22c55e;border-radius:2px;padding:1px 4px;">ABERTA</span></div>
+                <div style="background:#192030;border:1px solid #1e2d3d;border-radius:3px;padding:3px 5px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:8px;color:#c9d4e0;">BBT-01 Bomba</span><span style="font-size:7px;background:#111820;color:#6b82a0;border-radius:2px;padding:1px 4px;">DESLIG.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Grid 50/50: mapa + cards/SCADA</h3>
+      <p>Metade esquerda: mapa OSM. Metade direita: topo com cards dos reservatórios, base com lista de equipamentos SCADA. Tudo visível em 1080p sem scroll.</p>
+    </div>
+  </div>
+
+  <!-- Opção C: Abas -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden; border-radius: 6px 6px 0 0; background: #0b0f14;">
+      <div style="display: flex; height: 210px; font-size: 10px;">
+        <div style="width: 36px; background: #111820; border-right: 1px solid #1e2d3d; display: flex; flex-direction: column; align-items: center; padding-top: 8px; gap: 8px; flex-shrink: 0;">
+          <div style="width: 22px; height: 22px; background: #1e3a5f; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px;">⬛</div>
+          <div style="font-size: 10px; color: #3d556e;">📈</div>
+          <div style="font-size: 10px; color: #3d556e;">📄</div>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column;">
+          <!-- KPI strip -->
+          <div style="background: #111820; border-bottom: 1px solid #1e2d3d; padding: 4px 8px; display: flex; gap: 8px;">
+            <div style="background: #192030; border: 1px solid #1e2d3d; border-radius: 3px; padding: 3px 8px; font-size: 9px; color: #22c55e;"><b>74%</b> <span style="color:#6b82a0;">vol médio</span></div>
+            <div style="background: #192030; border: 1px solid #1e2d3d; border-radius: 3px; padding: 3px 8px; font-size: 9px; color: #ef4444;"><b>1</b> <span style="color:#6b82a0;">crítico</span></div>
+          </div>
+          <!-- Abas -->
+          <div style="background: #111820; border-bottom: 1px solid #1e2d3d; padding: 0 8px; display: flex; gap: 2px;">
+            <div style="padding: 4px 10px; font-size: 9px; color: #3b82f6; border-bottom: 2px solid #3b82f6;">Mapa</div>
+            <div style="padding: 4px 10px; font-size: 9px; color: #6b82a0;">SCADA</div>
+          </div>
+          <!-- Conteúdo da aba ativa (Mapa) -->
+          <div style="flex: 1; background: #1a2535; position: relative; overflow: hidden;">
+            <svg width="100%" height="100%" style="position:absolute; opacity: 0.25;"><line x1="20%" y1="0" x2="35%" y2="100%" stroke="#334155" stroke-width="1.5"/><line x1="60%" y1="0" x2="70%" y2="100%" stroke="#334155" stroke-width="1"/><line x1="0" y1="40%" x2="100%" y2="45%" stroke="#334155" stroke-width="2"/></svg>
+            <div style="position:absolute; top:25%; left:30%; transform:translate(-50%,-50%);"><div style="background:#22c55e;border:2px solid #166534;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:7px;color:white;font-weight:bold;">CON<br>74%</div></div>
+            <div style="position:absolute; top:55%; left:60%; transform:translate(-50%,-50%);"><div style="background:#ef4444;border:2px solid #7f1d1d;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:7px;color:white;font-weight:bold;">CAV<br>12%</div></div>
+            <div style="position:absolute; top:35%; left:70%; transform:translate(-50%,-50%);"><div style="background:#f59e0b;border:2px solid #78350f;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:7px;color:white;font-weight:bold;">CB31<br>28%</div></div>
+            <div style="position:absolute; top:72%; left:25%; transform:translate(-50%,-50%);"><div style="background:#3b82f6;border:2px solid #1e3a5f;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:7px;color:white;font-weight:bold;">CIE1<br>61%</div></div>
+            <div style="position:absolute; bottom:4px; right:6px; font-size:7px; color:#3d556e; opacity:0.7;">© OpenStreetMap</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Abas: Mapa / SCADA</h3>
+      <p>KPIs fixos no topo. Duas abas abaixo: "Mapa" (OSM + marcadores) e "SCADA" (equipamentos). Cada visão ocupa 100% do espaço disponível. Mais simples.</p>
+    </div>
+  </div>
+
+</div>
+<p class="subtitle" style="margin-top: 1rem; font-size: 0.8rem;">Clique para selecionar. Pode comentar no terminal.</p>
