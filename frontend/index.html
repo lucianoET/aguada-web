@@ -265,6 +265,9 @@ function dashboardApp() {
       this._map = L.map('map', {
         maxBounds: [[-22.855, -43.125], [-22.825, -43.090]],
         maxBoundsViscosity: 0.8,
+        scrollWheelZoom: true,
+        touchZoom: true,
+        tap: false,
       }).setView([-22.8390, -43.1080], 16);
 
       // Tiles locais, fallback para OSM online
