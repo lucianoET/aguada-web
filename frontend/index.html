@@ -278,6 +278,9 @@ function dashboardApp() {
       });
       localLayer.addTo(this._map);
 
+      // Garantir que o Leaflet detecta o tamanho correto do container
+      setTimeout(() => this._map && this._map.invalidateSize(), 50);
+
       // Carregar infraestrutura OSM
       try {
         const infra = await fetch('assets/infra.json').then(r => r.json());
