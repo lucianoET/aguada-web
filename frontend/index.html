@@ -10,6 +10,7 @@
     [x-cloak] { display: none; }
     #map { width: 100%; height: 100%; }
     .map-wrap { flex: 1; position: relative; }
+    .aguada-marker { background: none !important; border: none !important; }
   </style>
 </head>
 <body>
@@ -226,7 +227,7 @@ function dashboardApp() {
       const gw = await fetch('/api/gateway').then(r => r.json()).catch(() => null);
       this._updateGw(gw);
       // Inicializar mapa
-      this._initMap();
+      await this._initMap();
       // WebSocket ao vivo
       this.wsConnect((data) => {
         if (data.type === 'snapshot') {
@@ -253,7 +254,7 @@ function dashboardApp() {
       else { this.gwStatus = 'off'; this.gwLabel = 'GW offline'; }
     },
 
-    _initMap() {
+    async _initMap() {
       if (this._map) return;
 
       const existingLeafletId = document.getElementById('map')?._leaflet_id;
@@ -261,17 +262,80 @@ function dashboardApp() {
 
       const tileUrl = 'assets/leaflet-tiles/{z}/{x}/{y}.png';
       const tileUrlFallback = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-      this._map = L.map('map').setView([-22.8390, -43.1080], 16);
+      this._map = L.map('map', {
+        maxBounds: [[-22.855, -43.125], [-22.825, -43.090]],
+        maxBoundsViscosity: 0.8,
+      }).setView([-22.8390, -43.1080], 16);
 
-      // Tentar tiles locais, fallback para OSM online
+      // Tiles locais, fallback para OSM online
       const localLayer = L.tileLayer(tileUrl, { maxZoom: 19, attribution: '© OpenStreetMap' });
+      let usedFallback = false;
       localLayer.on('tileerror', () => {
+        if (usedFallback) return;
+        usedFallback = true;
         this._map.removeLayer(localLayer);
         L.tileLayer(tileUrlFallback, { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(this._map);
       });
       localLayer.addTo(this._map);
 
+      // Carregar infraestrutura OSM
+      try {
+        const infra = await fetch('assets/infra.json').then(r => r.json());
+        this._drawInfra(infra);
+      } catch(e) {
+        console.warn('infra.json não encontrado', e);
+      }
+
       this._updateMarkers();
+    },
+
+    _drawInfra(infra) {
+      const map = this._map;
+
+      // Tubulações
+      (infra.pipelines || []).forEach(p => {
+        const coords = p.coords.map(c => [c[0], c[1]]);
+        L.polyline(coords, {
+          color: p.submarine ? '#06b6d4' : '#3b82f6',
+          weight: p.submarine ? 3 : 2,
+          opacity: 0.7,
+          dashArray: p.submarine ? '8 4' : null,
+        }).bindTooltip(p.submarine ? 'Adutora submarina IF→IE' : 'Tubulação', {sticky: true}).addTo(map);
+      });
+
+      // Bombas
+      (infra.pumps || []).forEach(b => {
+        const icon = L.divIcon({
+          className: 'aguada-marker',
+          html: `<div title="${b.name}" style="background:#1e3a5f;border:2px solid #3b82f6;border-radius:4px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:default">
+            <svg width="14" height="14" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4"/></svg>
+          </div>`,
+          iconSize: [28, 28], iconAnchor: [14, 14],
+        });
+        L.marker([b.lat, b.lon], {icon}).bindTooltip(`<b>${b.name}</b><br>Bomba`, {permanent: false}).addTo(map);
+      });
+
+      // Hidrômetros
+      (infra.hydrometers || []).forEach(h => {
+        const icon = L.divIcon({
+          className: 'aguada-marker',
+          html: `<div title="${h.name}" style="background:#14532d;border:2px solid #22c55e;border-radius:4px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:default">
+            <svg width="12" height="12" fill="none" stroke="#22c55e" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>`,
+          iconSize: [26, 26], iconAnchor: [13, 13],
+        });
+        L.marker([h.lat, h.lon], {icon}).bindTooltip(`<b>${h.name}</b><br>Hidrômetro`, {permanent: false}).addTo(map);
+      });
+
+      // Válvulas principais (apenas as nomeadas, não as de detalhe)
+      (infra.valves || []).filter(v => v.ref && !v.ref.includes('-IN') && !v.ref.includes('-AV') && !v.ref.includes('-AZ')).forEach(v => {
+        const icon = L.divIcon({
+          className: 'aguada-marker',
+          html: `<div title="${v.ref}" style="background:#78350f;border:2px solid #f59e0b;border-radius:2px;width:14px;height:14px;transform:rotate(45deg)"></div>`,
+          iconSize: [14, 14], iconAnchor: [7, 7],
+        });
+        L.marker([v.lat, v.lon], {icon}).bindTooltip(`<b>${v.ref}</b><br>Válvula`, {permanent: false}).addTo(map);
+      });
     },
 
     _updateMarkers() {
@@ -282,13 +346,14 @@ function dashboardApp() {
         const color = markerColor(r.pct, r.online);
         const pct = r.pct != null ? Math.round(r.pct) : '?';
         const icon = L.divIcon({
-          className: '',
+          className: 'aguada-marker',
           html: `<div style="background:${color};border:2px solid rgba(0,0,0,0.4);border-radius:50%;width:36px;height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 8px ${color}44">
                    <div style="font-size:8px;font-weight:700;color:white;line-height:1">${r.alias}</div>
                    <div style="font-size:9px;font-weight:700;color:white;line-height:1">${pct}%</div>
                  </div>`,
           iconSize: [36, 36],
           iconAnchor: [18, 18],
+          popupAnchor: [0, -18],
         });
         if (this._markers[r.alias]) {
           this._markers[r.alias].setIcon(icon);
