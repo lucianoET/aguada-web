@@ -57,8 +57,9 @@ ZOOM_MIN, ZOOM_MAX = 13, 17
 
 total = 0
 for z in range(ZOOM_MIN, ZOOM_MAX + 1):
-    x0, y1 = deg2tile(LAT_MAX, LNG_MIN, z)
-    x1, y0 = deg2tile(LAT_MIN, LNG_MAX, z)
+    x0, _y0 = deg2tile(LAT_MAX, LNG_MIN, z)
+    x1, _y1 = deg2tile(LAT_MIN, LNG_MAX, z)
+    y0, y1 = min(_y0, _y1), max(_y0, _y1)
     for x in range(x0, x1 + 1):
         for y in range(y0, y1 + 1):
             tile_dir = TILES_DIR / str(z) / str(x)
