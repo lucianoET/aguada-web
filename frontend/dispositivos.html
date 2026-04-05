@@ -44,7 +44,7 @@
       </div>
       <div class="topbar-right">
         <button @click="loadAll()" :disabled="loading"
-          style="display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer">
+          style="display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer">
           <svg style="width:16px;height:16px" :style="loading ? 'animation:spin 1s linear infinite' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M20 20v-5h-.581M4.582 9A8 8 0 0120 15m-.581-5A8 8 0 014 9"/>
           </svg>
@@ -63,18 +63,18 @@
           <div style="display:flex;align-items:center;gap:16px;flex:1;min-width:200px">
             <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0"
                  :style="gateway.connected ? 'background:rgba(34,197,94,0.15)' : 'background:rgba(239,68,68,0.1)'">
-              <svg style="width:24px;height:24px" :style="gateway.connected ? 'color:var(--ok)' : 'color:var(--critical)'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg style="width:24px;height:24px" :style="gateway.connected ? 'color:var(--green)' : 'color:var(--red)'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                       d="M9.75 3v2.25M14.25 3v2.25M12 5.25V9m0 0H8.25A2.25 2.25 0 006 11.25v1.5A2.25 2.25 0 008.25 15H12m0-6h3.75A2.25 2.25 0 0118 11.25v1.5A2.25 2.25 0 0115.75 15H12m0 0v6"/>
               </svg>
             </div>
             <div>
               <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-weight:600;color:var(--text1)">ESP32 Gateway</span>
+                <span style="font-weight:600;color:var(--text)">ESP32 Gateway</span>
                 <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500"
                       :style="gateway.connected
-                        ? 'background:rgba(34,197,94,0.15);color:var(--ok)'
-                        : 'background:rgba(239,68,68,0.1);color:var(--critical)'">
+                        ? 'background:rgba(34,197,94,0.15);color:var(--green)'
+                        : 'background:rgba(239,68,68,0.1);color:var(--red)'">
                   <span x-text="gateway.sim_mode ? 'Simulação' : gateway.connected ? 'Online' : 'Offline'"></span>
                 </span>
               </div>
@@ -95,7 +95,7 @@
                   <span>Último boot:</span>
                   <span style="margin-left:4px" x-text="timeAgo(gateway.last_seen)"></span>
                 </div>
-                <div x-show="!gateway.port && !gateway.connected" style="color:var(--critical)">
+                <div x-show="!gateway.port && !gateway.connected" style="color:var(--red)">
                   Nenhuma porta serial detectada
                 </div>
               </div>
@@ -104,15 +104,15 @@
 
           <!-- Stats chips -->
           <div style="display:flex;flex-wrap:wrap;gap:8px">
-            <div style="padding:6px 12px;border-radius:8px;background:var(--surface2);color:var(--text2);font-size:12px;display:flex;align-items:center;gap:6px">
+            <div style="padding:6px 12px;border-radius:8px;background:var(--bg3);color:var(--text2);font-size:12px;display:flex;align-items:center;gap:6px">
               <svg style="width:14px;height:14px;color:#3b82f6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.14 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>
               <span>ESP-NOW ch 1</span>
             </div>
-            <div style="padding:6px 12px;border-radius:8px;background:var(--surface2);color:var(--text2);font-size:12px;display:flex;align-items:center;gap:6px">
+            <div style="padding:6px 12px;border-radius:8px;background:var(--bg3);color:var(--text2);font-size:12px;display:flex;align-items:center;gap:6px">
               <svg style="width:14px;height:14px;color:#a855f7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
               <span>115200 baud</span>
             </div>
-            <div style="padding:6px 12px;border-radius:8px;background:var(--surface2);color:var(--text2);font-size:12px;display:flex;align-items:center;gap:6px">
+            <div style="padding:6px 12px;border-radius:8px;background:var(--bg3);color:var(--text2);font-size:12px;display:flex;align-items:center;gap:6px">
               <svg style="width:14px;height:14px;color:#f97316" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 4-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
               <span x-text="nodes.length + ' nó' + (nodes.length !== 1 ? 's' : '') + ' conhecidos'"></span>
             </div>
@@ -125,7 +125,7 @@
         <div class="section-title" style="margin:0">Nós ESP-NOW</div>
         <div style="display:flex;align-items:center;gap:12px;font-size:12px;color:var(--text3)">
           <span>
-            <span style="width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:4px"></span>
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px"></span>
             <span x-text="nodes.filter(n=>n.online).length + ' online'"></span>
           </span>
           <span>
@@ -139,9 +139,9 @@
       <div x-show="loading && nodes.length === 0" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
         <template x-for="i in 4" :key="i">
           <div class="card" style="padding:20px;animation:pulse 1.5s ease-in-out infinite">
-            <div style="height:16px;background:var(--surface2);border-radius:4px;width:33%;margin-bottom:12px"></div>
-            <div style="height:12px;background:var(--surface2);border-radius:4px;width:66%;margin-bottom:8px"></div>
-            <div style="height:12px;background:var(--surface2);border-radius:4px;width:50%"></div>
+            <div style="height:16px;background:var(--bg3);border-radius:4px;width:33%;margin-bottom:12px"></div>
+            <div style="height:12px;background:var(--bg3);border-radius:4px;width:66%;margin-bottom:8px"></div>
+            <div style="height:12px;background:var(--bg3);border-radius:4px;width:50%"></div>
           </div>
         </template>
       </div>
@@ -164,7 +164,7 @@
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
               <div style="display:flex;align-items:center;gap:12px;min-width:0">
                 <div style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"
-                     :style="node.online ? 'background:rgba(59,130,246,0.15)' : 'background:var(--surface2)'">
+                     :style="node.online ? 'background:rgba(59,130,246,0.15)' : 'background:var(--bg3)'">
                   <svg x-show="node.num_sensors > 0"
                        style="width:20px;height:20px" :style="node.online ? 'color:#3b82f6' : 'color:var(--text3)'"
                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -179,7 +179,7 @@
                   </svg>
                 </div>
                 <div style="min-width:0">
-                  <div style="font-weight:600;color:var(--text1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                  <div style="font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
                        x-text="node.alias || node.node_id"></div>
                   <div style="font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
                        x-text="node.name || (node.num_sensors > 0 ? 'Nó sensor' : 'Relay')"></div>
@@ -188,40 +188,40 @@
               <!-- Online badge -->
               <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500;flex-shrink:0"
                     :style="node.online
-                      ? 'background:rgba(34,197,94,0.15);color:var(--ok)'
-                      : 'background:var(--surface2);color:var(--text3)'">
+                      ? 'background:rgba(34,197,94,0.15);color:var(--green)'
+                      : 'background:var(--bg3);color:var(--text3)'">
                 <span x-text="node.online ? 'Online' : 'Offline'"></span>
               </span>
             </div>
 
             <!-- Metrics grid -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
-              <div style="background:var(--surface2);border-radius:8px;padding:10px">
+              <div style="background:var(--bg3);border-radius:8px;padding:10px">
                 <div style="color:var(--text3);margin-bottom:2px">Node ID</div>
-                <div class="mono" style="font-weight:500;color:var(--text1)" x-text="node.node_id"></div>
+                <div class="mono" style="font-weight:500;color:var(--text)" x-text="node.node_id"></div>
               </div>
-              <div style="background:var(--surface2);border-radius:8px;padding:10px">
+              <div style="background:var(--bg3);border-radius:8px;padding:10px">
                 <div style="color:var(--text3);margin-bottom:2px">Sensores</div>
-                <div style="font-weight:500;color:var(--text1)"
+                <div style="font-weight:500;color:var(--text)"
                      x-text="node.num_sensors > 0 ? node.num_sensors + ' HC-SR04' : 'Relay (0)'"></div>
               </div>
-              <div style="background:var(--surface2);border-radius:8px;padding:10px">
+              <div style="background:var(--bg3);border-radius:8px;padding:10px">
                 <div style="color:var(--text3);margin-bottom:2px">RSSI</div>
                 <div style="font-weight:500" :style="rssiStyle(node.last_rssi)" x-text="node.last_rssi != null ? node.last_rssi + ' dBm' : '—'"></div>
               </div>
-              <div style="background:var(--surface2);border-radius:8px;padding:10px">
+              <div style="background:var(--bg3);border-radius:8px;padding:10px">
                 <div style="color:var(--text3);margin-bottom:2px">Bateria</div>
-                <div style="font-weight:500;color:var(--text1)"
+                <div style="font-weight:500;color:var(--text)"
                      x-text="node.last_vbat != null ? node.last_vbat.toFixed(1) + ' V' : '—'"></div>
               </div>
-              <div style="background:var(--surface2);border-radius:8px;padding:10px;grid-column:span 2">
+              <div style="background:var(--bg3);border-radius:8px;padding:10px;grid-column:span 2">
                 <div style="color:var(--text3);margin-bottom:2px">Último pacote</div>
-                <div style="font-weight:500;color:var(--text1)"
+                <div style="font-weight:500;color:var(--text)"
                      x-text="node.last_seen ? timeAgo(node.last_seen) : '—'"></div>
               </div>
-              <div x-show="node.fw_version" style="background:var(--surface2);border-radius:8px;padding:10px;grid-column:span 2">
+              <div x-show="node.fw_version" style="background:var(--bg3);border-radius:8px;padding:10px;grid-column:span 2">
                 <div style="color:var(--text3);margin-bottom:2px">Firmware</div>
-                <div class="mono" style="font-weight:500;color:var(--text1)" x-text="node.fw_version"></div>
+                <div class="mono" style="font-weight:500;color:var(--text)" x-text="node.fw_version"></div>
               </div>
             </div>
 
@@ -231,17 +231,17 @@
             <!-- Action buttons -->
             <div style="display:flex;gap:8px;padding-top:4px;border-top:1px solid var(--border)">
               <button @click="openEdit(node)"
-                      style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;background:var(--surface2);color:var(--text2);border:none;cursor:pointer">
+                      style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;background:var(--bg3);color:var(--text2);border:none;cursor:pointer">
                 <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 Editar
               </button>
               <button @click="openDetails(node)"
-                      style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;background:var(--surface2);color:var(--text2);border:none;cursor:pointer">
+                      style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;background:var(--bg3);color:var(--text2);border:none;cursor:pointer">
                 <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 Detalhes
               </button>
               <button @click="confirmRestart(node)"
-                      style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;background:var(--surface2);color:var(--text2);border:none;cursor:pointer"
+                      style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;background:var(--bg3);color:var(--text2);border:none;cursor:pointer"
                       title="Reiniciar nó">
                 <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M20 20v-5h-.581M4.582 9A8 8 0 0120 15m-.581-5A8 8 0 014 9"/></svg>
               </button>
@@ -260,9 +260,9 @@
      @click.self="editModal.open = false">
   <div style="background:var(--surface1);border-radius:16px;box-shadow:0 25px 50px rgba(0,0,0,0.3);width:100%;max-width:420px;padding:24px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <h3 style="font-weight:600;color:var(--text1)">
+      <h3 style="font-weight:600;color:var(--text)">
         Editar nó
-        <span class="mono" style="color:var(--accent);font-size:13px;margin-left:4px" x-text="editModal.node_id"></span>
+        <span class="mono" style="color:var(--blue);font-size:13px;margin-left:4px" x-text="editModal.node_id"></span>
       </h3>
       <button @click="editModal.open = false" style="color:var(--text3);background:none;border:none;cursor:pointer">
         <svg style="width:20px;height:20px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -273,24 +273,24 @@
       <div>
         <label style="display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:4px">Alias <span style="color:var(--text3);font-weight:normal">(ex: CON, CAV, CB31)</span></label>
         <input x-model="editModal.alias" type="text" maxlength="16"
-               style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;background:var(--surface2);color:var(--text1);box-sizing:border-box"
+               style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;background:var(--bg3);color:var(--text);box-sizing:border-box"
                placeholder="Alias curto"/>
       </div>
       <div>
         <label style="display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:4px">Nome completo</label>
         <input x-model="editModal.name" type="text" maxlength="64"
-               style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;background:var(--surface2);color:var(--text1);box-sizing:border-box"
+               style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;background:var(--bg3);color:var(--text);box-sizing:border-box"
                placeholder="Ex: Castelo de Consumo"/>
       </div>
       <div>
         <label style="display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:4px">Nota</label>
         <textarea x-model="editModal.note" rows="2" maxlength="256"
-                  style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;background:var(--surface2);color:var(--text1);resize:none;box-sizing:border-box"
+                  style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;background:var(--bg3);color:var(--text);resize:none;box-sizing:border-box"
                   placeholder="Observações opcionais..."></textarea>
       </div>
     </div>
 
-    <div x-show="editModal.error" style="margin-top:12px;font-size:12px;color:var(--critical)" x-text="editModal.error"></div>
+    <div x-show="editModal.error" style="margin-top:12px;font-size:12px;color:var(--red)" x-text="editModal.error"></div>
 
     <div style="display:flex;gap:12px;margin-top:24px">
       <button @click="editModal.open = false"
@@ -298,7 +298,7 @@
         Cancelar
       </button>
       <button @click="saveEdit()"
-              style="flex:1;padding:10px 16px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:500;border:none;cursor:pointer"
+              style="flex:1;padding:10px 16px;border-radius:8px;background:var(--blue);color:#fff;font-size:13px;font-weight:500;border:none;cursor:pointer"
               :disabled="editModal.saving">
         <span x-text="editModal.saving ? 'A guardar...' : 'Guardar'"></span>
       </button>
@@ -312,9 +312,9 @@
      @click.self="detailModal.open = false">
   <div style="background:var(--surface1);border-radius:16px;box-shadow:0 25px 50px rgba(0,0,0,0.3);width:100%;max-width:480px;padding:24px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <h3 style="font-weight:600;color:var(--text1)">
+      <h3 style="font-weight:600;color:var(--text)">
         Detalhes
-        <span class="mono" style="color:var(--accent);font-size:13px;margin-left:4px" x-text="detailModal.node?.node_id"></span>
+        <span class="mono" style="color:var(--blue);font-size:13px;margin-left:4px" x-text="detailModal.node?.node_id"></span>
       </h3>
       <button @click="detailModal.open = false" style="color:var(--text3);background:none;border:none;cursor:pointer">
         <svg style="width:20px;height:20px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -325,9 +325,9 @@
       <div style="display:flex;flex-direction:column;gap:12px;font-size:13px">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <template x-for="[label, value] in detailRows(detailModal.node)" :key="label">
-            <div style="background:var(--surface2);border-radius:8px;padding:12px">
+            <div style="background:var(--bg3);border-radius:8px;padding:12px">
               <div style="font-size:11px;color:var(--text3);margin-bottom:2px" x-text="label"></div>
-              <div class="mono" style="font-size:12px;font-weight:500;color:var(--text1);word-break:break-all" x-text="value ?? '—'"></div>
+              <div class="mono" style="font-size:12px;font-weight:500;color:var(--text);word-break:break-all" x-text="value ?? '—'"></div>
             </div>
           </template>
         </div>
@@ -335,7 +335,7 @@
         <!-- Full raw JSON -->
         <details style="margin-top:8px">
           <summary style="font-size:12px;color:var(--text3);cursor:pointer">Ver JSON completo</summary>
-          <pre style="margin-top:8px;background:var(--surface2);border-radius:8px;padding:12px;font-size:12px;overflow-x:auto;color:var(--text1)"
+          <pre style="margin-top:8px;background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;overflow-x:auto;color:var(--text)"
                x-text="JSON.stringify(detailModal.node, null, 2)"></pre>
         </details>
 
@@ -347,7 +347,7 @@
             Editar
           </button>
           <button @click="detailModal.open = false; confirmRestart(detailModal.node)"
-                  style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;font-size:13px;border:1px solid rgba(239,68,68,0.3);color:var(--critical);background:none;cursor:pointer">
+                  style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;font-size:13px;border:1px solid rgba(239,68,68,0.3);color:var(--red);background:none;cursor:pointer">
             <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M20 20v-5h-.581M4.582 9A8 8 0 0120 15m-.581-5A8 8 0 014 9"/></svg>
             Reiniciar
           </button>
@@ -363,15 +363,15 @@
      @click.self="restartModal.open = false">
   <div style="background:var(--surface1);border-radius:16px;box-shadow:0 25px 50px rgba(0,0,0,0.3);width:100%;max-width:340px;padding:24px;text-align:center">
     <div style="width:48px;height:48px;border-radius:50%;background:rgba(239,68,68,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-      <svg style="width:24px;height:24px;color:var(--critical)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M20 20v-5h-.581M4.582 9A8 8 0 0120 15m-.581-5A8 8 0 014 9"/></svg>
+      <svg style="width:24px;height:24px;color:var(--red)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M20 20v-5h-.581M4.582 9A8 8 0 0120 15m-.581-5A8 8 0 014 9"/></svg>
     </div>
-    <h3 style="font-weight:600;color:var(--text1);margin-bottom:4px">Reiniciar nó</h3>
+    <h3 style="font-weight:600;color:var(--text);margin-bottom:4px">Reiniciar nó</h3>
     <p style="font-size:13px;color:var(--text2);margin-bottom:20px">
       Enviar comando RESTART ao nó
-      <span class="mono" style="font-weight:500;color:var(--text1)" x-text="restartModal.node?.alias || restartModal.node?.node_id"></span>?
+      <span class="mono" style="font-weight:500;color:var(--text)" x-text="restartModal.node?.alias || restartModal.node?.node_id"></span>?
       O nó irá reiniciar em ~1s.
     </p>
-    <div x-show="restartModal.error" style="font-size:12px;color:var(--critical);margin-bottom:12px" x-text="restartModal.error"></div>
+    <div x-show="restartModal.error" style="font-size:12px;color:var(--red);margin-bottom:12px" x-text="restartModal.error"></div>
     <div style="display:flex;gap:12px">
       <button @click="restartModal.open = false"
               style="flex:1;padding:10px 16px;border-radius:8px;border:1px solid var(--border);font-size:13px;color:var(--text2);background:none;cursor:pointer">
@@ -501,9 +501,9 @@ function dispositivosApp() {
 
     rssiStyle(rssi) {
       if (rssi == null) return 'color:var(--text3)';
-      if (rssi >= -65)  return 'color:var(--ok)';
+      if (rssi >= -65)  return 'color:var(--green)';
       if (rssi >= -80)  return 'color:#f59e0b';
-      return 'color:var(--critical)';
+      return 'color:var(--red)';
     },
 
     detailRows(node) {

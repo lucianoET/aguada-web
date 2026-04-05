@@ -14,95 +14,281 @@
     <div class="sidebar-brand"><div class="sidebar-logo">A</div><span class="sidebar-brand-text">AGUADA</span></div>
     <nav class="sidebar-nav">
       <div class="sidebar-section">Operação</div>
-      <a href="index.html" class="nav-link"><span class="nav-icon">📊</span><span class="nav-label">Dashboard</span></a>
-      <a href="scada.html" class="nav-link"><span class="nav-icon">⚙</span><span class="nav-label">SCADA</span></a>
+      <a href="index.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="nav-label">Dashboard</span></a>
+      <a href="scada.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span><span class="nav-label">SCADA</span></a>
       <div class="sidebar-section">Análise</div>
-      <a href="analise.html" class="nav-link"><span class="nav-icon">📈</span><span class="nav-label">Análise</span></a>
+      <a href="analise.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="nav-label">Análise</span></a>
       <div class="sidebar-section">Gestão</div>
-      <a href="report.html" class="nav-link"><span class="nav-icon">📄</span><span class="nav-label">Relatório</span></a>
-      <a href="dispositivos.html" class="nav-link"><span class="nav-icon">📡</span><span class="nav-label">Dispositivos</span></a>
-      <a href="documentacao.html" class="nav-link active"><span class="nav-icon">📚</span><span class="nav-label">Documentação</span></a>
+      <a href="report.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="nav-label">Relatório</span></a>
+      <a href="dispositivos.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span><span class="nav-label">Dispositivos</span></a>
+      <a href="documentacao.html" class="nav-link active"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span><span class="nav-label">Documentação</span></a>
     </nav>
     <div class="sidebar-footer"><span class="gw-dot off"></span><span class="gw-label">GW</span></div>
   </aside>
+
   <div class="main">
     <div class="topbar">
-      <div><div class="topbar-title">Documentação</div></div>
-      <div class="topbar-right"><button class="theme-btn" onclick="toggleTheme()">☀</button></div>
+      <div><div class="topbar-title">Documentação</div><div class="topbar-sub">Manuais, normas e procedimentos operacionais</div></div>
+      <div class="topbar-right"><button class="theme-btn" onclick="toggleTheme()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg></button></div>
     </div>
+
+    <!-- Abas -->
+    <div class="tabs">
+      <button class="tab-btn" :class="tab==='manuais'?'active':''" @click="tab='manuais'">Manuais</button>
+      <button class="tab-btn" :class="tab==='normas'?'active':''" @click="tab='normas'">Normas</button>
+      <button class="tab-btn" :class="tab==='procedimentos'?'active':''" @click="tab='procedimentos'">Procedimentos</button>
+      <button class="tab-btn" :class="tab==='formularios'?'active':''" @click="tab='formularios'">Formulários</button>
+    </div>
+
     <div class="content">
 
-      <p style="font-size:13px;color:var(--text3);margin-bottom:16px">Área de documentos técnicos, normas e manuais operacionais do Aguada.</p>
+      <!-- Manuais -->
+      <div x-show="tab==='manuais'">
+        <div class="section-title">Manuais Operacionais</div>
+        <div x-data="{open:null}" style="display:flex;flex-direction:column;gap:8px">
 
-      <div style="display:flex;gap:8px;margin-bottom:16px">
-        <button @click="tab = 'documentos'" :style="tab === 'documentos' ? 'background:var(--accent);color:#fff' : 'background:var(--surface2);color:var(--text2)'" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;border:none;cursor:pointer">Documentos</button>
-        <button @click="tab = 'normas'" :style="tab === 'normas' ? 'background:var(--accent);color:#fff' : 'background:var(--surface2);color:var(--text2)'" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;border:none;cursor:pointer">Normas</button>
-        <button @click="tab = 'manuais'" :style="tab === 'manuais' ? 'background:var(--accent);color:#fff' : 'background:var(--surface2);color:var(--text2)'" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;border:none;cursor:pointer">Manuais</button>
-      </div>
-
-      <div x-show="tab === 'documentos'">
-        <div class="card" style="padding:16px;margin-bottom:12px">
-          <div style="font-weight:600;color:var(--text1);margin-bottom:12px">Documentos de Referência</div>
-          <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13px">
-            <li>
-              <a style="color:var(--accent);text-decoration:none" href="assets/docs/relatorio_diario_modelo.md" target="_blank">Modelo de Relatório Diário (Balanço Hídrico)</a>
-            </li>
-            <li>
-              <span style="color:var(--text2)">Estrutura de documentação no repositório:</span>
-              <code style="font-size:12px;background:var(--surface2);padding:2px 8px;border-radius:4px">aguada-web/docs/aguada-web</code>
-              e
-              <code style="font-size:12px;background:var(--surface2);padding:2px 8px;border-radius:4px">aguada-web/docs/sistemas-hidricos</code>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div x-show="tab === 'normas'">
-        <div class="card" style="padding:16px;margin-bottom:12px">
-          <div style="font-weight:600;color:var(--text1);margin-bottom:8px">Normas Técnicas</div>
-          <p style="font-size:13px;color:var(--text2);margin-bottom:12px">
-            Documento incluído na documentação conforme solicitado: <strong>Normas_Tecnicas.md</strong>.
-          </p>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-            <a style="padding:6px 12px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;text-decoration:none" href="assets/docs/Normas_Tecnicas.md" target="_blank">Abrir Normas_Tecnicas.md</a>
-            <span style="font-size:12px;color:var(--text3)">Cópia canônica no repositório: <code style="background:var(--surface2);padding:2px 6px;border-radius:4px">aguada-web/docs/sistemas-hidricos/Normas_Tecnicas.md</code></span>
-          </div>
-        </div>
-
-        <div class="card" style="padding:16px">
-          <div style="font-weight:500;color:var(--text2);margin-bottom:8px">Resumo executivo das normas aplicáveis</div>
-          <ul style="font-size:13px;color:var(--text2);padding-left:20px;margin:0;display:flex;flex-direction:column;gap:4px">
-            <li>ABNT NBR 12217, 12218, 12214 e 5626 (projeto e operação de reservatórios, adutoras e elevatórias).</li>
-            <li>ABNT NBR ISO 24510/24511/24512 (indicadores e gestão de desempenho).</li>
-            <li>Portaria GM/MS 2.914/2011 (qualidade e potabilidade da água).</li>
-            <li>Regra crítica: bloqueio automático de recalque abaixo do nível mínimo operacional.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div x-show="tab === 'manuais'">
-        <div class="card" style="padding:16px">
-          <div style="font-weight:600;color:var(--text1);margin-bottom:12px">Manuais Operacionais</div>
-          <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13px">
-            <li>
-              <a style="color:var(--accent);text-decoration:none" href="assets/docs/manual_operacao_aguada_web.md" target="_blank">Manual de Operação — Aguada Web</a>
-            </li>
-            <li style="color:var(--text2)">Fluxo recomendado: Dashboard → SCADA → Histórico/Consumo → Relatórios (incluindo Balanço Hídrico).</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="section-title" style="margin-top:24px">Instruções Operacionais</div>
-      <div x-data="{open:null}">
-        <template x-for="(sec, i) in docSections" :key="i">
-          <div class="card" style="margin-bottom:8px">
-            <div class="card-header" style="cursor:pointer" @click="open=open===i?null:i">
-              <div style="font-weight:500" x-text="sec.title"></div>
-              <span x-text="open===i?'▲':'▼'" style="color:var(--text3);font-size:11px"></span>
+          <template x-for="(sec, i) in manuais" :key="i">
+            <div class="card">
+              <div class="card-header" style="cursor:pointer" @click="open=open===i?null:i">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span x-html="sec.icon" style="color:var(--blue)"></span>
+                  <span style="font-weight:500" x-text="sec.title"></span>
+                </div>
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                  :style="open===i ? 'transform:rotate(180deg)' : ''" style="transition:transform 0.2s;color:var(--text3)">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+              <div x-show="open===i" style="padding:16px;font-size:13px;color:var(--text2);line-height:1.75;white-space:pre-wrap" x-text="sec.content"></div>
             </div>
-            <div x-show="open===i" style="padding:14px 16px;font-size:13px;color:var(--text2);white-space:pre-wrap;line-height:1.7" x-text="sec.content"></div>
+          </template>
+
+        </div>
+      </div>
+
+      <!-- Normas -->
+      <div x-show="tab==='normas'">
+        <div class="section-title">Normas Técnicas Aplicáveis</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+
+          <div class="card card-body">
+            <div style="font-weight:600;margin-bottom:12px">ABNT — Sistemas de Abastecimento de Água</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
+              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
+                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR 12217</span>
+                <span style="color:var(--text2)">Projeto de reservatório de distribuição de água para abastecimento público</span>
+              </div>
+              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
+                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR 12218</span>
+                <span style="color:var(--text2)">Projeto de rede de distribuição de água para abastecimento público</span>
+              </div>
+              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
+                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR 12214</span>
+                <span style="color:var(--text2)">Projeto de sistema de bombeamento de água para abastecimento público</span>
+              </div>
+              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
+                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR 5626</span>
+                <span style="color:var(--text2)">Instalação predial de água fria</span>
+              </div>
+            </div>
           </div>
-        </template>
+
+          <div class="card card-body">
+            <div style="font-weight:600;margin-bottom:12px">ISO — Gestão e Desempenho</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
+              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
+                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR ISO 24510</span>
+                <span style="color:var(--text2)">Atividades relativas aos serviços de água potável e de esgotamento sanitário — avaliação e melhoria do serviço prestado</span>
+              </div>
+              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
+                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR ISO 24511</span>
+                <span style="color:var(--text2)">Diretrizes para a gestão dos serviços de utilidade pública de esgotamento sanitário</span>
+              </div>
+              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
+                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR ISO 24512</span>
+                <span style="color:var(--text2)">Diretrizes para a gestão dos sistemas de água potável</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card card-body">
+            <div style="font-weight:600;margin-bottom:12px">Legislação Federal</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
+              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
+                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">GM/MS 2.914/2011</span>
+                <span style="color:var(--text2)">Potabilidade e qualidade da água para consumo humano — procedimentos de controle e vigilância</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card card-body" style="border-left:3px solid var(--yellow)">
+            <div style="font-weight:600;margin-bottom:8px;color:var(--yellow)">Regra Operacional Crítica</div>
+            <p style="font-size:13px;color:var(--text2)">Bloqueio automático de recalque abaixo do nível mínimo operacional. Nenhuma bomba pode ser acionada se o reservatório de sucção estiver abaixo de 10% da capacidade, salvo autorização expressa do operador responsável com registro em livro de ocorrências.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Procedimentos -->
+      <div x-show="tab==='procedimentos'">
+        <div class="section-title">Procedimentos Operacionais</div>
+        <div x-data="{open:null}" style="display:flex;flex-direction:column;gap:8px">
+          <template x-for="(sec, i) in procedimentos" :key="i">
+            <div class="card">
+              <div class="card-header" style="cursor:pointer" @click="open=open===i?null:i">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span class="badge" :class="sec.badgeClass" x-text="sec.badge"></span>
+                  <span style="font-weight:500" x-text="sec.title"></span>
+                </div>
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                  :style="open===i ? 'transform:rotate(180deg)' : ''" style="transition:transform 0.2s;color:var(--text3)">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+              <div x-show="open===i" style="padding:16px">
+                <template x-for="(step, j) in sec.steps" :key="j">
+                  <div style="display:flex;gap:12px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)">
+                    <span style="font-family:var(--mono);color:var(--text3);min-width:20px" x-text="(j+1)+'.'"></span>
+                    <span x-text="step"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Formulários -->
+      <div x-show="tab==='formularios'">
+        <div class="section-title">Formulários de Registro</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+
+          <div class="card">
+            <div class="card-header">
+              <span style="font-weight:500">Ficha de Manutenção</span>
+              <button onclick="window.print()" class="btn btn-secondary" style="font-size:11px">Imprimir</button>
+            </div>
+            <div class="card-body" style="font-size:13px">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Data</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">___/___/______</div>
+                </div>
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Técnico responsável</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">_____________________________</div>
+                </div>
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Equipamento / Local</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">_____________________________</div>
+                </div>
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Tipo de manutenção</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">☐ Preventiva  ☐ Corretiva  ☐ Calibração</div>
+                </div>
+              </div>
+              <div style="margin-top:16px">
+                <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Problema identificado</div>
+                <div style="border:1px solid var(--border2);border-radius:4px;height:60px;padding:8px;color:var(--text3);font-size:12px">Descrever o problema encontrado...</div>
+              </div>
+              <div style="margin-top:12px">
+                <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Ação tomada</div>
+                <div style="border:1px solid var(--border2);border-radius:4px;height:60px;padding:8px;color:var(--text3);font-size:12px">Descrever a ação corretiva tomada...</div>
+              </div>
+              <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Resultado</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">_____________________________</div>
+                </div>
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Assinatura</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">_____________________________</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span style="font-weight:500">Ficha de Calibração de Sensor</span>
+              <button onclick="window.print()" class="btn btn-secondary" style="font-size:11px">Imprimir</button>
+            </div>
+            <div class="card-body" style="font-size:13px">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Data</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">___/___/______</div>
+                </div>
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Node ID</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">0x____</div>
+                </div>
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Sensor ID</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">S___</div>
+                </div>
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Distância referência (cm)</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">______</div>
+                </div>
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Distância medida (cm)</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">______</div>
+                </div>
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Offset ajustado (cm)</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">______</div>
+                </div>
+              </div>
+              <div style="margin-top:16px">
+                <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Observações</div>
+                <div style="border:1px solid var(--border2);border-radius:4px;height:48px;padding:8px;color:var(--text3);font-size:12px">Condições de medição, anomalias observadas...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span style="font-weight:500">Registro de Incidente</span>
+              <button onclick="window.print()" class="btn btn-secondary" style="font-size:11px">Imprimir</button>
+            </div>
+            <div class="card-body" style="font-size:13px">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Data / Hora início</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">___/___/______ ____:____</div>
+                </div>
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Data / Hora fim</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">___/___/______ ____:____</div>
+                </div>
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Severidade</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">☐ Info  ☐ Atenção  ☐ Crítico</div>
+                </div>
+              </div>
+              <div style="margin-top:16px">
+                <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Descrição do incidente</div>
+                <div style="border:1px solid var(--border2);border-radius:4px;height:60px;padding:8px;color:var(--text3);font-size:12px">Descrever o evento, local afetado e impacto...</div>
+              </div>
+              <div style="margin-top:12px">
+                <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Ação imediata tomada</div>
+                <div style="border:1px solid var(--border2);border-radius:4px;height:48px;padding:8px;color:var(--text3);font-size:12px">Medidas tomadas para contenção/resolução...</div>
+              </div>
+              <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Operador de plantão</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">_____________________________</div>
+                </div>
+                <div>
+                  <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Assinatura</div>
+                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">_____________________________</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
 
     </div>
@@ -113,13 +299,132 @@
 <script>
   function docsApp() {
     return {
-      tab: 'documentos',
-      docSections: [
-        { title: 'Manual de Operação', content: 'Sistema Aguada — CMASM\nMonitoramento de reservatórios via sensores ultrassônicos ESP32-C3.\n\nOperação básica:\n1. Verificar status dos nós no Dashboard\n2. Registrar leituras manuais quando sensor offline\n3. Consultar SCADA para visão geral da topologia' },
-        { title: 'Calibração de Sensores', content: 'Procedimento de calibração:\n1. Verificar sensor ultrassônico HC-SR04\n2. Medir distância conhecida (referência)\n3. Ajustar sensor_offset_cm no reservoirs.yaml\n4. Reiniciar bridge.py para aplicar alterações' },
-        { title: 'Procedimentos de Emergência', content: 'Em caso de falha de sensor:\n1. Registrar leitura manual no Dashboard\n2. Verificar conexão USB do gateway\n3. Consultar bridge/bridge.log para diagnóstico\n4. Verificar alimentação do nó ESP32' },
-        { title: 'Formulário de Manutenção', content: 'Data: ___/___/___\nTécnico: __________\nEquipamento: ______\nProblema identificado: ____________\nAção tomada: ______\nResultado: ________\nAssinatura: _______' },
+      tab: 'manuais',
+
+      manuais: [
+        {
+          icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+          title: 'Manual de Operação — Sistema Aguada',
+          content: `Sistema Aguada — CMASM
+Monitoramento de reservatórios via sensores ultrassônicos ESP32-C3 (ESP-NOW/WiFi).
+
+OPERAÇÃO DIÁRIA:
+1. Verificar status do gateway na sidebar (ponto verde = conectado).
+2. Conferir Dashboard: todos os reservatórios devem aparecer com leitura recente (< 15 min).
+3. Reservatórios em amarelo (< 35%) ou vermelho (< 20%) requerem atenção imediata.
+4. Consultar SCADA para visão geral da topologia IF → IE.
+5. Registrar qualquer leitura manual via modal do reservatório no Dashboard.
+6. Ao final do turno: gerar Relatório Diário e verificar o Balanço Hídrico.`,
+        },
+        {
+          icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+          title: 'Interpretação de Dados e Alertas',
+          content: `NÍVEIS DE ALERTA:
+• Verde  (≥ 35%) — Normal. Operação regular.
+• Amarelo (20–35%) — Atenção. Programar abastecimento.
+• Vermelho (< 20%) — Crítico. Acionar protocolo de emergência.
+
+LEITURAS MANUAIS:
+Usar quando o sensor estiver offline. Inserir o valor em % (percentual), volume (litros) ou nível (cm).
+O sistema registra com timestamp e marca como "leitura manual" na tabela de eventos.
+
+CONSUMO ANÔMALO:
+O balanço hídrico calcula: Abastecimento − Consumo por período.
+Consumo > 20% da média histórica → alerta automático no Relatório Diário.
+Consumo > 50% → crítico (provável vazamento).`,
+        },
+        {
+          icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+          title: 'Gateway e Conectividade',
+          content: `GATEWAY ESP32-C3 (modo WiFi/MQTT):
+O gateway recebe pacotes ESP-NOW dos nós sensores e os publica via MQTT.
+O backend (bridge.py) subscreve no broker MQTT e grava os dados no SQLite.
+
+STATUS DO GATEWAY:
+• Ponto verde na sidebar = gateway conectado ao broker MQTT.
+• Ponto amarelo = modo simulação (sem hardware real).
+• Ponto vermelho = gateway offline.
+
+SOLUÇÃO DE PROBLEMAS:
+1. Verificar alimentação do gateway ESP32-C3.
+2. Verificar conexão WiFi do gateway com o broker MQTT.
+3. Verificar se o container Docker do broker (mosquitto) está rodando.
+4. Consultar logs: docker logs aguada-web-app-1
+5. O bridge.py envia SETTIME ao gateway ao conectar — verificar log se o relógio divergir.`,
+        },
       ],
+
+      procedimentos: [
+        {
+          badge: 'ROTINA',
+          badgeClass: 'badge-green',
+          title: 'Verificação diária de sensores',
+          steps: [
+            'Acessar página Dispositivos e verificar status de todos os nós (online/offline).',
+            'Confirmar que o RSSI de cada nó está dentro do limite aceitável (> -85 dBm).',
+            'Para nós offline: verificar alimentação elétrica do ESP32-C3.',
+            'Verificar data/hora da última leitura — tolerância: 15 minutos.',
+            'Registrar no livro de ocorrências qualquer nó com problema.',
+          ],
+        },
+        {
+          badge: 'ROTINA',
+          badgeClass: 'badge-green',
+          title: 'Calibração de sensor ultrassônico',
+          steps: [
+            'Medir a distância real do sensor à superfície da água com régua ou trena de referência.',
+            'Anotar a distância lida pelo sistema na página Dispositivos.',
+            'Calcular o offset: offset = distância_referência − distância_medida.',
+            'Editar backend/reservoirs.yaml: ajustar o campo sensor_offset_cm do reservatório.',
+            'Reiniciar o bridge: docker compose restart app (ou systemctl restart aguada-bridge).',
+            'Verificar nova leitura após 1 minuto e confirmar correção.',
+            'Preencher e arquivar a Ficha de Calibração de Sensor.',
+          ],
+        },
+        {
+          badge: 'URGENTE',
+          badgeClass: 'badge-red',
+          title: 'Reservatório em nível crítico (< 20%)',
+          steps: [
+            'Confirmar leitura: verificar se há leitura manual recente que confirme o nível baixo.',
+            'Acionar imediatamente o operador responsável pelo abastecimento.',
+            'Verificar no SCADA o status das bombas e válvulas — abrir passagem de abastecimento.',
+            'Registrar evento no livro de ocorrências com horário e nível atual.',
+            'Monitorar no Dashboard a evolução do nível a cada 5 minutos.',
+            'Quando nível ultrapassar 35%, registrar normalização e fechar a ocorrência.',
+          ],
+        },
+        {
+          badge: 'URGENTE',
+          badgeClass: 'badge-red',
+          title: 'Falha do gateway (sem dados)',
+          steps: [
+            'Verificar no Dashboard se todos os reservatórios estão com leitura congelada (mesmo timestamp).',
+            'Verificar status do broker MQTT: docker ps | grep mqtt.',
+            'Verificar logs do bridge: docker logs aguada-web-app-1 --tail 50.',
+            'Reiniciar o serviço: docker compose restart app.',
+            'Se o problema persistir, reiniciar o gateway ESP32-C3 (desligar e religar).',
+            'Registrar leituras manuais dos reservatórios críticos enquanto o sistema estiver offline.',
+            'Se persistir após reinicialização, contatar suporte técnico com o log completo.',
+          ],
+        },
+        {
+          badge: 'MANUT.',
+          badgeClass: 'badge-yellow',
+          title: 'Substituição de nó sensor',
+          steps: [
+            'Anotar o node_id do nó a ser substituído (visível na página Dispositivos).',
+            'Substituir o hardware ESP32-C3 no campo.',
+            'Obter o MAC address do novo nó (impresso na placa ou via monitor serial).',
+            'Atualizar backend/reservoirs.yaml: substituir node_id pelo novo valor.',
+            'Reiniciar o bridge: docker compose restart app.',
+            'Aguardar o nó aparecer na página Dispositivos como online.',
+            'Realizar calibração conforme procedimento de calibração.',
+            'Preencher e arquivar a Ficha de Manutenção.',
+          ],
+        },
+      ],
+
       init() {},
     };
   }

@@ -14,35 +14,27 @@
     <div class="sidebar-brand"><div class="sidebar-logo">A</div><span class="sidebar-brand-text">AGUADA</span></div>
     <nav class="sidebar-nav">
       <div class="sidebar-section">Operação</div>
-      <a href="index.html" class="nav-link"><span class="nav-icon">📊</span><span class="nav-label">Dashboard</span></a>
-      <a href="scada.html" class="nav-link"><span class="nav-icon">⚙</span><span class="nav-label">SCADA</span></a>
+      <a href="index.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="nav-label">Dashboard</span></a>
+      <a href="scada.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span><span class="nav-label">SCADA</span></a>
       <div class="sidebar-section">Análise</div>
-      <a href="analise.html" class="nav-link"><span class="nav-icon">📈</span><span class="nav-label">Análise</span></a>
+      <a href="analise.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="nav-label">Análise</span></a>
       <div class="sidebar-section">Gestão</div>
-      <a href="report.html" class="nav-link active"><span class="nav-icon">📄</span><span class="nav-label">Relatório</span></a>
-      <a href="dispositivos.html" class="nav-link"><span class="nav-icon">📡</span><span class="nav-label">Dispositivos</span></a>
-      <a href="documentacao.html" class="nav-link"><span class="nav-icon">📚</span><span class="nav-label">Documentação</span></a>
+      <a href="report.html" class="nav-link active"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="nav-label">Relatório</span></a>
+      <a href="dispositivos.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span><span class="nav-label">Dispositivos</span></a>
+      <a href="documentacao.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span><span class="nav-label">Documentação</span></a>
     </nav>
     <div class="sidebar-footer"><span class="gw-dot off"></span><span class="gw-label">GW</span></div>
   </aside>
   <div class="main">
     <div class="topbar">
       <div><div class="topbar-title">Relatório Diário</div></div>
-      <div class="topbar-right"><button class="theme-btn" onclick="toggleTheme()">☀</button></div>
+      <div class="topbar-right"><button class="theme-btn" onclick="toggleTheme()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg></button></div>
     </div>
     <div class="content">
 
-      <div class="mb-4 flex items-center gap-2">
-        <button @click="activeTab = 'resumo'"
-          :class="activeTab === 'resumo' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
-          class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-          Resumo Operacional
-        </button>
-        <button @click="activeTab = 'balanco'"
-          :class="activeTab === 'balanco' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
-          class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-          Balanço Hídrico Diário
-        </button>
+      <div style="display:flex;gap:2px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:0">
+        <button @click="activeTab = 'resumo'" class="tab-btn" :class="activeTab === 'resumo' ? 'active' : ''">Resumo Operacional</button>
+        <button @click="activeTab = 'balanco'" class="tab-btn" :class="activeTab === 'balanco' ? 'active' : ''">Balanço Hídrico Diário</button>
       </div>
 
       <!-- Filter Bar -->
@@ -51,12 +43,12 @@
           <!-- Date Selector -->
           <div style="display:flex;align-items:center;gap:8px">
             <label style="font-size:13px;font-weight:500;color:var(--text2)">Data</label>
-            <input type="date" x-model="date" style="border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;background:var(--surface2);color:var(--text1)" />
+            <input type="date" x-model="date" class="form-input" style="width:auto" />
           </div>
 
           <!-- Ver Relatório Button -->
           <button @click="load()" :disabled="loading"
-            style="padding:6px 16px;background:var(--accent);color:#fff;font-size:13px;font-weight:500;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;opacity:1"
+            class="btn btn-primary" style="display:flex;align-items:center;gap:8px"
             :style="loading ? 'opacity:0.5' : ''">
             <svg x-show="loading" style="width:16px;height:16px;animation:spin 1s linear infinite" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle style="opacity:0.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -67,7 +59,7 @@
 
           <!-- PDF Download -->
           <a :href="'/api/report/daily.pdf?date=' + date"
-            style="padding:6px 16px;background:var(--surface2);color:var(--text2);font-size:13px;font-weight:500;border-radius:8px;text-decoration:none;display:flex;align-items:center;gap:6px"
+            class="btn btn-secondary" style="text-decoration:none;display:flex;align-items:center;gap:6px"
             download>
             <svg xmlns="http://www.w3.org/2000/svg" style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
@@ -132,14 +124,14 @@
             <tbody>
               <template x-for="(row, i) in rows" :key="i">
                 <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:10px 16px;font-weight:700;color:var(--text1)" x-text="row.alias"></td>
+                  <td style="padding:10px 16px;font-weight:700;color:var(--text)" x-text="row.alias"></td>
                   <td style="padding:10px 16px;color:var(--text2)" x-text="row.name || '—'"></td>
                   <td style="padding:10px 16px;text-align:right">
                     <span style="font-weight:600"
                       :style="{
-                        color: row.pct >= 80 ? 'var(--ok)' :
+                        color: row.pct >= 80 ? 'var(--green)' :
                                row.pct >= 50 ? '#3b82f6' :
-                               row.pct >= 20 ? '#f59e0b' : 'var(--critical)'
+                               row.pct >= 20 ? '#f59e0b' : 'var(--red)'
                       }"
                       x-text="row.pct !== null && row.pct !== undefined ? row.pct + '%' : '—'">
                     </span>
@@ -149,10 +141,10 @@
                   <td style="padding:10px 16px;text-align:center">
                     <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500"
                       :style="{
-                        background: row.pct === null || row.pct === undefined ? 'var(--surface2)' :
+                        background: row.pct === null || row.pct === undefined ? 'var(--bg3)' :
                                     row.pct < 20 ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)',
                         color: row.pct === null || row.pct === undefined ? 'var(--text3)' :
-                               row.pct < 20 ? 'var(--critical)' : 'var(--ok)'
+                               row.pct < 20 ? 'var(--red)' : 'var(--green)'
                       }"
                       x-text="row.pct === null || row.pct === undefined ? 'Sem dados' : row.pct < 20 ? 'Crítico' : row.pct < 50 ? 'Baixo' : row.pct < 80 ? 'Normal' : 'Cheio'">
                     </span>
@@ -169,11 +161,11 @@
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px">
           <div class="card" style="padding:16px">
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3)">Abastecimento estimado</div>
-            <div style="font-size:22px;font-weight:700;color:var(--ok)" x-text="formatSigned(totalSupplied()) + ' L'"></div>
+            <div style="font-size:22px;font-weight:700;color:var(--green)" x-text="formatSigned(totalSupplied()) + ' L'"></div>
           </div>
           <div class="card" style="padding:16px">
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3)">Consumo estimado</div>
-            <div style="font-size:22px;font-weight:700;color:var(--critical)" x-text="formatSigned(-totalConsumed()) + ' L'"></div>
+            <div style="font-size:22px;font-weight:700;color:var(--red)" x-text="formatSigned(-totalConsumed()) + ' L'"></div>
           </div>
           <div class="card" style="padding:16px">
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3)">Balanço estimado</div>
@@ -181,7 +173,7 @@
           </div>
           <div class="card" style="padding:16px">
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3)">Reservatórios com evento</div>
-            <div style="font-size:22px;font-weight:700;color:var(--text1)" x-text="dailyRows().filter(r => r.events_count > 0).length"></div>
+            <div style="font-size:22px;font-weight:700;color:var(--text)" x-text="dailyRows().filter(r => r.events_count > 0).length"></div>
           </div>
         </div>
 
@@ -205,11 +197,11 @@
                 <template x-for="(row, i) in dailyRows()" :key="row.alias + '-' + i">
                   <tr style="border-bottom:1px solid var(--border)">
                     <td style="padding:10px 16px">
-                      <div style="font-weight:600;color:var(--text1)" x-text="row.name || row.alias"></div>
+                      <div style="font-weight:600;color:var(--text)" x-text="row.name || row.alias"></div>
                       <div style="font-size:11px;color:var(--text3)" x-text="row.alias"></div>
                     </td>
-                    <td style="padding:10px 16px;text-align:right;font-family:monospace;color:var(--critical)" x-text="formatSigned(-row.consumed_l)"></td>
-                    <td style="padding:10px 16px;text-align:right;font-family:monospace;color:var(--ok)" x-text="formatSigned(row.supplied_l)"></td>
+                    <td style="padding:10px 16px;text-align:right;font-family:monospace;color:var(--red)" x-text="formatSigned(-row.consumed_l)"></td>
+                    <td style="padding:10px 16px;text-align:right;font-family:monospace;color:var(--green)" x-text="formatSigned(row.supplied_l)"></td>
                     <td style="padding:10px 16px;text-align:right;font-family:monospace" :style="row.balance_l >= 0 ? 'color:#3b82f6' : 'color:#f59e0b'" x-text="formatSigned(row.balance_l)"></td>
                     <td style="padding:10px 16px;text-align:right;color:var(--text3)" x-text="row.events_count"></td>
                   </tr>
