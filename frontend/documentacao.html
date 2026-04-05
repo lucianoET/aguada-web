@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aguada — Documentação</title>
+  <link rel="stylesheet" href="assets/aguada.css" />
+  <style>[x-cloak]{display:none}</style>
+</head>
+<body>
+<div class="layout" x-data="docsApp()" x-init="init()" x-cloak>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">A</div><span class="sidebar-brand-text">AGUADA</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Operação</div>
+      <a href="index.html" class="nav-link"><span class="nav-icon">📊</span><span class="nav-label">Dashboard</span></a>
+      <a href="scada.html" class="nav-link"><span class="nav-icon">⚙</span><span class="nav-label">SCADA</span></a>
+      <div class="sidebar-section">Análise</div>
+      <a href="analise.html" class="nav-link"><span class="nav-icon">📈</span><span class="nav-label">Análise</span></a>
+      <div class="sidebar-section">Gestão</div>
+      <a href="report.html" class="nav-link"><span class="nav-icon">📄</span><span class="nav-label">Relatório</span></a>
+      <a href="dispositivos.html" class="nav-link"><span class="nav-icon">📡</span><span class="nav-label">Dispositivos</span></a>
+      <a href="documentacao.html" class="nav-link active"><span class="nav-icon">📚</span><span class="nav-label">Documentação</span></a>
+    </nav>
+    <div class="sidebar-footer"><span class="gw-dot off"></span><span class="gw-label">GW</span></div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div><div class="topbar-title">Documentação</div></div>
+      <div class="topbar-right"><button class="theme-btn" onclick="toggleTheme()">☀</button></div>
+    </div>
+    <div class="content">
+
+      <p style="font-size:13px;color:var(--text3);margin-bottom:16px">Área de documentos técnicos, normas e manuais operacionais do Aguada.</p>
+
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button @click="tab = 'documentos'" :style="tab === 'documentos' ? 'background:var(--accent);color:#fff' : 'background:var(--surface2);color:var(--text2)'" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;border:none;cursor:pointer">Documentos</button>
+        <button @click="tab = 'normas'" :style="tab === 'normas' ? 'background:var(--accent);color:#fff' : 'background:var(--surface2);color:var(--text2)'" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;border:none;cursor:pointer">Normas</button>
+        <button @click="tab = 'manuais'" :style="tab === 'manuais' ? 'background:var(--accent);color:#fff' : 'background:var(--surface2);color:var(--text2)'" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;border:none;cursor:pointer">Manuais</button>
+      </div>
+
+      <div x-show="tab === 'documentos'">
+        <div class="card" style="padding:16px;margin-bottom:12px">
+          <div style="font-weight:600;color:var(--text1);margin-bottom:12px">Documentos de Referência</div>
+          <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13px">
+            <li>
+              <a style="color:var(--accent);text-decoration:none" href="assets/docs/relatorio_diario_modelo.md" target="_blank">Modelo de Relatório Diário (Balanço Hídrico)</a>
+            </li>
+            <li>
+              <span style="color:var(--text2)">Estrutura de documentação no repositório:</span>
+              <code style="font-size:12px;background:var(--surface2);padding:2px 8px;border-radius:4px">aguada-web/docs/aguada-web</code>
+              e
+              <code style="font-size:12px;background:var(--surface2);padding:2px 8px;border-radius:4px">aguada-web/docs/sistemas-hidricos</code>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div x-show="tab === 'normas'">
+        <div class="card" style="padding:16px;margin-bottom:12px">
+          <div style="font-weight:600;color:var(--text1);margin-bottom:8px">Normas Técnicas</div>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:12px">
+            Documento incluído na documentação conforme solicitado: <strong>Normas_Tecnicas.md</strong>.
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+            <a style="padding:6px 12px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;text-decoration:none" href="assets/docs/Normas_Tecnicas.md" target="_blank">Abrir Normas_Tecnicas.md</a>
+            <span style="font-size:12px;color:var(--text3)">Cópia canônica no repositório: <code style="background:var(--surface2);padding:2px 6px;border-radius:4px">aguada-web/docs/sistemas-hidricos/Normas_Tecnicas.md</code></span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:16px">
+          <div style="font-weight:500;color:var(--text2);margin-bottom:8px">Resumo executivo das normas aplicáveis</div>
+          <ul style="font-size:13px;color:var(--text2);padding-left:20px;margin:0;display:flex;flex-direction:column;gap:4px">
+            <li>ABNT NBR 12217, 12218, 12214 e 5626 (projeto e operação de reservatórios, adutoras e elevatórias).</li>
+            <li>ABNT NBR ISO 24510/24511/24512 (indicadores e gestão de desempenho).</li>
+            <li>Portaria GM/MS 2.914/2011 (qualidade e potabilidade da água).</li>
+            <li>Regra crítica: bloqueio automático de recalque abaixo do nível mínimo operacional.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div x-show="tab === 'manuais'">
+        <div class="card" style="padding:16px">
+          <div style="font-weight:600;color:var(--text1);margin-bottom:12px">Manuais Operacionais</div>
+          <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13px">
+            <li>
+              <a style="color:var(--accent);text-decoration:none" href="assets/docs/manual_operacao_aguada_web.md" target="_blank">Manual de Operação — Aguada Web</a>
+            </li>
+            <li style="color:var(--text2)">Fluxo recomendado: Dashboard → SCADA → Histórico/Consumo → Relatórios (incluindo Balanço Hídrico).</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:24px">Instruções Operacionais</div>
+      <div x-data="{open:null}">
+        <template x-for="(sec, i) in docSections" :key="i">
+          <div class="card" style="margin-bottom:8px">
+            <div class="card-header" style="cursor:pointer" @click="open=open===i?null:i">
+              <div style="font-weight:500" x-text="sec.title"></div>
+              <span x-text="open===i?'▲':'▼'" style="color:var(--text3);font-size:11px"></span>
+            </div>
+            <div x-show="open===i" style="padding:14px 16px;font-size:13px;color:var(--text2);white-space:pre-wrap;line-height:1.7" x-text="sec.content"></div>
+          </div>
+        </template>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="assets/shared.js"></script>
+<script defer src="assets/vendor/alpine.min.js"></script>
+<script>
+  function docsApp() {
+    return {
+      tab: 'documentos',
+      docSections: [
+        { title: 'Manual de Operação', content: 'Sistema Aguada — CMASM\nMonitoramento de reservatórios via sensores ultrassônicos ESP32-C3.\n\nOperação básica:\n1. Verificar status dos nós no Dashboard\n2. Registrar leituras manuais quando sensor offline\n3. Consultar SCADA para visão geral da topologia' },
+        { title: 'Calibração de Sensores', content: 'Procedimento de calibração:\n1. Verificar sensor ultrassônico HC-SR04\n2. Medir distância conhecida (referência)\n3. Ajustar sensor_offset_cm no reservoirs.yaml\n4. Reiniciar bridge.py para aplicar alterações' },
+        { title: 'Procedimentos de Emergência', content: 'Em caso de falha de sensor:\n1. Registrar leitura manual no Dashboard\n2. Verificar conexão USB do gateway\n3. Consultar bridge/bridge.log para diagnóstico\n4. Verificar alimentação do nó ESP32' },
+        { title: 'Formulário de Manutenção', content: 'Data: ___/___/___\nTécnico: __________\nEquipamento: ______\nProblema identificado: ____________\nAção tomada: ______\nResultado: ________\nAssinatura: _______' },
+      ],
+      init() {},
+    };
+  }
+</script>
+</body>
+</html>
