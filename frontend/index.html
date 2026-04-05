@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aguada — Dashboard</title>
+  <link rel="stylesheet" href="assets/aguada.css" />
+  <link rel="stylesheet" href="assets/vendor/leaflet.min.css" />
+  <style>
+    [x-cloak] { display: none; }
+    #map { width: 100%; height: 100%; }
+    .map-wrap { flex: 1; position: relative; overflow: hidden; }
+  </style>
+</head>
+<body>
+<div class="layout" x-data="dashboardApp()" x-init="init()" x-cloak>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">A</div>
+      <span class="sidebar-brand-text">AGUADA</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Operação</div>
+      <a href="index.html" class="nav-link active">
+        <span class="nav-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </span>
+        <span class="nav-label">Dashboard</span>
+      </a>
+      <a href="scada.html" class="nav-link">
+        <span class="nav-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        </span>
+        <span class="nav-label">SCADA</span>
+      </a>
+      <div class="sidebar-section">Análise</div>
+      <a href="analise.html" class="nav-link">
+        <span class="nav-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </span>
+        <span class="nav-label">Análise</span>
+      </a>
+      <div class="sidebar-section">Gestão</div>
+      <a href="report.html" class="nav-link">
+        <span class="nav-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </span>
+        <span class="nav-label">Relatório</span>
+      </a>
+      <a href="dispositivos.html" class="nav-link">
+        <span class="nav-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+        </span>
+        <span class="nav-label">Dispositivos</span>
+      </a>
+      <a href="documentacao.html" class="nav-link">
+        <span class="nav-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        </span>
+        <span class="nav-label">Documentação</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="gw-dot" :class="gwStatus"></span>
+      <span class="gw-label" x-text="gwLabel"></span>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div>
+        <button class="theme-btn" onclick="document.querySelector('#sidebar').classList.toggle('mobile-open')" style="display:none" id="sidebar-toggle">☰</button>
+        <div class="topbar-title">Dashboard</div>
+        <div class="topbar-sub">Monitoramento em tempo real</div>
+      </div>
+      <div class="topbar-right">
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)">
+          <span class="ws-dot" :class="wsConnected ? 'connected' : 'disconnected'"></span>
+          <span x-text="wsConnected ? 'Ao vivo' : 'Desconectado'"></span>
+          <span x-show="lastUpdate" x-text="'· ' + timeAgo(lastUpdate)" style="color:var(--text3)"></span>
+        </div>
+        <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI Strip -->
+    <div class="kpi-strip">
+      <div class="kpi-item">
+        <div>
+          <div class="kpi-label">Reservatórios</div>
+          <div class="kpi-value" x-text="reservoirs.length"></div>
+        </div>
+      </div>
+      <div class="kpi-item">
+        <div>
+          <div class="kpi-label">Volume médio</div>
+          <div class="kpi-value" style="color:var(--blue)" x-text="avgPct + '%'"></div>
+        </div>
+      </div>
+      <div class="kpi-item">
+        <div>
+          <div class="kpi-label">Críticos</div>
+          <div class="kpi-value" :style="critical > 0 ? 'color:var(--red)' : 'color:var(--green)'" x-text="critical"></div>
+        </div>
+      </div>
+      <div class="kpi-item">
+        <div>
+          <div class="kpi-label">Online</div>
+          <div class="kpi-value" x-text="onlineCount + '/' + reservoirs.length"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mapa -->
+    <div class="map-wrap">
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <!-- Modal lateral -->
+  <div class="modal-side" :class="{ open: modal.open }" id="modal-side">
+    <div class="modal-header">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-family:var(--mono);font-size:16px;font-weight:600" x-text="modal.alias"></span>
+          <span class="badge" :class="modal.online ? 'badge-green' : 'badge-gray'" x-text="modal.online ? 'Online' : 'Offline'"></span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px" x-text="modal.name"></div>
+      </div>
+      <button class="theme-btn" @click="closeModal()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- Barra de nível -->
+      <div class="tank-wrap" style="height:90px;margin-bottom:12px">
+        <div class="tank-fill" :style="`height:${modal.pct}%;background:${statusColor(modal.pct, modal.online)}`"></div>
+        <div class="tank-label" :style="modal.pct > 40 ? 'color:white' : 'color:var(--text)'" x-text="modal.pct + '%'"></div>
+      </div>
+      <!-- Métricas -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+        <div class="card" style="padding:10px">
+          <div style="font-size:10px;color:var(--text3)">Volume</div>
+          <div style="font-family:var(--mono);font-size:15px;margin-top:2px" x-text="modal.volume_l != null ? Math.round(modal.volume_l / 1000) + ' m³' : '—'"></div>
+        </div>
+        <div class="card" style="padding:10px">
+          <div style="font-size:10px;color:var(--text3)">Nível</div>
+          <div style="font-family:var(--mono);font-size:15px;margin-top:2px" x-text="modal.level_cm != null ? modal.level_cm + ' cm' : '—'"></div>
+        </div>
+        <div class="card" style="padding:10px">
+          <div style="font-size:10px;color:var(--text3)">RSSI</div>
+          <div style="font-family:var(--mono);font-size:15px;margin-top:2px" :style="`color:${rssiColor(modal.rssi)}`" x-text="modal.rssi != null ? modal.rssi + ' dBm' : '—'"></div>
+        </div>
+        <div class="card" style="padding:10px">
+          <div style="font-size:10px;color:var(--text3)">Atualizado</div>
+          <div style="font-size:11px;margin-top:2px;color:var(--text2)" x-text="timeAgo(modal.ts)"></div>
+        </div>
+      </div>
+      <!-- Leitura manual -->
+      <div class="section-title">Leitura Manual</div>
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <button class="eq-btn" :class="{active: modal.manualMode==='pct'}" @click="modal.manualMode='pct'">%</button>
+        <button class="eq-btn" :class="{active: modal.manualMode==='volume_l'}" @click="modal.manualMode='volume_l'">Litros</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" type="number" min="0" :max="modal.manualMode==='pct'?100:modal.volume_max_l" :placeholder="modal.manualMode==='pct'?'0–100 %':'Litros'" x-model="modal.manualValue" @keyup.enter="submitManual()" />
+        <button class="btn btn-primary" @click="submitManual()" :disabled="modal.saving" x-text="modal.saving ? '...' : 'Salvar'"></button>
+      </div>
+      <div x-show="modal.feedback" x-text="modal.feedback" style="font-size:11px;margin-top:6px" :style="modal.feedbackOk ? 'color:var(--green)' : 'color:var(--red)'"></div>
+    </div>
+  </div>
+  <!-- Overlay modal-side -->
+  <div x-show="modal.open" @click="closeModal()" style="position:fixed;inset:0;z-index:99;background:rgba(0,0,0,0.4)" x-cloak></div>
+
+</div>
+
+<script src="assets/shared.js"></script>
+<script src="assets/vendor/leaflet.min.js"></script>
+<script defer src="assets/vendor/alpine.min.js"></script>
+<script>
+function dashboardApp() {
+  return {
+    reservoirs: [],
+    gwStatus: 'off',
+    gwLabel: 'GW offline',
+    _map: null,
+    _markers: {},
+
+    get avgPct() {
+      if (!this.reservoirs.length) return 0;
+      const online = this.reservoirs.filter(r => r.online);
+      if (!online.length) return 0;
+      return Math.round(online.reduce((s, r) => s + (r.pct || 0), 0) / online.length);
+    },
+    get critical() { return this.reservoirs.filter(r => r.online && r.pct <= 20).length; },
+    get onlineCount() { return this.reservoirs.filter(r => r.online).length; },
+
+    ...wsMixin(),
+    ...reservoirModalMixin(),
+
+    async init() {
+      // Buscar estado inicial
+      const res = await fetch('/api/reservoirs');
+      this.reservoirs = await res.json();
+      // Gateway
+      const gw = await fetch('/api/gateway').then(r => r.json()).catch(() => null);
+      this._updateGw(gw);
+      // Inicializar mapa
+      this._initMap();
+      // WebSocket ao vivo
+      this.wsConnect((data) => {
+        if (data.type === 'snapshot') {
+          this.reservoirs = data.reservoirs;
+          this._updateGw(data.gateway);
+        } else if (data.type === 'reading') {
+          const idx = this.reservoirs.findIndex(r => r.alias === data.alias);
+          if (idx >= 0) this.reservoirs[idx] = { ...this.reservoirs[idx], ...data };
+          else this.reservoirs.push(data);
+          this.reservoirs = [...this.reservoirs];
+        }
+        this._updateMarkers();
+        if (this.modal.open) {
+          const r = this.reservoirs.find(r => r.alias === this.modal.alias);
+          if (r) this._fillModal(r);
+        }
+      });
+    },
+
+    _updateGw(gw) {
+      if (!gw) return;
+      if (gw.sim_mode) { this.gwStatus = 'sim'; this.gwLabel = 'Simulação'; }
+      else if (gw.connected) { this.gwStatus = 'on'; this.gwLabel = 'GW online'; }
+      else { this.gwStatus = 'off'; this.gwLabel = 'GW offline'; }
+    },
+
+    _initMap() {
+      const tileUrl = 'assets/leaflet-tiles/{z}/{x}/{y}.png';
+      const tileUrlFallback = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+      this._map = L.map('map').setView([-22.8390, -43.1080], 16);
+
+      // Tentar tiles locais, fallback para OSM online
+      const localLayer = L.tileLayer(tileUrl, { maxZoom: 19, attribution: '© OpenStreetMap' });
+      localLayer.on('tileerror', () => {
+        this._map.removeLayer(localLayer);
+        L.tileLayer(tileUrlFallback, { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(this._map);
+      });
+      localLayer.addTo(this._map);
+
+      this._updateMarkers();
+    },
+
+    _updateMarkers() {
+      this.reservoirs.forEach(r => {
+        if (!r.lat || !r.lng) return;
+        const color = markerColor(r.pct, r.online);
+        const pct = r.pct != null ? Math.round(r.pct) : '?';
+        const icon = L.divIcon({
+          className: '',
+          html: `<div style="background:${color};border:2px solid rgba(0,0,0,0.4);border-radius:50%;width:36px;height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 8px ${color}44">
+                   <div style="font-size:8px;font-weight:700;color:white;line-height:1">${r.alias}</div>
+                   <div style="font-size:9px;font-weight:700;color:white;line-height:1">${pct}%</div>
+                 </div>`,
+          iconSize: [36, 36],
+          iconAnchor: [18, 18],
+        });
+        if (this._markers[r.alias]) {
+          this._markers[r.alias].setIcon(icon);
+        } else {
+          const m = L.marker([r.lat, r.lng], { icon }).addTo(this._map);
+          m.on('click', () => this.openModal(r.alias));
+          this._markers[r.alias] = m;
+        }
+      });
+    },
+  };
+}
+</script>
+</body>
+</html>
