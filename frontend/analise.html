@@ -5,7 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Aguada — Análise</title>
   <link rel="stylesheet" href="assets/aguada.css"/>
-  <style>[x-cloak]{display:none}</style>
+  <style>
+    [x-cloak]{display:none}
+    .table-wrap { overflow-x: auto; }
+    .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:16px; }
+    .summary-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; }
+    .summary-label { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+    .summary-value { font-family:var(--mono); font-size:18px; }
+  </style>
 </head>
 <body>
 <div class="layout" x-data="analiseApp()" x-init="init()" x-cloak>
@@ -24,7 +31,7 @@
       <a href="dispositivos.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span><span class="nav-label">Dispositivos</span></a>
       <a href="documentacao.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span><span class="nav-label">Documentação</span></a>
     </nav>
-    <div class="sidebar-footer"><span class="gw-dot off"></span><span class="gw-label">GW</span></div>
+    <div class="sidebar-footer"><span class="gw-dot" :class="gwStatus"></span><span class="gw-label" x-text="gwLabel"></span></div>
   </aside>
 
   <div class="main">
@@ -73,6 +80,24 @@
           </select>
           <input class="form-input" type="date" style="width:160px" x-model="cons.date" @change="loadConsumo()"/>
         </div>
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="summary-label">Reservatório</div>
+            <div class="summary-value" style="color:var(--blue)" x-text="cons.summary.alias || (cons.alias || 'CON')"></div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Consumo</div>
+            <div class="summary-value" style="color:var(--yellow)" x-text="formatVolume(cons.summary.consumed_l)"></div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Abastecimento</div>
+            <div class="summary-value" style="color:var(--green)" x-text="formatVolume(cons.summary.supplied_l)"></div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Balanço</div>
+            <div class="summary-value" :style="(cons.summary.balance_l || 0) >= 0 ? 'color:var(--green)' : 'color:var(--red)'" x-text="formatSignedVolume(cons.summary.balance_l)"></div>
+          </div>
+        </div>
         <div class="card" style="padding:16px">
           <canvas id="consChart" height="80"></canvas>
         </div>
@@ -81,7 +106,7 @@
       <!-- ABA: Abastecimento -->
       <div x-show="tab==='abastecimento'">
         <div class="section-title" style="margin-bottom:12px">Registros de Abastecimento</div>
-        <div class="card">
+        <div class="card table-wrap">
           <table style="width:100%;border-collapse:collapse;font-size:12px">
             <thead><tr style="border-bottom:1px solid var(--border)">
               <th style="padding:8px 12px;text-align:left;color:var(--text3);font-weight:500">Reservatório</th>
@@ -90,10 +115,10 @@
               <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">Data</th>
             </tr></thead>
             <tbody>
-              <template x-for="row in abast.items" :key="row.id">
+              <template x-for="(row, idx) in abast.items" :key="row.id ?? `${row.ts || 'ts'}-${row.alias || row.reservoir_alias || 'reservatorio'}-${idx}`">
                 <tr style="border-bottom:1px solid var(--border)">
                   <td style="padding:7px 12px;font-family:var(--mono);color:var(--blue)" x-text="row.alias||row.reservoir_alias||'—'"></td>
-                  <td style="padding:7px 12px;text-align:right;font-family:var(--mono)" x-text="row.volume_m3!=null?row.volume_m3+' m³':row.note||'—'"></td>
+                  <td style="padding:7px 12px;text-align:right;font-family:var(--mono)" x-text="row.volume_l!=null ? (row.volume_l / 1000).toFixed(1) + ' m³' : '—'"></td>
                   <td style="padding:7px 12px;text-align:right;color:var(--text2)" x-text="row.note||'—'"></td>
                   <td style="padding:7px 12px;text-align:right;color:var(--text3);font-size:11px" x-text="formatTs(row.ts)"></td>
                 </tr>
@@ -119,7 +144,7 @@
           <button class="btn btn-secondary" @click="loadDados()">Atualizar</button>
           <button class="btn btn-secondary" @click="exportCsv()">Exportar CSV</button>
         </div>
-        <div class="card">
+        <div class="card table-wrap">
           <table style="width:100%;border-collapse:collapse;font-size:12px">
             <thead><tr style="border-bottom:1px solid var(--border)">
               <th style="padding:8px 12px;text-align:left;color:var(--text3);font-weight:500">Alias</th>
@@ -129,7 +154,7 @@
               <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">Data/Hora</th>
             </tr></thead>
             <tbody>
-              <template x-for="row in dados.rows" :key="row.ts+row.alias">
+              <template x-for="(row, idx) in dados.rows" :key="`${row.alias || 'alias'}-${row.ts || 'ts'}-${idx}`">
                 <tr style="border-bottom:1px solid var(--border)">
                   <td style="padding:6px 12px;font-family:var(--mono);color:var(--blue)" x-text="row.alias"></td>
                   <td style="padding:6px 12px;text-align:right;font-family:var(--mono)" :style="`color:${statusColor(row.pct,true)}`" x-text="row.pct!=null?Math.round(row.pct)+'%':'—'"></td>
@@ -153,6 +178,7 @@
 <script defer src="assets/vendor/alpine.min.js"></script>
 <script>
 const CHART_DEFAULTS = {
+  animation: false,
   responsive: true, maintainAspectRatio: true,
   plugins: { legend: { labels: { color: '#c9d4e0', font: { size: 11 } } } },
   scales: {
@@ -166,14 +192,25 @@ function analiseApp() {
     tab: 'historico',
     aliases: ['CON','CAV','CB31','CB32','CIE1','CIE2','CBIF1','CBIF2'],
     hist:  { alias: '', period: '24h', loading: false },
-    cons:  { alias: '', date: new Date().toISOString().slice(0,10) },
+    cons:  { alias: '', date: new Date().toISOString().slice(0,10), summary: { alias: 'CON', consumed_l: 0, supplied_l: 0, balance_l: 0 } },
     abast: { items: [] },
     dados: { alias: '', period: '24h', rows: [] },
+    gwStatus: 'off',
+    gwLabel: 'GW offline',
     _histChart: null,
     _consChart: null,
 
     async init() {
+      await this.loadGateway();
       await Promise.all([this.loadHistorico(), this.loadConsumo(), this.loadAbastecimento(), this.loadDados()]);
+    },
+
+    async loadGateway() {
+      const gw = await fetch('/api/gateway').then(r => r.json()).catch(() => null);
+      if (!gw) return;
+      if (gw.sim_mode) { this.gwStatus = 'sim'; this.gwLabel = 'Simulação'; }
+      else if (gw.connected) { this.gwStatus = 'on'; this.gwLabel = 'GW online'; }
+      else { this.gwStatus = 'off'; this.gwLabel = 'GW offline'; }
     },
 
     async switchTab(t) {
@@ -193,8 +230,10 @@ function analiseApp() {
       }));
       this._lastHistData = datasets;
       this.hist.loading = false;
-      await this.$nextTick();
-      this._renderHistChart(datasets);
+      if (this.tab === 'historico') {
+        await this.$nextTick();
+        this._renderHistChart(datasets);
+      }
     },
 
     _renderHistChart(datasets) {
@@ -206,19 +245,50 @@ function analiseApp() {
 
     async loadConsumo() {
       const alias = this.cons.alias || 'CON';
-      const r = await fetch(`/api/consumption?alias=${alias}&date=${this.cons.date}`).then(r=>r.json()).catch(()=>[]);
-      this._lastConsData = r;
-      await this.$nextTick();
-      this._renderConsChart(r);
+      const r = await fetch(`/api/consumption?alias=${alias}&date=${this.cons.date}`).then(r=>r.json()).catch(()=>({ events: [], summary: {}, alias }));
+      this.cons.summary = {
+        alias: r.alias || alias,
+        consumed_l: r.summary?.consumed_l || 0,
+        supplied_l: r.summary?.supplied_l || 0,
+        balance_l: r.summary?.balance_l || 0,
+      };
+      this._lastConsData = Array.isArray(r.events) ? r.events : [];
+      if (this.tab === 'consumo') {
+        await this.$nextTick();
+        this._renderConsChart(this._lastConsData);
+      }
     },
 
     _renderConsChart(data) {
       const ctx = document.getElementById('consChart');
       if (!ctx) return;
       if (this._consChart) this._consChart.destroy();
-      const labels = data.map(d=>d.date||d.label||'');
-      const vals = data.map(d=>d.volume_l||d.value||0);
-      this._consChart = new Chart(ctx, { type:'bar', data:{ labels, datasets:[{ label:'Consumo (L)', data:vals, backgroundColor:'#3b82f644', borderColor:'#3b82f6', borderWidth:1 }] }, options:{ ...CHART_DEFAULTS, scales:{ x:{ticks:{color:'#6b82a0'},grid:{color:'#1e2d3d'}}, y:{ticks:{color:'#6b82a0'},grid:{color:'#1e2d3d'}} } } });
+      const labels = data.map(d => d.hour || '—');
+      const vals = data.map(d => d.delta_l || 0);
+      const colors = data.map(d => d.type === 'supply' ? 'rgba(34,197,94,0.35)' : d.type === 'consumption' ? 'rgba(245,158,11,0.35)' : 'rgba(107,130,160,0.25)');
+      const borders = data.map(d => d.type === 'supply' ? '#22c55e' : d.type === 'consumption' ? '#f59e0b' : '#6b82a0');
+      this._consChart = new Chart(ctx, {
+        type:'bar',
+        data:{
+          labels,
+          datasets:[{
+            label:'Δ volume por hora (L)',
+            data: vals,
+            backgroundColor: colors,
+            borderColor: borders,
+            borderWidth:1,
+          }]
+        },
+        options:{
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: { legend: { labels: { color: '#c9d4e0', font: { size: 11 } } } },
+          scales:{
+            x:{ticks:{color:'#6b82a0'},grid:{color:'#1e2d3d'}},
+            y:{ticks:{color:'#6b82a0'},grid:{color:'#1e2d3d'}}
+          }
+        }
+      });
     },
 
     async loadAbastecimento() {
@@ -240,6 +310,17 @@ function analiseApp() {
     },
 
     formatTs, statusColor,
+
+    formatVolume(value) {
+      const amount = Number(value || 0);
+      return `${(amount / 1000).toFixed(1)} m³`;
+    },
+
+    formatSignedVolume(value) {
+      const amount = Number(value || 0);
+      const sign = amount > 0 ? '+' : '';
+      return `${sign}${(amount / 1000).toFixed(1)} m³`;
+    },
   };
 }
 </script>

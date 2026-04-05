@@ -256,7 +256,7 @@
 
 <!-- ── MODAL EDITAR NÓ ──────────────────────────────────────────────── -->
 <div x-show="editModal.open" x-transition.opacity
-     style="position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);padding:16px"
+  style="position:fixed;inset:0;z-index:1400;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);padding:16px"
      @click.self="editModal.open = false">
   <div style="background:var(--surface1);border-radius:16px;box-shadow:0 25px 50px rgba(0,0,0,0.3);width:100%;max-width:420px;padding:24px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
@@ -308,7 +308,7 @@
 
 <!-- ── MODAL DETALHES NÓ ─────────────────────────────────────────────── -->
 <div x-show="detailModal.open" x-transition.opacity
-     style="position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);padding:16px"
+  style="position:fixed;inset:0;z-index:1400;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);padding:16px"
      @click.self="detailModal.open = false">
   <div style="background:var(--surface1);border-radius:16px;box-shadow:0 25px 50px rgba(0,0,0,0.3);width:100%;max-width:480px;padding:24px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
@@ -359,7 +359,7 @@
 
 <!-- ── MODAL CONFIRMAR RESTART ──────────────────────────────────────── -->
 <div x-show="restartModal.open" x-transition.opacity
-     style="position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);padding:16px"
+  style="position:fixed;inset:0;z-index:1400;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);padding:16px"
      @click.self="restartModal.open = false">
   <div style="background:var(--surface1);border-radius:16px;box-shadow:0 25px 50px rgba(0,0,0,0.3);width:100%;max-width:340px;padding:24px;text-align:center">
     <div style="width:48px;height:48px;border-radius:50%;background:rgba(239,68,68,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
@@ -388,7 +388,7 @@
 
 <!-- ── TOAST ────────────────────────────────────────────────────────── -->
 <div x-show="toast.show" x-transition.opacity
-     style="position:fixed;bottom:24px;right:24px;z-index:50;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px"
+  style="position:fixed;bottom:24px;right:24px;z-index:1450;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px"
      :style="toast.ok ? 'background:#16a34a;color:#fff' : 'background:#dc2626;color:#fff'">
   <svg x-show="toast.ok" style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
   <svg x-show="!toast.ok" style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>

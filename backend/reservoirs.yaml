@@ -6,8 +6,8 @@ reservoirs:
       level_max_cm: 450
       volume_max_l: 80000
       sensor_offset_cm: 20
-      lat: -22.8381768
-      lng: -43.1082139
+      lat: -22.8382228
+      lng: -43.1080717
 
   "0xc9c4":
     - sensor_id: 1
@@ -26,16 +26,16 @@ reservoirs:
       level_max_cm: 200
       volume_max_l: 40000
       sensor_offset_cm: 10
-      lat: -22.8386364
-      lng: -43.1082231
+      lat: -22.8384676
+      lng: -43.1083677
     - sensor_id: 2
       alias: CB32
       name: Casa de Bombas Nº3-2
       level_max_cm: 200
       volume_max_l: 40000
       sensor_offset_cm: 10
-      lat: -22.8386560
-      lng: -43.1082431
+      lat: -22.8384876
+      lng: -43.1083877
 
   "0x9eac":
     - sensor_id: 1

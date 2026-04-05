@@ -54,6 +54,34 @@ function rssiColor(rssi) {
   return 'var(--red)';
 }
 
+function normalizeWsMessage(message) {
+  const type = message?.type;
+  const envelopeData = message && typeof message === 'object' && 'data' in message ? message.data : message;
+
+  if (type === 'snapshot') {
+    return {
+      type,
+      reservoirs: Array.isArray(envelopeData)
+        ? envelopeData
+        : (Array.isArray(envelopeData?.reservoirs) ? envelopeData.reservoirs : []),
+      gateway: message?.gateway ?? envelopeData?.gateway ?? null,
+    };
+  }
+
+  if (type === 'reading') {
+    const reading = envelopeData?.alias
+      ? envelopeData
+      : (message?.reading?.alias ? message.reading : null);
+    return { type, reading };
+  }
+
+  return {
+    type,
+    payload: envelopeData,
+    gateway: message?.gateway ?? envelopeData?.gateway ?? null,
+  };
+}
+
 // ── Tema claro/escuro ──────────────────────────────────────────
 function getTheme() {
   return localStorage.getItem('aguada-theme') || 'dark';

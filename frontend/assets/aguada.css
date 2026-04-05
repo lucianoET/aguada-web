@@ -15,8 +15,8 @@
   --border:     #1e2d3d;
   --border2:    #243344;
   --text:       #c9d4e0;
-  --text2:      #6b82a0;
-  --text3:      #3d556e;
+  --text2:      #8aa2bf;
+  --text3:      #6a829f;
   --blue:       #3b82f6;
   --blue-dim:   #1e3a5f;
   --green:      #22c55e;
@@ -180,7 +180,7 @@ button { cursor: pointer; font-family: var(--sans); border: none; background: no
 .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
 
 /* ── Modal ──────────────────────────────────────────────────── */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: center; justify-content: center; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1400; display: flex; align-items: center; justify-content: center; }
 .modal-box { background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 0; width: 400px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
 .modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
 .modal-body { padding: 16px 18px; }
@@ -190,7 +190,7 @@ button { cursor: pointer; font-family: var(--sans); border: none; background: no
 .modal-side {
   position: fixed; top: 0; right: 0; bottom: 0; width: 340px;
   background: var(--bg2); border-left: 1px solid var(--border2);
-  z-index: 100; overflow-y: auto;
+  z-index: 1410; overflow-y: auto;
   transform: translateX(100%); transition: transform 0.25s ease;
 }
 .modal-side.open { transform: translateX(0); }

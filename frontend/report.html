@@ -23,7 +23,7 @@
       <a href="dispositivos.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span><span class="nav-label">Dispositivos</span></a>
       <a href="documentacao.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span><span class="nav-label">Documentação</span></a>
     </nav>
-    <div class="sidebar-footer"><span class="gw-dot off"></span><span class="gw-label">GW</span></div>
+    <div class="sidebar-footer"><span class="gw-dot" :class="gwStatus"></span><span class="gw-label" x-text="gwLabel"></span></div>
   </aside>
   <div class="main">
     <div class="topbar">
@@ -43,7 +43,7 @@
           <!-- Date Selector -->
           <div style="display:flex;align-items:center;gap:8px">
             <label style="font-size:13px;font-weight:500;color:var(--text2)">Data</label>
-            <input type="date" x-model="date" class="form-input" style="width:auto" />
+            <input type="date" x-model="date" @change="load()" class="form-input" style="width:auto" />
           </div>
 
           <!-- Ver Relatório Button -->
@@ -140,13 +140,8 @@
                   <td style="padding:10px 16px;text-align:right;color:var(--text3)" x-text="row.readings_count !== null && row.readings_count !== undefined ? row.readings_count : '—'"></td>
                   <td style="padding:10px 16px;text-align:center">
                     <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500"
-                      :style="{
-                        background: row.pct === null || row.pct === undefined ? 'var(--bg3)' :
-                                    row.pct < 20 ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)',
-                        color: row.pct === null || row.pct === undefined ? 'var(--text3)' :
-                               row.pct < 20 ? 'var(--red)' : 'var(--green)'
-                      }"
-                      x-text="row.pct === null || row.pct === undefined ? 'Sem dados' : row.pct < 20 ? 'Crítico' : row.pct < 50 ? 'Baixo' : row.pct < 80 ? 'Normal' : 'Cheio'">
+                      :style="statusBadgeStyle(row.pct)"
+                      x-text="statusLabel(row.pct)">
                     </span>
                   </td>
                 </tr>
@@ -236,9 +231,20 @@
       alerts: [],
       loading: false,
       reportDate: null,
+      gwStatus: 'off',
+      gwLabel: 'GW offline',
 
       init() {
+        this.loadGateway();
         this.load();
+      },
+
+      async loadGateway() {
+        const gw = await fetch('/api/gateway').then(r => r.json()).catch(() => null);
+        if (!gw) return;
+        if (gw.sim_mode) { this.gwStatus = 'sim'; this.gwLabel = 'Simulação'; }
+        else if (gw.connected) { this.gwStatus = 'on'; this.gwLabel = 'GW online'; }
+        else { this.gwStatus = 'off'; this.gwLabel = 'GW offline'; }
       },
 
       async load() {
@@ -302,6 +308,45 @@
         if (num > 0) return `+${num.toLocaleString('pt-BR')}`;
         if (num < 0) return `${num.toLocaleString('pt-BR')}`;
         return '0';
+      },
+
+      statusLabel(pct) {
+        if (pct === null || pct === undefined) return 'Sem dados';
+        if (pct < 20) return 'Crítico';
+        if (pct < 50) return 'Baixo';
+        if (pct < 80) return 'Normal';
+        return 'Cheio';
+      },
+
+      statusBadgeStyle(pct) {
+        if (pct === null || pct === undefined) {
+          return {
+            background: 'var(--bg3)',
+            color: 'var(--text3)',
+          };
+        }
+        if (pct < 20) {
+          return {
+            background: 'rgba(239,68,68,0.15)',
+            color: 'var(--red)',
+          };
+        }
+        if (pct < 50) {
+          return {
+            background: 'rgba(245,158,11,0.15)',
+            color: '#f59e0b',
+          };
+        }
+        if (pct < 80) {
+          return {
+            background: 'rgba(59,130,246,0.15)',
+            color: '#3b82f6',
+          };
+        }
+        return {
+          background: 'rgba(34,197,94,0.15)',
+          color: 'var(--green)',
+        };
       }
     };
   }

@@ -23,6 +23,11 @@ Isso significa que, neste workspace separado, o fluxo principal recomendado é:
 
 MQTT é opcional e controlado pelas variáveis do `.env`.
 
+Para usar **gateway ESP32 DevKit por Wi‑Fi** com o backend rodando em Docker,
+o fluxo recomendado passa a ser:
+
+`ESP-NOW` → `Gateway ESP32 DevKit (Wi‑Fi + MQTT)` → `broker MQTT` → `aguada-web/backend` → `SQLite/WebSocket`
+
 ## Configuração
 
 1. Copie `.env.example` para `.env`, se necessário.
@@ -46,6 +51,18 @@ Ou diretamente:
 ### Frontend via Docker/nginx
 
 - `docker compose up -d nginx`
+
+### Gateway Wi‑Fi + Docker
+
+- O compose inclui um broker MQTT opcional na porta `1883`.
+- No backend em Docker, use no `.env`:
+   - `GATEWAY_TRANSPORT=wifi`
+   - `GW_MQTT_HOST=mqtt`
+   - `GW_MQTT_PORT=1883`
+- Se também quiser republicar leituras processadas no mesmo broker, defina:
+   - `MQTT_HOST=mqtt`
+- No firmware do gateway ESP32 DevKit, use o ambiente `gateway-esp32-aguada-web`.
+- O `MQTT_BROKER` compilado no firmware deve apontar para o **IP/LAN do host Docker**.
 
 ## Autostart do backend
 

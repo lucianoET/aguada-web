@@ -371,10 +371,15 @@ function scadaApp() {
       this._updateGw(gw);
 
       this.wsConnect((data) => {
-        if (data.type === 'snapshot') { this.reservoirs = data.reservoirs; this._updateGw(data.gateway); }
-        else if (data.type === 'reading') {
-          const idx = this.reservoirs.findIndex(r=>r.alias===data.alias);
-          if (idx>=0) this.reservoirs[idx]={...this.reservoirs[idx],...data};
+        const msg = normalizeWsMessage(data);
+        if (msg.type === 'snapshot') {
+          this.reservoirs = msg.reservoirs;
+          this._updateGw(msg.gateway);
+        }
+        else if (msg.type === 'reading' && msg.reading) {
+          const idx = this.reservoirs.findIndex(r=>r.alias===msg.reading.alias);
+          if (idx>=0) this.reservoirs[idx]={...this.reservoirs[idx],...msg.reading};
+          else this.reservoirs.push(msg.reading);
           this.reservoirs=[...this.reservoirs];
         }
       });
@@ -389,7 +394,10 @@ function scadaApp() {
 
     async setEquip(type, id, status) {
       const url = type==='pump' ? '/api/manual/pumps' : '/api/manual/valves';
-      await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name:id, status}) });
+      const body = type === 'pump'
+        ? { pump_name: id, state: status }
+        : { valve_name: id, state: status };
+      await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
       if (type==='pump') { const i=this.pumps.findIndex(p=>p.id===id); if(i>=0) this.pumps[i]={...this.pumps[i],status}; this.pumps=[...this.pumps]; }
       else { const i=this.valves.findIndex(v=>v.id===id); if(i>=0) this.valves[i]={...this.valves[i],status}; this.valves=[...this.valves]; }
     },

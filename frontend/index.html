@@ -11,6 +11,56 @@
     #map { width: 100%; height: 100%; }
     .map-wrap { flex: 1; position: relative; }
     .aguada-marker { background: none !important; border: none !important; }
+    .map-legend {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      z-index: 500;
+      background: rgba(11, 15, 20, 0.88);
+      border: 1px solid rgba(61, 85, 110, 0.5);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #c9d4e0;
+      font-size: 11px;
+      line-height: 1.35;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      pointer-events: none;
+    }
+    .map-legend-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b82a0;
+      margin-bottom: 8px;
+    }
+    .map-legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .map-legend-chip {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .map-legend-chip.valve {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      transform: rotate(45deg);
+      background: #f59e0b;
+    }
+    @media (max-width: 768px) {
+      .map-legend {
+        right: 10px;
+        bottom: 10px;
+        padding: 8px 10px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -121,6 +171,16 @@
     <!-- Mapa -->
     <div class="map-wrap">
       <div id="map"></div>
+      <div class="map-legend" aria-hidden="true">
+        <div class="map-legend-title">Legenda do mapa</div>
+        <div class="map-legend-row"><span class="map-legend-chip" style="background:#22c55e"></span><span>Reservatório normal</span></div>
+        <div class="map-legend-row"><span class="map-legend-chip" style="background:#f59e0b"></span><span>Nível de atenção</span></div>
+        <div class="map-legend-row"><span class="map-legend-chip" style="background:#ef4444"></span><span>Nível crítico</span></div>
+        <div class="map-legend-row"><span class="map-legend-chip" style="background:#3d556e"></span><span>Sem comunicação</span></div>
+        <div class="map-legend-row"><span class="map-legend-chip" style="background:#3b82f6;border-radius:4px"></span><span>Bomba</span></div>
+        <div class="map-legend-row"><span class="map-legend-chip" style="background:#22c55e;border-radius:4px"></span><span>Hidrômetro</span></div>
+        <div class="map-legend-row"><span class="map-legend-chip valve"></span><span>Válvula</span></div>
+      </div>
     </div>
   </div>
 
@@ -177,7 +237,7 @@
     </div>
   </div>
   <!-- Overlay modal-side -->
-  <div x-show="modal.open" @click="closeModal()" style="position:fixed;inset:0;z-index:99;background:rgba(0,0,0,0.4)" x-cloak></div>
+  <div x-show="modal.open" @click="closeModal()" style="position:fixed;inset:0;z-index:1400;background:rgba(0,0,0,0.4)" x-cloak></div>
 
 </div>
 
@@ -193,6 +253,13 @@ function dashboardApp() {
     _initialized: false,
     _map: null,
     _markers: {},
+    _infraLayer: null,
+    _mapResizeObserver: null,
+    _mapRefreshFrame: null,
+    _layoutRefreshTimers: [],
+    _hasFittedBounds: false,
+    _mapBusy: false,
+    _mapRefreshPending: false,
 
     get avgPct() {
       const reservoirs = Array.isArray(this.reservoirs) ? this.reservoirs : [];
@@ -230,13 +297,14 @@ function dashboardApp() {
       await this._initMap();
       // WebSocket ao vivo
       this.wsConnect((data) => {
-        if (data.type === 'snapshot') {
-          this.reservoirs = data.reservoirs;
-          this._updateGw(data.gateway);
-        } else if (data.type === 'reading') {
-          const idx = this.reservoirs.findIndex(r => r.alias === data.alias);
-          if (idx >= 0) this.reservoirs[idx] = { ...this.reservoirs[idx], ...data };
-          else this.reservoirs.push(data);
+        const msg = normalizeWsMessage(data);
+        if (msg.type === 'snapshot') {
+          this.reservoirs = msg.reservoirs;
+          this._updateGw(msg.gateway);
+        } else if (msg.type === 'reading' && msg.reading) {
+          const idx = this.reservoirs.findIndex(r => r.alias === msg.reading.alias);
+          if (idx >= 0) this.reservoirs[idx] = { ...this.reservoirs[idx], ...msg.reading };
+          else this.reservoirs.push(msg.reading);
           this.reservoirs = [...this.reservoirs];
         }
         this._updateMarkers();
@@ -260,27 +328,33 @@ function dashboardApp() {
       const existingLeafletId = document.getElementById('map')?._leaflet_id;
       if (existingLeafletId) return;
 
-      const tileUrl = 'assets/leaflet-tiles/{z}/{x}/{y}.png';
-      const tileUrlFallback = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+      const tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
       this._map = L.map('map', {
         scrollWheelZoom: true,
         touchZoom: true,
         tap: false,
+        zoomAnimation: false,
+        markerZoomAnimation: false,
       }).setView([-22.8390, -43.1080], 16);
 
-      // Tiles locais, fallback para OSM online
-      const localLayer = L.tileLayer(tileUrl, { maxZoom: 19, attribution: '© OpenStreetMap' });
-      let usedFallback = false;
-      localLayer.on('tileerror', () => {
-        if (usedFallback) return;
-        usedFallback = true;
-        this._map.removeLayer(localLayer);
-        L.tileLayer(tileUrlFallback, { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(this._map);
+      this._map.on('zoomstart movestart resize', () => {
+        this._mapBusy = true;
       });
-      localLayer.addTo(this._map);
+      this._map.on('zoomend moveend resizeend load', () => {
+        this._mapBusy = false;
+        if (this._mapRefreshPending) {
+          this._mapRefreshPending = false;
+          this._scheduleMapRefresh();
+        }
+      });
+
+      // O repositório atual não traz tiles offline; usar OSM direto evita layers quebradas no zoom.
+      L.tileLayer(tileUrl, { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(this._map);
+
+      this._installMapLayoutObservers();
 
       // Garantir que o Leaflet detecta o tamanho correto do container
-      setTimeout(() => this._map && this._map.invalidateSize(), 50);
+      this._queueLayoutRefresh();
 
       // Carregar infraestrutura OSM
       try {
@@ -291,10 +365,62 @@ function dashboardApp() {
       }
 
       this._updateMarkers();
+      this._fitMapToData();
+    },
+
+    _installMapLayoutObservers() {
+      if (!this._map || this._mapResizeObserver) return;
+
+      const refresh = () => this._queueLayoutRefresh();
+      const sidebar = document.getElementById('sidebar');
+
+      this._mapResizeObserver = { active: true };
+
+      if (sidebar) {
+        ['transitionend', 'mouseenter', 'mouseleave'].forEach((eventName) => {
+          sidebar.addEventListener(eventName, refresh);
+        });
+      }
+
+      window.addEventListener('resize', refresh);
+      window.addEventListener('orientationchange', refresh);
+    },
+
+    _queueLayoutRefresh() {
+      this._layoutRefreshTimers.forEach(timerId => clearTimeout(timerId));
+      this._layoutRefreshTimers = [];
+
+      [0, 120, 260].forEach(delay => {
+        const timerId = setTimeout(() => this._scheduleMapRefresh(), delay);
+        this._layoutRefreshTimers.push(timerId);
+      });
+    },
+
+    _scheduleMapRefresh() {
+      if (!this._map) return;
+      if (this._mapBusy) {
+        this._mapRefreshPending = true;
+        return;
+      }
+      if (this._mapRefreshFrame) cancelAnimationFrame(this._mapRefreshFrame);
+
+      this._mapRefreshFrame = requestAnimationFrame(() => {
+        this._mapRefreshFrame = null;
+        const container = this._map?.getContainer?.();
+        if (!this._map || !this._map._loaded || !container || !container.isConnected) return;
+
+        try {
+          this._map.invalidateSize({ pan: false, debounceMoveend: true });
+        } catch (error) {
+          console.warn('Falha ao atualizar layout do mapa', error);
+        }
+      });
     },
 
     _drawInfra(infra) {
       const map = this._map;
+      if (this._infraLayer) this._infraLayer.remove();
+      this._infraLayer = L.layerGroup().addTo(map);
 
       // Tubulações
       (infra.pipelines || []).forEach(p => {
@@ -304,7 +430,7 @@ function dashboardApp() {
           weight: p.submarine ? 3 : 2,
           opacity: 0.7,
           dashArray: p.submarine ? '8 4' : null,
-        }).bindTooltip(p.submarine ? 'Adutora submarina IF→IE' : 'Tubulação', {sticky: true}).addTo(map);
+        }).bindTooltip(p.submarine ? 'Adutora submarina IF→IE' : 'Tubulação', {sticky: true}).addTo(this._infraLayer);
       });
 
       // Bombas
@@ -316,7 +442,7 @@ function dashboardApp() {
           </div>`,
           iconSize: [28, 28], iconAnchor: [14, 14],
         });
-        L.marker([b.lat, b.lon], {icon}).bindTooltip(`<b>${b.name}</b><br>Bomba`, {permanent: false}).addTo(map);
+        L.marker([b.lat, b.lon], {icon}).bindTooltip(`<b>${b.name}</b><br>Bomba`, {permanent: false}).addTo(this._infraLayer);
       });
 
       // Hidrômetros
@@ -328,7 +454,7 @@ function dashboardApp() {
           </div>`,
           iconSize: [26, 26], iconAnchor: [13, 13],
         });
-        L.marker([h.lat, h.lon], {icon}).bindTooltip(`<b>${h.name}</b><br>Hidrômetro`, {permanent: false}).addTo(map);
+        L.marker([h.lat, h.lon], {icon}).bindTooltip(`<b>${h.name}</b><br>Hidrômetro`, {permanent: false}).addTo(this._infraLayer);
       });
 
       // Válvulas principais (apenas as nomeadas, não as de detalhe)
@@ -338,8 +464,10 @@ function dashboardApp() {
           html: `<div title="${v.ref}" style="background:#78350f;border:2px solid #f59e0b;border-radius:2px;width:14px;height:14px;transform:rotate(45deg)"></div>`,
           iconSize: [14, 14], iconAnchor: [7, 7],
         });
-        L.marker([v.lat, v.lon], {icon}).bindTooltip(`<b>${v.ref}</b><br>Válvula`, {permanent: false}).addTo(map);
+        L.marker([v.lat, v.lon], {icon}).bindTooltip(`<b>${v.ref}</b><br>Válvula`, {permanent: false}).addTo(this._infraLayer);
       });
+
+      this._scheduleMapRefresh();
     },
 
     _updateMarkers() {
@@ -360,6 +488,7 @@ function dashboardApp() {
           popupAnchor: [0, -18],
         });
         if (this._markers[r.alias]) {
+          this._markers[r.alias].setLatLng([r.lat, r.lng]);
           this._markers[r.alias].setIcon(icon);
         } else {
           const m = L.marker([r.lat, r.lng], { icon }).addTo(this._map);
@@ -367,6 +496,37 @@ function dashboardApp() {
           this._markers[r.alias] = m;
         }
       });
+
+      this._scheduleMapRefresh();
+      this._fitMapToData();
+    },
+
+    _fitMapToData() {
+      if (!this._map || this._hasFittedBounds) return;
+
+      const points = [];
+      Object.values(this._markers).forEach(marker => {
+        if (marker?.getLatLng) points.push(marker.getLatLng());
+      });
+
+      if (this._infraLayer) {
+        this._infraLayer.eachLayer(layer => {
+          if (layer?.getLatLng) points.push(layer.getLatLng());
+          else if (layer?.getBounds) {
+            const center = layer.getBounds().getCenter();
+            if (center) points.push(center);
+          }
+        });
+      }
+
+      if (!points.length) return;
+
+      const bounds = L.latLngBounds(points);
+      if (!bounds.isValid()) return;
+
+      this._hasFittedBounds = true;
+      this._map.fitBounds(bounds.pad(0.12), { maxZoom: 17, animate: false });
+      this._scheduleMapRefresh();
     },
   };
 }
