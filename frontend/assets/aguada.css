@@ -1,0 +1,245 @@
+/* ============================================================
+   AGUADA — Design System v1.0
+   Tema escuro (padrão) inspirado no aguada3.
+   Tema claro via [data-theme="light"] no <html>.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Variáveis — Tema Escuro (padrão) ──────────────────────── */
+:root {
+  --bg:         #0b0f14;
+  --bg2:        #111820;
+  --bg3:        #161e28;
+  --card:       #192030;
+  --border:     #1e2d3d;
+  --border2:    #243344;
+  --text:       #c9d4e0;
+  --text2:      #6b82a0;
+  --text3:      #3d556e;
+  --blue:       #3b82f6;
+  --blue-dim:   #1e3a5f;
+  --green:      #22c55e;
+  --green-dim:  #14532d;
+  --yellow:     #f59e0b;
+  --yellow-dim: #78350f;
+  --red:        #ef4444;
+  --red-dim:    #7f1d1d;
+  --cyan:       #06b6d4;
+  --mono: 'Courier New', Courier, monospace;
+  --sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sidebar-w-collapsed: 42px;
+  --sidebar-w-expanded:  220px;
+  --topbar-h: 48px;
+  --radius: 8px;
+}
+
+/* ── Tema Claro ─────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:    #f1f5f9;
+  --bg2:   #ffffff;
+  --bg3:   #e2e8f0;
+  --card:  #ffffff;
+  --border: #e2e8f0;
+  --border2: #cbd5e1;
+  --text:  #1e293b;
+  --text2: #64748b;
+  --text3: #94a3b8;
+}
+
+html, body { height: 100%; font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: var(--sans); border: none; background: none; }
+
+/* ── Layout Global ──────────────────────────────────────────── */
+.layout { display: flex; height: 100vh; overflow: hidden; }
+
+/* ── Sidebar ────────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w-collapsed);
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; flex-shrink: 0;
+  overflow: hidden;
+  transition: width 0.2s ease;
+  position: relative; z-index: 50;
+}
+.sidebar.expanded,
+.sidebar:hover { width: var(--sidebar-w-expanded); }
+
+.sidebar-brand {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  overflow: hidden; white-space: nowrap; flex-shrink: 0;
+  min-height: 56px;
+}
+.sidebar-logo {
+  width: 42px; min-width: 42px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--cyan);
+}
+.sidebar-brand-text { font-family: var(--mono); font-size: 13px; color: var(--cyan); letter-spacing: 2px; opacity: 0; transition: opacity 0.15s; }
+.sidebar.expanded .sidebar-brand-text,
+.sidebar:hover .sidebar-brand-text { opacity: 1; }
+
+.sidebar-nav { padding: 8px 0; flex: 1; overflow-y: auto; }
+.sidebar-section {
+  font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--text3); padding: 10px 0 4px;
+  text-align: center; overflow: hidden; white-space: nowrap;
+  opacity: 0; transition: opacity 0.15s;
+}
+.sidebar.expanded .sidebar-section,
+.sidebar:hover .sidebar-section { opacity: 1; text-align: left; padding-left: 14px; }
+
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0; color: var(--text2); font-size: 13px;
+  transition: all 0.15s; overflow: hidden; white-space: nowrap;
+}
+.nav-link:hover { background: var(--bg3); color: var(--text); }
+.nav-link.active { background: var(--blue-dim); color: var(--blue); }
+.nav-icon {
+  width: 42px; min-width: 42px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.nav-label { opacity: 0; transition: opacity 0.15s; }
+.sidebar.expanded .nav-label,
+.sidebar:hover .nav-label { opacity: 1; }
+
+.sidebar-footer {
+  padding: 10px 0; border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  overflow: hidden; white-space: nowrap; flex-shrink: 0;
+}
+.gw-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-left: 17px; }
+.gw-dot.on  { background: var(--green); }
+.gw-dot.sim { background: var(--yellow); }
+.gw-dot.off { background: var(--red); }
+.gw-label { font-family: var(--mono); font-size: 10px; color: var(--text3); opacity: 0; transition: opacity 0.15s; }
+.sidebar.expanded .gw-label,
+.sidebar:hover .gw-label { opacity: 1; }
+
+/* ── Main / Topbar / Content ────────────────────────────────── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.topbar {
+  height: var(--topbar-h); background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; flex-shrink: 0;
+}
+.topbar-title { font-size: 15px; font-weight: 500; }
+.topbar-sub { font-size: 11px; color: var(--text2); margin-top: 1px; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.content { flex: 1; overflow-y: auto; padding: 20px; }
+
+/* ── KPI Strip ──────────────────────────────────────────────── */
+.kpi-strip { display: flex; gap: 10px; padding: 10px 20px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap; }
+.kpi-item { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; display: flex; align-items: center; gap: 8px; }
+.kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+.kpi-value { font-family: var(--mono); font-size: 16px; font-weight: 600; }
+
+/* ── Cards ──────────────────────────────────────────────────── */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+.card-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.card-body { padding: 16px; }
+.section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); margin-bottom: 10px; }
+
+/* ── Badges de Status ISA-101 ───────────────────────────────── */
+.badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; text-transform: uppercase; white-space: nowrap; display: inline-block; }
+.badge-green  { background: var(--green-dim);  color: var(--green); }
+.badge-yellow { background: var(--yellow-dim); color: var(--yellow); }
+.badge-red    { background: var(--red-dim);    color: var(--red); }
+.badge-gray   { background: var(--bg3);        color: var(--text3); }
+.badge-blue   { background: var(--blue-dim);   color: var(--blue); }
+
+/* ── SCADA — Equipamentos ───────────────────────────────────── */
+.eq-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+.eq-codigo { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+.eq-nome { font-size: 13px; font-weight: 500; margin-top: 2px; }
+.eq-local { font-size: 11px; color: var(--text3); }
+.eq-controls { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.eq-btn { padding: 3px 10px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); border-radius: 4px; font-size: 11px; cursor: pointer; }
+.eq-btn:hover { background: var(--bg2); color: var(--text); }
+.eq-btn.active { background: var(--blue-dim); border-color: var(--blue); color: var(--blue); }
+
+/* ── Hidrômetros ────────────────────────────────────────────── */
+.hidro-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.hidro-head { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.hidro-body { padding: 12px 14px; }
+.hidro-valor { font-family: var(--mono); font-size: 20px; }
+
+/* ── Abas ───────────────────────────────────────────────────── */
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); padding: 0 20px; background: var(--bg2); flex-shrink: 0; }
+.tab-btn { padding: 10px 16px; font-size: 12px; color: var(--text2); border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.15s; background: none; border-left: none; border-right: none; border-top: none; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+/* ── Modal ──────────────────────────────────────────────────── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: center; justify-content: center; }
+.modal-box { background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 0; width: 400px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+.modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
+.modal-body { padding: 16px 18px; }
+.modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Modal lateral (Dashboard — deslizante da direita) */
+.modal-side {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 340px;
+  background: var(--bg2); border-left: 1px solid var(--border2);
+  z-index: 100; overflow-y: auto;
+  transform: translateX(100%); transition: transform 0.25s ease;
+}
+.modal-side.open { transform: translateX(0); }
+
+/* ── Tank bar (reservatório visual) ─────────────────────────── */
+.tank-wrap { position: relative; width: 100%; height: 80px; border: 1px solid var(--border2); border-radius: 4px; overflow: hidden; background: var(--bg3); }
+.tank-fill { position: absolute; bottom: 0; left: 0; right: 0; transition: height 0.6s ease; }
+.tank-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 18px; font-weight: 600; }
+
+/* ── Inputs / Forms ─────────────────────────────────────────── */
+.form-input {
+  width: 100%; padding: 7px 10px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 4px; color: var(--text); font-family: var(--sans); font-size: 13px;
+}
+.form-input:focus { outline: none; border-color: var(--blue); }
+.form-select { width: 100%; padding: 6px 10px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 4px; color: var(--text); font-size: 13px; cursor: pointer; }
+.btn { padding: 6px 16px; border-radius: 4px; font-size: 12px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:hover { opacity: 0.9; }
+.btn-secondary { background: var(--bg3); color: var(--text2); border: 1px solid var(--border2); }
+.btn-secondary:hover { color: var(--text); }
+
+/* ── WS Status indicator ────────────────────────────────────── */
+.ws-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.ws-dot.connected    { background: var(--green); }
+.ws-dot.disconnected { background: var(--red); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── Theme toggle button ────────────────────────────────────── */
+.theme-btn { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--text2); transition: background 0.15s; }
+.theme-btn:hover { background: var(--bg3); color: var(--text); }
+
+/* ── Responsividade ─────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .sidebar { position: fixed; top: 0; bottom: 0; left: 0; z-index: 200; transform: translateX(-100%); transition: transform 0.2s ease; width: var(--sidebar-w-expanded) !important; }
+  .sidebar.mobile-open { transform: translateX(0); }
+  .sidebar:hover { width: var(--sidebar-w-expanded) !important; }
+  .main { margin-left: 0 !important; }
+}
+@media (max-width: 768px) {
+  .kpi-strip { gap: 6px; padding: 8px 12px; }
+  .content { padding: 12px; }
+  .modal-side { width: 100%; }
+}
+
+/* ── Leaflet customização tema escuro ───────────────────────── */
+.leaflet-container { background: #0d1520; }
+.leaflet-tile-pane { filter: grayscale(0.3) brightness(0.85); }
+[data-theme="light"] .leaflet-tile-pane { filter: none; }
+.leaflet-popup-content-wrapper { background: var(--card); border: 1px solid var(--border2); color: var(--text); border-radius: var(--radius); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+.leaflet-popup-tip { background: var(--card); }
