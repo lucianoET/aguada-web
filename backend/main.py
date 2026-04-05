@@ -23,7 +23,10 @@ if dotenv_values is not None:
     env_path = Path(__file__).resolve().parents[1] / ".env"
     if env_path.exists():
         env_values = dotenv_values(env_path)
-        for key in ("SERIAL_PORT", "MQTT_HOST", "MQTT_PORT", "MQTT_USER", "MQTT_PASS", "TZ"):
+        for key in (
+            "SERIAL_PORT", "MQTT_HOST", "MQTT_PORT", "MQTT_USER", "MQTT_PASS", "TZ",
+            "GATEWAY_TRANSPORT", "GW_MQTT_HOST", "GW_MQTT_PORT", "GW_MQTT_USER", "GW_MQTT_PASS", "GW_MQTT_TOPIC",
+        ):
             value = env_values.get(key)
             if value and key not in os.environ:
                 os.environ[key] = value

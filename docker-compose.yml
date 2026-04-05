@@ -9,6 +9,16 @@ services:
     env_file: .env
     environment:
       - DATA_DIR=/data
+    depends_on:
+      - mqtt
+
+  mqtt:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./tools/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
 
   nginx:
     image: nginx:alpine

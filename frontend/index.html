@@ -94,7 +94,7 @@
       <div class="kpi-item">
         <div>
           <div class="kpi-label">Reservatórios</div>
-          <div class="kpi-value" x-text="reservoirs.length"></div>
+          <div class="kpi-value" x-text="(reservoirs || []).length"></div>
         </div>
       </div>
       <div class="kpi-item">
@@ -112,7 +112,7 @@
       <div class="kpi-item">
         <div>
           <div class="kpi-label">Online</div>
-          <div class="kpi-value" x-text="onlineCount + '/' + reservoirs.length"></div>
+          <div class="kpi-value" x-text="onlineCount + '/' + ((reservoirs || []).length)"></div>
         </div>
       </div>
     </div>
@@ -189,22 +189,36 @@ function dashboardApp() {
     reservoirs: [],
     gwStatus: 'off',
     gwLabel: 'GW offline',
+    _initialized: false,
     _map: null,
     _markers: {},
 
     get avgPct() {
-      if (!this.reservoirs.length) return 0;
-      const online = this.reservoirs.filter(r => r.online);
+      const reservoirs = Array.isArray(this.reservoirs) ? this.reservoirs : [];
+      if (!reservoirs.length) return 0;
+      const online = reservoirs.filter(r => r.online);
       if (!online.length) return 0;
       return Math.round(online.reduce((s, r) => s + (r.pct || 0), 0) / online.length);
     },
-    get critical() { return this.reservoirs.filter(r => r.online && r.pct <= 20).length; },
-    get onlineCount() { return this.reservoirs.filter(r => r.online).length; },
+    get critical() {
+      const reservoirs = Array.isArray(this.reservoirs) ? this.reservoirs : [];
+      return reservoirs.filter(r => r.online && r.pct <= 20).length;
+    },
+    get onlineCount() {
+      const reservoirs = Array.isArray(this.reservoirs) ? this.reservoirs : [];
+      return reservoirs.filter(r => r.online).length;
+    },
 
     ...wsMixin(),
     ...reservoirModalMixin(),
 
     async init() {
+      if (this._initialized) {
+        this._updateMarkers();
+        return;
+      }
+      this._initialized = true;
+
       // Buscar estado inicial
       const res = await fetch('/api/reservoirs');
       this.reservoirs = await res.json();
@@ -240,9 +254,18 @@ function dashboardApp() {
     },
 
     _initMap() {
+      if (this._map) return;
+
+      const existingLeafletId = document.getElementById('map')?._leaflet_id;
+      if (existingLeafletId) return;
+
       const tileUrl = 'assets/leaflet-tiles/{z}/{x}/{y}.png';
       const tileUrlFallback = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-      this._map = L.map('map').setView([-22.8390, -43.1080], 16);
+      this._map = L.map('map', {
+        zoomAnimation: false,
+        fadeAnimation: false,
+        markerZoomAnimation: false,
+      }).setView([-22.8390, -43.1080], 16);
 
       // Tentar tiles locais, fallback para OSM online
       const localLayer = L.tileLayer(tileUrl, { maxZoom: 19, attribution: '© OpenStreetMap' });
@@ -256,6 +279,8 @@ function dashboardApp() {
     },
 
     _updateMarkers() {
+      if (!this._map || !Array.isArray(this.reservoirs)) return;
+
       this.reservoirs.forEach(r => {
         if (!r.lat || !r.lng) return;
         const color = markerColor(r.pct, r.online);

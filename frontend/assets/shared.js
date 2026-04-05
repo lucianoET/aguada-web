@@ -123,7 +123,8 @@ function reservoirModalMixin() {
     },
 
     openModal(alias) {
-      const r = this.reservoirs.find(r => r.alias === alias);
+      const reservoirs = Array.isArray(this.reservoirs) ? this.reservoirs : [];
+      const r = reservoirs.find(r => r.alias === alias);
       this.modal.alias = alias;
       this.modal.manualMode = 'pct';
       this.modal.manualValue = '';
@@ -167,11 +168,12 @@ function reservoirModalMixin() {
         });
         const json = await res.json();
         if (!res.ok) throw new Error(json.detail || 'Erro ao salvar');
-        const idx = this.reservoirs.findIndex(r => r.alias === this.modal.alias);
-        const updated = { ...(this.reservoirs[idx] || {}), alias: json.alias, pct: json.pct, volume_l: json.volume_l, level_cm: json.level_cm, ts: Math.floor(Date.now() / 1000), online: true };
-        if (idx >= 0) this.reservoirs[idx] = updated;
-        else this.reservoirs.push(updated);
-        this.reservoirs = [...this.reservoirs];
+        const reservoirs = Array.isArray(this.reservoirs) ? [...this.reservoirs] : [];
+        const idx = reservoirs.findIndex(r => r.alias === this.modal.alias);
+        const updated = { ...(reservoirs[idx] || {}), alias: json.alias, pct: json.pct, volume_l: json.volume_l, level_cm: json.level_cm, ts: Math.floor(Date.now() / 1000), online: true };
+        if (idx >= 0) reservoirs[idx] = updated;
+        else reservoirs.push(updated);
+        this.reservoirs = reservoirs;
         this._fillModal(updated);
         this.modal.feedback = `Salvo: ${json.pct}% · ${Math.round(json.volume_l)} L`;
         this.modal.feedbackOk = true;

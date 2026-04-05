@@ -314,6 +314,10 @@ class Bridge:
                     "transport": "wifi", "port": f"mqtt://{host}:{port}",
                 })
                 self._active_transport = "wifi"
+                try:
+                    client.publish("aguada/cmd/settime", json.dumps({"cmd": "SETTIME", "ts": int(time.time())}))
+                except Exception as e:
+                    logger.warning("WiFi transport: falha ao enviar SETTIME inicial: %s", e)
                 logger.info(
                     "WiFi transport: conectado %s:%d, subscrito em %s", host, port, topic_sub
                 )
@@ -326,8 +330,8 @@ class Bridge:
                 raw = json.loads(msg.payload.decode("utf-8"))
                 self._gw_status["last_seen"] = int(time.time())
                 if raw.get("type") == "GATEWAY_STATUS":
-                    if raw.get("gw_mac"):
-                        self._gw_status["mac"] = raw["gw_mac"]
+                    if raw.get("mac"):
+                        self._gw_status["mac"] = raw["mac"]
                     if raw.get("fw"):
                         self._gw_status["fw"] = raw["fw"]
                 self._handle(raw)
