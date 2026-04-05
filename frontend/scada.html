@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aguada — SCADA</title>
+  <link rel="stylesheet" href="assets/aguada.css" />
+  <style>
+    [x-cloak] { display: none; }
+    .scada-wrap { flex: 1; display: flex; overflow: hidden; }
+    .scada-canvas { flex: 1; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1a2535 0%, #0b0f14 100%); overflow: hidden; padding: 16px; }
+    .scada-svg { width: 100%; height: 100%; max-width: 1800px; max-height: 900px; }
+    .scada-panel { width: 260px; flex-shrink: 0; background: var(--bg2); border-left: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; }
+    .scada-panel-section { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    .tank-group { cursor: pointer; transition: filter 0.2s; }
+    .tank-group:hover { filter: brightness(1.15); }
+    @keyframes flow { to { stroke-dashoffset: -20; } }
+    @keyframes flow-slow { to { stroke-dashoffset: -30; } }
+    .pipe-flow { stroke-dasharray: 10 5; animation: flow 1.2s linear infinite; }
+    .pipe-flow-slow { stroke-dasharray: 12 6; animation: flow-slow 2.5s linear infinite; }
+  </style>
+</head>
+<body>
+<div class="layout" x-data="scadaApp()" x-init="init()" x-cloak>
+
+  <!-- Sidebar (idêntica ao Dashboard) -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">A</div>
+      <span class="sidebar-brand-text">AGUADA</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Operação</div>
+      <a href="index.html" class="nav-link">
+        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
+        <span class="nav-label">Dashboard</span>
+      </a>
+      <a href="scada.html" class="nav-link active">
+        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span>
+        <span class="nav-label">SCADA</span>
+      </a>
+      <div class="sidebar-section">Análise</div>
+      <a href="analise.html" class="nav-link">
+        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+        <span class="nav-label">Análise</span>
+      </a>
+      <div class="sidebar-section">Gestão</div>
+      <a href="report.html" class="nav-link">
+        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+        <span class="nav-label">Relatório</span>
+      </a>
+      <a href="dispositivos.html" class="nav-link">
+        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span>
+        <span class="nav-label">Dispositivos</span>
+      </a>
+      <a href="documentacao.html" class="nav-link">
+        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span>
+        <span class="nav-label">Documentação</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="gw-dot" :class="gwStatus"></span>
+      <span class="gw-label" x-text="gwLabel"></span>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">SCADA — Diagrama Unifilar</div>
+        <div class="topbar-sub" x-text="'Volume total: ' + totalVol + ' · Nodes: ' + onlineCount + '/8'"></div>
+      </div>
+      <div class="topbar-right">
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)">
+          <span class="ws-dot" :class="wsConnected ? 'connected' : 'disconnected'"></span>
+          <span x-text="wsConnected ? 'Ao vivo' : 'Desconectado'"></span>
+        </div>
+        <button class="theme-btn" onclick="toggleTheme()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="scada-wrap">
+      <!-- Diagrama SVG -->
+      <div class="scada-canvas">
+        <svg class="scada-svg" viewBox="0 0 1800 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="water-blue" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.85"/>
+              <stop offset="100%" style="stop-color:#1e40af;stop-opacity:0.95"/>
+            </linearGradient>
+            <linearGradient id="water-red" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#ef4444;stop-opacity:0.85"/>
+              <stop offset="100%" style="stop-color:#7f1d1d;stop-opacity:0.95"/>
+            </linearGradient>
+            <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#3b82f6" opacity="0.7"/>
+            </marker>
+          </defs>
+
+          <!-- ILHA DAS FLORES -->
+          <rect x="30" y="30" width="320" height="840" fill="rgba(245,158,11,0.05)" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="8,4" rx="12"/>
+          <text x="190" y="60" font-size="16" fill="#f59e0b" text-anchor="middle" font-weight="700" font-family="monospace">ILHA DAS FLORES</text>
+
+          <!-- CBIF1 -->
+          <g class="tank-group" @click="openModal('CBIF1')">
+            <rect x="90" y="90" width="120" height="120" fill="#0b0f14" stroke="#3b82f6" stroke-width="2" rx="6"/>
+            <rect x="95" y="95" width="110"
+              :height="(getR('CBIF1').pct/100)*110"
+              :y="95+(110-(getR('CBIF1').pct/100)*110)"
+              :fill="getR('CBIF1').online ? 'url(#water-blue)' : '#3d556e'" rx="3"/>
+            <text x="150" y="155" font-size="22" fill="white" text-anchor="middle" font-weight="700" x-text="getR('CBIF1').pct+'%'"/>
+            <text x="150" y="230" font-size="13" fill="#6b82a0" text-anchor="middle">CBIF1</text>
+          </g>
+
+          <!-- CBIF2 -->
+          <g class="tank-group" @click="openModal('CBIF2')">
+            <rect x="240" y="90" width="120" height="120" fill="#0b0f14" stroke="#3b82f6" stroke-width="2" rx="6"/>
+            <rect x="245" y="95" width="110"
+              :height="(getR('CBIF2').pct/100)*110"
+              :y="95+(110-(getR('CBIF2').pct/100)*110)"
+              :fill="getR('CBIF2').online ? 'url(#water-blue)' : '#3d556e'" rx="3"/>
+            <text x="300" y="155" font-size="22" fill="white" text-anchor="middle" font-weight="700" x-text="getR('CBIF2').pct+'%'"/>
+            <text x="300" y="230" font-size="13" fill="#6b82a0" text-anchor="middle">CBIF2</text>
+          </g>
+
+          <!-- Bombas IF -->
+          <circle cx="140" cy="620" r="32" fill="#1e2d3d" stroke="#f59e0b" stroke-width="2"/>
+          <text x="140" y="627" font-size="18" fill="#f59e0b" text-anchor="middle">⚙</text>
+          <text x="140" y="670" font-size="11" fill="#c9d4e0" text-anchor="middle">BIF-ELE</text>
+          <circle cx="240" cy="620" r="32" fill="#1e2d3d" stroke="#f59e0b" stroke-width="2"/>
+          <text x="240" y="627" font-size="18" fill="#f59e0b" text-anchor="middle">⚙</text>
+          <text x="240" y="670" font-size="11" fill="#c9d4e0" text-anchor="middle">BIF-DIE</text>
+
+          <!-- Hidrômetro IF -->
+          <circle cx="190" cy="760" r="24" fill="#1e2d3d" stroke="#06b6d4" stroke-width="2"/>
+          <text x="190" y="767" font-size="14" fill="#06b6d4" text-anchor="middle" font-weight="700">H</text>
+          <text x="190" y="800" font-size="11" fill="#6b82a0" text-anchor="middle">HID-IF</text>
+
+          <!-- Linha submarina -->
+          <path d="M 350 650 Q 550 700 730 650" stroke="#3b82f6" stroke-width="6" fill="none" stroke-dasharray="14,8" marker-end="url(#arrow)" class="pipe-flow-slow"/>
+          <text x="540" y="720" font-size="14" fill="#3b82f6" text-anchor="middle">— submarina —</text>
+
+          <!-- ILHA DO ENGENHO -->
+          <rect x="720" y="30" width="1060" height="840" fill="rgba(16,185,129,0.04)" stroke="#10b981" stroke-width="1.5" stroke-dasharray="8,4" rx="12"/>
+          <text x="1250" y="60" font-size="16" fill="#10b981" text-anchor="middle" font-weight="700" font-family="monospace">ILHA DO ENGENHO</text>
+
+          <!-- CIE1 -->
+          <g class="tank-group" @click="openModal('CIE1')">
+            <rect x="780" y="90" width="140" height="140" fill="#0b0f14" stroke="#ef4444" stroke-width="2" rx="6"/>
+            <rect x="785" y="95" width="130"
+              :height="(getR('CIE1').pct/100)*130"
+              :y="95+(130-(getR('CIE1').pct/100)*130)"
+              :fill="getR('CIE1').online ? 'url(#water-red)' : '#3d556e'" rx="3"/>
+            <text x="850" y="165" font-size="26" fill="white" text-anchor="middle" font-weight="700" x-text="getR('CIE1').pct+'%'"/>
+            <text x="850" y="255" font-size="13" fill="#ef4444" text-anchor="middle">CIE1 (Incêndio)</text>
+          </g>
+
+          <!-- CIE2 -->
+          <g class="tank-group" @click="openModal('CIE2')">
+            <rect x="960" y="90" width="140" height="140" fill="#0b0f14" stroke="#ef4444" stroke-width="2" rx="6"/>
+            <rect x="965" y="95" width="130"
+              :height="(getR('CIE2').pct/100)*130"
+              :y="95+(130-(getR('CIE2').pct/100)*130)"
+              :fill="getR('CIE2').online ? 'url(#water-red)' : '#3d556e'" rx="3"/>
+            <text x="1030" y="165" font-size="26" fill="white" text-anchor="middle" font-weight="700" x-text="getR('CIE2').pct+'%'"/>
+            <text x="1030" y="255" font-size="13" fill="#ef4444" text-anchor="middle">CIE2 (Incêndio)</text>
+          </g>
+
+          <!-- CB31 e CB32 -->
+          <g class="tank-group" @click="openModal('CB31')">
+            <rect x="780" y="420" width="140" height="140" fill="#0b0f14" stroke="#7c3aed" stroke-width="2" rx="6"/>
+            <rect x="785" y="425" width="130"
+              :height="(getR('CB31').pct/100)*130"
+              :y="425+(130-(getR('CB31').pct/100)*130)"
+              fill="url(#water-blue)" rx="3"/>
+            <text x="850" y="495" font-size="26" fill="white" text-anchor="middle" font-weight="700" x-text="getR('CB31').pct+'%'"/>
+            <text x="850" y="585" font-size="13" fill="#a78bfa" text-anchor="middle">CB31</text>
+          </g>
+          <g class="tank-group" @click="openModal('CB32')">
+            <rect x="960" y="420" width="140" height="140" fill="#0b0f14" stroke="#7c3aed" stroke-width="2" rx="6"/>
+            <rect x="965" y="425" width="130"
+              :height="(getR('CB32').pct/100)*130"
+              :y="425+(130-(getR('CB32').pct/100)*130)"
+              fill="url(#water-blue)" rx="3"/>
+            <text x="1030" y="495" font-size="26" fill="white" text-anchor="middle" font-weight="700" x-text="getR('CB32').pct+'%'"/>
+            <text x="1030" y="585" font-size="13" fill="#a78bfa" text-anchor="middle">CB32</text>
+          </g>
+
+          <!-- Bombas Engenho -->
+          <circle cx="1200" cy="630" r="32" fill="#1e2d3d" stroke="#f59e0b" stroke-width="2"/>
+          <text x="1200" y="637" font-size="18" fill="#f59e0b" text-anchor="middle">⚙</text>
+          <text x="1200" y="678" font-size="11" fill="#c9d4e0" text-anchor="middle">B03-ELE</text>
+          <circle cx="1310" cy="630" r="32" fill="#1e2d3d" stroke="#f59e0b" stroke-width="2"/>
+          <text x="1310" y="637" font-size="18" fill="#f59e0b" text-anchor="middle">⚙</text>
+          <text x="1310" y="678" font-size="11" fill="#c9d4e0" text-anchor="middle">B03-DIE</text>
+
+          <!-- CON (Castelo Consumo) — forma trapezoidal -->
+          <g class="tank-group" @click="openModal('CON')">
+            <path d="M1430 300 L1470 100 L1630 100 L1670 300 Z" fill="#0b0f14" stroke="#22c55e" stroke-width="3"/>
+            <clipPath id="clipCON"><path d="M1430 300 L1470 100 L1630 100 L1670 300 Z"/></clipPath>
+            <rect x="1430" y="100" width="240" height="200" clip-path="url(#clipCON)"
+              :height="(getR('CON').pct/100)*200"
+              :y="100+(200-(getR('CON').pct/100)*200)"
+              :fill="getR('CON').online ? '#22c55e' : '#3d556e'" opacity="0.7"/>
+            <text x="1550" y="210" font-size="28" fill="white" text-anchor="middle" font-weight="700" x-text="getR('CON').pct+'%'"/>
+            <text x="1550" y="340" font-size="15" fill="#22c55e" text-anchor="middle" font-weight="700">CON</text>
+            <text x="1550" y="358" font-size="11" fill="#6b82a0" text-anchor="middle">Consumo</text>
+          </g>
+
+          <!-- CAV (Castelo Incêndio) -->
+          <g class="tank-group" @click="openModal('CAV')">
+            <path d="M1570 700 L1610 500 L1770 500 L1810 700 Z" fill="#0b0f14" stroke="#ef4444" stroke-width="3"/>
+            <clipPath id="clipCAV"><path d="M1570 700 L1610 500 L1770 500 L1810 700 Z"/></clipPath>
+            <rect x="1570" y="500" width="240" height="200" clip-path="url(#clipCAV)"
+              :height="(getR('CAV').pct/100)*200"
+              :y="500+(200-(getR('CAV').pct/100)*200)"
+              :fill="getR('CAV').online ? '#ef4444' : '#3d556e'" opacity="0.7"/>
+            <text x="1690" y="610" font-size="28" fill="white" text-anchor="middle" font-weight="700" x-text="getR('CAV').pct+'%'"/>
+            <text x="1690" y="740" font-size="15" fill="#ef4444" text-anchor="middle" font-weight="700">CAV</text>
+            <text x="1690" y="758" font-size="11" fill="#6b82a0" text-anchor="middle">Incêndio</text>
+          </g>
+
+          <!-- Pipes principais -->
+          <line x1="850" y1="560" x2="850" y2="620" stroke="#6b82a0" stroke-width="3" stroke-dasharray="6,3" class="pipe-flow"/>
+          <line x1="1030" y1="560" x2="1030" y2="620" stroke="#6b82a0" stroke-width="3" stroke-dasharray="6,3" class="pipe-flow"/>
+          <line x1="850" y1="620" x2="1200" y2="630" stroke="#3b82f6" stroke-width="4" stroke-dasharray="8,4" class="pipe-flow"/>
+          <line x1="1200" y1="598" x2="1550" y2="300" stroke="#22c55e" stroke-width="4" stroke-dasharray="8,4" class="pipe-flow"/>
+          <line x1="1310" y1="598" x2="1690" y2="500" stroke="#ef4444" stroke-width="4" stroke-dasharray="8,4" class="pipe-flow"/>
+
+          <!-- Hidrômetro Praia -->
+          <circle cx="1420" cy="800" r="24" fill="#1e2d3d" stroke="#06b6d4" stroke-width="2"/>
+          <text x="1420" y="807" font-size="14" fill="#06b6d4" text-anchor="middle" font-weight="700">H</text>
+          <text x="1420" y="840" font-size="11" fill="#6b82a0" text-anchor="middle">HID-PRAIA</text>
+        </svg>
+      </div>
+
+      <!-- Painel lateral de controle -->
+      <div class="scada-panel">
+        <div class="scada-panel-section">
+          <div class="section-title">Bombas</div>
+          <template x-for="b in pumps" :key="b.id">
+            <div class="eq-card" style="margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                  <div class="eq-codigo" x-text="b.name || b.id"></div>
+                  <div class="eq-nome" x-text="b.location || '—'"></div>
+                </div>
+                <span class="badge" :class="b.status==='ligada'?'badge-green':b.status==='manutencao'?'badge-yellow':'badge-gray'" x-text="b.status || 'deslig.'"></span>
+              </div>
+              <div class="eq-controls">
+                <button class="eq-btn" :class="{active:b.status==='ligada'}" @click="setEquip('pump',b.id,'ligada')">Ligar</button>
+                <button class="eq-btn" :class="{active:b.status==='desligada'}" @click="setEquip('pump',b.id,'desligada')">Desligar</button>
+                <button class="eq-btn" :class="{active:b.status==='manutencao'}" @click="setEquip('pump',b.id,'manutencao')">Manut.</button>
+              </div>
+            </div>
+          </template>
+        </div>
+        <div class="scada-panel-section">
+          <div class="section-title">Válvulas</div>
+          <template x-for="v in valves" :key="v.id">
+            <div class="eq-card" style="margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                  <div class="eq-codigo" x-text="v.name || v.id"></div>
+                </div>
+                <span class="badge" :class="v.status==='aberta'?'badge-green':v.status==='parcial'?'badge-yellow':'badge-gray'" x-text="v.status || 'fechada'"></span>
+              </div>
+              <div class="eq-controls">
+                <button class="eq-btn" :class="{active:v.status==='aberta'}" @click="setEquip('valve',v.id,'aberta')">Abrir</button>
+                <button class="eq-btn" :class="{active:v.status==='parcial'}" @click="setEquip('valve',v.id,'parcial')">Parcial</button>
+                <button class="eq-btn" :class="{active:v.status==='fechada'}" @click="setEquip('valve',v.id,'fechada')">Fechar</button>
+              </div>
+            </div>
+          </template>
+        </div>
+        <div class="scada-panel-section" style="flex:1">
+          <div class="section-title">Hidrômetros</div>
+          <template x-for="h in hydrometers" :key="h.meter_name">
+            <div class="hidro-card" style="margin-bottom:8px">
+              <div class="hidro-head">
+                <div class="eq-codigo" x-text="h.meter_name"></div>
+              </div>
+              <div class="hidro-body" style="display:flex;justify-content:space-between;align-items:center">
+                <div class="hidro-valor" x-text="h.reading_m3 != null ? h.reading_m3 + ' m³' : '—'"></div>
+                <div style="font-size:10px;color:var(--text3)" x-text="formatTs(h.ts)"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de reservatório (reutiliza reservoirModalMixin) -->
+  <div class="modal-overlay" x-show="modal.open" @click.self="closeModal()" x-cloak>
+    <div class="modal-box" @click.stop>
+      <div class="modal-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--mono);font-size:16px;font-weight:600" x-text="modal.alias"></span>
+            <span class="badge" :class="modal.online?'badge-green':'badge-gray'" x-text="modal.online?'Online':'Offline'"></span>
+          </div>
+          <div style="font-size:11px;color:var(--text2)" x-text="modal.name"></div>
+        </div>
+        <button class="theme-btn" @click="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="tank-wrap" style="height:70px;margin-bottom:12px">
+          <div class="tank-fill" :style="`height:${modal.pct}%;background:${statusColor(modal.pct,modal.online)}`"></div>
+          <div class="tank-label" x-text="modal.pct+'%'"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <div class="card" style="padding:8px"><div style="font-size:10px;color:var(--text3)">Volume</div><div style="font-family:var(--mono);font-size:14px" x-text="modal.volume_l!=null?Math.round(modal.volume_l/1000)+' m³':'—'"></div></div>
+          <div class="card" style="padding:8px"><div style="font-size:10px;color:var(--text3)">Nível</div><div style="font-family:var(--mono);font-size:14px" x-text="modal.level_cm!=null?modal.level_cm+' cm':'—'"></div></div>
+        </div>
+        <div class="section-title">Leitura Manual</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <button class="eq-btn" :class="{active:modal.manualMode==='pct'}" @click="modal.manualMode='pct'">%</button>
+          <button class="eq-btn" :class="{active:modal.manualMode==='volume_l'}" @click="modal.manualMode='volume_l'">Litros</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" type="number" min="0" :placeholder="modal.manualMode==='pct'?'0–100 %':'Litros'" x-model="modal.manualValue" @keyup.enter="submitManual()"/>
+          <button class="btn btn-primary" @click="submitManual()" x-text="modal.saving?'...':'Salvar'"></button>
+        </div>
+        <div x-show="modal.feedback" x-text="modal.feedback" style="font-size:11px;margin-top:6px" :style="modal.feedbackOk?'color:var(--green)':'color:var(--red)'"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="assets/shared.js"></script>
+<script defer src="assets/vendor/alpine.min.js"></script>
+<script>
+function scadaApp() {
+  return {
+    reservoirs: [],
+    pumps: [],
+    valves: [],
+    hydrometers: [],
+    gwStatus: 'off',
+    gwLabel: 'GW offline',
+
+    get totalVol() {
+      const tot = this.reservoirs.filter(r=>r.online).reduce((s,r)=>s+(r.volume_l||0),0);
+      return tot >= 1000 ? Math.round(tot/1000)+' m³' : Math.round(tot)+' L';
+    },
+    get onlineCount() { return this.reservoirs.filter(r=>r.online).length; },
+
+    getR(alias) {
+      return this.reservoirs.find(r=>r.alias===alias) || { pct:0, online:false };
+    },
+
+    ...wsMixin(),
+    ...reservoirModalMixin(),
+
+    async init() {
+      const [resv, pumps, valves, hydros, gw] = await Promise.all([
+        fetch('/api/reservoirs').then(r=>r.json()),
+        fetch('/api/manual/pumps?limit=50').then(r=>r.json()).catch(()=>({items:[]})),
+        fetch('/api/manual/valves?limit=50').then(r=>r.json()).catch(()=>({items:[]})),
+        fetch('/api/manual/hydrometers?limit=50').then(r=>r.json()).catch(()=>({items:[]})),
+        fetch('/api/gateway').then(r=>r.json()).catch(()=>null),
+      ]);
+      this.reservoirs = resv;
+      this.pumps = pumps.items || [];
+      this.valves = valves.items || [];
+      this.hydrometers = hydros.items || [];
+      this._updateGw(gw);
+
+      this.wsConnect((data) => {
+        if (data.type === 'snapshot') { this.reservoirs = data.reservoirs; this._updateGw(data.gateway); }
+        else if (data.type === 'reading') {
+          const idx = this.reservoirs.findIndex(r=>r.alias===data.alias);
+          if (idx>=0) this.reservoirs[idx]={...this.reservoirs[idx],...data};
+          this.reservoirs=[...this.reservoirs];
+        }
+      });
+    },
+
+    _updateGw(gw) {
+      if (!gw) return;
+      if (gw.sim_mode) { this.gwStatus='sim'; this.gwLabel='Simulação'; }
+      else if (gw.connected) { this.gwStatus='on'; this.gwLabel='GW online'; }
+      else { this.gwStatus='off'; this.gwLabel='GW offline'; }
+    },
+
+    async setEquip(type, id, status) {
+      const url = type==='pump' ? '/api/manual/pumps' : '/api/manual/valves';
+      await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name:id, status}) });
+      if (type==='pump') { const i=this.pumps.findIndex(p=>p.id===id); if(i>=0) this.pumps[i]={...this.pumps[i],status}; this.pumps=[...this.pumps]; }
+      else { const i=this.valves.findIndex(v=>v.id===id); if(i>=0) this.valves[i]={...this.valves[i],status}; this.valves=[...this.valves]; }
+    },
+  };
+}
+</script>
+</body>
+</html>
