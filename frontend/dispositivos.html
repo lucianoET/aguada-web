@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:,">
+
   <title>Aguada — Dispositivos</title>
   <link rel="stylesheet" href="assets/aguada.css" />
   <style>
@@ -22,14 +24,16 @@
     <div class="sidebar-brand"><div class="sidebar-logo">A</div><span class="sidebar-brand-text">AGUADA</span></div>
     <nav class="sidebar-nav">
       <div class="sidebar-section">Operação</div>
-      <a href="index.html" class="nav-link"><span class="nav-icon">📊</span><span class="nav-label">Dashboard</span></a>
-      <a href="scada.html" class="nav-link"><span class="nav-icon">⚙</span><span class="nav-label">SCADA</span></a>
+      <a href="index.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="nav-label">Dashboard</span></a>
+      <a href="painel.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span><span class="nav-label">Painel Geral</span></a>
+      <a href="scada.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span><span class="nav-label">SCADA</span></a>
       <div class="sidebar-section">Análise</div>
-      <a href="analise.html" class="nav-link"><span class="nav-icon">📈</span><span class="nav-label">Análise</span></a>
+      <a href="analise.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="nav-label">Análise</span></a>
       <div class="sidebar-section">Gestão</div>
-      <a href="report.html" class="nav-link"><span class="nav-icon">📄</span><span class="nav-label">Relatório</span></a>
-      <a href="dispositivos.html" class="nav-link active"><span class="nav-icon">📡</span><span class="nav-label">Dispositivos</span></a>
-      <a href="documentacao.html" class="nav-link"><span class="nav-icon">📚</span><span class="nav-label">Documentação</span></a>
+      <a href="report.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="nav-label">Relatório</span></a>
+            <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
+      <a href="dispositivos.html" class="nav-link active"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span><span class="nav-label">Dispositivos</span></a>
+      <a href="documentacao.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span><span class="nav-label">Documentação</span></a>
     </nav>
     <div class="sidebar-footer">
       <span :class="wsConnected ? 'gw-dot on' : 'gw-dot off pulse-dot'"></span>
@@ -252,7 +256,6 @@
 
     </div>
   </div>
-</div>
 
 <!-- ── MODAL EDITAR NÓ ──────────────────────────────────────────────── -->
 <div x-show="editModal.open" x-transition.opacity
@@ -394,6 +397,8 @@
   <svg x-show="!toast.ok" style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
   <span x-text="toast.msg"></span>
 </div>
+
+</div><!-- end x-data layout -->
 
 <script src="assets/shared.js"></script>
 <script defer src="assets/vendor/alpine.min.js"></script>

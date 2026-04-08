@@ -1,0 +1,22 @@
+Local                 hora    | Ton
+'Castelo de Consumo | 06h00'  | 74 
+'Castelo de Consumo |  08h00' | 72 
+'Castelo de Consumo |  10h00' | 70 
+'Castelo de Consumo |  13h15' | 66 
+'Castelo de Consumo |  15h00' | 64 
+'Castelo de Consumo |  17h00' | 62 
+'Castelo de Consumo |  21h00' | 61 
+'Castelo de Consumo |  06h00' | 60 
+'Consumo Estimado'            | 14    
+
+Local               | anterior (T) | atual (T) | Diferença (T) |
+Castelo de Incêndio | 70           | 69        | -1
+Casa de Bombas IF   | 10           | 10        | 0
+Casa de Bombas nº3  | 40           | 40        | 0
+Cisterna nº1        | 128          | 128       | 0
+Cisterna nº2        | 136          | 136       | 0
+
+Hidrômetro IF       | 10142        | 10142     |    0          |
+Hidrômetro Praia    | 24765        | 24765     |    0          |
+Hidrômetro A. Verm  | 11530        | 11535     |    5          |
+Hidrômetro (AV/AZ)  | 27694,38     | 27707,64  |  13,26        |

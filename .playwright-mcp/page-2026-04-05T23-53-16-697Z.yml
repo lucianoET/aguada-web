@@ -1,0 +1,67 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: A
+      - generic [ref=e6]: AGUADA
+    - navigation [ref=e7]:
+      - generic [ref=e8]: Operação
+      - link "Dashboard" [ref=e9] [cursor=pointer]:
+        - /url: index.html
+        - img [ref=e11]
+        - generic [ref=e16]: Dashboard
+      - link "SCADA" [ref=e17] [cursor=pointer]:
+        - /url: scada.html
+        - img [ref=e19]
+        - generic [ref=e22]: SCADA
+      - generic [ref=e23]: Análise
+      - link "Análise" [ref=e24] [cursor=pointer]:
+        - /url: analise.html
+        - img [ref=e26]
+        - generic [ref=e28]: Análise
+      - generic [ref=e29]: Gestão
+      - link "Relatório" [ref=e30] [cursor=pointer]:
+        - /url: report.html
+        - img [ref=e32]
+        - generic [ref=e35]: Relatório
+      - link "Hidráulica" [ref=e36] [cursor=pointer]:
+        - /url: hidraulica.html
+        - img [ref=e38]
+        - generic [ref=e40]: Hidráulica
+      - link "Dispositivos" [ref=e41] [cursor=pointer]:
+        - /url: dispositivos.html
+        - img [ref=e43]
+        - generic [ref=e45]: Dispositivos
+      - link "Documentação" [ref=e46] [cursor=pointer]:
+        - /url: documentacao.html
+        - img [ref=e48]
+        - generic [ref=e51]: Documentação
+    - generic [ref=e54]: GW online
+  - generic [ref=e55]:
+    - generic [ref=e56]:
+      - generic [ref=e57]:
+        - generic [ref=e58]: Análise
+        - generic [ref=e59]: Histórico, Consumo, Abastecimento, Dados
+      - button [ref=e61] [cursor=pointer]:
+        - img [ref=e62]
+    - generic [ref=e66]:
+      - button "Histórico" [ref=e67] [cursor=pointer]
+      - button "Consumo" [ref=e68] [cursor=pointer]
+      - button "Abastecimento" [ref=e69] [cursor=pointer]
+      - button "Dados" [ref=e70] [cursor=pointer]
+      - button "⚠️ Tubo Submarino" [ref=e71] [cursor=pointer]
+    - generic [ref=e74]:
+      - combobox [ref=e75] [cursor=pointer]:
+        - option "Todos" [selected]
+        - option "CON"
+        - option "CAV"
+        - option "CB31"
+        - option "CB32"
+        - option "CIE1"
+        - option "CIE2"
+        - option "CBIF1"
+        - option "CBIF2"
+      - generic [ref=e76]:
+        - button "24h" [ref=e77] [cursor=pointer]
+        - button "7d" [ref=e78] [cursor=pointer]
+        - button "30d" [ref=e79] [cursor=pointer]
+      - generic [ref=e80]: Carregando...

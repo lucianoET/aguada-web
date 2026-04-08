@@ -1,439 +1,401 @@
 <!DOCTYPE html>
-<html lang="pt-BR" x-data="consumptionApp()" x-init="init()" :class="{ 'dark': darkMode }">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="data:,">
+
   <title>Aguada — Consumo</title>
-  <link rel="stylesheet" href="assets/tailwind.css?v=1" />
-  <script src="assets/shared.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="assets/aguada.css"/>
   <style>[x-cloak]{display:none}</style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen" x-cloak>
+<body>
+<div class="layout" x-data="consumptionApp()" x-init="init()" x-cloak>
 
-  <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">A</div>
-          <span class="font-semibold text-lg text-gray-800 dark:text-gray-100">Aguada CMASM</span>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">A</div><span class="sidebar-brand-text">AGUADA</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Operação</div>
+      <a href="index.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="nav-label">Dashboard</span></a>
+      <a href="painel.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span><span class="nav-label">Painel Geral</span></a>
+      <a href="scada.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span><span class="nav-label">SCADA</span></a>
+      <div class="sidebar-section">Análise</div>
+      <a href="analise.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="nav-label">Análise</span></a>
+      <a href="consumption.html" class="nav-link active"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></span><span class="nav-label">Consumo</span></a>
+      <div class="sidebar-section">Gestão</div>
+      <a href="report.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="nav-label">Relatório</span></a>
+            <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
+      <a href="dispositivos.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span><span class="nav-label">Dispositivos</span></a>
+      <a href="documentacao.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span><span class="nav-label">Documentação</span></a>
+    </nav>
+    <div class="sidebar-footer"><span class="gw-dot" :class="gwStatus"></span><span class="gw-label" x-text="gwLabel"></span></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div><div class="topbar-title">Consumo</div><div class="topbar-sub">Análise de variação de volume</div></div>
+      <div class="topbar-right">
+        <button class="theme-btn" onclick="toggleTheme()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg></button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Filtros -->
+      <div class="card" style="padding:12px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;color:var(--text3)">Período</span>
+          <template x-for="p in ['Hoje','7 dias','30 dias']" :key="p">
+            <button class="eq-btn" :class="{active:period===p}" @click="setPeriod(p)" x-text="p"></button>
+          </template>
         </div>
-        <nav class="hidden md:flex items-center gap-1">
-          <a href="index.html"       class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dashboard</a>
-          <a href="scada.html"       class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">SCADA</a>
-          <a href="history.html"     class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Histórico</a>
-          <a href="consumption.html" class="px-4 py-2 rounded-md text-sm font-medium bg-blue-600 text-white">Consumo</a>
-          <a href="abastecimento.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Abastecimento</a>
-          <a href="dados.html"       class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dados</a>
-          <a href="report.html"      class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Relatório</a>
-          <a href="dispositivos.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dispositivos</a>
-          <a href="documentacao.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Documentação</a>
-        </nav>
-        <button @click="toggleDark()" class="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-          <svg x-show="!darkMode" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-          <svg x-show="darkMode"  class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1m15.07-6.07l-.71.71M6.34 17.66l-.71.71M17.66 17.66l-.71-.71M6.34 6.34l-.71-.71M12 7a5 5 0 100 10A5 5 0 0012 7z"/></svg>
-        </button>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;color:var(--text3)">Reservatório</span>
+          <select class="form-select" style="width:160px" x-model="alias" @change="load()">
+            <option value="CON">CON — Castelo Consumo</option>
+            <option value="CAV">CAV — Castelo Incêndio</option>
+            <option value="CB31">CB31 — Casa Bombas Nº3</option>
+            <option value="CB32">CB32 — Casa Bombas Nº3</option>
+            <option value="CIE1">CIE1 — Cisterna IE</option>
+            <option value="CIE2">CIE2 — Cisterna IE</option>
+            <option value="CBIF1">CBIF1 — Casa Bombas IF</option>
+            <option value="CBIF2">CBIF2 — Casa Bombas IF</option>
+          </select>
+        </div>
+        <div x-show="period === 'Hoje'" style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;color:var(--text3)">Data</span>
+          <input class="form-input" type="date" style="width:140px" x-model="date" @change="load()"/>
+        </div>
+        <span x-show="loading" style="font-size:11px;color:var(--text3);margin-left:auto">Carregando...</span>
       </div>
-    </div>
-  </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <h1 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Análise de Consumo</h1>
+      <!-- KPI Cards -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">
+        <div class="card" style="padding:14px 16px">
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Consumido</div>
+          <div style="font-family:var(--mono);font-size:20px;color:var(--red)" x-text="kpi.consumed !== null ? Math.abs(kpi.consumed) + ' L' : '—'"></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">saída total</div>
+        </div>
+        <div class="card" style="padding:14px 16px">
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Abastecido</div>
+          <div style="font-family:var(--mono);font-size:20px;color:var(--green)" x-text="kpi.supplied !== null ? kpi.supplied + ' L' : '—'"></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">entrada total</div>
+        </div>
+        <div class="card" style="padding:14px 16px">
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Balanço</div>
+          <div style="font-family:var(--mono);font-size:20px" :style="(kpi.balance||0)>=0?'color:var(--green)':'color:var(--red)'"
+            x-text="kpi.balance !== null ? (kpi.balance >= 0 ? '+' : '') + kpi.balance + ' L' : '—'"></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">líquido</div>
+        </div>
+        <div class="card" style="padding:14px 16px">
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Pico saída</div>
+          <div style="font-family:var(--mono);font-size:20px;color:var(--yellow)" x-text="kpi.peak ? kpi.peak + ' L/h' : '—'"></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px" x-text="kpi.peakHour ? 'às ' + kpi.peakHour + 'h' : 'hora pico'"></div>
+        </div>
+      </div>
 
-    <!-- Filtros -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6 flex flex-wrap items-center gap-4">
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-600 dark:text-gray-300">Período</label>
-        <template x-for="p in ['Hoje','7 dias','30 dias']" :key="p">
-          <button @click="setPeriod(p)"
-            :class="period === p ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
-            class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors" x-text="p"></button>
-        </template>
+      <!-- Gráficos linha 1 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="card" style="padding:14px 16px">
+          <div class="section-title" style="margin-bottom:10px">Delta por hora (L)</div>
+          <div style="position:relative;height:220px"><canvas id="chartHour"></canvas></div>
+        </div>
+        <div class="card" style="padding:14px 16px">
+          <div class="section-title" style="margin-bottom:10px">Nível por reservatório (atual %)</div>
+          <div style="position:relative;height:220px"><canvas id="chartDonut"></canvas></div>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-600 dark:text-gray-300">Reservatório</label>
-        <select x-model="alias" @change="load()" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="CON">CON — Castelo Consumo</option>
-          <option value="CAV">CAV — Castelo Incêndio</option>
-          <option value="CB31">CB31 — Casa Bombas Nº3</option>
-          <option value="CB32">CB32 — Casa Bombas Nº3</option>
-          <option value="CIE1">CIE1 — Cisterna IE</option>
-          <option value="CIE2">CIE2 — Cisterna IE</option>
-          <option value="CBIF1">CBIF1 — Casa Bombas IF</option>
-          <option value="CBIF2">CBIF2 — Casa Bombas IF</option>
-        </select>
-      </div>
-      <div x-show="period === 'Hoje'" class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-600 dark:text-gray-300">Data</label>
-        <input type="date" x-model="date" @change="load()" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-      </div>
-      <div x-show="loading" class="ml-auto flex items-center gap-2 text-xs text-gray-400">
-        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-        Carregando...
-      </div>
-    </div>
 
-    <!-- KPI Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
-        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Consumido</div>
-        <div class="text-2xl font-bold text-red-500" x-text="kpi.consumed !== null ? Math.abs(kpi.consumed) + ' L' : '—'"></div>
-        <div class="text-xs text-gray-400 mt-1">saída total</div>
+      <!-- Gráficos linha 2 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="card" style="padding:14px 16px">
+          <div class="section-title" style="margin-bottom:10px">Tendência — nível médio diário (%)</div>
+          <div style="position:relative;height:220px"><canvas id="chartTrend"></canvas></div>
+        </div>
+        <div class="card" style="padding:14px 16px">
+          <div class="section-title" style="margin-bottom:10px">Distribuição por turno (queda média %)</div>
+          <div style="position:relative;height:220px"><canvas id="chartRadar"></canvas></div>
+        </div>
       </div>
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
-        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Abastecido</div>
-        <div class="text-2xl font-bold text-green-600" x-text="kpi.supplied !== null ? kpi.supplied + ' L' : '—'"></div>
-        <div class="text-xs text-gray-400 mt-1">entrada total</div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
-        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Balanço</div>
-        <div class="text-2xl font-bold" :class="kpi.balance >= 0 ? 'text-green-600' : 'text-red-500'"
-          x-text="kpi.balance !== null ? (kpi.balance >= 0 ? '+' : '') + kpi.balance + ' L' : '—'"></div>
-        <div class="text-xs text-gray-400 mt-1">líquido</div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
-        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Pico saída</div>
-        <div class="text-2xl font-bold text-orange-500" x-text="kpi.peak ? kpi.peak + ' L/h' : '—'"></div>
-        <div class="text-xs text-gray-400 mt-1" x-text="kpi.peakHour ? 'às ' + kpi.peakHour + 'h' : 'hora pico'"></div>
-      </div>
-    </div>
 
-    <!-- Linha 1: barras hora + doughnut por reservatório -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Delta por hora (L)</h2>
-        <div style="position:relative;height:240px"><canvas id="chartHour"></canvas></div>
+      <!-- Gráfico mensal -->
+      <div class="card" style="padding:14px 16px;margin-bottom:12px">
+        <div class="section-title" style="margin-bottom:10px">Volume médio diário (L) — últimos 30 dias</div>
+        <div style="position:relative;height:180px"><canvas id="chartMonthly"></canvas></div>
       </div>
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Nível por reservatório (atual %)</h2>
-        <div style="position:relative;height:240px"><canvas id="chartDonut"></canvas></div>
-      </div>
-    </div>
 
-    <!-- Linha 2: tendência 7d + radar horário -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Tendência — nível médio diário (%)</h2>
-        <div style="position:relative;height:240px"><canvas id="chartTrend"></canvas></div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Distribuição por turno (queda média %)</h2>
-        <div style="position:relative;height:240px"><canvas id="chartRadar"></canvas></div>
-      </div>
-    </div>
-
-    <!-- Linha 3: comparativo mensal (volume médio por mês) -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
-      <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Volume médio por mês (L) — últimos 12 meses</h2>
-      <div style="position:relative;height:200px"><canvas id="chartMonthly"></canvas></div>
-    </div>
-
-    <!-- Tabela eventos do dia (só visível no modo "Hoje") -->
-    <div x-show="period === 'Hoje'" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-      <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Eventos do Dia</h2>
-        <span class="text-xs text-gray-400" x-text="events.length + ' registros'"></span>
-      </div>
-      <div x-show="events.length === 0 && !loading" class="p-8 text-center text-gray-400 dark:text-gray-600 text-sm">
-        Nenhum evento encontrado.
-      </div>
-      <div x-show="events.length > 0" class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400 tracking-wide">
-              <th class="px-4 py-3 text-left">Hora</th>
-              <th class="px-4 py-3 text-right">Vol. Início (L)</th>
-              <th class="px-4 py-3 text-right">Vol. Fim (L)</th>
-              <th class="px-4 py-3 text-right">Delta (L)</th>
-              <th class="px-4 py-3 text-center">Tipo</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-            <template x-for="(ev, i) in events" :key="i">
-              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                <td class="px-4 py-2.5 text-gray-600 dark:text-gray-300 font-mono" x-text="formatHour(ev.hour)"></td>
-                <td class="px-4 py-2.5 text-right font-mono" x-text="ev.vol_start != null ? Math.round(ev.vol_start) : '—'"></td>
-                <td class="px-4 py-2.5 text-right font-mono" x-text="ev.vol_end != null ? Math.round(ev.vol_end) : '—'"></td>
-                <td class="px-4 py-2.5 text-right font-mono font-medium"
-                  :class="(ev.delta_l||0) < 0 ? 'text-red-500' : 'text-green-600'"
-                  x-text="ev.delta_l != null ? ((ev.delta_l>=0?'+':'')+Math.round(ev.delta_l)) : '—'"></td>
-                <td class="px-4 py-2.5 text-center">
-                  <span class="px-2 py-0.5 rounded-full text-xs font-medium"
-                    :class="{
-                      'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400': (ev.delta_l||0) < 0,
-                      'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': (ev.delta_l||0) > 0,
-                      'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400': ev.delta_l === 0
-                    }"
-                    x-text="(ev.delta_l||0) < 0 ? 'saída' : (ev.delta_l||0) > 0 ? 'entrada' : 'estável'"></span>
-                </td>
+      <!-- Tabela eventos (só no modo Hoje) -->
+      <div x-show="period === 'Hoje'" class="card" style="overflow:hidden">
+        <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <span class="section-title" style="margin:0">Eventos do Dia</span>
+          <span style="font-size:11px;color:var(--text3)" x-text="events.length + ' registros'"></span>
+        </div>
+        <div x-show="events.length === 0 && !loading" style="padding:32px;text-align:center;color:var(--text3);font-size:13px">
+          Nenhum evento encontrado.
+        </div>
+        <div x-show="events.length > 0" style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border)">
+                <th style="padding:8px 12px;text-align:left;color:var(--text3);font-weight:500">Hora</th>
+                <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">Vol. Início (L)</th>
+                <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">Vol. Fim (L)</th>
+                <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">Delta (L)</th>
+                <th style="padding:8px 12px;text-align:center;color:var(--text3);font-weight:500">Tipo</th>
               </tr>
-            </template>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <template x-for="(ev, i) in events" :key="i">
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:6px 12px;font-family:var(--mono);color:var(--text2)" x-text="formatHour(ev.hour)"></td>
+                  <td style="padding:6px 12px;text-align:right;font-family:var(--mono)" x-text="ev.vol_start != null ? Math.round(ev.vol_start) : '—'"></td>
+                  <td style="padding:6px 12px;text-align:right;font-family:var(--mono)" x-text="ev.vol_end != null ? Math.round(ev.vol_end) : '—'"></td>
+                  <td style="padding:6px 12px;text-align:right;font-family:var(--mono);font-weight:500"
+                    :style="(ev.delta_l||0)<0?'color:var(--red)':'color:var(--green)'"
+                    x-text="ev.delta_l != null ? ((ev.delta_l>=0?'+':'')+Math.round(ev.delta_l)) : '—'"></td>
+                  <td style="padding:6px 12px;text-align:center">
+                    <span style="padding:2px 8px;border-radius:4px;font-size:11px"
+                      :style="(ev.delta_l||0)<0?'background:rgba(239,68,68,0.15);color:var(--red)':(ev.delta_l||0)>0?'background:rgba(34,197,94,0.15);color:var(--green)':'background:rgba(107,130,160,0.15);color:var(--text3)'"
+                      x-text="(ev.delta_l||0)<0?'saída':(ev.delta_l||0)>0?'entrada':'estável'"></span>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
       </div>
+
     </div>
-  </main>
+  </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script>
-  const COLORS = ['#3b82f6','#ef4444','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ec4899','#f97316'];
+<script src="assets/shared.js"></script>
+<script src="assets/vendor/chart.min.js"></script>
+<script defer src="assets/vendor/alpine.min.js"></script>
+<script>
+const CONS_COLORS = ['#3b82f6','#ef4444','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ec4899','#f97316'];
 
-  function consumptionApp() {
-    const today = new Date().toISOString().slice(0,10);
-    const chartStore = {};
-    return {
-      darkMode: localStorage.getItem('darkMode') === 'true',
-      alias: 'CON',
-      date: today,
-      period: 'Hoje',
-      events: [],
-      loading: false,
-      kpi: { consumed: null, supplied: null, balance: null, peak: null, peakHour: null },
+function consumptionApp() {
+  const today = new Date().toISOString().slice(0,10);
+  const chartStore = {};
+  return {
+    alias: 'CON',
+    date: today,
+    period: 'Hoje',
+    events: [],
+    loading: false,
+    kpi: { consumed: null, supplied: null, balance: null, peak: null, peakHour: null },
+    gwStatus: 'off',
+    gwLabel: 'GW offline',
 
-      init() { this.load(); },
-      toggleDark() {
-        this.darkMode = !this.darkMode;
-        localStorage.setItem('darkMode', this.darkMode);
-        this.$nextTick(() => this.load());
-      },
+    init() { this.loadGateway(); this.load(); },
 
-      setPeriod(p) { this.period = p; this.load(); },
+    async loadGateway() {
+      const gw = await fetch('/api/gateway').then(r => r.json()).catch(() => null);
+      if (!gw) return;
+      if (gw.sim_mode) { this.gwStatus = 'sim'; this.gwLabel = 'Simulação'; }
+      else if (gw.connected) { this.gwStatus = 'on'; this.gwLabel = 'GW online'; }
+      else { this.gwStatus = 'off'; this.gwLabel = 'GW offline'; }
+    },
 
-      apiPeriod() {
-        return this.period === '7 dias' ? '7d' : this.period === '30 dias' ? '30d' : '24h';
-      },
+    setPeriod(p) { this.period = p; this.load(); },
 
-      async load() {
-        this.loading = true;
-        try {
-          await Promise.all([
-            this.loadDayEvents(),
-            this.loadDonut(),
-            this.loadTrend(),
-            this.loadMonthly(),
-          ]);
-        } finally {
-          this.loading = false;
-        }
-      },
+    apiPeriod() {
+      return this.period === '7 dias' ? '7d' : this.period === '30 dias' ? '30d' : '24h';
+    },
 
-      async loadDayEvents() {
-        if (this.period !== 'Hoje') {
-          // Para 7d/30d usa history para gráfico de hora agregado
-          const res = await fetch(`/api/history/${encodeURIComponent(this.alias)}?period=${this.apiPeriod()}`);
-          if (!res.ok) return;
-          const rows = await res.json();
-          this.buildHourChartFromHistory(rows);
-          this.events = [];
-          this.kpi = { consumed: null, supplied: null, balance: null, peak: null, peakHour: null };
-          return;
-        }
-        const res = await fetch(`/api/consumption?alias=${encodeURIComponent(this.alias)}&date=${this.date}`);
+    async load() {
+      this.loading = true;
+      try {
+        await Promise.all([this.loadDayEvents(), this.loadDonut(), this.loadTrend(), this.loadMonthly()]);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async loadDayEvents() {
+      if (this.period !== 'Hoje') {
+        const res = await fetch(`/api/history/${encodeURIComponent(this.alias)}?period=${this.apiPeriod()}`);
         if (!res.ok) return;
-        const data = await res.json();
-        this.events = data.events || data || [];
-        this.computeKPI();
-        this.$nextTick(() => this.buildHourChartFromEvents());
-      },
+        const rows = await res.json();
+        this.buildHourChartFromHistory(rows);
+        this.events = [];
+        this.kpi = { consumed: null, supplied: null, balance: null, peak: null, peakHour: null };
+        return;
+      }
+      const res = await fetch(`/api/consumption?alias=${encodeURIComponent(this.alias)}&date=${this.date}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      this.events = data.events || data || [];
+      this.computeKPI();
+      this.$nextTick(() => this.buildHourChartFromEvents());
+    },
 
-      computeKPI() {
-        let consumed = 0, supplied = 0;
-        const hourNeg = {};
-        for (const ev of this.events) {
-          const d = ev.delta_l || 0;
-          if (d < 0) { consumed += d; hourNeg[ev.hour] = (hourNeg[ev.hour]||0) + d; }
-          else supplied += d;
-        }
-        let peak = 0, peakHour = null;
-        for (const [h, v] of Object.entries(hourNeg)) {
-          if (Math.abs(v) > peak) { peak = Math.abs(v); peakHour = parseInt(h); }
-        }
-        this.kpi = {
-          consumed: Math.round(consumed),
-          supplied: Math.round(supplied),
-          balance: Math.round(consumed + supplied),
-          peak: peak > 0 ? Math.round(peak) : null,
-          peakHour
-        };
-      },
+    computeKPI() {
+      let consumed = 0, supplied = 0;
+      const hourNeg = {};
+      for (const ev of this.events) {
+        const d = ev.delta_l || 0;
+        if (d < 0) { consumed += d; hourNeg[ev.hour] = (hourNeg[ev.hour]||0) + d; }
+        else supplied += d;
+      }
+      let peak = 0, peakHour = null;
+      for (const [h, v] of Object.entries(hourNeg)) {
+        if (Math.abs(v) > peak) { peak = Math.abs(v); peakHour = parseInt(h); }
+      }
+      this.kpi = { consumed: Math.round(consumed), supplied: Math.round(supplied), balance: Math.round(consumed + supplied), peak: peak > 0 ? Math.round(peak) : null, peakHour };
+    },
 
-      buildHourChartFromEvents() {
-        const hourMap = {};
-        for (const ev of this.events) {
-          const h = parseInt(ev.hour);
-          if (isNaN(h)) continue;
-          hourMap[h] = (hourMap[h]||0) + (ev.delta_l||0);
-        }
-        this.renderHourChart(hourMap, 'Delta (L)');
-      },
+    buildHourChartFromEvents() {
+      const hourMap = {};
+      for (const ev of this.events) {
+        const h = parseInt(ev.hour);
+        if (isNaN(h)) continue;
+        hourMap[h] = (hourMap[h]||0) + (ev.delta_l||0);
+      }
+      this.renderHourChart(hourMap, 'Delta (L)');
+    },
 
-      buildHourChartFromHistory(rows) {
-        // agrupa variação de volume por hora do dia
-        const hourMap = {};
-        for (let i = 1; i < rows.length; i++) {
-          const h = new Date(rows[i].ts * 1000).getHours();
-          const delta = (rows[i].volume_l||0) - (rows[i-1].volume_l||0);
-          hourMap[h] = (hourMap[h]||0) + delta;
-        }
-        this.renderHourChart(hourMap, 'Delta acumulado (L)');
-      },
+    buildHourChartFromHistory(rows) {
+      const hourMap = {};
+      for (let i = 1; i < rows.length; i++) {
+        const h = new Date(rows[i].ts * 1000).getHours();
+        const delta = (rows[i].volume_l||0) - (rows[i-1].volume_l||0);
+        hourMap[h] = (hourMap[h]||0) + delta;
+      }
+      this.renderHourChart(hourMap, 'Delta acumulado (L)');
+    },
 
-      renderHourChart(hourMap, label) {
-        const isDark = this.darkMode;
-        const grid = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
-        const text = isDark ? '#9ca3af' : '#6b7280';
-        const labels = [], data = [], colors = [];
-        for (let h = 0; h < 24; h++) {
-          labels.push(String(h).padStart(2,'0')+':00');
-          const v = Math.round(hourMap[h]||0);
-          data.push(v);
-          colors.push(v < 0 ? 'rgba(239,68,68,0.75)' : 'rgba(34,197,94,0.75)');
+    renderHourChart(hourMap, label) {
+      const grid = '#1e2d3d'; const text = '#6b82a0';
+      const labels = [], data = [], colors = [];
+      for (let h = 0; h < 24; h++) {
+        labels.push(String(h).padStart(2,'0')+':00');
+        const v = Math.round(hourMap[h]||0);
+        data.push(v);
+        colors.push(v < 0 ? 'rgba(239,68,68,0.75)' : 'rgba(34,197,94,0.75)');
+      }
+      this.makeChart('chartHour', {
+        type: 'bar',
+        data: { labels, datasets: [{ label, data, backgroundColor: colors, borderColor: colors.map(c=>c.replace('0.75','1')), borderWidth:1 }] },
+        options: { responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{labels:{color:text,font:{size:11}}} },
+          scales:{ x:{ticks:{color:text,maxRotation:45},grid:{color:grid}}, y:{ticks:{color:text},grid:{color:grid},title:{display:true,text:'L',color:text}} }
         }
-        this.makeChart('chartHour', {
-          type: 'bar',
-          data: { labels, datasets: [{ label, data, backgroundColor: colors, borderColor: colors.map(c=>c.replace('0.75','1')), borderWidth:1 }] },
+      });
+    },
+
+    async loadDonut() {
+      try {
+        const res = await fetch('/api/reservoirs');
+        if (!res.ok) return;
+        const reservoirs = await res.json();
+        const online = reservoirs.filter(r => r.online && r.pct != null);
+        if (online.length === 0) return;
+        const labels = online.map(r => r.alias);
+        const data = online.map(r => Math.round(r.pct));
+        const colors = labels.map(a => CONS_COLORS[ORDERED_ALIASES.indexOf(a) % CONS_COLORS.length]);
+        const text = '#6b82a0';
+        this.makeChart('chartDonut', {
+          type: 'doughnut',
+          data: { labels, datasets: [{ data, backgroundColor: colors.map(c=>c+'cc'), borderColor: colors, borderWidth:2 }] },
           options: { responsive:true, maintainAspectRatio:false,
-            plugins:{ legend:{labels:{color:text,font:{size:11}}} },
-            scales:{ x:{ticks:{color:text,maxRotation:45},grid:{color:grid}}, y:{ticks:{color:text},grid:{color:grid},title:{display:true,text:'L',color:text}} }
+            plugins:{ legend:{ position:'right', labels:{color:text,font:{size:11},boxWidth:14} } }
           }
         });
-      },
+      } catch(e) {}
+    },
 
-      async loadDonut() {
-        try {
-          const res = await fetch('/api/reservoirs');
-          if (!res.ok) return;
-          const reservoirs = await res.json();
-          const online = reservoirs.filter(r => r.online && r.pct != null);
-          if (online.length === 0) return;
-          const labels = online.map(r => r.alias);
-          const data = online.map(r => Math.round(r.pct));
-          const colors = labels.map(a => COLORS[ORDERED_ALIASES.indexOf(a) % COLORS.length]);
-          const isDark = this.darkMode;
-          const text = isDark ? '#9ca3af' : '#6b7280';
-          this.makeChart('chartDonut', {
-            type: 'doughnut',
-            data: { labels, datasets: [{ data, backgroundColor: colors.map(c=>c+'cc'), borderColor: colors, borderWidth:2 }] },
-            options: { responsive:true, maintainAspectRatio:false,
-              plugins:{ legend:{ position:'right', labels:{color:text,font:{size:11},boxWidth:14} } }
-            }
-          });
-        } catch(e) {}
-      },
-
-      async loadTrend() {
-        try {
-          const res = await fetch(`/api/history/${encodeURIComponent(this.alias)}?period=${this.period==='30 dias'?'30d':'7d'}`);
-          if (!res.ok) return;
-          const rows = await res.json();
-          if (rows.length < 2) return;
-          // Agrupa por dia: média de pct
-          const dayMap = {};
-          for (const r of rows) {
-            const d = new Date(r.ts*1000).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-            if (!dayMap[d]) dayMap[d] = [];
-            dayMap[d].push(r.pct);
-          }
-          const labels = Object.keys(dayMap);
-          const data = labels.map(d => {
-            const arr = dayMap[d];
-            return Math.round(arr.reduce((s,v)=>s+v,0)/arr.length*10)/10;
-          });
-          const isDark = this.darkMode;
-          const grid = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
-          const text = isDark ? '#9ca3af' : '#6b7280';
-          this.makeChart('chartTrend', {
-            type: 'line',
-            data: { labels, datasets:[{ label:`Nível médio — ${this.alias}`, data, borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.12)', borderWidth:2, tension:0.3, fill:true, pointRadius:3, spanGaps:true }] },
-            options: { responsive:true, maintainAspectRatio:false,
-              plugins:{ legend:{labels:{color:text,font:{size:11}}} },
-              scales:{ x:{ticks:{color:text},grid:{color:grid}}, y:{ticks:{color:text,callback:v=>v+'%'},grid:{color:grid},min:0,max:100} }
-            }
-          });
-        } catch(e) {}
-      },
-
-      async loadMonthly() {
-        try {
-          const res = await fetch(`/api/history/${encodeURIComponent(this.alias)}?period=30d`);
-          if (!res.ok) return;
-          const rows = await res.json();
-          if (rows.length < 2) return;
-          // Agrupa por mês: volume médio
-          const mMap = {};
-          for (const r of rows) {
-            const m = new Date(r.ts*1000).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});
-            if (!mMap[m]) mMap[m] = [];
-            if (r.volume_l != null) mMap[m].push(r.volume_l);
-          }
-          const labels = Object.keys(mMap);
-          const data = labels.map(m => {
-            const arr = mMap[m];
-            return arr.length ? Math.round(arr.reduce((s,v)=>s+v,0)/arr.length) : 0;
-          });
-
-          // Radar: queda média por turno (0-6h, 6-12h, 12-18h, 18-24h)
-          const turnos = ['00-06h','06-12h','12-18h','18-24h'];
-          const turnoDeltas = [[], [], [], []];
-          for (let i = 1; i < rows.length; i++) {
-            const h = new Date(rows[i].ts*1000).getHours();
-            const delta = (rows[i].pct||0) - (rows[i-1].pct||0);
-            if (delta < 0) turnoDeltas[Math.floor(h/6)].push(Math.abs(delta));
-          }
-          const radarData = turnoDeltas.map(arr => arr.length ? Math.round(arr.reduce((s,v)=>s+v,0)/arr.length*10)/10 : 0);
-          const isDark = this.darkMode;
-          const grid = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
-          const text = isDark ? '#9ca3af' : '#6b7280';
-
-          this.makeChart('chartRadar', {
-            type: 'radar',
-            data: { labels: turnos, datasets:[{ label:'Queda média (%)', data:radarData, borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.2)', pointBackgroundColor:'#3b82f6' }] },
-            options: { responsive:true, maintainAspectRatio:false,
-              plugins:{ legend:{labels:{color:text,font:{size:11}}} },
-              scales:{ r:{ beginAtZero:true, ticks:{color:text,backdropColor:'transparent'}, grid:{color:grid}, angleLines:{color:grid}, pointLabels:{color:text} } }
-            }
-          });
-
-          this.makeChart('chartMonthly', {
-            type: 'bar',
-            data: { labels, datasets:[{ label:`Vol. médio — ${this.alias} (L)`, data, backgroundColor:'rgba(59,130,246,0.7)', borderColor:'#3b82f6', borderWidth:1 }] },
-            options: { responsive:true, maintainAspectRatio:false,
-              plugins:{ legend:{labels:{color:text,font:{size:11}}} },
-              scales:{ x:{ticks:{color:text},grid:{color:grid}}, y:{ticks:{color:text},grid:{color:grid},title:{display:true,text:'Litros',color:text},beginAtZero:true} }
-            }
-          });
-        } catch(e) {}
-      },
-
-      makeChart(id, config) {
-        if (typeof Chart === 'undefined') return;
-        const canvas = document.getElementById(id);
-        const ctx = canvas?.getContext?.('2d');
-        if (!ctx) return;
-        const safeConfig = {
-          ...config,
-          options: {
-            animation: false,
-            ...(config.options || {})
-          }
-        };
-        if (chartStore[id]) {
-          try {
-            chartStore[id].stop();
-            chartStore[id].destroy();
-          } catch (e) {
-            console.warn(`Falha ao recriar gráfico ${id}:`, e);
-          }
+    async loadTrend() {
+      try {
+        const res = await fetch(`/api/history/${encodeURIComponent(this.alias)}?period=${this.period==='30 dias'?'30d':'7d'}`);
+        if (!res.ok) return;
+        const rows = await res.json();
+        if (rows.length < 2) return;
+        const dayMap = {};
+        for (const r of rows) {
+          const d = new Date(r.ts*1000).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+          if (!dayMap[d]) dayMap[d] = [];
+          dayMap[d].push(r.pct);
         }
-        chartStore[id] = new Chart(ctx, safeConfig);
-      },
+        const labels = Object.keys(dayMap);
+        const data = labels.map(d => { const arr = dayMap[d]; return Math.round(arr.reduce((s,v)=>s+v,0)/arr.length*10)/10; });
+        const grid = '#1e2d3d'; const text = '#6b82a0';
+        this.makeChart('chartTrend', {
+          type: 'line',
+          data: { labels, datasets:[{ label:`Nível médio — ${this.alias}`, data, borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.12)', borderWidth:2, tension:0.3, fill:true, pointRadius:3, spanGaps:true }] },
+          options: { responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{labels:{color:text,font:{size:11}}} },
+            scales:{ x:{ticks:{color:text},grid:{color:grid}}, y:{ticks:{color:text,callback:v=>v+'%'},grid:{color:grid},min:0,max:100} }
+          }
+        });
+      } catch(e) {}
+    },
 
-      formatHour(h) {
-        if (h == null) return '—';
-        return String(parseInt(h)).padStart(2,'0') + ':00';
+    async loadMonthly() {
+      try {
+        const res = await fetch(`/api/history/${encodeURIComponent(this.alias)}?period=30d`);
+        if (!res.ok) return;
+        const rows = await res.json();
+        if (rows.length < 2) return;
+        const mMap = {};
+        for (const r of rows) {
+          const m = new Date(r.ts*1000).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});
+          if (!mMap[m]) mMap[m] = [];
+          if (r.volume_l != null) mMap[m].push(r.volume_l);
+        }
+        const labels = Object.keys(mMap);
+        const data = labels.map(m => { const arr = mMap[m]; return arr.length ? Math.round(arr.reduce((s,v)=>s+v,0)/arr.length) : 0; });
+
+        const turnos = ['00-06h','06-12h','12-18h','18-24h'];
+        const turnoDeltas = [[], [], [], []];
+        for (let i = 1; i < rows.length; i++) {
+          const h = new Date(rows[i].ts*1000).getHours();
+          const delta = (rows[i].pct||0) - (rows[i-1].pct||0);
+          if (delta < 0) turnoDeltas[Math.floor(h/6)].push(Math.abs(delta));
+        }
+        const radarData = turnoDeltas.map(arr => arr.length ? Math.round(arr.reduce((s,v)=>s+v,0)/arr.length*10)/10 : 0);
+        const grid = '#1e2d3d'; const text = '#6b82a0';
+
+        this.makeChart('chartRadar', {
+          type: 'radar',
+          data: { labels: turnos, datasets:[{ label:'Queda média (%)', data:radarData, borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.2)', pointBackgroundColor:'#3b82f6' }] },
+          options: { responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{labels:{color:text,font:{size:11}}} },
+            scales:{ r:{ beginAtZero:true, ticks:{color:text,backdropColor:'transparent'}, grid:{color:grid}, angleLines:{color:grid}, pointLabels:{color:text} } }
+          }
+        });
+
+        this.makeChart('chartMonthly', {
+          type: 'bar',
+          data: { labels, datasets:[{ label:`Vol. médio — ${this.alias} (L)`, data, backgroundColor:'rgba(59,130,246,0.7)', borderColor:'#3b82f6', borderWidth:1 }] },
+          options: { responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{labels:{color:text,font:{size:11}}} },
+            scales:{ x:{ticks:{color:text},grid:{color:grid}}, y:{ticks:{color:text},grid:{color:grid},title:{display:true,text:'Litros',color:text},beginAtZero:true} }
+          }
+        });
+      } catch(e) {}
+    },
+
+    makeChart(id, config) {
+      if (typeof Chart === 'undefined') return;
+      const canvas = document.getElementById(id);
+      const ctx = canvas?.getContext?.('2d');
+      if (!ctx) return;
+      const safeConfig = { ...config, options: { animation: false, ...(config.options || {}) } };
+      if (chartStore[id]) {
+        try { chartStore[id].stop(); chartStore[id].destroy(); } catch (e) {}
       }
-    };
-  }
-  </script>
+      chartStore[id] = new Chart(ctx, safeConfig);
+    },
+
+    formatHour(h) {
+      if (h == null) return '—';
+      return String(parseInt(h)).padStart(2,'0') + ':00';
+    }
+  };
+}
+</script>
 </body>
 </html>

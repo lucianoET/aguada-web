@@ -1,8 +1,15 @@
 # backend/report.py
 """Geração de relatório HTML + PDF com WeasyPrint."""
 from __future__ import annotations
+import datetime
 import aiosqlite
-from .db import get_all_states, get_readings_for_date, get_manual_hydrometer_summary_for_date
+from .db import (
+    get_all_states,
+    get_readings_for_date,
+    get_manual_hydrometer_summary_for_date,
+    get_pump_states_for_date,
+    get_valve_states_for_date,
+)
 from .calc import calc_consumption_events
 
 
@@ -23,7 +30,8 @@ def _fmt_signed(v: float | int) -> str:
     return str(n)
 
 
-def _build_html(date: str, reservoirs: list[dict], hydrom_summary: list[dict] | None = None) -> str:
+def _build_html(date: str, reservoirs: list[dict], hydrom_summary: list[dict] | None = None,
+                pump_states: list[dict] | None = None, valve_states: list[dict] | None = None) -> str:
     by_alias = {r.get("alias"): r for r in reservoirs}
 
     # 1) Consumo estimado por delta volume (foco no CON, conforme modelo anexado)
@@ -117,6 +125,47 @@ def _build_html(date: str, reservoirs: list[dict], hydrom_summary: list[dict] | 
           <tr><td colspan='4' style='text-align:center;color:#6b7280'>Sem lançamentos manuais de hidrômetros para o período.</td></tr>
         """
 
+    # 4) Bombas
+    _PUMP_LABELS = {"ligada": "LIGADA", "desligada": "DESLIGADA", "falha": "FALHA", "manutencao": "MANUTENÇÃO"}
+    _PUMP_COLORS = {"ligada": "#16a34a", "desligada": "#6b7280", "falha": "#dc2626", "manutencao": "#d97706"}
+    pump_rows_html = ""
+    if pump_states:
+        for p in pump_states:
+            st = p.get("state", "")
+            label = _PUMP_LABELS.get(st, st or "—")
+            color = _PUMP_COLORS.get(st, "#6b7280")
+            ts_str = datetime.datetime.fromtimestamp(p["ts"]).strftime("%H:%M") if p.get("ts") else "—"
+            mode = p.get("mode") or "manual"
+            note = p.get("note") or "—"
+            pump_rows_html += (
+                f"<tr><td>{p['pump_name']}</td>"
+                f"<td style='color:{color};font-weight:600'>{label}</td>"
+                f"<td>{mode}</td><td class='num'>{ts_str}</td>"
+                f"<td>{note}</td></tr>"
+            )
+    else:
+        pump_rows_html = "<tr><td colspan='5' style='text-align:center;color:#6b7280'>Sem registros de bombas.</td></tr>"
+
+    # 5) Válvulas
+    _VALVE_LABELS = {"aberta": "ABERTA", "fechada": "FECHADA", "parcial": "PARCIAL", "falha": "FALHA"}
+    _VALVE_COLORS = {"aberta": "#16a34a", "fechada": "#6b7280", "parcial": "#d97706", "falha": "#dc2626"}
+    valve_rows_html = ""
+    if valve_states:
+        for v in valve_states:
+            st = v.get("state", "")
+            label = _VALVE_LABELS.get(st, st or "—")
+            color = _VALVE_COLORS.get(st, "#6b7280")
+            ts_str = datetime.datetime.fromtimestamp(v["ts"]).strftime("%H:%M") if v.get("ts") else "—"
+            note = v.get("note") or "—"
+            valve_rows_html += (
+                f"<tr><td>{v['valve_name']}</td>"
+                f"<td style='color:{color};font-weight:600'>{label}</td>"
+                f"<td class='num'>{ts_str}</td>"
+                f"<td>{note}</td></tr>"
+            )
+    else:
+        valve_rows_html = "<tr><td colspan='4' style='text-align:center;color:#6b7280'>Sem registros de válvulas.</td></tr>"
+
     return f"""<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -195,6 +244,41 @@ def _build_html(date: str, reservoirs: list[dict], hydrom_summary: list[dict] | 
     </tbody>
   </table>
 
+  <div class="sep"></div>
+
+  <h2>Bombas (estado final do dia)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Bomba</th>
+        <th>Estado</th>
+        <th>Modo</th>
+        <th class="num">Hora</th>
+        <th>Nota</th>
+      </tr>
+    </thead>
+    <tbody>
+      {pump_rows_html}
+    </tbody>
+  </table>
+
+  <div class="sep"></div>
+
+  <h2>Válvulas (estado final do dia)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Válvula</th>
+        <th>Estado</th>
+        <th class="num">Hora</th>
+        <th>Nota</th>
+      </tr>
+    </thead>
+    <tbody>
+      {valve_rows_html}
+    </tbody>
+  </table>
+
   <div class="footer">Gerado automaticamente por Aguada Web — formato tabular operacional.</div>
 </body>
 </html>"""
@@ -212,5 +296,8 @@ async def generate_daily_report_pdf(
         enriched.append({**s, "events": events})
 
     hydrom_summary = await get_manual_hydrometer_summary_for_date(conn, date)
-    html = _build_html(date, enriched, hydrom_summary=hydrom_summary)
+    pump_states = await get_pump_states_for_date(conn, date)
+    valve_states = await get_valve_states_for_date(conn, date)
+    html = _build_html(date, enriched, hydrom_summary=hydrom_summary,
+                       pump_states=pump_states, valve_states=valve_states)
     HTML(string=html).write_pdf(out_path)

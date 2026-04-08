@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="data:,">
+  <title>Aguada — Painel Geral</title>
+  <link rel="stylesheet" href="assets/aguada.css"/>
+  <link rel="stylesheet" href="assets/vendor/leaflet.min.css"/>
+  <style>
+    [x-cloak]{display:none}
+
+    /* ── grade principal ─────────────────────────────────── */
+    .pg-grid {
+      flex:1; display:grid; min-height:0; overflow:hidden;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 300px 1fr;
+      gap:8px; padding:8px;
+      overflow-y:auto;
+    }
+
+    /* ── células da grade ────────────────────────────────── */
+    .pg-cell {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--radius); display:flex; flex-direction:column;
+      min-height:0; overflow:hidden; position:relative;
+    }
+    .pg-cell-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:8px 12px; border-bottom:1px solid var(--border);
+      flex-shrink:0;
+    }
+    .pg-cell-title {
+      font-size:10px; text-transform:uppercase; letter-spacing:1.2px;
+      color:var(--text3); font-weight:600;
+    }
+    .pg-cell-actions { display:flex; gap:4px; }
+    .pg-cell-body { flex:1; overflow:auto; }
+
+    /* Mapa ocupa 2 colunas linha 1 */
+    .cell-map { grid-column: 1/3; grid-row:1; }
+    /* SCADA ocupa 1 coluna linha 1 */
+    .cell-scada { grid-column:3; grid-row:1; }
+    /* Linhas 2 – cada datatable ocupa 1 coluna */
+    .cell-res  { grid-column:1; grid-row:2; }
+    .cell-equip{ grid-column:2; grid-row:2; }
+    .cell-hid  { grid-column:3; grid-row:2; }
+
+    /* ── botão ícone ──────────────────────────────────────── */
+    .icon-btn {
+      width:24px; height:24px; display:flex; align-items:center;
+      justify-content:center; border-radius:4px; color:var(--text3);
+      background:none; border:none; cursor:pointer;
+    }
+    .icon-btn:hover { background:var(--bg3); color:var(--text); }
+
+    /* ── mapa embutido ───────────────────────────────────── */
+    #mini-map { width:100%; height:100%; }
+    .map-wrap-mini { flex:1; min-height:0; position:relative; }
+
+    /* ── tabelas ──────────────────────────────────────────── */
+    .dt { width:100%; border-collapse:collapse; font-size:12px; }
+    .dt th { position:sticky; top:0; background:var(--bg2); color:var(--text3);
+              font-size:10px; text-transform:uppercase; letter-spacing:.8px;
+              padding:5px 8px; border-bottom:1px solid var(--border); font-weight:600; text-align:left; }
+    .dt td { padding:5px 8px; border-bottom:1px solid var(--border); color:var(--text); white-space:nowrap; }
+    .dt tr:last-child td { border-bottom:none; }
+    .dt tr:hover td { background:var(--bg3); }
+    .mono { font-family:var(--mono); }
+
+    /* Barra inline */
+    .bar-wrap { width:60px; height:7px; background:var(--bg3); border-radius:4px; overflow:hidden; display:inline-block; vertical-align:middle; }
+    .bar-fill  { height:100%; border-radius:4px; transition:width .5s; }
+
+    /* SCADA iframe */
+    .scada-embed { flex:1; width:100%; border:none; background:var(--bg); min-height:0; display:block; }
+
+    /* ── Modal fullscreen ─────────────────────────────────── */
+    .fullscreen-modal {
+      position:fixed; inset:0; z-index:2000;
+      background:var(--bg); display:flex; flex-direction:column;
+    }
+    .fullscreen-modal-bar {
+      height:40px; background:var(--bg2); border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 16px; flex-shrink:0;
+    }
+    .fullscreen-modal-title { font-size:12px; color:var(--text2); }
+    .fullscreen-modal-body { flex:1; min-height:0; position:relative; }
+    #full-map { width:100%; height:100%; }
+
+    /* ── Balança / balanço strip ──────────────────────────── */
+    .balance-strip {
+      display:flex; gap:8px; padding:4px 8px; flex-shrink:0;
+      border-bottom:1px solid var(--border); background:var(--bg2);
+      flex-wrap:wrap;
+    }
+    .balance-kpi { text-align:center; flex:1; min-width:70px; padding:4px; }
+    .balance-kpi-val { font-family:var(--mono); font-size:15px; font-weight:600; }
+    .balance-kpi-lbl { font-size:9px; text-transform:uppercase; color:var(--text3); letter-spacing:.8px; }
+
+    /* ── Delta badges ─────────────────────────────────────── */
+    .delta-pos { color:var(--green); }
+    .delta-neg { color:var(--red); }
+
+    @media (max-width:1100px) {
+      .pg-grid {
+        grid-template-columns:1fr 1fr;
+        grid-template-rows:260px 280px 1fr;
+      }
+      .cell-map  { grid-column:1/3; grid-row:1; }
+      .cell-scada{ grid-column:1/3; grid-row:2; }
+      .cell-res  { grid-column:1; grid-row:3; }
+      .cell-equip{ grid-column:2; grid-row:3; }
+      .cell-hid  { grid-column:1/3; grid-row:4; }
+    }
+    @media (max-width:700px) {
+      .pg-grid { grid-template-columns:1fr; grid-template-rows:none; }
+      .cell-map,.cell-scada,.cell-res,.cell-equip,.cell-hid { grid-column:1; grid-row:auto; min-height:240px; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout" x-data="painelApp()" x-init="init()" x-cloak>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">A</div>
+      <span class="sidebar-brand-text">AGUADA</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Operação</div>
+      <a href="index.html" class="nav-link">
+        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
+        <span class="nav-label">Dashboard</span>
+      </a>
+      <a href="painel.html" class="nav-link active">
+        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+        <span class="nav-label">Painel Geral</span>
+      </a>
+      <a href="scada.html" class="nav-link">
+        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span>
+        <span class="nav-label">SCADA</span>
+      </a>
+      <div class="sidebar-section">Análise</div>
+      <a href="analise.html" class="nav-link">
+        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+        <span class="nav-label">Análise</span>
+      </a>
+      <div class="sidebar-section">Gestão</div>
+      <a href="report.html" class="nav-link">
+        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+        <span class="nav-label">Relatório</span>
+      </a>
+      <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
+      <a href="dispositivos.html" class="nav-link">
+        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span>
+        <span class="nav-label">Dispositivos</span>
+      </a>
+      <a href="documentacao.html" class="nav-link">
+        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span>
+        <span class="nav-label">Documentação</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="gw-dot" :class="gwStatus"></span>
+      <span class="gw-label" x-text="gwLabel"></span>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Painel Geral</div>
+        <div class="topbar-sub">Visão consolidada do sistema</div>
+      </div>
+      <div class="topbar-right">
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)">
+          <span class="ws-dot" :class="wsConnected ? 'connected':'disconnected'"></span>
+          <span x-text="wsConnected ? 'Ao vivo':'Desconectado'"></span>
+          <span x-show="lastUpdate" x-text="'· '+timeAgo(lastUpdate)" style="color:var(--text3)"></span>
+        </div>
+        <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Grade -->
+    <div class="pg-grid">
+
+      <!-- ── MAPA ──────────────────────────────────────────── -->
+      <div class="pg-cell cell-map">
+        <div class="pg-cell-header">
+          <span class="pg-cell-title">Mapa</span>
+          <div class="pg-cell-actions">
+            <button class="icon-btn" title="Expandir mapa" @click="openFullMap()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            </button>
+            <a href="index.html" class="icon-btn" title="Abrir Dashboard">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="map-wrap-mini">
+          <div id="mini-map"></div>
+        </div>
+      </div>
+
+      <!-- ── SCADA ─────────────────────────────────────────── -->
+      <div class="pg-cell cell-scada">
+        <div class="pg-cell-header">
+          <span class="pg-cell-title">SCADA</span>
+          <div class="pg-cell-actions">
+            <button class="icon-btn" title="Expandir SCADA" @click="openFullScada()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            </button>
+            <a href="scada.html" class="icon-btn" title="Abrir SCADA">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+        <iframe class="scada-embed" src="scada.html" id="scada-frame" title="SCADA"></iframe>
+      </div>
+
+      <!-- ── RESERVATÓRIOS ──────────────────────────────────── -->
+      <div class="pg-cell cell-res">
+        <div class="pg-cell-header">
+          <span class="pg-cell-title">Reservatórios</span>
+          <div class="pg-cell-actions">
+            <span style="font-size:10px;color:var(--text3)" x-text="avgPct+'% médio'"></span>
+            <a href="index.html" class="icon-btn" title="Abrir Dashboard">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+        <!-- Balanço strip -->
+        <div class="balance-strip">
+          <div class="balance-kpi">
+            <div class="balance-kpi-val" x-text="(reservoirs||[]).length"></div>
+            <div class="balance-kpi-lbl">Total</div>
+          </div>
+          <div class="balance-kpi">
+            <div class="balance-kpi-val" style="color:var(--blue)" x-text="avgPct+'%'"></div>
+            <div class="balance-kpi-lbl">Vol. médio</div>
+          </div>
+          <div class="balance-kpi">
+            <div class="balance-kpi-val" :style="critical>0?'color:var(--red)':'color:var(--green)'" x-text="critical"></div>
+            <div class="balance-kpi-lbl">Críticos</div>
+          </div>
+          <div class="balance-kpi">
+            <div class="balance-kpi-val" x-text="onlineCount+'/'+(reservoirs||[]).length"></div>
+            <div class="balance-kpi-lbl">Online</div>
+          </div>
+        </div>
+        <div class="pg-cell-body">
+          <table class="dt">
+            <thead><tr>
+              <th>Alias</th><th>%</th><th>Nível</th><th>Volume</th><th>Status</th><th>atualiz.</th>
+            </tr></thead>
+            <tbody>
+              <template x-for="r in reservoirs" :key="r.alias">
+                <tr style="cursor:pointer" @click="openResModal(r.alias)">
+                  <td class="mono" x-text="r.alias"></td>
+                  <td>
+                    <span class="bar-wrap"><span class="bar-fill" :style="`width:${r.pct||0}%;background:${statusColor(r.pct,r.online)}`"></span></span>
+                    <span class="mono" style="margin-left:4px" x-text="r.pct!=null?Math.round(r.pct)+'%':'—'"></span>
+                  </td>
+                  <td class="mono" x-text="r.level_cm!=null?r.level_cm+' cm':'—'"></td>
+                  <td class="mono" x-text="r.volume_l!=null?Math.round(r.volume_l/1000)+' m³':'—'"></td>
+                  <td>
+                    <span class="badge"
+                      :class="!r.online?'badge-gray':r.pct<=20?'badge-red':r.pct<=35?'badge-yellow':'badge-green'"
+                      x-text="!r.online?'Offline':r.pct<=20?'Crítico':r.pct<=35?'Atenção':'Normal'"></span>
+                  </td>
+                  <td style="color:var(--text3);font-size:10px" x-text="timeAgo(r.ts)"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── BOMBAS & VÁLVULAS ──────────────────────────────── -->
+      <div class="pg-cell cell-equip">
+        <div class="pg-cell-header">
+          <span class="pg-cell-title">Equipamentos</span>
+          <div class="pg-cell-actions">
+            <a href="dispositivos.html" class="icon-btn" title="Abrir Dispositivos">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="pg-cell-body">
+          <!-- Bombas -->
+          <div style="padding:4px 8px 2px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);border-bottom:1px solid var(--border)">Bombas</div>
+          <table class="dt">
+            <thead><tr><th>Nome</th><th>Estado</th><th>Modo</th><th>Registro</th></tr></thead>
+            <tbody>
+              <template x-for="p in pumps" :key="p.id">
+                <tr>
+                  <td class="mono" x-text="p.pump_name"></td>
+                  <td>
+                    <span class="badge"
+                      :class="p.state==='ligada'?'badge-green':p.state==='falha'?'badge-red':p.state==='manutencao'?'badge-yellow':'badge-gray'"
+                      x-text="p.state"></span>
+                  </td>
+                  <td style="color:var(--text3);font-size:10px" x-text="p.mode||'—'"></td>
+                  <td style="color:var(--text3);font-size:10px" x-text="formatTs(p.ts)"></td>
+                </tr>
+              </template>
+              <tr x-show="!pumps.length"><td colspan="4" style="color:var(--text3);text-align:center;padding:12px">Sem registros</td></tr>
+            </tbody>
+          </table>
+          <!-- Válvulas -->
+          <div style="padding:4px 8px 2px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);border-bottom:1px solid var(--border);border-top:1px solid var(--border)">Válvulas</div>
+          <table class="dt">
+            <thead><tr><th>Nome</th><th>Estado</th><th>Registro</th></tr></thead>
+            <tbody>
+              <template x-for="v in valves" :key="v.id">
+                <tr>
+                  <td class="mono" x-text="v.valve_name"></td>
+                  <td>
+                    <span class="badge"
+                      :class="v.state==='aberta'?'badge-green':v.state==='fechada'?'badge-red':v.state==='parcial'?'badge-yellow':'badge-gray'"
+                      x-text="v.state"></span>
+                  </td>
+                  <td style="color:var(--text3);font-size:10px" x-text="formatTs(v.ts)"></td>
+                </tr>
+              </template>
+              <tr x-show="!valves.length"><td colspan="3" style="color:var(--text3);text-align:center;padding:12px">Sem registros</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── HIDRÔMETROS ─────────────────────────────────────── -->
+      <div class="pg-cell cell-hid">
+        <div class="pg-cell-header">
+          <span class="pg-cell-title">Hidrômetros</span>
+          <div class="pg-cell-actions">
+            <a href="analise.html" class="icon-btn" title="Abrir Análise">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="pg-cell-body">
+          <table class="dt">
+            <thead><tr>
+              <th>Hidrômetro</th><th>Anterior (m³)</th><th>Atual (m³)</th><th>Δ (m³)</th><th>Data anterior</th><th>Data atual</th>
+            </tr></thead>
+            <tbody>
+              <template x-for="h in hydrometerRows" :key="h.name">
+                <tr>
+                  <td class="mono" x-text="h.name"></td>
+                  <td class="mono" x-text="h.prev!=null?h.prev.toFixed(3):'—'"></td>
+                  <td class="mono" x-text="h.curr!=null?h.curr.toFixed(3):'—'"></td>
+                  <td class="mono"
+                    :class="h.delta!=null?(h.delta>=0?'delta-pos':'delta-neg'):''"
+                    x-text="h.delta!=null?(h.delta>=0?'+':'')+h.delta.toFixed(3):'—'"></td>
+                  <td style="color:var(--text3);font-size:10px" x-text="formatTs(h.prevTs)"></td>
+                  <td style="color:var(--text3);font-size:10px" x-text="formatTs(h.currTs)"></td>
+                </tr>
+              </template>
+              <tr x-show="!hydrometerRows.length"><td colspan="6" style="color:var(--text3);text-align:center;padding:12px">Sem leituras registradas</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /pg-grid -->
+  </div><!-- /main -->
+
+  <!-- ── Modal reservatório ──────────────────────────────────── -->
+  <div class="modal-side" :class="{open:modal.open}" id="modal-side">
+    <div class="modal-header">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-family:var(--mono);font-size:16px;font-weight:600" x-text="modal.alias"></span>
+          <span class="badge" :class="modal.online?'badge-green':'badge-gray'" x-text="modal.online?'Online':'Offline'"></span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px" x-text="modal.name"></div>
+      </div>
+      <button class="theme-btn" @click="closeModal()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="tank-wrap" style="height:90px;margin-bottom:12px">
+        <div class="tank-fill" :style="`height:${modal.pct}%;background:${statusColor(modal.pct,modal.online)}`"></div>
+        <div class="tank-label" :style="modal.pct>40?'color:white':'color:var(--text)'" x-text="modal.pct+'%'"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+        <div class="card" style="padding:10px"><div style="font-size:10px;color:var(--text3)">Volume</div><div style="font-family:var(--mono);font-size:15px;margin-top:2px" x-text="modal.volume_l!=null?Math.round(modal.volume_l/1000)+' m³':'—'"></div></div>
+        <div class="card" style="padding:10px"><div style="font-size:10px;color:var(--text3)">Nível</div><div style="font-family:var(--mono);font-size:15px;margin-top:2px" x-text="modal.level_cm!=null?modal.level_cm+' cm':'—'"></div></div>
+        <div class="card" style="padding:10px"><div style="font-size:10px;color:var(--text3)">RSSI</div><div style="font-family:var(--mono);font-size:15px;margin-top:2px" :style="`color:${rssiColor(modal.rssi)}`" x-text="modal.rssi!=null?modal.rssi+' dBm':'—'"></div></div>
+        <div class="card" style="padding:10px"><div style="font-size:10px;color:var(--text3)">Atualizado</div><div style="font-size:11px;margin-top:2px;color:var(--text2)" x-text="timeAgo(modal.ts)"></div></div>
+      </div>
+      <div class="section-title">Leitura Manual</div>
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <button class="eq-btn" :class="{active:modal.manualMode==='pct'}" @click="modal.manualMode='pct'">%</button>
+        <button class="eq-btn" :class="{active:modal.manualMode==='volume_l'}" @click="modal.manualMode='volume_l'">Litros</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" type="number" min="0" :max="modal.manualMode==='pct'?100:modal.volume_max_l" :placeholder="modal.manualMode==='pct'?'0–100 %':'Litros'" x-model="modal.manualValue" @keyup.enter="submitManual()"/>
+        <button class="btn btn-primary" @click="submitManual()" :disabled="modal.saving" x-text="modal.saving?'...':'Salvar'"></button>
+      </div>
+      <div x-show="modal.feedback" x-text="modal.feedback" style="font-size:11px;margin-top:6px" :style="modal.feedbackOk?'color:var(--green)':'color:var(--red)'"></div>
+    </div>
+  </div>
+  <div x-show="modal.open" @click="closeModal()" style="position:fixed;inset:0;z-index:1400;background:rgba(0,0,0,0.4)" x-cloak></div>
+
+  <!-- ── Modal fullscreen mapa ──────────────────────────────── -->
+  <div class="fullscreen-modal" x-show="fullMap" x-cloak>
+    <div class="fullscreen-modal-bar">
+      <span class="fullscreen-modal-title">Mapa — Visão ampliada</span>
+      <div style="display:flex;gap:8px">
+        <a href="index.html" style="font-size:11px;color:var(--blue);display:flex;align-items:center;gap:4px">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Dashboard
+        </a>
+        <button class="icon-btn" @click="closeFullMap()" title="Fechar">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="fullscreen-modal-body">
+      <div id="full-map"></div>
+    </div>
+  </div>
+
+  <!-- ── Modal fullscreen SCADA ─────────────────────────────── -->
+  <div class="fullscreen-modal" x-show="fullScada" x-cloak>
+    <div class="fullscreen-modal-bar">
+      <span class="fullscreen-modal-title">SCADA — Visão ampliada</span>
+      <div style="display:flex;gap:8px">
+        <a href="scada.html" style="font-size:11px;color:var(--blue);display:flex;align-items:center;gap:4px">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          SCADA completo
+        </a>
+        <button class="icon-btn" @click="fullScada=false" title="Fechar">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="fullscreen-modal-body">
+      <iframe style="width:100%;height:100%;border:none" src="scada.html" title="SCADA fullscreen"></iframe>
+    </div>
+  </div>
+
+</div><!-- /layout -->
+
+<script src="assets/shared.js"></script>
+<script src="assets/vendor/leaflet.min.js"></script>
+<script defer src="assets/vendor/alpine.min.js"></script>
+<script>
+function painelApp() {
+  return {
+    reservoirs: [],
+    pumps: [],
+    valves: [],
+    hydrometers: [],
+    gwStatus: 'off',
+    gwLabel: 'GW offline',
+    fullMap: false,
+    fullScada: false,
+    _miniMap: null,
+    _fullMapObj: null,
+    _miniMarkers: {},
+    _initialized: false,
+
+    get avgPct() {
+      const r = (this.reservoirs||[]).filter(x=>x.online);
+      if (!r.length) return 0;
+      return Math.round(r.reduce((s,x)=>s+(x.pct||0),0)/r.length);
+    },
+    get critical() { return (this.reservoirs||[]).filter(r=>r.online&&r.pct<=20).length; },
+    get onlineCount() { return (this.reservoirs||[]).filter(r=>r.online).length; },
+
+    get hydrometerRows() {
+      // Agrupar por meter_name, retornar curr+prev+delta
+      const groups = {};
+      for (const h of this.hydrometers) {
+        if (!groups[h.meter_name]) groups[h.meter_name] = [];
+        groups[h.meter_name].push(h);
+      }
+      return Object.entries(groups).map(([name, entries]) => {
+        const sorted = [...entries].sort((a,b)=>(b.ts||0)-(a.ts||0));
+        const curr = sorted[0] || null;
+        const prev = sorted[1] || null;
+        const currVal = curr ? curr.reading : null;
+        const prevVal = prev ? prev.reading : null;
+        const delta = currVal!=null && prevVal!=null ? Math.round((currVal-prevVal)*1000)/1000 : null;
+        return { name, curr: currVal, prev: prevVal, delta, currTs: curr?.ts, prevTs: prev?.ts };
+      });
+    },
+
+    ...wsMixin(),
+    ...reservoirModalMixin(),
+
+    async init() {
+      if (this._initialized) return;
+      this._initialized = true;
+
+      // Dados
+      const [resData, equipData, gwData, hidData] = await Promise.all([
+        fetch('/api/reservoirs').then(r=>r.json()).catch(()=>[]),
+        fetch('/api/equip/current').then(r=>r.json()).catch(()=>({pumps:[],valves:[],hydrometers:[]})),
+        fetch('/api/gateway').then(r=>r.json()).catch(()=>null),
+        fetch('/api/manual/hydrometers?limit=200').then(r=>r.json()).catch(()=>({items:[]})),
+      ]);
+
+      this.reservoirs = Array.isArray(resData) ? resData : [];
+      this.pumps = equipData.pumps || [];
+      this.valves = equipData.valves || [];
+      this.hydrometers = hidData.items || [];
+      this._updateGw(gwData);
+
+      await this._initMiniMap();
+      this._updateMiniMarkers();
+
+      // WebSocket
+      this.wsConnect(data => {
+        const msg = normalizeWsMessage(data);
+        if (msg.type==='snapshot') {
+          this.reservoirs = msg.reservoirs;
+          this._updateGw(msg.gateway);
+        } else if (msg.type==='reading' && msg.reading) {
+          const idx = this.reservoirs.findIndex(r=>r.alias===msg.reading.alias);
+          if (idx>=0) this.reservoirs[idx]={...this.reservoirs[idx],...msg.reading};
+          else this.reservoirs.push(msg.reading);
+          this.reservoirs=[...this.reservoirs];
+        }
+        this._updateMiniMarkers();
+        if (this.modal.open){
+          const r=this.reservoirs.find(r=>r.alias===this.modal.alias);
+          if(r) this._fillModal(r);
+        }
+      });
+    },
+
+    _updateGw(gw) {
+      if (!gw) return;
+      if (gw.sim_mode)  { this.gwStatus='sim'; this.gwLabel='Simulação'; }
+      else if (gw.connected) { this.gwStatus='on';  this.gwLabel='GW online'; }
+      else               { this.gwStatus='off'; this.gwLabel='GW offline'; }
+    },
+
+    async _initMiniMap() {
+      if (this._miniMap) return;
+      const osmLayer = L.tileLayer('assets/leaflet-tiles/{z}/{x}/{y}.png', {
+        minZoom:13, maxZoom:19, maxNativeZoom:17, attribution:'© OpenStreetMap',
+      });
+      const satLayer = L.tileLayer('assets/leaflet-tiles-sat/{z}/{x}/{y}.jpg', {
+        minZoom:13, maxZoom:19, maxNativeZoom:17, attribution:'© Esri WorldImagery',
+      });
+      const bounds = L.latLngBounds([-22.856,-43.120],[-22.830,-43.088]);
+      this._miniMap = L.map('mini-map',{
+        scrollWheelZoom:true, touchZoom:true, tap:false,
+        zoomAnimation:false, markerZoomAnimation:false,
+        minZoom:13, maxZoom:19,
+        maxBounds:bounds, maxBoundsViscosity:0.8,
+        layers:[osmLayer],
+      }).setView([-22.8381,-43.1086],16);
+      L.control.layers({'Mapa':osmLayer,'Satélite':satLayer},{},{position:'topright',collapsed:true}).addTo(this._miniMap);
+      // infra leve (apenas tubulações e bombas)
+      try {
+        const infra = await fetch('assets/infra.json').then(r=>r.json());
+        const canvasRenderer = L.canvas({padding:0.5});
+        const lg = L.layerGroup().addTo(this._miniMap);
+        (infra.pipelines||[]).forEach(p=>{
+          L.polyline(p.coords.map(c=>[c[0],c[1]]),{
+            renderer:canvasRenderer,
+            color:p.submarine?'#06b6d4':'#3b82f6',
+            weight:2, opacity:0.6,
+            dashArray:p.submarine?'8 4':null,
+          }).addTo(lg);
+        });
+      } catch(e){/**/}
+      setTimeout(()=>this._miniMap.invalidateSize(),200);
+    },
+
+    _updateMiniMarkers() {
+      if (!this._miniMap) return;
+      (this.reservoirs||[]).forEach(r=>{
+        if (!r.lat||!r.lng) return;
+        const color = markerColor(r.pct,r.online);
+        const pct = r.pct!=null?Math.round(r.pct):'?';
+        const icon = L.divIcon({
+          className:'aguada-marker',
+          html:`<div style="background:${color};border:2px solid rgba(0,0,0,0.4);border-radius:50%;width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 6px ${color}44">
+                  <div style="font-size:7px;font-weight:700;color:white;line-height:1">${r.alias}</div>
+                  <div style="font-size:8px;font-weight:700;color:white;line-height:1">${pct}%</div>
+                </div>`,
+          iconSize:[32,32], iconAnchor:[16,16],
+        });
+        if (this._miniMarkers[r.alias]) {
+          this._miniMarkers[r.alias].setLatLng([r.lat,r.lng]);
+          this._miniMarkers[r.alias].setIcon(icon);
+        } else {
+          const m = L.marker([r.lat,r.lng],{icon}).addTo(this._miniMap);
+          m.on('click',()=>this.openResModal(r.alias));
+          this._miniMarkers[r.alias]=m;
+        }
+      });
+    },
+
+    openResModal(alias) { this.openModal(alias); },
+
+    openFullMap() {
+      this.fullMap = true;
+      this.$nextTick(()=>{
+        if (this._fullMapObj) {
+          this._fullMapObj.invalidateSize();
+          return;
+        }
+        const osmLayer = L.tileLayer('assets/leaflet-tiles/{z}/{x}/{y}.png',{minZoom:13,maxZoom:19,maxNativeZoom:17,attribution:'© OSM'});
+        const satLayer = L.tileLayer('assets/leaflet-tiles-sat/{z}/{x}/{y}.jpg',{minZoom:13,maxZoom:19,maxNativeZoom:17,attribution:'© Esri'});
+        const bounds = L.latLngBounds([-22.856,-43.120],[-22.830,-43.088]);
+        this._fullMapObj = L.map('full-map',{
+          minZoom:13,maxZoom:19,maxBounds:bounds,maxBoundsViscosity:0.8,layers:[osmLayer],
+        }).setView([-22.8381,-43.1086],17);
+        L.control.layers({'Mapa':osmLayer,'Satélite':satLayer},{},{position:'topright',collapsed:false}).addTo(this._fullMapObj);
+        // Copiar markers
+        (this.reservoirs||[]).forEach(r=>{
+          if (!r.lat||!r.lng) return;
+          const color=markerColor(r.pct,r.online);
+          const pct=r.pct!=null?Math.round(r.pct):'?';
+          const icon=L.divIcon({className:'aguada-marker',html:`<div style="background:${color};border:2px solid rgba(0,0,0,0.4);border-radius:50%;width:36px;height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 8px ${color}44"><div style="font-size:8px;font-weight:700;color:white;line-height:1">${r.alias}</div><div style="font-size:9px;font-weight:700;color:white;line-height:1">${pct}%</div></div>`,iconSize:[36,36],iconAnchor:[18,18]});
+          L.marker([r.lat,r.lng],{icon}).bindTooltip(`<b>${r.alias}</b> — ${pct}%`).addTo(this._fullMapObj);
+        });
+        setTimeout(()=>this._fullMapObj.invalidateSize(),250);
+      });
+    },
+
+    closeFullMap() { this.fullMap=false; },
+
+    openFullScada() { this.fullScada=true; },
+  };
+}
+</script>
+</body>
+</html>

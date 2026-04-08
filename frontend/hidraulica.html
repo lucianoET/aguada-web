@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="data:,">
+  <title>Aguada — Hidráulica</title>
+  <link rel="stylesheet" href="assets/aguada.css"/>
+  <style>
+    [x-cloak]{display:none}
+
+    .equip-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .equip-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .equip-card.state-on   { border-left: 3px solid var(--green); }
+    .equip-card.state-off  { border-left: 3px solid var(--border2); }
+    .equip-card.state-fail { border-left: 3px solid var(--red); }
+    .equip-card.state-mnt  { border-left: 3px solid var(--yellow); }
+    .equip-card.state-open { border-left: 3px solid var(--green); }
+    .equip-card.state-closed { border-left: 3px solid var(--border2); }
+    .equip-card.state-partial { border-left: 3px solid var(--yellow); }
+
+    .equip-name {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .equip-ts {
+      font-size: 10px;
+      color: var(--text3);
+    }
+
+    .state-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+      display: inline-block;
+    }
+    .dot-green  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .dot-gray   { background: var(--text3); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+
+    .ctrl-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .ctrl-btn {
+      padding: 5px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--border2);
+      background: var(--bg3);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .ctrl-btn:hover { color: var(--text); border-color: var(--text3); }
+    .ctrl-btn.active-green  { background: rgba(34,197,94,0.15); color: var(--green); border-color: var(--green); }
+    .ctrl-btn.active-gray   { background: var(--bg3); color: var(--text); border-color: var(--text); }
+    .ctrl-btn.active-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); border-color: var(--yellow); }
+    .ctrl-btn.active-red    { background: rgba(239,68,68,0.15); color: var(--red); border-color: var(--red); }
+
+    .hydro-reading {
+      font-family: var(--mono);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--cyan);
+      line-height: 1;
+    }
+    .hydro-unit { font-size: 13px; color: var(--text3); margin-left: 4px; }
+    .hydro-diff { font-size: 11px; margin-top: 2px; }
+    .hydro-diff.positive { color: var(--yellow); }
+    .hydro-diff.negative { color: var(--green); }
+
+    .add-form {
+      background: var(--bg2);
+      border: 1px dashed var(--border2);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+
+    .add-form-title {
+      width: 100%;
+      font-size: 11px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 2px;
+    }
+
+    .note-text {
+      font-size: 11px;
+      color: var(--text3);
+      border-top: 1px solid var(--border);
+      padding-top: 6px;
+      font-style: italic;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      margin-top: 24px;
+    }
+
+    .section-header:first-of-type { margin-top: 0; }
+
+    .section-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      margin-right: 8px;
+    }
+
+    .empty-state {
+      padding: 32px;
+      text-align: center;
+      color: var(--text3);
+      background: var(--bg2);
+      border: 1px dashed var(--border2);
+      border-radius: var(--radius);
+      font-size: 13px;
+    }
+
+    .inline-note-form {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .tag-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--mono);
+    }
+  </style>
+</head>
+<body>
+<div class="layout" x-data="hidraulicaApp()" x-init="init()" x-cloak>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">A</div><span class="sidebar-brand-text">AGUADA</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Operação</div>
+      <a href="index.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="nav-label">Dashboard</span></a>
+      <a href="painel.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span><span class="nav-label">Painel Geral</span></a>
+      <a href="scada.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span><span class="nav-label">SCADA</span></a>
+      <div class="sidebar-section">Análise</div>
+      <a href="analise.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="nav-label">Análise</span></a>
+      <div class="sidebar-section">Gestão</div>
+      <a href="report.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="nav-label">Relatório</span></a>
+      <a href="hidraulica.html" class="nav-link active"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
+      <a href="dispositivos.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span><span class="nav-label">Dispositivos</span></a>
+      <a href="documentacao.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span><span class="nav-label">Documentação</span></a>
+    </nav>
+    <div class="sidebar-footer"><span class="gw-dot" :class="gwStatus"></span><span class="gw-label" x-text="gwLabel"></span></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Hidráulica</div>
+        <div class="topbar-sub">
+          Bombas: <span x-text="pumps.filter(p=>p.state==='ligada').length"></span> ligadas ·
+          Válvulas: <span x-text="valves.filter(v=>v.state==='aberta').length"></span> abertas ·
+          Hidrômetros: <span x-text="hydrometers.length"></span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-secondary" @click="load()" style="display:flex;gap:6px;align-items:center">
+          <svg :style="loading?'animation:spin 1s linear infinite':''" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          Atualizar
+        </button>
+        <button class="theme-btn" onclick="toggleTheme()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg></button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Toast feedback -->
+      <div x-show="feedback" x-transition
+        style="position:fixed;top:16px;right:20px;z-index:9999;padding:10px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,0.4)"
+        :style="feedbackOk ? 'background:rgba(34,197,94,0.2);border:1px solid var(--green);color:var(--green)' : 'background:rgba(239,68,68,0.2);border:1px solid var(--red);color:var(--red)'"
+        x-text="feedback">
+      </div>
+
+      <!-- ══════════════════ BOMBAS ══════════════════ -->
+      <div class="section-header">
+        <div style="display:flex;align-items:center">
+          <div class="section-icon" style="background:rgba(245,158,11,0.12)">
+            <svg width="16" height="16" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          </div>
+          <div class="section-title" style="font-size:15px">Bombas</div>
+        </div>
+        <button class="btn btn-secondary" @click="showAddPump=!showAddPump" style="font-size:11px">
+          + Adicionar bomba
+        </button>
+      </div>
+
+      <!-- Formulário adicionar bomba -->
+      <div x-show="showAddPump" x-transition class="add-form" style="margin-bottom:12px">
+        <div class="add-form-title">Nova bomba</div>
+        <input class="form-input" style="width:160px" type="text" placeholder="Nome (ex: B03-ELE)" x-model="newPump.name"/>
+        <select class="form-select" style="width:130px" x-model="newPump.state">
+          <option value="desligada">Desligada</option>
+          <option value="ligada">Ligada</option>
+          <option value="manutencao">Manutenção</option>
+        </select>
+        <select class="form-select" style="width:110px" x-model="newPump.mode">
+          <option value="manual">Manual</option>
+          <option value="auto">Auto</option>
+        </select>
+        <input class="form-input" style="flex:1;min-width:150px" type="text" placeholder="Observação (opcional)" x-model="newPump.note"/>
+        <button class="btn btn-primary" @click="addPump()">Registrar</button>
+        <button class="btn btn-secondary" @click="showAddPump=false">Cancelar</button>
+      </div>
+
+      <!-- Cards de bombas -->
+      <div class="equip-grid">
+        <template x-for="p in pumps" :key="p.pump_name">
+          <div class="equip-card"
+            :class="p.state==='ligada'?'state-on':p.state==='falha'?'state-fail':p.state==='manutencao'?'state-mnt':'state-off'">
+            <div class="equip-name">
+              <span class="state-dot"
+                :class="p.state==='ligada'?'dot-green':p.state==='falha'?'dot-red':p.state==='manutencao'?'dot-yellow':'dot-gray'"></span>
+              <span x-text="p.pump_name"></span>
+              <span class="tag-badge" style="margin-left:auto;font-size:10px"
+                :style="p.state==='ligada'?'background:rgba(34,197,94,0.15);color:var(--green)':p.state==='falha'?'background:rgba(239,68,68,0.15);color:var(--red)':p.state==='manutencao'?'background:rgba(245,158,11,0.15);color:var(--yellow)':'background:var(--bg3);color:var(--text3)'"
+                x-text="p.state==='ligada'?'LIGADA':p.state==='desligada'?'DESLIGADA':p.state==='manutencao'?'MANUTENÇÃO':'FALHA'">
+              </span>
+            </div>
+
+            <div class="ctrl-row">
+              <button class="ctrl-btn" :class="p.state==='ligada'?'active-green':''"
+                @click="setPump(p.pump_name,'ligada')">⏵ Ligar</button>
+              <button class="ctrl-btn" :class="p.state==='desligada'?'active-gray':''"
+                @click="setPump(p.pump_name,'desligada')">⏹ Desligar</button>
+              <button class="ctrl-btn" :class="p.state==='manutencao'?'active-yellow':''"
+                @click="setPump(p.pump_name,'manutencao')">🔧 Manutenção</button>
+              <button class="ctrl-btn" :class="p.state==='falha'?'active-red':''"
+                @click="setPump(p.pump_name,'falha')">⚠ Falha</button>
+            </div>
+
+            <div style="display:flex;gap:10px;align-items:center">
+              <div class="equip-ts">
+                Modo: <span style="color:var(--text2)" x-text="p.mode||'manual'"></span> ·
+                Atualizado: <span x-text="fmtTs(p.ts)"></span>
+              </div>
+            </div>
+
+            <div class="note-text" x-show="p.note" x-text="p.note"></div>
+
+            <!-- Nota inline -->
+            <div class="inline-note-form">
+              <input class="form-input" style="flex:1;font-size:11px" type="text" placeholder="Observação..."
+                x-model="p._note_draft"
+                @keyup.enter="setPumpWithNote(p.pump_name, p.state, p._note_draft)"/>
+              <button class="ctrl-btn" style="font-size:11px"
+                @click="setPumpWithNote(p.pump_name, p.state, p._note_draft)">Salvar</button>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <div class="empty-state" x-show="loaded && pumps.length===0">
+        Nenhuma bomba cadastrada. Clique em "+ Adicionar bomba" para começar.
+      </div>
+
+      <!-- ══════════════════ VÁLVULAS ══════════════════ -->
+      <div class="section-header">
+        <div style="display:flex;align-items:center">
+          <div class="section-icon" style="background:rgba(6,182,212,0.12)">
+            <svg width="16" height="16" fill="none" stroke="#06b6d4" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg>
+          </div>
+          <div class="section-title" style="font-size:15px">Válvulas</div>
+        </div>
+        <button class="btn btn-secondary" @click="showAddValve=!showAddValve" style="font-size:11px">
+          + Adicionar válvula
+        </button>
+      </div>
+
+      <!-- Formulário adicionar válvula -->
+      <div x-show="showAddValve" x-transition class="add-form" style="margin-bottom:12px">
+        <div class="add-form-title">Nova válvula</div>
+        <input class="form-input" style="width:160px" type="text" placeholder="Nome (ex: V-CAV-1)" x-model="newValve.name"/>
+        <select class="form-select" style="width:130px" x-model="newValve.state">
+          <option value="fechada">Fechada</option>
+          <option value="aberta">Aberta</option>
+          <option value="parcial">Parcial</option>
+        </select>
+        <input class="form-input" style="flex:1;min-width:150px" type="text" placeholder="Observação (opcional)" x-model="newValve.note"/>
+        <button class="btn btn-primary" @click="addValve()">Registrar</button>
+        <button class="btn btn-secondary" @click="showAddValve=false">Cancelar</button>
+      </div>
+
+      <!-- Cards de válvulas -->
+      <div class="equip-grid">
+        <template x-for="v in valves" :key="v.valve_name">
+          <div class="equip-card"
+            :class="v.state==='aberta'?'state-open':v.state==='parcial'?'state-partial':v.state==='falha'?'state-fail':'state-closed'">
+            <div class="equip-name">
+              <span class="state-dot"
+                :class="v.state==='aberta'?'dot-green':v.state==='parcial'?'dot-yellow':v.state==='falha'?'dot-red':'dot-gray'"></span>
+              <span x-text="v.valve_name"></span>
+              <span class="tag-badge" style="margin-left:auto;font-size:10px"
+                :style="v.state==='aberta'?'background:rgba(34,197,94,0.15);color:var(--green)':v.state==='parcial'?'background:rgba(245,158,11,0.15);color:var(--yellow)':v.state==='falha'?'background:rgba(239,68,68,0.15);color:var(--red)':'background:var(--bg3);color:var(--text3)'"
+                x-text="v.state==='aberta'?'ABERTA':v.state==='fechada'?'FECHADA':v.state==='parcial'?'PARCIAL':'FALHA'">
+              </span>
+            </div>
+
+            <div class="ctrl-row">
+              <button class="ctrl-btn" :class="v.state==='aberta'?'active-green':''"
+                @click="setValve(v.valve_name,'aberta')">✓ Abrir</button>
+              <button class="ctrl-btn" :class="v.state==='parcial'?'active-yellow':''"
+                @click="setValve(v.valve_name,'parcial')">≈ Parcial</button>
+              <button class="ctrl-btn" :class="v.state==='fechada'?'active-gray':''"
+                @click="setValve(v.valve_name,'fechada')">✕ Fechar</button>
+              <button class="ctrl-btn" :class="v.state==='falha'?'active-red':''"
+                @click="setValve(v.valve_name,'falha')">⚠ Falha</button>
+            </div>
+
+            <div class="equip-ts">Atualizado: <span x-text="fmtTs(v.ts)"></span></div>
+
+            <div class="note-text" x-show="v.note" x-text="v.note"></div>
+
+            <div class="inline-note-form">
+              <input class="form-input" style="flex:1;font-size:11px" type="text" placeholder="Observação..."
+                x-model="v._note_draft"
+                @keyup.enter="setValveWithNote(v.valve_name, v.state, v._note_draft)"/>
+              <button class="ctrl-btn" style="font-size:11px"
+                @click="setValveWithNote(v.valve_name, v.state, v._note_draft)">Salvar</button>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <div class="empty-state" x-show="loaded && valves.length===0">
+        Nenhuma válvula cadastrada. Clique em "+ Adicionar válvula" para começar.
+      </div>
+
+      <!-- ══════════════════ HIDRÔMETROS ══════════════════ -->
+      <div class="section-header">
+        <div style="display:flex;align-items:center">
+          <div class="section-icon" style="background:rgba(59,130,246,0.12)">
+            <svg width="16" height="16" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+          </div>
+          <div class="section-title" style="font-size:15px">Hidrômetros</div>
+        </div>
+        <button class="btn btn-secondary" @click="showAddHydro=!showAddHydro" style="font-size:11px">
+          + Adicionar hidrômetro
+        </button>
+      </div>
+
+      <!-- Formulário adicionar hidrômetro -->
+      <div x-show="showAddHydro" x-transition class="add-form" style="margin-bottom:12px">
+        <div class="add-form-title">Novo hidrômetro — primeira leitura</div>
+        <input class="form-input" style="width:160px" type="text" placeholder="Nome (ex: HID-IF)" x-model="newHydro.name"/>
+        <input class="form-input" style="width:130px" type="number" step="0.01" min="0" placeholder="Leitura inicial" x-model="newHydro.reading"/>
+        <select class="form-select" style="width:90px" x-model="newHydro.unit">
+          <option value="m3">m³</option>
+          <option value="L">L</option>
+        </select>
+        <input class="form-input" style="flex:1;min-width:150px" type="text" placeholder="Observação (opcional)" x-model="newHydro.note"/>
+        <button class="btn btn-primary" @click="addHydro()">Registrar</button>
+        <button class="btn btn-secondary" @click="showAddHydro=false">Cancelar</button>
+      </div>
+
+      <!-- Cards de hidrômetros -->
+      <div class="equip-grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
+        <template x-for="h in hydrometers" :key="h.meter_name">
+          <div class="equip-card" style="border-left:3px solid var(--blue)">
+            <div class="equip-name">
+              <svg width="14" height="14" fill="none" stroke="var(--cyan)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+              <span x-text="h.meter_name"></span>
+            </div>
+
+            <div style="display:flex;align-items:baseline;gap:4px">
+              <div class="hydro-reading" x-text="Number(h.reading).toFixed(2)"></div>
+              <div class="hydro-unit" x-text="h.unit||'m3'"></div>
+            </div>
+
+            <div class="hydro-diff" :class="(h._diff||0)<0?'negative':'positive'" x-show="h._diff!=null">
+              Variação vs anterior: <span x-text="(h._diff>=0?'+':'')+Number(h._diff).toFixed(2)+' '+(h.unit||'m3')"></span>
+            </div>
+
+            <div class="equip-ts">Última leitura: <span x-text="fmtTs(h.ts)"></span></div>
+
+            <!-- Input nova leitura -->
+            <div style="display:flex;gap:6px;align-items:flex-end;margin-top:2px">
+              <div style="flex:1">
+                <div style="font-size:10px;color:var(--text3);margin-bottom:3px">Nova leitura (<span x-text="h.unit||'m3'"></span>)</div>
+                <input class="form-input" type="number" step="0.01" min="0" placeholder="Valor atual do hidrômetro"
+                  x-model="h._new_reading"
+                  @keyup.enter="registerReading(h)"/>
+              </div>
+              <button class="btn btn-primary" style="padding:6px 14px;font-size:12px" @click="registerReading(h)">
+                Registrar
+              </button>
+            </div>
+
+            <div class="note-text" x-show="h.note" x-text="h.note"></div>
+          </div>
+        </template>
+      </div>
+
+      <div class="empty-state" x-show="loaded && hydrometers.length===0">
+        Nenhum hidrômetro cadastrado. Clique em "+ Adicionar hidrômetro" para começar.
+      </div>
+
+      <div style="height:32px"></div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script src="assets/shared.js"></script>
+<script defer src="assets/vendor/alpine.min.js"></script>
+<script>
+function hidraulicaApp() {
+  return {
+    pumps: [],
+    valves: [],
+    hydrometers: [],
+    loaded: false,
+    loading: false,
+    gwStatus: 'off',
+    gwLabel: 'GW offline',
+    feedback: '',
+    feedbackOk: true,
+    showAddPump: false,
+    showAddValve: false,
+    showAddHydro: false,
+    newPump:  { name: '', state: 'desligada', mode: 'manual', note: '' },
+    newValve: { name: '', state: 'fechada', note: '' },
+    newHydro: { name: '', reading: '', unit: 'm3', note: '' },
+
+    async init() {
+      await Promise.all([this.loadGateway(), this.load()]);
+    },
+
+    async loadGateway() {
+      const gw = await fetch('/api/gateway').then(r => r.json()).catch(() => null);
+      if (!gw) return;
+      if (gw.sim_mode)      { this.gwStatus = 'sim'; this.gwLabel = 'Simulação'; }
+      else if (gw.connected) { this.gwStatus = 'on';  this.gwLabel = 'GW online'; }
+      else                   { this.gwStatus = 'off'; this.gwLabel = 'GW offline'; }
+    },
+
+    async load() {
+      this.loading = true;
+      try {
+        const [curr, allHydro] = await Promise.all([
+          fetch('/api/equip/current').then(r => r.json()).catch(() => ({ pumps: [], valves: [], hydrometers: [] })),
+          fetch('/api/manual/hydrometers?limit=500').then(r => r.json()).catch(() => ({ items: [] })),
+        ]);
+
+        // Calcular diff para hidrômetros: comparar leitura atual com a penúltima
+        const hydroLatest = curr.hydrometers || [];
+        const hydroAll = allHydro.items || [];
+
+        this.pumps = (curr.pumps || []).map(p => ({ ...p, _note_draft: '' }));
+        this.valves = (curr.valves || []).map(v => ({ ...v, _note_draft: '' }));
+        this.hydrometers = hydroLatest.map(h => {
+          const history = hydroAll.filter(x => x.meter_name === h.meter_name);
+          // history is sorted desc by ts; [0] is latest, [1] is previous
+          const prev = history.length >= 2 ? history[1] : null;
+          const diff = prev != null ? (parseFloat(h.reading) - parseFloat(prev.reading)) : null;
+          return { ...h, _diff: diff, _new_reading: '', _prev_reading: prev ? prev.reading : null };
+        });
+
+        this.loaded = true;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // ── Bombas ──────────────────────────────────────────────────
+    async setPump(pump_name, state, note = '', mode = '') {
+      const body = { pump_name, state };
+      if (note) body.note = note;
+      if (mode) body.mode = mode;
+      const res = await fetch('/api/manual/pumps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) { await this.load(); this.notify('Bomba "' + pump_name + '" → ' + state, true); }
+      else { this.notify('Erro ao atualizar bomba', false); }
+    },
+
+    async setPumpWithNote(pump_name, state, note) {
+      await this.setPump(pump_name, state, note);
+    },
+
+    async addPump() {
+      const name = this.newPump.name.trim();
+      if (!name) return this.notify('Informe o nome da bomba', false);
+      await this.setPump(name, this.newPump.state, this.newPump.note, this.newPump.mode);
+      this.newPump = { name: '', state: 'desligada', mode: 'manual', note: '' };
+      this.showAddPump = false;
+    },
+
+    // ── Válvulas ─────────────────────────────────────────────────
+    async setValve(valve_name, state, note = '') {
+      const res = await fetch('/api/manual/valves', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ valve_name, state, note: note || undefined }),
+      });
+      if (res.ok) { await this.load(); this.notify('Válvula "' + valve_name + '" → ' + state, true); }
+      else { this.notify('Erro ao atualizar válvula', false); }
+    },
+
+    async setValveWithNote(valve_name, state, note) {
+      await this.setValve(valve_name, state, note);
+    },
+
+    async addValve() {
+      const name = this.newValve.name.trim();
+      if (!name) return this.notify('Informe o nome da válvula', false);
+      await this.setValve(name, this.newValve.state, this.newValve.note);
+      this.newValve = { name: '', state: 'fechada', note: '' };
+      this.showAddValve = false;
+    },
+
+    // ── Hidrômetros ───────────────────────────────────────────────
+    async registerReading(h) {
+      const val = parseFloat(h._new_reading);
+      if (isNaN(val) || val < 0) return this.notify('Leitura inválida', false);
+      if (val < parseFloat(h.reading)) {
+        if (!confirm(`Nova leitura (${val}) é menor que a atual (${h.reading}). Confirmar?`)) return;
+      }
+      const res = await fetch('/api/manual/hydrometers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ meter_name: h.meter_name, reading: val, unit: h.unit || 'm3' }),
+      });
+      if (res.ok) {
+        await this.load();
+        this.notify('Hidrômetro "' + h.meter_name + '" registrado: ' + val + ' ' + (h.unit || 'm3'), true);
+      } else {
+        this.notify('Erro ao registrar leitura', false);
+      }
+    },
+
+    async addHydro() {
+      const name = this.newHydro.name.trim();
+      const val = parseFloat(this.newHydro.reading);
+      if (!name) return this.notify('Informe o nome do hidrômetro', false);
+      if (isNaN(val)) return this.notify('Informe a leitura inicial', false);
+      const res = await fetch('/api/manual/hydrometers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ meter_name: name, reading: val, unit: this.newHydro.unit, note: this.newHydro.note || undefined }),
+      });
+      if (res.ok) {
+        await this.load();
+        this.notify('Hidrômetro "' + name + '" adicionado', true);
+        this.newHydro = { name: '', reading: '', unit: 'm3', note: '' };
+        this.showAddHydro = false;
+      } else {
+        this.notify('Erro ao adicionar hidrômetro', false);
+      }
+    },
+
+    // ── Utilidades ──────────────────────────────────────────────
+    notify(msg, ok) {
+      this.feedback = msg;
+      this.feedbackOk = ok;
+      setTimeout(() => { this.feedback = ''; }, 3500);
+    },
+
+    fmtTs(ts) {
+      if (!ts) return '—';
+      return new Date(ts * 1000).toLocaleString('pt-BR', {
+        day: '2-digit', month: '2-digit',
+        hour: '2-digit', minute: '2-digit',
+      });
+    },
+  };
+}
+</script>
+</body>
+</html>

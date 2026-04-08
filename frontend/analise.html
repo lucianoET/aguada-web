@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="data:,">
+
   <title>Aguada — Análise</title>
   <link rel="stylesheet" href="assets/aguada.css"/>
   <style>
@@ -23,11 +25,13 @@
     <nav class="sidebar-nav">
       <div class="sidebar-section">Operação</div>
       <a href="index.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="nav-label">Dashboard</span></a>
+      <a href="painel.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span><span class="nav-label">Painel Geral</span></a>
       <a href="scada.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span><span class="nav-label">SCADA</span></a>
       <div class="sidebar-section">Análise</div>
       <a href="analise.html" class="nav-link active"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="nav-label">Análise</span></a>
       <div class="sidebar-section">Gestão</div>
       <a href="report.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="nav-label">Relatório</span></a>
+            <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
       <a href="dispositivos.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span><span class="nav-label">Dispositivos</span></a>
       <a href="documentacao.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span><span class="nav-label">Documentação</span></a>
     </nav>
@@ -48,6 +52,7 @@
       <button class="tab-btn" :class="{active:tab==='consumo'}" @click="switchTab('consumo')">Consumo</button>
       <button class="tab-btn" :class="{active:tab==='abastecimento'}" @click="switchTab('abastecimento')">Abastecimento</button>
       <button class="tab-btn" :class="{active:tab==='dados'}" @click="switchTab('dados')">Dados</button>
+      <button class="tab-btn" :class="{active:tab==='tubo'}" @click="switchTab('tubo')">⚠️ Tubo Submarino</button>
     </div>
 
     <div class="content">
@@ -117,7 +122,7 @@
             <tbody>
               <template x-for="(row, idx) in abast.items" :key="row.id ?? `${row.ts || 'ts'}-${row.alias || row.reservoir_alias || 'reservatorio'}-${idx}`">
                 <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:7px 12px;font-family:var(--mono);color:var(--blue)" x-text="row.alias||row.reservoir_alias||'—'"></td>
+                  <td style="padding:7px 12px;font-family:var(--mono);color:var(--blue)" x-text="row.reservoir_name||row.alias||'—'"></td>
                   <td style="padding:7px 12px;text-align:right;font-family:var(--mono)" x-text="row.volume_l!=null ? (row.volume_l / 1000).toFixed(1) + ' m³' : '—'"></td>
                   <td style="padding:7px 12px;text-align:right;color:var(--text2)" x-text="row.note||'—'"></td>
                   <td style="padding:7px 12px;text-align:right;color:var(--text3);font-size:11px" x-text="formatTs(row.ts)"></td>
@@ -169,6 +174,88 @@
         </div>
       </div>
 
+      <!-- ABA: Tubo Submarino -->
+      <div x-show="tab==='tubo'">
+        <!-- Banner de status -->
+        <div style="margin-bottom:16px;padding:14px 18px;border-radius:var(--radius);display:flex;align-items:center;gap:14px"
+          :style="tubo.alarm ? 'background:rgba(239,68,68,0.12);border:1px solid var(--red)' : 'background:rgba(34,197,94,0.08);border:1px solid var(--green)'">
+          <div style="font-size:28px" x-text="tubo.alarm ? '⚠️' : '✅'"></div>
+          <div>
+            <div style="font-size:15px;font-weight:700" :style="tubo.alarm ? 'color:var(--red)' : 'color:var(--green)'"
+              x-text="tubo.alarm ? 'ALARME: Possível vazamento no tubo submarino' : 'Fluxo normal — sem vazamento detectado'"></div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">Comparação Δ HID-IF vs Δ HID-PRAIA — diferença acima de <strong>0,5 m³</strong> gera alarme</div>
+          </div>
+          <button class="btn btn-secondary" style="margin-left:auto" @click="loadTubulacao()">↻ Atualizar</button>
+        </div>
+
+        <!-- Cards de leitura atual -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+          <div class="card" style="padding:16px">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px">HID-IF — saída Ilha das Flores</div>
+            <div style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--cyan)" x-text="tubo.if_curr != null ? tubo.if_curr.toFixed(2) + ' m³' : '—'"></div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px">
+              Δ leitura anterior:
+              <span :style="tubo.if_delta != null ? (tubo.if_delta >= 0 ? 'color:var(--yellow)' : 'color:var(--green)') : ''"
+                x-text="tubo.if_delta != null ? (tubo.if_delta >= 0 ? '+' : '') + tubo.if_delta.toFixed(2) + ' m³' : '—'"></span>
+            </div>
+            <div style="font-size:10px;color:var(--text3);margin-top:4px" x-text="tubo.if_ts ? 'Lida em ' + formatTs(tubo.if_ts) : ''"></div>
+          </div>
+          <div class="card" style="padding:16px">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px">HID-PRAIA — entrada Ilha do Engenho</div>
+            <div style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--cyan)" x-text="tubo.praia_curr != null ? tubo.praia_curr.toFixed(2) + ' m³' : '—'"></div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px">
+              Δ leitura anterior:
+              <span :style="tubo.praia_delta != null ? (tubo.praia_delta >= 0 ? 'color:var(--yellow)' : 'color:var(--green)') : ''"
+                x-text="tubo.praia_delta != null ? (tubo.praia_delta >= 0 ? '+' : '') + tubo.praia_delta.toFixed(2) + ' m³' : '—'"></span>
+            </div>
+            <div style="font-size:10px;color:var(--text3);margin-top:4px" x-text="tubo.praia_ts ? 'Lida em ' + formatTs(tubo.praia_ts) : ''"></div>
+          </div>
+        </div>
+
+        <!-- Diferença de deltas -->
+        <div x-show="tubo.if_delta != null && tubo.praia_delta != null"
+          class="card" style="padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:16px">
+          <div>
+            <div style="font-size:11px;color:var(--text3)">Diferença |ΔIF − ΔPRAIA|</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:700" :style="tubo.alarm ? 'color:var(--red)' : 'color:var(--green)'" x-text="tubo.diff_abs != null ? tubo.diff_abs.toFixed(2) + ' m³' : '—'"></div>
+          </div>
+          <div style="flex:1;font-size:12px;color:var(--text2)">
+            <strong>Lógica:</strong> A água entra por HID-IF → tubulação submersa → HID-PRAIA. Se os deltas diários diferem, há perda na tubulação.
+            A tubulação possui remendos e histórico de vazamentos. Inclua como ativo de manutenção.
+          </div>
+        </div>
+
+        <!-- Histórico de leituras -->
+        <div class="card table-wrap">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text2)">Histórico de Comparação</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr style="border-bottom:1px solid var(--border)">
+              <th style="padding:8px 12px;text-align:left;color:var(--text3);font-weight:500">Data/Hora</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--cyan);font-weight:500">HID-IF (m³)</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">Δ IF</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--cyan);font-weight:500">HID-PRAIA (m³)</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">Δ PRAIA</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">|ΔIF−ΔPRAIA|</th>
+              <th style="padding:8px 12px;text-align:center;color:var(--text3);font-weight:500">Status</th>
+            </tr></thead>
+            <tbody>
+              <template x-for="(row, idx) in tubo.history" :key="idx">
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:7px 12px;color:var(--text3);font-size:11px" x-text="formatTs(row.ts)"></td>
+                  <td style="padding:7px 12px;text-align:right;font-family:var(--mono)" x-text="row.hid_if != null ? row.hid_if.toFixed(2) : '—'"></td>
+                  <td style="padding:7px 12px;text-align:right;font-family:var(--mono);font-size:11px" :style="row.delta_if != null && row.delta_if > 0 ? 'color:var(--yellow)' : 'color:var(--text3)'" x-text="row.delta_if != null ? (row.delta_if >= 0 ? '+' : '') + row.delta_if.toFixed(2) : '—'"></td>
+                  <td style="padding:7px 12px;text-align:right;font-family:var(--mono)" x-text="row.hid_praia != null ? row.hid_praia.toFixed(2) : '—'"></td>
+                  <td style="padding:7px 12px;text-align:right;font-family:var(--mono);font-size:11px" :style="row.delta_praia != null && row.delta_praia > 0 ? 'color:var(--yellow)' : 'color:var(--text3)'" x-text="row.delta_praia != null ? (row.delta_praia >= 0 ? '+' : '') + row.delta_praia.toFixed(2) : '—'"></td>
+                  <td style="padding:7px 12px;text-align:right;font-family:var(--mono);font-size:11px" :style="row.diff_abs > 0.5 ? 'color:var(--red);font-weight:600' : 'color:var(--text3)'" x-text="row.diff_abs != null ? row.diff_abs.toFixed(2) : '—'"></td>
+                  <td style="padding:7px 12px;text-align:center;font-size:11px" x-text="row.diff_abs != null ? (row.diff_abs > 0.5 ? '⚠️ Alarme' : '✅ Normal') : '—'"></td>
+                </tr>
+              </template>
+              <tr x-show="!tubo.history.length"><td colspan="7" style="padding:20px;text-align:center;color:var(--text3)">Sem leituras suficientes. Insira leituras de HID-IF e HID-PRAIA em Hidráulica.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -195,6 +282,7 @@ function analiseApp() {
     cons:  { alias: '', date: new Date().toISOString().slice(0,10), summary: { alias: 'CON', consumed_l: 0, supplied_l: 0, balance_l: 0 } },
     abast: { items: [] },
     dados: { alias: '', period: '24h', rows: [] },
+    tubo: { alarm: false, if_curr: null, if_delta: null, if_ts: null, praia_curr: null, praia_delta: null, praia_ts: null, diff_abs: null, history: [] },
     gwStatus: 'off',
     gwLabel: 'GW offline',
     _histChart: null,
@@ -218,6 +306,7 @@ function analiseApp() {
       await this.$nextTick();
       if (t==='historico') this._renderHistChart(this._lastHistData||[]);
       if (t==='consumo')   this._renderConsChart(this._lastConsData||[]);
+      if (t==='tubo')       this.loadTubulacao();
     },
 
     async loadHistorico() {
@@ -226,7 +315,17 @@ function analiseApp() {
       const datasets = await Promise.all(aliases.map(async a => {
         const r = await fetch(`/api/history/${a}?period=${this.hist.period}`).then(r=>r.json()).catch(()=>[]);
         const color = ALIAS_FILL_COLORS[a] || '#3b82f6';
-        return { label: a, data: r.map(p=>({x: new Date(p.ts*1000).toLocaleString('pt-BR'), y: Math.round(p.pct||0)})), borderColor: color, backgroundColor: color+'22', tension: 0.3, pointRadius: 0, fill: false };
+        return {
+          label: a,
+          data: r.map(p => ({ x: Number(p.ts || 0), y: Math.round(p.pct || 0) })),
+          borderColor: color,
+          backgroundColor: color + '22',
+          tension: 0.25,
+          pointRadius: 0,
+          pointHitRadius: 6,
+          borderWidth: 2,
+          fill: false,
+        };
       }));
       this._lastHistData = datasets;
       this.hist.loading = false;
@@ -240,7 +339,44 @@ function analiseApp() {
       const ctx = document.getElementById('histChart');
       if (!ctx) return;
       if (this._histChart) this._histChart.destroy();
-      this._histChart = new Chart(ctx, { type:'line', data:{ datasets }, options:{ ...CHART_DEFAULTS, parsing:{ xAxisKey:'x', yAxisKey:'y' } } });
+      this._histChart = new Chart(ctx, {
+        type:'line',
+        data:{ datasets },
+        options:{
+          ...CHART_DEFAULTS,
+          parsing:{ xAxisKey:'x', yAxisKey:'y' },
+          scales: {
+            x: {
+              type: 'linear',
+              ticks: {
+                color: '#8aa2bf',
+                maxTicksLimit: 8,
+                callback: (value) => {
+                  const ts = Number(value);
+                  if (!ts) return '';
+                  return new Date(ts * 1000).toLocaleString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  });
+                }
+              },
+              grid: { color: '#1e2d3d' }
+            },
+            y: {
+              ticks: { color: '#8aa2bf' },
+              grid: { color: '#1e2d3d' },
+              min: 0,
+              max: 100,
+            },
+          },
+          interaction: {
+            mode: 'nearest',
+            intersect: false,
+          },
+        }
+      });
     },
 
     async loadConsumo() {
@@ -289,6 +425,44 @@ function analiseApp() {
           }
         }
       });
+    },
+
+    async loadTubulacao() {
+      const [rIF, rPRAIA] = await Promise.all([
+        fetch('/api/manual/hydrometers?meter_name=HID-IF&limit=30').then(r=>r.json()).catch(()=>({items:[]})),
+        fetch('/api/manual/hydrometers?meter_name=HID-PRAIA&limit=30').then(r=>r.json()).catch(()=>({items:[]})),
+      ]);
+      const ifList    = (rIF.items    || []).sort((a,b) => b.ts - a.ts);
+      const praiaList = (rPRAIA.items || []).sort((a,b) => b.ts - a.ts);
+
+      // Current readings and deltas
+      this.tubo.if_curr    = ifList[0]    ? parseFloat(ifList[0].reading)    : null;
+      this.tubo.if_ts      = ifList[0]    ? ifList[0].ts  : null;
+      this.tubo.praia_curr = praiaList[0] ? parseFloat(praiaList[0].reading) : null;
+      this.tubo.praia_ts   = praiaList[0] ? praiaList[0].ts : null;
+      this.tubo.if_delta    = (ifList[0]    && ifList[1])    ? parseFloat(ifList[0].reading)    - parseFloat(ifList[1].reading)    : null;
+      this.tubo.praia_delta = (praiaList[0] && praiaList[1]) ? parseFloat(praiaList[0].reading) - parseFloat(praiaList[1].reading) : null;
+      this.tubo.diff_abs    = (this.tubo.if_delta != null && this.tubo.praia_delta != null)
+        ? Math.abs(this.tubo.if_delta - this.tubo.praia_delta) : null;
+      this.tubo.alarm = this.tubo.diff_abs != null && this.tubo.diff_abs > 0.5;
+
+      // Build comparison history (pair IF[i] vs PRAIA[i] by index)
+      const maxLen = Math.max(ifList.length, praiaList.length);
+      const history = [];
+      for (let i = 0; i < Math.min(maxLen - 1, 20); i++) {
+        const ifRow    = ifList[i];
+        const ifPrev   = ifList[i+1];
+        const prRow    = praiaList[i];
+        const prPrev   = praiaList[i+1];
+        const ts       = ifRow ? ifRow.ts : (prRow ? prRow.ts : null);
+        const hif      = ifRow    ? parseFloat(ifRow.reading)    : null;
+        const dif      = (ifRow && ifPrev)  ? parseFloat(ifRow.reading)  - parseFloat(ifPrev.reading)  : null;
+        const hpr      = prRow    ? parseFloat(prRow.reading)    : null;
+        const dpr      = (prRow && prPrev)  ? parseFloat(prRow.reading)  - parseFloat(prPrev.reading)  : null;
+        const diff     = (dif != null && dpr != null) ? Math.abs(dif - dpr) : null;
+        history.push({ ts, hid_if: hif, delta_if: dif, hid_praia: hpr, delta_praia: dpr, diff_abs: diff });
+      }
+      this.tubo.history = history;
     },
 
     async loadAbastecimento() {

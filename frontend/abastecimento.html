@@ -1,363 +1,334 @@
 <!DOCTYPE html>
-<html lang="pt-BR" x-data="abastApp()" x-init="init()" :class="{ 'dark': darkMode }">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="data:,">
+
   <title>Aguada — Abastecimento</title>
-  <link rel="stylesheet" href="assets/tailwind.css?v=1" />
-  <script src="assets/shared.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="assets/aguada.css"/>
   <style>[x-cloak]{display:none}</style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen" x-cloak>
+<body>
+<div class="layout" x-data="abastApp()" x-init="init()" x-cloak>
 
-  <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">A</div>
-          <span class="font-semibold text-lg text-gray-800 dark:text-gray-100">Aguada CMASM</span>
-        </div>
-        <nav class="hidden md:flex items-center gap-1">
-          <a href="index.html"         class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dashboard</a>
-          <a href="scada.html"         class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">SCADA</a>
-          <a href="history.html"       class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Histórico</a>
-          <a href="consumption.html"   class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Consumo</a>
-          <a href="abastecimento.html" class="px-4 py-2 rounded-md text-sm font-medium bg-blue-600 text-white">Abastecimento</a>
-          <a href="dados.html"         class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dados</a>
-          <a href="report.html"        class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Relatório</a>
-          <a href="dispositivos.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dispositivos</a>
-          <a href="documentacao.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Documentação</a>
-        </nav>
-        <button @click="toggleDark()" class="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-          <svg x-show="!darkMode" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-          <svg x-show="darkMode"  class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1m15.07-6.07l-.71.71M6.34 17.66l-.71.71M17.66 17.66l-.71-.71M6.34 6.34l-.71-.71M12 7a5 5 0 100 10A5 5 0 0012 7z"/></svg>
-        </button>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">A</div><span class="sidebar-brand-text">AGUADA</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Operação</div>
+      <a href="index.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="nav-label">Dashboard</span></a>
+      <a href="painel.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span><span class="nav-label">Painel Geral</span></a>
+      <a href="scada.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span><span class="nav-label">SCADA</span></a>
+      <div class="sidebar-section">Análise</div>
+      <a href="analise.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="nav-label">Análise</span></a>
+      <a href="abastecimento.html" class="nav-link active"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a5 5 0 00-5 5c0 5 5 11 5 11s5-6 5-11a5 5 0 00-5-5z"/></svg></span><span class="nav-label">Abastecimento</span></a>
+      <div class="sidebar-section">Gestão</div>
+      <a href="report.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="nav-label">Relatório</span></a>
+            <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
+      <a href="dispositivos.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span><span class="nav-label">Dispositivos</span></a>
+      <a href="documentacao.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span><span class="nav-label">Documentação</span></a>
+    </nav>
+    <div class="sidebar-footer"><span class="gw-dot" :class="gwStatus"></span><span class="gw-label" x-text="gwLabel"></span></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div><div class="topbar-title">Abastecimento</div><div class="topbar-sub">Entradas e saídas detectadas por variação de volume</div></div>
+      <div class="topbar-right">
+        <button class="theme-btn" onclick="toggleTheme()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg></button>
       </div>
     </div>
-  </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <h1 class="text-xl font-semibold mb-1 text-gray-700 dark:text-gray-200">Monitoramento de Abastecimento</h1>
-    <p class="text-xs text-gray-400 dark:text-gray-500 mb-6">Eventos detectados por variação positiva de volume (entrada) ou negativa (saída)</p>
+    <div class="content">
 
-    <!-- Status cards por reservatório -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-      <template x-for="r in reservoirs" :key="r.alias">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 text-center border-2 transition-colors"
-          :class="r.trend === 'up' ? 'border-green-400 dark:border-green-600' : r.trend === 'down' ? 'border-red-300 dark:border-red-700' : 'border-transparent'">
-          <div class="text-xs font-bold text-gray-600 dark:text-gray-300 mb-1" x-text="r.alias"></div>
-          <div class="text-lg font-bold"
-            :class="{'text-gray-400':!r.online,'text-green-600':r.online&&r.pct>=80,'text-blue-500':r.online&&r.pct>=50&&r.pct<80,'text-yellow-500':r.online&&r.pct>=20&&r.pct<50,'text-red-500':r.online&&r.pct<20}"
-            x-text="r.online ? r.pct + '%' : 'Off'"></div>
-          <div class="text-xs mt-1"
-            :class="r.trend==='up' ? 'text-green-500' : r.trend==='down' ? 'text-red-400' : 'text-gray-400'"
-            x-text="r.trend==='up' ? '▲ entrada' : r.trend==='down' ? '▼ saída' : '— estável'"></div>
-        </div>
-      </template>
-    </div>
-
-    <!-- KPI + Status -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
-        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Status Atual</div>
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl"
-            :class="anySupplying ? 'bg-green-100 dark:bg-green-900/40 animate-pulse' : 'bg-gray-100 dark:bg-gray-700'">
-            💧
+      <!-- Cards de status por reservatório -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:16px">
+        <template x-for="r in reservoirs" :key="r.alias">
+          <div class="card" style="padding:10px;text-align:center"
+            :style="r.trend==='up'?'border-color:var(--green)':r.trend==='down'?'border-color:var(--red)':''">
+            <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px" x-text="r.alias"></div>
+            <div style="font-family:var(--mono);font-size:17px"
+              :style="!r.online?'color:var(--text3)':r.pct>=80?'color:var(--green)':r.pct>=50?'color:var(--blue)':r.pct>=20?'color:var(--yellow)':'color:var(--red)'"
+              x-text="r.online ? r.pct + '%' : 'Off'"></div>
+            <div style="font-size:10px;margin-top:4px"
+              :style="r.trend==='up'?'color:var(--green)':r.trend==='down'?'color:var(--red)':'color:var(--text3)'"
+              x-text="r.trend==='up'?'▲ entrada':r.trend==='down'?'▼ saída':'— estável'"></div>
           </div>
+        </template>
+      </div>
+
+      <!-- KPI row -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px">
+        <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:14px">
+          <div style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px"
+            :style="anySupplying?'background:rgba(34,197,94,0.15)':'background:var(--surface2)'">💧</div>
           <div>
-            <div class="text-xl font-bold" :class="anySupplying ? 'text-green-600' : 'text-gray-400'"
+            <div style="font-size:16px;font-weight:600" :style="anySupplying?'color:var(--green)':'color:var(--text3)'"
               x-text="anySupplying ? 'Abastecendo' : 'Inativo'"></div>
-            <div class="text-xs text-gray-400 dark:text-gray-500" x-text="supplyingAliases.length ? supplyingAliases.join(', ') : 'nenhum reservatório enchendo'"></div>
+            <div style="font-size:11px;color:var(--text3)" x-text="supplyingAliases.length ? supplyingAliases.join(', ') : 'nenhum reservatório enchendo'"></div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:14px 16px">
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Volume Total Atual</div>
+          <div style="font-family:var(--mono);font-size:20px;color:var(--blue)" x-text="totalVolume > 0 ? totalVolume + ' L' : '—'"></div>
+          <div style="height:4px;background:var(--surface2);border-radius:2px;margin-top:8px">
+            <div style="height:4px;background:var(--blue);border-radius:2px;transition:width 0.7s" :style="`width:${avgPct}%`"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px" x-text="`Nível médio: ${avgPct}%`"></div>
+        </div>
+
+        <div class="card" style="padding:14px 16px">
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Eventos (7 dias)</div>
+          <div style="display:flex;align-items:flex-end;gap:16px">
+            <div>
+              <div style="font-family:var(--mono);font-size:20px;color:var(--green)" x-text="stats.supplyEvents"></div>
+              <div style="font-size:11px;color:var(--text3)">entradas</div>
+            </div>
+            <div>
+              <div style="font-family:var(--mono);font-size:20px;color:var(--red)" x-text="stats.consumeEvents"></div>
+              <div style="font-size:11px;color:var(--text3)">saídas</div>
+            </div>
+            <div>
+              <div style="font-family:var(--mono);font-size:17px" :style="stats.netL>=0?'color:var(--green)':'color:var(--red)'"
+                x-text="(stats.netL >= 0 ? '+' : '') + stats.netL + ' L'"></div>
+              <div style="font-size:11px;color:var(--text3)">balanço</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
-        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Volume Total Atual</div>
-        <div class="text-2xl font-bold text-blue-600" x-text="totalVolume > 0 ? totalVolume + ' L' : '—'"></div>
-        <div class="mt-2 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-          <div class="bg-blue-500 h-2 rounded-full transition-all duration-700" :style="`width:${avgPct}%`"></div>
-        </div>
-        <div class="text-xs text-gray-400 mt-1" x-text="`Nível médio: ${avgPct}%`"></div>
+      <!-- Gráfico: volume diário por reservatório -->
+      <div class="card" style="padding:14px 16px;margin-bottom:16px">
+        <div class="section-title" style="margin-bottom:10px">Volume médio diário por reservatório — 7 dias (%)</div>
+        <div style="position:relative;height:240px"><canvas id="chartSupply"></canvas></div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
-        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Eventos (7 dias)</div>
-        <div class="flex items-end gap-4">
-          <div>
-            <div class="text-2xl font-bold text-green-600" x-text="stats.supplyEvents"></div>
-            <div class="text-xs text-gray-400">entradas</div>
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-red-500" x-text="stats.consumeEvents"></div>
-            <div class="text-xs text-gray-400">saídas</div>
-          </div>
-          <div>
-            <div class="text-lg font-bold" :class="stats.netL >= 0 ? 'text-green-600' : 'text-red-500'"
-              x-text="(stats.netL >= 0 ? '+' : '') + stats.netL + ' L'"></div>
-            <div class="text-xs text-gray-400">balanço líquido</div>
+      <!-- Tabela de eventos -->
+      <div class="card" style="overflow:hidden">
+        <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <span class="section-title" style="margin:0">Eventos Recentes</span>
+          <div style="display:flex;gap:6px">
+            <button class="eq-btn" :class="{active:filterType==='all'}"     @click="filterType='all'">Todos</button>
+            <button class="eq-btn" :class="{active:filterType==='supply'}"  @click="filterType='supply'" style="color:var(--green)">Entradas</button>
+            <button class="eq-btn" :class="{active:filterType==='consume'}" @click="filterType='consume'" style="color:var(--red)">Saídas</button>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Gráfico barras: volume diário por reservatório (7 dias) -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
-      <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Volume médio diário por reservatório — 7 dias (%)</h2>
-      <div style="position:relative;height:260px"><canvas id="chartSupply"></canvas></div>
-    </div>
-
-    <!-- Histórico de eventos detalhados -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-      <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Eventos Recentes</h2>
-        <div class="flex gap-2">
-          <button @click="filterType='all'"     :class="filterType==='all'     ? 'bg-gray-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'" class="px-2 py-1 rounded text-xs font-medium">Todos</button>
-          <button @click="filterType='supply'"  :class="filterType==='supply'  ? 'bg-green-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'" class="px-2 py-1 rounded text-xs font-medium">Entradas</button>
-          <button @click="filterType='consume'" :class="filterType==='consume' ? 'bg-red-600 text-white'   : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'" class="px-2 py-1 rounded text-xs font-medium">Saídas</button>
+        <div x-show="eventsFiltered.length === 0 && !loading" style="padding:32px;text-align:center;color:var(--text3);font-size:13px">
+          Nenhum evento detectado nos últimos 7 dias.
         </div>
-      </div>
-      <div x-show="eventsFiltered.length === 0 && !loading" class="p-8 text-center text-gray-400 dark:text-gray-600 text-sm">
-        Nenhum evento detectado nos últimos 7 dias.
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm" x-show="eventsFiltered.length > 0">
-          <thead>
-            <tr class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400 tracking-wide">
-              <th class="px-4 py-3 text-left">Timestamp</th>
-              <th class="px-4 py-3 text-left">Reservatório</th>
-              <th class="px-4 py-3 text-right">Vol. antes (L)</th>
-              <th class="px-4 py-3 text-right">Vol. depois (L)</th>
-              <th class="px-4 py-3 text-right">Delta (L)</th>
-              <th class="px-4 py-3 text-right">Variação %</th>
-              <th class="px-4 py-3 text-center">Tipo</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-            <template x-for="(ev, i) in eventsFiltered.slice(0,100)" :key="i">
-              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                <td class="px-4 py-2.5 text-xs text-gray-500 dark:text-gray-400 font-mono" x-text="fmtTs(ev.ts)"></td>
-                <td class="px-4 py-2.5">
-                  <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" x-text="ev.alias"></span>
-                </td>
-                <td class="px-4 py-2.5 text-right text-xs font-mono" x-text="ev.volBefore != null ? Math.round(ev.volBefore) : '—'"></td>
-                <td class="px-4 py-2.5 text-right text-xs font-mono" x-text="ev.volAfter != null ? Math.round(ev.volAfter) : '—'"></td>
-                <td class="px-4 py-2.5 text-right text-xs font-mono font-medium"
-                  :class="ev.deltaL > 0 ? 'text-green-600' : 'text-red-500'"
-                  x-text="(ev.deltaL >= 0 ? '+' : '') + Math.round(ev.deltaL) + ' L'"></td>
-                <td class="px-4 py-2.5 text-right text-xs font-mono"
-                  :class="ev.deltaPct > 0 ? 'text-green-600' : 'text-red-500'"
-                  x-text="(ev.deltaPct >= 0 ? '+' : '') + ev.deltaPct.toFixed(1) + '%'"></td>
-                <td class="px-4 py-2.5 text-center">
-                  <span class="px-2 py-0.5 rounded-full text-xs font-medium"
-                    :class="ev.deltaL > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'"
-                    x-text="ev.deltaL > 0 ? '▲ entrada' : '▼ saída'"></span>
-                </td>
+
+        <div x-show="eventsFiltered.length > 0" style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border)">
+                <th style="padding:8px 12px;text-align:left;color:var(--text3);font-weight:500">Timestamp</th>
+                <th style="padding:8px 12px;text-align:left;color:var(--text3);font-weight:500">Reservatório</th>
+                <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">Vol. antes (L)</th>
+                <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">Vol. depois (L)</th>
+                <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">Delta (L)</th>
+                <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">Variação %</th>
+                <th style="padding:8px 12px;text-align:center;color:var(--text3);font-weight:500">Tipo</th>
               </tr>
-            </template>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <template x-for="(ev, i) in eventsFiltered.slice(0,100)" :key="i">
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:6px 12px;font-family:var(--mono);font-size:11px;color:var(--text3)" x-text="fmtTs(ev.ts)"></td>
+                  <td style="padding:6px 12px">
+                    <span style="padding:2px 8px;border-radius:4px;background:rgba(59,130,246,0.15);color:var(--blue);font-size:11px;font-weight:600" x-text="ev.alias"></span>
+                  </td>
+                  <td style="padding:6px 12px;text-align:right;font-family:var(--mono);font-size:11px" x-text="ev.volBefore != null ? Math.round(ev.volBefore) : '—'"></td>
+                  <td style="padding:6px 12px;text-align:right;font-family:var(--mono);font-size:11px" x-text="ev.volAfter != null ? Math.round(ev.volAfter) : '—'"></td>
+                  <td style="padding:6px 12px;text-align:right;font-family:var(--mono);font-size:11px;font-weight:500"
+                    :style="ev.deltaL>0?'color:var(--green)':'color:var(--red)'"
+                    x-text="(ev.deltaL >= 0 ? '+' : '') + Math.round(ev.deltaL) + ' L'"></td>
+                  <td style="padding:6px 12px;text-align:right;font-family:var(--mono);font-size:11px"
+                    :style="ev.deltaPct>0?'color:var(--green)':'color:var(--red)'"
+                    x-text="(ev.deltaPct >= 0 ? '+' : '') + ev.deltaPct.toFixed(1) + '%'"></td>
+                  <td style="padding:6px 12px;text-align:center">
+                    <span style="padding:2px 8px;border-radius:4px;font-size:11px"
+                      :style="ev.deltaL>0?'background:rgba(34,197,94,0.15);color:var(--green)':'background:rgba(239,68,68,0.15);color:var(--red)'"
+                      x-text="ev.deltaL > 0 ? '▲ entrada' : '▼ saída'"></span>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
       </div>
+
     </div>
-  </main>
+  </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script>
-  const CHART_COLORS = ['#3b82f6','#ef4444','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ec4899','#f97316'];
+<script src="assets/shared.js"></script>
+<script src="assets/vendor/chart.min.js"></script>
+<script defer src="assets/vendor/alpine.min.js"></script>
+<script>
+const ABAST_COLORS = ['#3b82f6','#ef4444','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ec4899','#f97316'];
 
-  function abastApp() {
-    return {
-      darkMode: localStorage.getItem('darkMode') === 'true',
-      reservoirs: [],
-      events: [],       // todos os eventos de variação
-      filterType: 'all',
-      loading: false,
-      chart: null,
-      cleanupChartHandler: null,
-      stats: { supplyEvents: 0, consumeEvents: 0, netL: 0 },
+function abastApp() {
+  return {
+    reservoirs: [],
+    events: [],
+    filterType: 'all',
+    loading: false,
+    chart: null,
+    stats: { supplyEvents: 0, consumeEvents: 0, netL: 0 },
+    gwStatus: 'off',
+    gwLabel: 'GW offline',
 
-      get anySupplying() { return this.reservoirs.some(r => r.trend === 'up'); },
-      get supplyingAliases() { return this.reservoirs.filter(r => r.trend === 'up').map(r => r.alias); },
-      get totalVolume() {
-        const t = this.reservoirs.filter(r => r.online && r.volume_l != null).reduce((s,r) => s + r.volume_l, 0);
-        return Math.round(t);
-      },
-      get avgPct() {
-        const online = this.reservoirs.filter(r => r.online && r.pct != null);
-        if (!online.length) return 0;
-        return Math.round(online.reduce((s,r) => s + r.pct, 0) / online.length);
-      },
-      get eventsFiltered() {
-        if (this.filterType === 'all') return this.events;
-        return this.events.filter(e => this.filterType === 'supply' ? e.deltaL > 0 : e.deltaL < 0);
-      },
+    get anySupplying() { return this.reservoirs.some(r => r.trend === 'up'); },
+    get supplyingAliases() { return this.reservoirs.filter(r => r.trend === 'up').map(r => r.alias); },
+    get totalVolume() {
+      const t = this.reservoirs.filter(r => r.online && r.volume_l != null).reduce((s,r) => s + r.volume_l, 0);
+      return Math.round(t);
+    },
+    get avgPct() {
+      const online = this.reservoirs.filter(r => r.online && r.pct != null);
+      if (!online.length) return 0;
+      return Math.round(online.reduce((s,r) => s + r.pct, 0) / online.length);
+    },
+    get eventsFiltered() {
+      if (this.filterType === 'all') return this.events;
+      return this.events.filter(e => this.filterType === 'supply' ? e.deltaL > 0 : e.deltaL < 0);
+    },
 
-      init() {
-        this.cleanupChartHandler = () => {
-          if (this.chart) {
-            this.chart.destroy();
-            this.chart = null;
-          }
-        };
-        window.addEventListener('pagehide', this.cleanupChartHandler);
-        window.addEventListener('beforeunload', this.cleanupChartHandler);
-        this.load();
-      },
-      toggleDark() { this.darkMode = !this.darkMode; localStorage.setItem('darkMode', this.darkMode); },
+    init() {
+      window.addEventListener('pagehide', () => { if (this.chart) { this.chart.destroy(); this.chart = null; } });
+      this.loadGateway();
+      this.load();
+    },
 
-      async load() {
-        this.loading = true;
-        try {
-          await Promise.all([this.loadReservoirs(), this.loadHistory()]);
-        } finally {
-          this.loading = false;
-        }
-      },
+    async loadGateway() {
+      const gw = await fetch('/api/gateway').then(r => r.json()).catch(() => null);
+      if (!gw) return;
+      if (gw.sim_mode) { this.gwStatus = 'sim'; this.gwLabel = 'Simulação'; }
+      else if (gw.connected) { this.gwStatus = 'on'; this.gwLabel = 'GW online'; }
+      else { this.gwStatus = 'off'; this.gwLabel = 'GW offline'; }
+    },
 
-      async loadReservoirs() {
-        const res = await fetch('/api/reservoirs');
-        if (!res.ok) return;
-        const data = await res.json();
-        // Adiciona campo trend (será calculado depois do histórico)
-        this.reservoirs = data.map(r => ({ ...r, trend: 'stable' }));
-      },
-
-      async loadHistory() {
-        // Busca 7 dias de histórico de todos os reservatórios
-        const results = await Promise.all(
-          ORDERED_ALIASES.map(a =>
-            fetch(`/api/history/${a}?period=7d`)
-              .then(r => r.ok ? r.json() : [])
-              .then(rows => ({ alias: a, rows }))
-          )
-        );
-
-        const allEvents = [];
-        // Limiar mínimo para considerar evento significativo (evita ruído)
-        const THRESHOLD_L = 50;
-
-        for (const { alias, rows } of results) {
-          if (rows.length < 2) continue;
-
-          // Detecta tendência atual (últimas 2 leituras)
-          const last = rows[rows.length - 1];
-          const prev = rows[rows.length - 2];
-          if (last && prev) {
-            const delta = (last.volume_l || 0) - (prev.volume_l || 0);
-            const idx = this.reservoirs.findIndex(r => r.alias === alias);
-            if (idx >= 0) {
-              this.reservoirs[idx] = {
-                ...this.reservoirs[idx],
-                trend: delta > 20 ? 'up' : delta < -20 ? 'down' : 'stable'
-              };
-            }
-          }
-
-          // Detecta eventos de abastecimento/consumo por variação consecutiva
-          for (let i = 1; i < rows.length; i++) {
-            const deltaL = (rows[i].volume_l || 0) - (rows[i-1].volume_l || 0);
-            if (Math.abs(deltaL) < THRESHOLD_L) continue;
-            const deltaPct = (rows[i].pct || 0) - (rows[i-1].pct || 0);
-            allEvents.push({
-              ts: rows[i].ts,
-              alias,
-              volBefore: rows[i-1].volume_l,
-              volAfter: rows[i].volume_l,
-              deltaL,
-              deltaPct,
-            });
-          }
-        }
-
-        // Ordena por ts desc
-        allEvents.sort((a,b) => b.ts - a.ts);
-        this.events = allEvents;
-
-        // Estatísticas
-        let supplyEvents = 0, consumeEvents = 0, netL = 0;
-        for (const ev of allEvents) {
-          if (ev.deltaL > 0) supplyEvents++;
-          else consumeEvents++;
-          netL += ev.deltaL;
-        }
-        this.stats = { supplyEvents, consumeEvents, netL: Math.round(netL) };
-
-        // Gráfico: volume médio diário por reservatório
-        this.renderChart(results);
-      },
-
-      renderChart(results) {
-        if (typeof Chart === 'undefined') return;
-        const canvas = document.getElementById('chartSupply');
-        const ctx = canvas?.getContext?.('2d');
-        if (!ctx) return;
-        if (this.chart) { this.chart.destroy(); }
-
-        // Gera labels dos últimos 7 dias
-        const days = [];
-        for (let i = 6; i >= 0; i--) {
-          const d = new Date(); d.setDate(d.getDate() - i);
-          days.push(d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
-        }
-
-        const datasets = results
-          .filter(({ rows }) => rows.length > 0)
-          .map(({ alias, rows }, idx) => {
-            // Agrupa pct médio por dia
-            const dayMap = {};
-            for (const r of rows) {
-              const d = new Date(r.ts * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-              if (!dayMap[d]) dayMap[d] = [];
-              if (r.pct != null) dayMap[d].push(r.pct);
-            }
-            const data = days.map(d => {
-              const arr = dayMap[d];
-              return arr && arr.length ? Math.round(arr.reduce((s,v) => s+v, 0) / arr.length * 10) / 10 : null;
-            });
-            return {
-              label: alias,
-              data,
-              borderColor: CHART_COLORS[idx % CHART_COLORS.length],
-              backgroundColor: CHART_COLORS[idx % CHART_COLORS.length] + '33',
-              borderWidth: 2,
-              tension: 0.3,
-              fill: false,
-              pointRadius: 3,
-              spanGaps: true,
-            };
-          });
-
-        const isDark = this.darkMode;
-        const grid = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
-        const text = isDark ? '#9ca3af' : '#6b7280';
-
-        this.chart = new Chart(ctx, {
-          type: 'line',
-          data: { labels: days, datasets },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            animation: false,
-            interaction: { mode: 'index', intersect: false },
-            plugins: { legend: { labels: { color: text, font: { size: 11 }, boxWidth: 12 } } },
-            scales: {
-              x: { ticks: { color: text }, grid: { color: grid } },
-              y: { ticks: { color: text, callback: v => v + '%' }, grid: { color: grid }, min: 0, max: 100,
-                   title: { display: true, text: 'Nível (%)', color: text } }
-            }
-          }
-        });
-      },
-
-      fmtTs(ts) {
-        if (!ts) return '—';
-        return new Date(ts * 1000).toLocaleString('pt-BR', {
-          day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
-        });
+    async load() {
+      this.loading = true;
+      try {
+        await Promise.all([this.loadReservoirs(), this.loadHistory()]);
+      } finally {
+        this.loading = false;
       }
-    };
-  }
-  </script>
+    },
+
+    async loadReservoirs() {
+      const res = await fetch('/api/reservoirs');
+      if (!res.ok) return;
+      const data = await res.json();
+      this.reservoirs = data.map(r => ({ ...r, trend: 'stable' }));
+    },
+
+    async loadHistory() {
+      const results = await Promise.all(
+        ORDERED_ALIASES.map(a =>
+          fetch(`/api/history/${a}?period=7d`)
+            .then(r => r.ok ? r.json() : [])
+            .then(rows => ({ alias: a, rows }))
+        )
+      );
+
+      const allEvents = [];
+      const THRESHOLD_L = 50;
+
+      for (const { alias, rows } of results) {
+        if (rows.length < 2) continue;
+
+        const last = rows[rows.length - 1];
+        const prev = rows[rows.length - 2];
+        if (last && prev) {
+          const delta = (last.volume_l || 0) - (prev.volume_l || 0);
+          const idx = this.reservoirs.findIndex(r => r.alias === alias);
+          if (idx >= 0) {
+            this.reservoirs[idx] = { ...this.reservoirs[idx], trend: delta > 20 ? 'up' : delta < -20 ? 'down' : 'stable' };
+          }
+        }
+
+        for (let i = 1; i < rows.length; i++) {
+          const deltaL = (rows[i].volume_l || 0) - (rows[i-1].volume_l || 0);
+          if (Math.abs(deltaL) < THRESHOLD_L) continue;
+          const deltaPct = (rows[i].pct || 0) - (rows[i-1].pct || 0);
+          allEvents.push({ ts: rows[i].ts, alias, volBefore: rows[i-1].volume_l, volAfter: rows[i].volume_l, deltaL, deltaPct });
+        }
+      }
+
+      allEvents.sort((a,b) => b.ts - a.ts);
+      this.events = allEvents;
+
+      let supplyEvents = 0, consumeEvents = 0, netL = 0;
+      for (const ev of allEvents) {
+        if (ev.deltaL > 0) supplyEvents++; else consumeEvents++;
+        netL += ev.deltaL;
+      }
+      this.stats = { supplyEvents, consumeEvents, netL: Math.round(netL) };
+      this.renderChart(results);
+    },
+
+    renderChart(results) {
+      if (typeof Chart === 'undefined') return;
+      const canvas = document.getElementById('chartSupply');
+      const ctx = canvas?.getContext?.('2d');
+      if (!ctx) return;
+      if (this.chart) { this.chart.destroy(); }
+
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        days.push(d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
+      }
+
+      const datasets = results
+        .filter(({ rows }) => rows.length > 0)
+        .map(({ alias, rows }, idx) => {
+          const dayMap = {};
+          for (const r of rows) {
+            const d = new Date(r.ts * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            if (!dayMap[d]) dayMap[d] = [];
+            if (r.pct != null) dayMap[d].push(r.pct);
+          }
+          const data = days.map(d => {
+            const arr = dayMap[d];
+            return arr && arr.length ? Math.round(arr.reduce((s,v) => s+v, 0) / arr.length * 10) / 10 : null;
+          });
+          return {
+            label: alias, data,
+            borderColor: ABAST_COLORS[idx % ABAST_COLORS.length],
+            backgroundColor: ABAST_COLORS[idx % ABAST_COLORS.length] + '33',
+            borderWidth: 2, tension: 0.3, fill: false, pointRadius: 3, spanGaps: true,
+          };
+        });
+
+      const grid = '#1e2d3d'; const text = '#6b82a0';
+      this.chart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: days, datasets },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { labels: { color: text, font: { size: 11 }, boxWidth: 12 } } },
+          scales: {
+            x: { ticks: { color: text }, grid: { color: grid } },
+            y: { ticks: { color: text, callback: v => v + '%' }, grid: { color: grid }, min: 0, max: 100,
+                 title: { display: true, text: 'Nível (%)', color: text } }
+          }
+        }
+      });
+    },
+
+    fmtTs(ts) {
+      if (!ts) return '—';
+      return new Date(ts * 1000).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    }
+  };
+}
+</script>
 </body>
 </html>

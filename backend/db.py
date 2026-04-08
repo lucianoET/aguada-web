@@ -371,6 +371,98 @@ async def get_manual_reservoir_logs(conn: aiosqlite.Connection, limit: int = 200
     return [dict(r) for r in rows]
 
 
+async def get_latest_pump_states(conn: aiosqlite.Connection) -> list[dict]:
+    """Retorna o estado mais recente de cada bomba (uma linha por bomba)."""
+    async with conn.execute(
+        """SELECT p.id, p.ts, p.pump_name, p.state, p.mode, p.note
+           FROM manual_pump_logs p
+           INNER JOIN (
+               SELECT pump_name, MAX(id) AS max_id
+               FROM manual_pump_logs
+               GROUP BY pump_name
+           ) latest ON p.id = latest.max_id
+           ORDER BY p.pump_name"""
+    ) as cur:
+        rows = await cur.fetchall()
+    return [dict(r) for r in rows]
+
+
+async def get_latest_valve_states(conn: aiosqlite.Connection) -> list[dict]:
+    """Retorna o estado mais recente de cada válvula (uma linha por válvula)."""
+    async with conn.execute(
+        """SELECT v.id, v.ts, v.valve_name, v.state, v.note
+           FROM manual_valve_logs v
+           INNER JOIN (
+               SELECT valve_name, MAX(id) AS max_id
+               FROM manual_valve_logs
+               GROUP BY valve_name
+           ) latest ON v.id = latest.max_id
+           ORDER BY v.valve_name"""
+    ) as cur:
+        rows = await cur.fetchall()
+    return [dict(r) for r in rows]
+
+
+async def get_latest_hydrometer_readings(conn: aiosqlite.Connection) -> list[dict]:
+    """Retorna a leitura mais recente de cada hidrômetro (uma linha por hidrômetro)."""
+    async with conn.execute(
+        """SELECT h.id, h.ts, h.meter_name, h.reading, h.unit, h.note
+           FROM manual_hydrometer_readings h
+           INNER JOIN (
+               SELECT meter_name, MAX(id) AS max_id
+               FROM manual_hydrometer_readings
+               GROUP BY meter_name
+           ) latest ON h.id = latest.max_id
+           ORDER BY h.meter_name"""
+    ) as cur:
+        rows = await cur.fetchall()
+    return [dict(r) for r in rows]
+
+
+async def get_pump_states_for_date(conn: aiosqlite.Connection, date_str: str) -> list[dict]:
+    """Retorna o último estado de cada bomba como de fim do dia (para relatório)."""
+    import datetime
+    day = datetime.date.fromisoformat(date_str)
+    ts_end = int(datetime.datetime(day.year, day.month, day.day, 23, 59, 59).timestamp())
+    async with conn.execute(
+        "SELECT DISTINCT pump_name FROM manual_pump_logs ORDER BY pump_name"
+    ) as cur:
+        names = [r[0] for r in await cur.fetchall()]
+    out: list[dict] = []
+    for name in names:
+        async with conn.execute(
+            """SELECT ts, pump_name, state, mode, note FROM manual_pump_logs
+               WHERE pump_name=? AND ts<=? ORDER BY ts DESC LIMIT 1""",
+            (name, ts_end),
+        ) as cur:
+            row = await cur.fetchone()
+        if row:
+            out.append(dict(row))
+    return out
+
+
+async def get_valve_states_for_date(conn: aiosqlite.Connection, date_str: str) -> list[dict]:
+    """Retorna o último estado de cada válvula como de fim do dia (para relatório)."""
+    import datetime
+    day = datetime.date.fromisoformat(date_str)
+    ts_end = int(datetime.datetime(day.year, day.month, day.day, 23, 59, 59).timestamp())
+    async with conn.execute(
+        "SELECT DISTINCT valve_name FROM manual_valve_logs ORDER BY valve_name"
+    ) as cur:
+        names = [r[0] for r in await cur.fetchall()]
+    out: list[dict] = []
+    for name in names:
+        async with conn.execute(
+            """SELECT ts, valve_name, state, note FROM manual_valve_logs
+               WHERE valve_name=? AND ts<=? ORDER BY ts DESC LIMIT 1""",
+            (name, ts_end),
+        ) as cur:
+            row = await cur.fetchone()
+        if row:
+            out.append(dict(row))
+    return out
+
+
 async def get_manual_hydrometer_summary_for_date(conn: aiosqlite.Connection, date_str: str) -> list[dict]:
     """Retorna anterior/atual/diferença por hidrômetro para a data (base em ts unix local)."""
     import datetime

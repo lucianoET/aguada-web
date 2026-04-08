@@ -1,0 +1,278 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: A
+      - generic [ref=e6]: AGUADA
+    - navigation [ref=e7]:
+      - generic [ref=e8]: Operação
+      - link "Dashboard" [ref=e9] [cursor=pointer]:
+        - /url: index.html
+        - img [ref=e11]
+        - generic [ref=e16]: Dashboard
+      - link "SCADA" [ref=e17] [cursor=pointer]:
+        - /url: scada.html
+        - img [ref=e19]
+        - generic [ref=e22]: SCADA
+      - generic [ref=e23]: Análise
+      - link "Análise" [ref=e24] [cursor=pointer]:
+        - /url: analise.html
+        - img [ref=e26]
+        - generic [ref=e28]: Análise
+      - generic [ref=e29]: Gestão
+      - link "Relatório" [ref=e30] [cursor=pointer]:
+        - /url: report.html
+        - img [ref=e32]
+        - generic [ref=e35]: Relatório
+      - link "Hidráulica" [ref=e36] [cursor=pointer]:
+        - /url: hidraulica.html
+        - img [ref=e38]
+        - generic [ref=e40]: Hidráulica
+      - link "Dispositivos" [ref=e41] [cursor=pointer]:
+        - /url: dispositivos.html
+        - img [ref=e43]
+        - generic [ref=e45]: Dispositivos
+      - link "Documentação" [ref=e46] [cursor=pointer]:
+        - /url: documentacao.html
+        - img [ref=e48]
+        - generic [ref=e51]: Documentação
+    - generic [ref=e54]: GW online
+  - generic [ref=e55]:
+    - generic [ref=e56]:
+      - generic [ref=e57]:
+        - generic [ref=e58]: Hidráulica
+        - generic [ref=e59]: "Bombas: 0 ligadas · Válvulas: 0 abertas · Hidrômetros: 5"
+      - generic [ref=e60]:
+        - button "Atualizar" [ref=e61] [cursor=pointer]:
+          - img [ref=e62]
+          - text: Atualizar
+        - button [ref=e66] [cursor=pointer]:
+          - img [ref=e67]
+    - generic [ref=e71]:
+      - generic [ref=e72]:
+        - generic [ref=e73]:
+          - img [ref=e75]
+          - generic [ref=e78]: Bombas
+        - button "+ Adicionar bomba" [ref=e79] [cursor=pointer]
+      - generic [ref=e80]:
+        - generic [ref=e81]:
+          - generic [ref=e82]:
+            - generic [ref=e84]: B03-D
+            - generic [ref=e85]: DESLIGADA
+          - generic [ref=e86]:
+            - button "⏵ Ligar" [ref=e87] [cursor=pointer]
+            - button "⏹ Desligar" [ref=e88] [cursor=pointer]
+            - button "🔧 Manutenção" [ref=e89] [cursor=pointer]
+            - button "⚠ Falha" [ref=e90] [cursor=pointer]
+          - generic [ref=e92]: "Modo: manual · Atualizado: 05/04, 20:46"
+          - generic [ref=e93]: Seed inicial
+          - generic [ref=e94]:
+            - textbox "Observação..." [ref=e95]
+            - button "Salvar" [ref=e96] [cursor=pointer]
+        - generic [ref=e97]:
+          - generic [ref=e98]:
+            - generic [ref=e100]: B03-E
+            - generic [ref=e101]: DESLIGADA
+          - generic [ref=e102]:
+            - button "⏵ Ligar" [ref=e103] [cursor=pointer]
+            - button "⏹ Desligar" [ref=e104] [cursor=pointer]
+            - button "🔧 Manutenção" [ref=e105] [cursor=pointer]
+            - button "⚠ Falha" [ref=e106] [cursor=pointer]
+          - generic [ref=e108]: "Modo: manual · Atualizado: 05/04, 20:46"
+          - generic [ref=e109]: Seed inicial
+          - generic [ref=e110]:
+            - textbox "Observação..." [ref=e111]
+            - button "Salvar" [ref=e112] [cursor=pointer]
+        - generic [ref=e113]:
+          - generic [ref=e114]:
+            - generic [ref=e116]: BIF-D
+            - generic [ref=e117]: DESLIGADA
+          - generic [ref=e118]:
+            - button "⏵ Ligar" [ref=e119] [cursor=pointer]
+            - button "⏹ Desligar" [ref=e120] [cursor=pointer]
+            - button "🔧 Manutenção" [ref=e121] [cursor=pointer]
+            - button "⚠ Falha" [ref=e122] [cursor=pointer]
+          - generic [ref=e124]: "Modo: manual · Atualizado: 05/04, 20:46"
+          - generic [ref=e125]: Seed inicial
+          - generic [ref=e126]:
+            - textbox "Observação..." [ref=e127]
+            - button "Salvar" [ref=e128] [cursor=pointer]
+        - generic [ref=e129]:
+          - generic [ref=e130]:
+            - generic [ref=e132]: BIF-E
+            - generic [ref=e133]: DESLIGADA
+          - generic [ref=e134]:
+            - button "⏵ Ligar" [ref=e135] [cursor=pointer]
+            - button "⏹ Desligar" [ref=e136] [cursor=pointer]
+            - button "🔧 Manutenção" [ref=e137] [cursor=pointer]
+            - button "⚠ Falha" [ref=e138] [cursor=pointer]
+          - generic [ref=e140]: "Modo: manual · Atualizado: 05/04, 20:46"
+          - generic [ref=e141]: Seed inicial
+          - generic [ref=e142]:
+            - textbox "Observação..." [ref=e143]
+            - button "Salvar" [ref=e144] [cursor=pointer]
+      - generic [ref=e145]:
+        - generic [ref=e146]:
+          - img [ref=e148]
+          - generic [ref=e150]: Válvulas
+        - button "+ Adicionar válvula" [ref=e151] [cursor=pointer]
+      - generic [ref=e152]:
+        - generic [ref=e153]:
+          - generic [ref=e154]:
+            - generic [ref=e156]: V-CAV-AV
+            - generic [ref=e157]: FECHADA
+          - generic [ref=e158]:
+            - button "✓ Abrir" [ref=e159] [cursor=pointer]
+            - button "≈ Parcial" [ref=e160] [cursor=pointer]
+            - button "✕ Fechar" [ref=e161] [cursor=pointer]
+            - button "⚠ Falha" [ref=e162] [cursor=pointer]
+          - generic [ref=e163]: "Atualizado: 05/04, 20:46"
+          - generic [ref=e164]: Seed inicial
+          - generic [ref=e165]:
+            - textbox "Observação..." [ref=e166]
+            - button "Salvar" [ref=e167] [cursor=pointer]
+        - generic [ref=e168]:
+          - generic [ref=e169]:
+            - generic [ref=e171]: V-CAV-AZ
+            - generic [ref=e172]: FECHADA
+          - generic [ref=e173]:
+            - button "✓ Abrir" [ref=e174] [cursor=pointer]
+            - button "≈ Parcial" [ref=e175] [cursor=pointer]
+            - button "✕ Fechar" [ref=e176] [cursor=pointer]
+            - button "⚠ Falha" [ref=e177] [cursor=pointer]
+          - generic [ref=e178]: "Atualizado: 05/04, 20:46"
+          - generic [ref=e179]: Seed inicial
+          - generic [ref=e180]:
+            - textbox "Observação..." [ref=e181]
+            - button "Salvar" [ref=e182] [cursor=pointer]
+        - generic [ref=e183]:
+          - generic [ref=e184]:
+            - generic [ref=e186]: V-CAV-BA
+            - generic [ref=e187]: FECHADA
+          - generic [ref=e188]:
+            - button "✓ Abrir" [ref=e189] [cursor=pointer]
+            - button "≈ Parcial" [ref=e190] [cursor=pointer]
+            - button "✕ Fechar" [ref=e191] [cursor=pointer]
+            - button "⚠ Falha" [ref=e192] [cursor=pointer]
+          - generic [ref=e193]: "Atualizado: 05/04, 20:46"
+          - generic [ref=e194]: Seed inicial
+          - generic [ref=e195]:
+            - textbox "Observação..." [ref=e196]
+            - button "Salvar" [ref=e197] [cursor=pointer]
+        - generic [ref=e198]:
+          - generic [ref=e199]:
+            - generic [ref=e201]: V-CON-AV
+            - generic [ref=e202]: FECHADA
+          - generic [ref=e203]:
+            - button "✓ Abrir" [ref=e204] [cursor=pointer]
+            - button "≈ Parcial" [ref=e205] [cursor=pointer]
+            - button "✕ Fechar" [ref=e206] [cursor=pointer]
+            - button "⚠ Falha" [ref=e207] [cursor=pointer]
+          - generic [ref=e208]: "Atualizado: 05/04, 20:46"
+          - generic [ref=e209]: Seed inicial
+          - generic [ref=e210]:
+            - textbox "Observação..." [ref=e211]
+            - button "Salvar" [ref=e212] [cursor=pointer]
+        - generic [ref=e213]:
+          - generic [ref=e214]:
+            - generic [ref=e216]: V-CON-AVAZ
+            - generic [ref=e217]: FECHADA
+          - generic [ref=e218]:
+            - button "✓ Abrir" [ref=e219] [cursor=pointer]
+            - button "≈ Parcial" [ref=e220] [cursor=pointer]
+            - button "✕ Fechar" [ref=e221] [cursor=pointer]
+            - button "⚠ Falha" [ref=e222] [cursor=pointer]
+          - generic [ref=e223]: "Atualizado: 05/04, 20:46"
+          - generic [ref=e224]: Seed inicial
+          - generic [ref=e225]:
+            - textbox "Observação..." [ref=e226]
+            - button "Salvar" [ref=e227] [cursor=pointer]
+        - generic [ref=e228]:
+          - generic [ref=e229]:
+            - generic [ref=e231]: V-CON-AZ
+            - generic [ref=e232]: FECHADA
+          - generic [ref=e233]:
+            - button "✓ Abrir" [ref=e234] [cursor=pointer]
+            - button "≈ Parcial" [ref=e235] [cursor=pointer]
+            - button "✕ Fechar" [ref=e236] [cursor=pointer]
+            - button "⚠ Falha" [ref=e237] [cursor=pointer]
+          - generic [ref=e238]: "Atualizado: 05/04, 20:46"
+          - generic [ref=e239]: Seed inicial
+          - generic [ref=e240]:
+            - textbox "Observação..." [ref=e241]
+            - button "Salvar" [ref=e242] [cursor=pointer]
+      - generic [ref=e243]:
+        - generic [ref=e244]:
+          - img [ref=e246]
+          - generic [ref=e249]: Hidrômetros
+        - button "+ Adicionar hidrômetro" [ref=e250] [cursor=pointer]
+      - generic [ref=e251]:
+        - generic [ref=e252]:
+          - generic [ref=e253]:
+            - img [ref=e254]
+            - generic [ref=e257]: HID-AV
+          - generic [ref=e258]:
+            - generic [ref=e259]: "0.00"
+            - generic [ref=e260]: m3
+          - generic [ref=e261]: "Última leitura: 05/04, 20:46"
+          - generic [ref=e262]:
+            - generic [ref=e263]:
+              - generic [ref=e264]: Nova leitura (m3)
+              - spinbutton [ref=e265]
+            - button "Registrar" [ref=e266] [cursor=pointer]
+          - generic [ref=e267]: Leitura inicial
+        - generic [ref=e268]:
+          - generic [ref=e269]:
+            - img [ref=e270]
+            - generic [ref=e273]: HID-AV|AZ
+          - generic [ref=e274]:
+            - generic [ref=e275]: "0.00"
+            - generic [ref=e276]: m3
+          - generic [ref=e277]: "Última leitura: 05/04, 20:46"
+          - generic [ref=e278]:
+            - generic [ref=e279]:
+              - generic [ref=e280]: Nova leitura (m3)
+              - spinbutton [ref=e281]
+            - button "Registrar" [ref=e282] [cursor=pointer]
+          - generic [ref=e283]: Leitura inicial
+        - generic [ref=e284]:
+          - generic [ref=e285]:
+            - img [ref=e286]
+            - generic [ref=e289]: HID-CONC
+          - generic [ref=e290]:
+            - generic [ref=e291]: "0.00"
+            - generic [ref=e292]: m3
+          - generic [ref=e293]: "Última leitura: 05/04, 20:46"
+          - generic [ref=e294]:
+            - generic [ref=e295]:
+              - generic [ref=e296]: Nova leitura (m3)
+              - spinbutton [ref=e297]
+            - button "Registrar" [ref=e298] [cursor=pointer]
+          - generic [ref=e299]: Leitura inicial
+        - generic [ref=e300]:
+          - generic [ref=e301]:
+            - img [ref=e302]
+            - generic [ref=e305]: HID-IF
+          - generic [ref=e306]:
+            - generic [ref=e307]: "0.00"
+            - generic [ref=e308]: m3
+          - generic [ref=e309]: "Última leitura: 05/04, 20:46"
+          - generic [ref=e310]:
+            - generic [ref=e311]:
+              - generic [ref=e312]: Nova leitura (m3)
+              - spinbutton [ref=e313]
+            - button "Registrar" [ref=e314] [cursor=pointer]
+          - generic [ref=e315]: Leitura inicial
+        - generic [ref=e316]:
+          - generic [ref=e317]:
+            - img [ref=e318]
+            - generic [ref=e321]: HID-PRAIA
+          - generic [ref=e322]:
+            - generic [ref=e323]: "0.00"
+            - generic [ref=e324]: m3
+          - generic [ref=e325]: "Última leitura: 05/04, 20:46"
+          - generic [ref=e326]:
+            - generic [ref=e327]:
+              - generic [ref=e328]: Nova leitura (m3)
+              - spinbutton [ref=e329]
+            - button "Registrar" [ref=e330] [cursor=pointer]
+          - generic [ref=e331]: Leitura inicial

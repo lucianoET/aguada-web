@@ -28,6 +28,8 @@
   --cyan:       #06b6d4;
   --mono: 'Courier New', Courier, monospace;
   --sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --surface1:   #192030;
+  --surface2:   #161e28;
   --sidebar-w-collapsed: 42px;
   --sidebar-w-expanded:  220px;
   --topbar-h: 48px;
@@ -36,15 +38,25 @@
 
 /* ── Tema Claro ─────────────────────────────────────────────── */
 [data-theme="light"] {
-  --bg:    #f1f5f9;
-  --bg2:   #ffffff;
-  --bg3:   #e2e8f0;
-  --card:  #ffffff;
-  --border: #e2e8f0;
-  --border2: #cbd5e1;
-  --text:  #1e293b;
-  --text2: #64748b;
-  --text3: #94a3b8;
+  --bg:         #f1f5f9;
+  --bg2:        #ffffff;
+  --bg3:        #e2e8f0;
+  --card:       #ffffff;
+  --border:     #e2e8f0;
+  --border2:    #cbd5e1;
+  --text:       #1e293b;
+  --text2:      #475569;
+  --text3:      #64748b;
+  --blue:       #2563eb;
+  --green:      #16a34a;
+  --green-dim:  #dcfce7;
+  --yellow:     #d97706;
+  --yellow-dim: #fef3c7;
+  --red:        #dc2626;
+  --red-dim:    #fee2e2;
+  --cyan:       #0891b2;
+  --surface1:   #ffffff;
+  --surface2:   #f8fafc;
 }
 
 html, body { height: 100%; font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
@@ -219,6 +231,7 @@ button { cursor: pointer; font-family: var(--sans); border: none; background: no
 .ws-dot.connected    { background: var(--green); }
 .ws-dot.disconnected { background: var(--red); animation: pulse 1.5s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+@keyframes spin { to { transform: rotate(1turn); } }
 
 /* ── Theme toggle button ────────────────────────────────────── */
 .theme-btn { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--text2); transition: background 0.15s; }

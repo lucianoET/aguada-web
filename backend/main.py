@@ -47,6 +47,9 @@ from .db import (
     get_manual_pump_logs,
     get_manual_valve_logs,
     get_manual_reservoir_logs,
+    get_latest_pump_states,
+    get_latest_valve_states,
+    get_latest_hydrometer_readings,
     get_all_nodes,
     get_node,
     patch_node,
@@ -164,17 +167,22 @@ async def get_reservoirs():
     async with aiosqlite.connect(DB_PATH) as conn:
         conn.row_factory = aiosqlite.Row
         states = await get_all_states(conn)
-    # Enriquecer com lat/lng do reservoirs.yaml via RESERVOIR_INDEX
-    alias_to_geo: dict[str, dict] = {}
+    # Enriquecer com lat/lng e capacity_l do reservoirs.yaml via RESERVOIR_INDEX
+    alias_to_meta: dict[str, dict] = {}
     for params in RESERVOIR_INDEX.values():
         alias = params.get("alias")
-        if alias and "lat" in params and "lng" in params:
-            alias_to_geo[alias] = {"lat": params["lat"], "lng": params["lng"]}
+        if not alias:
+            continue
+        meta: dict = {}
+        if "lat" in params and "lng" in params:
+            meta["lat"] = params["lat"]
+            meta["lng"] = params["lng"]
+        if "volume_max_l" in params:
+            meta["capacity_l"] = params["volume_max_l"]
+        alias_to_meta[alias] = meta
     for s in states:
-        geo = alias_to_geo.get(s.get("alias", ""))
-        if geo:
-            s["lat"] = geo["lat"]
-            s["lng"] = geo["lng"]
+        meta = alias_to_meta.get(s.get("alias", ""), {})
+        s.update(meta)
     return states
 
 
@@ -449,6 +457,17 @@ async def get_manual_reservoirs(limit: int = Query(200, ge=1, le=1000)):
         conn.row_factory = aiosqlite.Row
         rows = await get_manual_reservoir_logs(conn, limit=limit)
     return {"items": rows}
+
+
+@app.get("/api/equip/current")
+async def get_equip_current():
+    """Retorna estado atual (mais recente) de bombas, válvulas e hidrômetros."""
+    async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        pumps = await get_latest_pump_states(conn)
+        valves = await get_latest_valve_states(conn)
+        hydrometers = await get_latest_hydrometer_readings(conn)
+    return {"pumps": pumps, "valves": valves, "hydrometers": hydrometers}
 
 
 @app.get("/api/gateway")

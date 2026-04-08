@@ -1,0 +1,152 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: A
+      - generic [ref=e6]: AGUADA
+    - navigation [ref=e7]:
+      - generic [ref=e8]: Operação
+      - link "Dashboard" [ref=e9] [cursor=pointer]:
+        - /url: index.html
+        - img [ref=e11]
+        - generic [ref=e16]: Dashboard
+      - link "Painel Geral" [ref=e17] [cursor=pointer]:
+        - /url: painel.html
+        - img [ref=e19]
+        - generic [ref=e21]: Painel Geral
+      - link "SCADA" [ref=e22] [cursor=pointer]:
+        - /url: scada.html
+        - img [ref=e24]
+        - generic [ref=e27]: SCADA
+      - generic [ref=e28]: Análise
+      - link "Análise" [ref=e29] [cursor=pointer]:
+        - /url: analise.html
+        - img [ref=e31]
+        - generic [ref=e33]: Análise
+      - generic [ref=e34]: Gestão
+      - link "Relatório" [ref=e35] [cursor=pointer]:
+        - /url: report.html
+        - img [ref=e37]
+        - generic [ref=e40]: Relatório
+      - link "Hidráulica" [ref=e41] [cursor=pointer]:
+        - /url: hidraulica.html
+        - img [ref=e43]
+        - generic [ref=e45]: Hidráulica
+      - link "Dispositivos" [ref=e46] [cursor=pointer]:
+        - /url: dispositivos.html
+        - img [ref=e48]
+        - generic [ref=e50]: Dispositivos
+      - link "Documentação" [ref=e51] [cursor=pointer]:
+        - /url: documentacao.html
+        - img [ref=e53]
+        - generic [ref=e56]: Documentação
+    - generic [ref=e59]: GW online
+  - generic [ref=e60]:
+    - generic [ref=e61]:
+      - generic [ref=e62]:
+        - generic [ref=e63]: SCADA — Diagrama Unifilar
+        - generic [ref=e64]: "Volume total: 630 m³ · Nodes: 6/8"
+      - generic [ref=e65]:
+        - generic [ref=e68]: Ao vivo
+        - button [ref=e69] [cursor=pointer]:
+          - img [ref=e70]
+    - img [ref=e76]:
+      - generic [ref=e78]:
+        - generic [ref=e81]: ILHA DAS FLORES
+        - generic [ref=e84] [cursor=pointer]: ◀
+        - generic [ref=e85] [cursor=pointer]:
+          - generic [ref=e89]: CISTERNA BIF-1
+          - generic [ref=e90]: CBIF1
+          - generic [ref=e91]: 40%
+          - generic [ref=e92]: 16 m³
+          - generic [ref=e93]: 06/04/26, 21:55
+        - generic [ref=e94] [cursor=pointer]:
+          - generic [ref=e98]: CISTERNA BIF-2
+          - generic [ref=e99]: CBIF2
+          - generic [ref=e100]: 70%
+          - generic [ref=e101]: 28 m³
+          - generic [ref=e102]: 06/04/26, 21:56
+        - generic [ref=e107] [cursor=pointer]: BIF-E
+        - generic [ref=e112] [cursor=pointer]: BIF-D
+        - generic [ref=e115] [cursor=pointer]:
+          - generic [ref=e118]: HID-IF
+          - generic [ref=e119]: "L: 0"
+        - generic [ref=e120]: — submarina →
+      - generic [ref=e121]:
+        - generic [ref=e123]: SCADA — Sistema Hidráulico
+        - generic [ref=e124]: rede de consumo
+        - generic [ref=e125]: rede de combate a incêndio (CAV)
+        - generic [ref=e126]: cisternas de emergência (CIE)
+        - generic [ref=e127]: casa de bombas N03
+        - generic [ref=e130]: CISTERNAS INCÊNDIO
+        - generic [ref=e131] [cursor=pointer]:
+          - generic [ref=e135]: RESERVATORIO DE AGUA
+          - generic [ref=e136]: CIE1
+          - generic [ref=e137]: 87.92%
+          - generic [ref=e138]: 215 m³
+          - generic [ref=e139]: 07/04/26, 01:38
+        - generic [ref=e140] [cursor=pointer]:
+          - generic [ref=e144]: RESERVATORIO DE AGUA
+          - generic [ref=e145]: CIE2
+          - generic [ref=e146]: 87.92%
+          - generic [ref=e147]: 215 m³
+          - generic [ref=e148]: 07/04/26, 01:36
+        - generic [ref=e149] [cursor=pointer]:
+          - generic [ref=e152]: CASTELO DE CONSUMO
+          - generic [ref=e154]: RESERVATORIO DE AGUA
+          - generic [ref=e157]: CON
+          - generic [ref=e158]: "pct:"
+          - generic [ref=e159]: 84%
+          - generic [ref=e160]: "vol:"
+          - generic [ref=e161]: 67 m³
+          - generic [ref=e162]: "cap: —"
+          - generic [ref=e163]: "bal: —"
+          - generic [ref=e164]: 07/04/26, 01:43
+          - generic [ref=e166]: VÁLVULAS
+          - generic [ref=e171]: V-CON-AZ
+          - generic [ref=e176]: V-CON-AV
+          - generic [ref=e181]: V-CON-AVAZ
+        - generic [ref=e183]: SISTEMA INCÊNDIO — CAV
+        - generic [ref=e186]: CB1 — N01
+        - generic [ref=e187] [cursor=pointer]:
+          - generic [ref=e191]: N01
+          - generic [ref=e192]: incêndio
+        - generic [ref=e195]: CB2 — N02
+        - generic [ref=e200] [cursor=pointer]: N02-E
+        - generic [ref=e205] [cursor=pointer]: N02-D
+        - generic [ref=e206]: incêndio
+        - generic [ref=e207] [cursor=pointer]:
+          - generic [ref=e210]: CASTELO DE INCENDIO
+          - generic [ref=e212]: RESERVATORIO DE AGUA
+          - generic [ref=e215]: CAV
+          - generic [ref=e216]: "pct:"
+          - generic [ref=e217]: 80.67%
+          - generic [ref=e218]: "vol:"
+          - generic [ref=e219]: 65 m³
+          - generic [ref=e220]: "cap: —"
+          - generic [ref=e221]: "bal: —"
+          - generic [ref=e222]: 07/04/26, 01:44
+          - generic [ref=e224]: VÁLVULAS
+          - generic [ref=e229]: V-CAV-AZ
+          - generic [ref=e234]: V-CAV-AV
+          - generic [ref=e239]: V-CAV-BA
+        - generic [ref=e240]:
+          - generic [ref=e243]: CASA BOMBAS Nº3
+          - generic [ref=e244] [cursor=pointer]:
+            - generic [ref=e248]: RESERVATORIO DE AGUA
+            - generic [ref=e249]: CB31
+            - generic [ref=e250]: 73%
+            - generic [ref=e251]: 29 m³
+            - generic [ref=e252]: 07/04/26, 01:43
+          - generic [ref=e253] [cursor=pointer]:
+            - generic [ref=e257]: RESERVATORIO DE AGUA
+            - generic [ref=e258]: CB32
+            - generic [ref=e259]: 95%
+            - generic [ref=e260]: 38 m³
+            - generic [ref=e261]: 07/04/26, 01:43
+        - generic [ref=e262] [cursor=pointer]:
+          - generic [ref=e265]: HID-PRAIA
+          - generic [ref=e266]: "L: 0"
+        - generic [ref=e268]: historico Deltas
+        - generic [ref=e271]: VOLUME TOTAL MEDIO
+        - generic [ref=e274]: CONSUMO 7 DIAS
+        - generic [ref=e277]: CONSUMO 30 DIAS

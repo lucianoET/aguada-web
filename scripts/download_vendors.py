@@ -77,6 +77,38 @@ for z in range(ZOOM_MIN, ZOOM_MAX + 1):
                 except Exception as e:
                     print(f"  [WARN] {url}: {e}")
 
-print(f"\n[DONE] Vendors e {total} tiles OSM baixados.")
-print(f"  Vendors: {VENDOR_DIR}")
-print(f"  Tiles:   {TILES_DIR}")
+print(f"\n[OSM] {total} tiles baixados.")
+
+# Tiles satélite ESRI WorldImagery — mesma área
+SAT_DIR = ROOT / "frontend" / "assets" / "leaflet-tiles-sat"
+SAT_DIR.mkdir(parents=True, exist_ok=True)
+
+import time
+total_sat = 0
+for z in range(ZOOM_MIN, ZOOM_MAX + 1):
+    x0, _y0 = deg2tile(LAT_MAX, LNG_MIN, z)
+    x1, _y1 = deg2tile(LAT_MIN, LNG_MAX, z)
+    y0, y1 = min(_y0, _y1), max(_y0, _y1)
+    for x in range(x0, x1 + 1):
+        for y in range(y0, y1 + 1):
+            tile_dir = SAT_DIR / str(z) / str(x)
+            tile_dir.mkdir(parents=True, exist_ok=True)
+            tile_path = tile_dir / f"{y}.jpg"
+            if not tile_path.exists():
+                # ESRI URL usa /tile/{z}/{y}/{x} (y antes de x)
+                url = f"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                try:
+                    req = urllib.request.Request(url, headers={"User-Agent": "aguada-web/1.0"})
+                    with urllib.request.urlopen(req, timeout=15) as r, open(tile_path, "wb") as f:
+                        f.write(r.read())
+                    total_sat += 1
+                    if total_sat % 20 == 0:
+                        print(f"  Satélite: {total_sat} tiles")
+                    time.sleep(0.05)
+                except Exception as e:
+                    print(f"  [WARN] sat {url}: {e}")
+
+print(f"\n[DONE] Vendors, {total} tiles OSM, {total_sat} tiles satélite baixados.")
+print(f"  Vendors:   {VENDOR_DIR}")
+print(f"  OSM:       {TILES_DIR}")
+print(f"  Satélite:  {SAT_DIR}")

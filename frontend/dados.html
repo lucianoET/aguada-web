@@ -1,466 +1,439 @@
 <!DOCTYPE html>
-<html lang="pt-BR" x-data="dadosApp()" x-init="init()" :class="{ 'dark': darkMode }">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="data:,">
+
   <title>Aguada — Dados Brutos</title>
-  <link rel="stylesheet" href="assets/tailwind.css?v=1" />
-  <script src="assets/shared.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
-  <style>
-    [x-cloak]{display:none}
-    .mono { font-family: 'Courier New', monospace; }
-  </style>
+  <link rel="stylesheet" href="assets/aguada.css"/>
+  <style>[x-cloak]{display:none}</style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen" x-cloak>
+<body>
+<div class="layout" x-data="dadosApp()" x-init="init()" x-cloak>
 
-  <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">A</div>
-          <span class="font-semibold text-lg text-gray-800 dark:text-gray-100">Aguada CMASM</span>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">A</div><span class="sidebar-brand-text">AGUADA</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Operação</div>
+      <a href="index.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="nav-label">Dashboard</span></a>
+      <a href="painel.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span><span class="nav-label">Painel Geral</span></a>
+      <a href="scada.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span><span class="nav-label">SCADA</span></a>
+      <div class="sidebar-section">Análise</div>
+      <a href="analise.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="nav-label">Análise</span></a>
+      <a href="dados.html" class="nav-link active"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg></span><span class="nav-label">Dados</span></a>
+      <div class="sidebar-section">Gestão</div>
+      <a href="report.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="nav-label">Relatório</span></a>
+            <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
+      <a href="dispositivos.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span><span class="nav-label">Dispositivos</span></a>
+      <a href="documentacao.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span><span class="nav-label">Documentação</span></a>
+    </nav>
+    <div class="sidebar-footer"><span class="gw-dot" :class="gwStatus"></span><span class="gw-label" x-text="gwLabel"></span></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div><div class="topbar-title">Dados Brutos</div><div class="topbar-sub">Leituras de sensores e lançamentos manuais</div></div>
+      <div class="topbar-right">
+        <button class="theme-btn" onclick="toggleTheme()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg></button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Toolbar -->
+      <div class="card" style="padding:12px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;color:var(--text3)">Reservatório</span>
+          <select class="form-select" style="width:120px" x-model="filterAlias" @change="applyFilters()">
+            <option value="">Todos</option>
+            <option value="CON">CON</option>
+            <option value="CAV">CAV</option>
+            <option value="CB31">CB31</option>
+            <option value="CB32">CB32</option>
+            <option value="CIE1">CIE1</option>
+            <option value="CIE2">CIE2</option>
+            <option value="CBIF1">CBIF1</option>
+            <option value="CBIF2">CBIF2</option>
+          </select>
         </div>
-        <nav class="hidden md:flex items-center gap-1">
-          <a href="index.html"         class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dashboard</a>
-          <a href="scada.html"         class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">SCADA</a>
-          <a href="history.html"       class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Histórico</a>
-          <a href="consumption.html"   class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Consumo</a>
-          <a href="abastecimento.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Abastecimento</a>
-          <a href="dados.html"         class="px-4 py-2 rounded-md text-sm font-medium bg-blue-600 text-white">Dados</a>
-          <a href="report.html"        class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Relatório</a>
-          <a href="dispositivos.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dispositivos</a>
-          <a href="documentacao.html" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Documentação</a>
-        </nav>
-        <button @click="toggleDark()" class="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-          <svg x-show="!darkMode" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-          <svg x-show="darkMode"  class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1m15.07-6.07l-.71.71M6.34 17.66l-.71.71M17.66 17.66l-.71-.71M6.34 6.34l-.71-.71M12 7a5 5 0 100 10A5 5 0 0012 7z"/></svg>
-        </button>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;color:var(--text3)">Período</span>
+          <select class="form-select" style="width:130px" x-model="period" @change="loadAll()">
+            <option value="24h">Últimas 24h</option>
+            <option value="7d">7 dias</option>
+            <option value="30d">30 dias</option>
+          </select>
+        </div>
+        <input class="form-input" type="text" style="flex:1;min-width:180px" placeholder="Filtrar por valor, nível, %..." x-model="filterText" @input="applyFilters()"/>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);margin-left:auto">
+          <span :style="loading?'background:var(--yellow);animation:blink 1s infinite':'background:var(--green)'" style="width:7px;height:7px;border-radius:50%;display:inline-block"></span>
+          <span x-text="loading ? 'Carregando...' : filtered.length + ' / ' + allRows.length + ' registros'"></span>
+        </div>
       </div>
-    </div>
-  </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <h1 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Dados Brutos</h1>
-
-    <!-- Toolbar -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-4 flex flex-wrap items-center gap-4">
-      <!-- Filtro reservatório -->
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-600 dark:text-gray-300">Reservatório</label>
-        <select x-model="filterAlias" @change="applyFilters()" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">Todos</option>
-          <option value="CON">CON</option>
-          <option value="CAV">CAV</option>
-          <option value="CB31">CB31</option>
-          <option value="CB32">CB32</option>
-          <option value="CIE1">CIE1</option>
-          <option value="CIE2">CIE2</option>
-          <option value="CBIF1">CBIF1</option>
-          <option value="CBIF2">CBIF2</option>
-        </select>
-      </div>
-      <!-- Período -->
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-600 dark:text-gray-300">Período</label>
-        <select x-model="period" @change="loadAll()" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="24h">Últimas 24h</option>
-          <option value="7d">7 dias</option>
-          <option value="30d">30 dias</option>
-        </select>
-      </div>
-      <!-- Busca texto -->
-      <div class="flex items-center gap-2 flex-1 min-w-48">
-        <input x-model="filterText" @input="applyFilters()" type="text" placeholder="Filtrar por valor, nível, %..." class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-      </div>
-      <!-- Status / auto-refresh -->
-      <div class="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 ml-auto">
-        <span :class="loading ? 'bg-yellow-400 animate-pulse' : 'bg-green-500'" class="w-2 h-2 rounded-full"></span>
-        <span x-text="loading ? 'Carregando...' : filtered.length + ' / ' + allRows.length + ' registros'"></span>
-      </div>
-    </div>
-
-    <!-- Tabela -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden mb-4">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="bg-gray-50 dark:bg-gray-700/60 text-xs uppercase text-gray-500 dark:text-gray-400 tracking-wide">
-              <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none" @click="sortBy('ts')">
-                Timestamp
-                <span x-text="sortCol==='ts' ? (sortDir==='asc'?'↑':'↓') : '⇅'" class="ml-1 opacity-50"></span>
-              </th>
-              <th class="px-4 py-3 text-left cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none" @click="sortBy('alias')">
-                Sensor
-                <span x-text="sortCol==='alias' ? (sortDir==='asc'?'↑':'↓') : '⇅'" class="ml-1 opacity-50"></span>
-              </th>
-              <th class="px-4 py-3 text-right cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none" @click="sortBy('distance_cm')">
-                Dist. (cm)
-                <span x-text="sortCol==='distance_cm' ? (sortDir==='asc'?'↑':'↓') : '⇅'" class="ml-1 opacity-50"></span>
-              </th>
-              <th class="px-4 py-3 text-right cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none" @click="sortBy('level_cm')">
-                Nível (cm)
-                <span x-text="sortCol==='level_cm' ? (sortDir==='asc'?'↑':'↓') : '⇅'" class="ml-1 opacity-50"></span>
-              </th>
-              <th class="px-4 py-3 text-right cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none" @click="sortBy('volume_l')">
-                Volume (L)
-                <span x-text="sortCol==='volume_l' ? (sortDir==='asc'?'↑':'↓') : '⇅'" class="ml-1 opacity-50"></span>
-              </th>
-              <th class="px-4 py-3 text-right cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none" @click="sortBy('pct')">
-                Nível %
-                <span x-text="sortCol==='pct' ? (sortDir==='asc'?'↑':'↓') : '⇅'" class="ml-1 opacity-50"></span>
-              </th>
-              <th class="px-4 py-3 text-right">RSSI</th>
-              <th class="px-4 py-3 text-right">Vbat</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-            <template x-if="paged.length === 0 && !loading">
-              <tr><td colspan="8" class="px-4 py-8 text-center text-gray-400 dark:text-gray-600">Nenhum dado encontrado.</td></tr>
-            </template>
-            <template x-for="(row, i) in paged" :key="row._id">
-              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                <td class="px-4 py-2 mono text-xs text-gray-500 dark:text-gray-400" x-text="fmt(row.ts)"></td>
-                <td class="px-4 py-2">
-                  <span class="px-2 py-0.5 rounded-full text-xs font-semibold" :class="badgeClass(row.alias)" x-text="row.alias"></span>
-                </td>
-                <td class="px-4 py-2 text-right mono text-xs" x-text="row.distance_cm != null ? row.distance_cm : '—'"></td>
-                <td class="px-4 py-2 text-right mono text-xs" x-text="row.level_cm != null ? row.level_cm : '—'"></td>
-                <td class="px-4 py-2 text-right mono text-xs" x-text="row.volume_l != null ? Math.round(row.volume_l) : '—'"></td>
-                <td class="px-4 py-2 text-right">
-                  <span class="text-xs font-medium"
-                    :class="{'text-green-600':row.pct>=80,'text-blue-500':row.pct>=50&&row.pct<80,'text-yellow-500':row.pct>=20&&row.pct<50,'text-red-500':row.pct<20}"
-                    x-text="row.pct != null ? row.pct + '%' : '—'"></span>
-                </td>
-                <td class="px-4 py-2 text-right mono text-xs text-gray-400" x-text="row.rssi != null ? row.rssi + ' dBm' : '—'"></td>
-                <td class="px-4 py-2 text-right mono text-xs text-gray-400" x-text="row.vbat != null ? row.vbat + ' V' : '—'"></td>
+      <!-- Tabela leituras -->
+      <div class="card" style="overflow:hidden;margin-bottom:12px">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border)">
+                <th style="padding:8px 12px;text-align:left;cursor:pointer;user-select:none;color:var(--text3);font-weight:500" @click="sortBy('ts')">
+                  Timestamp <span x-text="sortCol==='ts'?(sortDir==='asc'?'↑':'↓'):'⇅'" style="opacity:0.5"></span>
+                </th>
+                <th style="padding:8px 12px;text-align:left;cursor:pointer;user-select:none;color:var(--text3);font-weight:500" @click="sortBy('alias')">
+                  Sensor <span x-text="sortCol==='alias'?(sortDir==='asc'?'↑':'↓'):'⇅'" style="opacity:0.5"></span>
+                </th>
+                <th style="padding:8px 12px;text-align:right;cursor:pointer;user-select:none;color:var(--text3);font-weight:500" @click="sortBy('distance_cm')">
+                  Dist. (cm) <span x-text="sortCol==='distance_cm'?(sortDir==='asc'?'↑':'↓'):'⇅'" style="opacity:0.5"></span>
+                </th>
+                <th style="padding:8px 12px;text-align:right;cursor:pointer;user-select:none;color:var(--text3);font-weight:500" @click="sortBy('level_cm')">
+                  Nível (cm) <span x-text="sortCol==='level_cm'?(sortDir==='asc'?'↑':'↓'):'⇅'" style="opacity:0.5"></span>
+                </th>
+                <th style="padding:8px 12px;text-align:right;cursor:pointer;user-select:none;color:var(--text3);font-weight:500" @click="sortBy('volume_l')">
+                  Volume (L) <span x-text="sortCol==='volume_l'?(sortDir==='asc'?'↑':'↓'):'⇅'" style="opacity:0.5"></span>
+                </th>
+                <th style="padding:8px 12px;text-align:right;cursor:pointer;user-select:none;color:var(--text3);font-weight:500" @click="sortBy('pct')">
+                  Nível % <span x-text="sortCol==='pct'?(sortDir==='asc'?'↑':'↓'):'⇅'" style="opacity:0.5"></span>
+                </th>
+                <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">RSSI</th>
+                <th style="padding:8px 12px;text-align:right;color:var(--text3);font-weight:500">Vbat</th>
               </tr>
-            </template>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <template x-if="paged.length === 0 && !loading">
+                <tr><td colspan="8" style="padding:32px;text-align:center;color:var(--text3)">Nenhum dado encontrado.</td></tr>
+              </template>
+              <template x-for="(row, i) in paged" :key="row._id">
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:6px 12px;font-family:var(--mono);font-size:11px;color:var(--text3)" x-text="fmt(row.ts)"></td>
+                  <td style="padding:6px 12px">
+                    <span style="padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600"
+                      :style="`background:${aliasColor(row.alias)}22;color:${aliasColor(row.alias)}`"
+                      x-text="row.alias"></span>
+                  </td>
+                  <td style="padding:6px 12px;text-align:right;font-family:var(--mono);font-size:11px" x-text="row.distance_cm != null ? row.distance_cm : '—'"></td>
+                  <td style="padding:6px 12px;text-align:right;font-family:var(--mono);font-size:11px" x-text="row.level_cm != null ? row.level_cm : '—'"></td>
+                  <td style="padding:6px 12px;text-align:right;font-family:var(--mono);font-size:11px" x-text="row.volume_l != null ? Math.round(row.volume_l) : '—'"></td>
+                  <td style="padding:6px 12px;text-align:right">
+                    <span style="font-family:var(--mono);font-size:11px"
+                      :style="row.pct>=80?'color:var(--green)':row.pct>=50?'color:var(--blue)':row.pct>=20?'color:var(--yellow)':'color:var(--red)'"
+                      x-text="row.pct != null ? row.pct + '%' : '—'"></span>
+                  </td>
+                  <td style="padding:6px 12px;text-align:right;font-family:var(--mono);font-size:11px;color:var(--text3)" x-text="row.rssi != null ? row.rssi + ' dBm' : '—'"></td>
+                  <td style="padding:6px 12px;text-align:right;font-family:var(--mono);font-size:11px;color:var(--text3)" x-text="row.vbat != null ? row.vbat + ' V' : '—'"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-    <!-- Paginação -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 flex items-center justify-between text-sm">
-      <span class="text-xs text-gray-400 dark:text-gray-500"
-        x-text="`Mostrando ${Math.min((page-1)*perPage+1, filtered.length)}–${Math.min(page*perPage, filtered.length)} de ${filtered.length}`">
-      </span>
-      <div class="flex items-center gap-1">
-        <button @click="page=1" :disabled="page===1" class="px-2 py-1 rounded text-xs border border-gray-200 dark:border-gray-600 disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-gray-700">««</button>
-        <button @click="page--" :disabled="page===1" class="px-2 py-1 rounded text-xs border border-gray-200 dark:border-gray-600 disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-gray-700">‹</button>
-        <span class="px-3 text-xs text-gray-500 dark:text-gray-400" x-text="`${page} / ${totalPages}`"></span>
-        <button @click="page++" :disabled="page>=totalPages" class="px-2 py-1 rounded text-xs border border-gray-200 dark:border-gray-600 disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-gray-700">›</button>
-        <button @click="page=totalPages" :disabled="page>=totalPages" class="px-2 py-1 rounded text-xs border border-gray-200 dark:border-gray-600 disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-gray-700">»»</button>
-      </div>
-      <select x-model.number="perPage" @change="page=1" class="border border-gray-200 dark:border-gray-600 rounded px-2 py-1 text-xs bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-        <option value="25">25/pág</option>
-        <option value="50">50/pág</option>
-        <option value="100">100/pág</option>
-      </select>
-    </div>
-
-    <section class="mt-8 space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Lançamentos manuais operacionais</h2>
-        <button @click="loadManualData()" class="px-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Atualizar</button>
+      <!-- Paginação -->
+      <div class="card" style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <span style="font-size:11px;color:var(--text3)"
+          x-text="`Mostrando ${Math.min((page-1)*perPage+1, filtered.length)}–${Math.min(page*perPage, filtered.length)} de ${filtered.length}`">
+        </span>
+        <div style="display:flex;align-items:center;gap:4px">
+          <button class="eq-btn" @click="page=1" :disabled="page===1">««</button>
+          <button class="eq-btn" @click="page--" :disabled="page===1">‹</button>
+          <span style="padding:0 8px;font-size:11px;color:var(--text3)" x-text="`${page} / ${totalPages}`"></span>
+          <button class="eq-btn" @click="page++" :disabled="page>=totalPages">›</button>
+          <button class="eq-btn" @click="page=totalPages" :disabled="page>=totalPages">»»</button>
+        </div>
+        <select class="form-select" style="width:90px" x-model.number="perPage" @change="page=1">
+          <option value="25">25/pág</option>
+          <option value="50">50/pág</option>
+          <option value="100">100/pág</option>
+        </select>
       </div>
 
-      <div x-show="manualMessage" class="text-sm rounded-lg px-3 py-2"
-           :class="manualMessageType === 'ok' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200' : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200'"
-           x-text="manualMessage"></div>
+      <!-- Lançamentos manuais -->
+      <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <div class="section-title">Lançamentos Manuais Operacionais</div>
+        <button class="btn btn-secondary" @click="loadManualData()">Atualizar</button>
+      </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 space-y-3">
-          <h3 class="font-medium text-gray-700 dark:text-gray-200">Hidrômetros</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <input x-model="manualHydrometerForm.meter_name" type="text" placeholder="Nome do hidrômetro" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
-            <input x-model.number="manualHydrometerForm.reading" type="number" step="0.01" placeholder="Leitura" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
-            <input x-model="manualHydrometerForm.unit" type="text" placeholder="Unidade (m3)" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
-            <input x-model="manualHydrometerForm.note" type="text" placeholder="Observação" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
+      <div x-show="manualMessage" style="padding:8px 12px;border-radius:var(--radius);font-size:12px;margin-bottom:12px"
+        :style="manualMessageType==='ok'?'background:rgba(34,197,94,0.15);color:var(--green)':'background:rgba(239,68,68,0.15);color:var(--red)'"
+        x-text="manualMessage"></div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-bottom:16px">
+
+        <!-- Hidrômetros -->
+        <div class="card" style="padding:14px 16px">
+          <div class="section-title" style="margin-bottom:10px">Hidrômetros</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <input class="form-input" type="text" placeholder="Nome do hidrômetro" x-model="manualHydrometerForm.meter_name"/>
+            <input class="form-input" type="number" step="0.01" placeholder="Leitura" x-model.number="manualHydrometerForm.reading"/>
+            <input class="form-input" type="text" placeholder="Unidade (m3)" x-model="manualHydrometerForm.unit"/>
+            <input class="form-input" type="text" placeholder="Observação" x-model="manualHydrometerForm.note"/>
           </div>
-          <button @click="submitManualHydrometer()" class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">Salvar hidrômetro</button>
-          <div class="overflow-x-auto">
-            <table class="w-full text-xs">
-              <thead><tr class="text-left text-gray-500 dark:text-gray-400"><th class="py-1">Nome</th><th class="py-1 text-right">Leitura</th><th class="py-1 text-right">Data</th></tr></thead>
-              <tbody>
-                <template x-for="item in manualHydrometers.slice(0, 6)" :key="`${item.meter_name}-${item.ts}`">
-                  <tr class="border-t border-gray-100 dark:border-gray-700"><td class="py-1" x-text="item.meter_name"></td><td class="py-1 text-right" x-text="`${Number(item.reading).toFixed(2)} ${item.unit || 'm3'}`"></td><td class="py-1 text-right" x-text="fmt(item.ts)"></td></tr>
-                </template>
-                <template x-if="manualHydrometers.length === 0"><tr><td colspan="3" class="py-2 text-center text-gray-400">Sem lançamentos.</td></tr></template>
-              </tbody>
-            </table>
-          </div>
+          <button class="btn btn-primary" style="margin-bottom:10px" @click="submitManualHydrometer()">Salvar hidrômetro</button>
+          <table style="width:100%;border-collapse:collapse;font-size:11px">
+            <thead><tr style="border-bottom:1px solid var(--border)"><th style="padding:4px;text-align:left;color:var(--text3);font-weight:500">Nome</th><th style="padding:4px;text-align:right;color:var(--text3);font-weight:500">Leitura</th><th style="padding:4px;text-align:right;color:var(--text3);font-weight:500">Data</th></tr></thead>
+            <tbody>
+              <template x-for="item in manualHydrometers.slice(0, 6)" :key="`${item.meter_name}-${item.ts}`">
+                <tr style="border-bottom:1px solid var(--border)"><td style="padding:4px" x-text="item.meter_name"></td><td style="padding:4px;text-align:right;font-family:var(--mono)" x-text="`${Number(item.reading).toFixed(2)} ${item.unit || 'm3'}`"></td><td style="padding:4px;text-align:right;color:var(--text3)" x-text="fmt(item.ts)"></td></tr>
+              </template>
+              <template x-if="manualHydrometers.length === 0"><tr><td colspan="3" style="padding:10px;text-align:center;color:var(--text3)">Sem lançamentos.</td></tr></template>
+            </tbody>
+          </table>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 space-y-3">
-          <h3 class="font-medium text-gray-700 dark:text-gray-200">Bombas</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <input x-model="manualPumpForm.pump_name" type="text" placeholder="Nome da bomba" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
-            <select x-model="manualPumpForm.state" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700">
+        <!-- Bombas -->
+        <div class="card" style="padding:14px 16px">
+          <div class="section-title" style="margin-bottom:10px">Bombas</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <input class="form-input" type="text" placeholder="Nome da bomba" x-model="manualPumpForm.pump_name"/>
+            <select class="form-select" x-model="manualPumpForm.state">
               <option value="ligada">Ligada</option><option value="desligada">Desligada</option><option value="falha">Falha</option><option value="manutencao">Manutenção</option>
             </select>
-            <input x-model="manualPumpForm.mode" type="text" placeholder="Modo (manual/auto)" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
-            <input x-model="manualPumpForm.note" type="text" placeholder="Observação" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
+            <input class="form-input" type="text" placeholder="Modo (manual/auto)" x-model="manualPumpForm.mode"/>
+            <input class="form-input" type="text" placeholder="Observação" x-model="manualPumpForm.note"/>
           </div>
-          <button @click="submitManualPump()" class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">Salvar bomba</button>
-          <div class="overflow-x-auto">
-            <table class="w-full text-xs">
-              <thead><tr class="text-left text-gray-500 dark:text-gray-400"><th class="py-1">Bomba</th><th class="py-1">Estado</th><th class="py-1 text-right">Data</th></tr></thead>
-              <tbody>
-                <template x-for="item in manualPumps.slice(0, 6)" :key="`${item.pump_name}-${item.ts}`">
-                  <tr class="border-t border-gray-100 dark:border-gray-700"><td class="py-1" x-text="item.pump_name"></td><td class="py-1" x-text="item.state"></td><td class="py-1 text-right" x-text="fmt(item.ts)"></td></tr>
-                </template>
-                <template x-if="manualPumps.length === 0"><tr><td colspan="3" class="py-2 text-center text-gray-400">Sem lançamentos.</td></tr></template>
-              </tbody>
-            </table>
-          </div>
+          <button class="btn btn-primary" style="margin-bottom:10px" @click="submitManualPump()">Salvar bomba</button>
+          <table style="width:100%;border-collapse:collapse;font-size:11px">
+            <thead><tr style="border-bottom:1px solid var(--border)"><th style="padding:4px;text-align:left;color:var(--text3);font-weight:500">Bomba</th><th style="padding:4px;text-align:left;color:var(--text3);font-weight:500">Estado</th><th style="padding:4px;text-align:right;color:var(--text3);font-weight:500">Data</th></tr></thead>
+            <tbody>
+              <template x-for="item in manualPumps.slice(0, 6)" :key="`${item.pump_name}-${item.ts}`">
+                <tr style="border-bottom:1px solid var(--border)"><td style="padding:4px" x-text="item.pump_name"></td><td style="padding:4px" x-text="item.state"></td><td style="padding:4px;text-align:right;color:var(--text3)" x-text="fmt(item.ts)"></td></tr>
+              </template>
+              <template x-if="manualPumps.length === 0"><tr><td colspan="3" style="padding:10px;text-align:center;color:var(--text3)">Sem lançamentos.</td></tr></template>
+            </tbody>
+          </table>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 space-y-3">
-          <h3 class="font-medium text-gray-700 dark:text-gray-200">Válvulas</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <input x-model="manualValveForm.valve_name" type="text" placeholder="Nome da válvula" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
-            <select x-model="manualValveForm.state" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700">
+        <!-- Válvulas -->
+        <div class="card" style="padding:14px 16px">
+          <div class="section-title" style="margin-bottom:10px">Válvulas</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <input class="form-input" type="text" placeholder="Nome da válvula" x-model="manualValveForm.valve_name"/>
+            <select class="form-select" x-model="manualValveForm.state">
               <option value="aberta">Aberta</option><option value="fechada">Fechada</option><option value="parcial">Parcial</option><option value="falha">Falha</option>
             </select>
-            <input x-model="manualValveForm.note" type="text" placeholder="Observação" class="sm:col-span-2 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
+            <input class="form-input" type="text" placeholder="Observação" style="grid-column:span 2" x-model="manualValveForm.note"/>
           </div>
-          <button @click="submitManualValve()" class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">Salvar válvula</button>
-          <div class="overflow-x-auto">
-            <table class="w-full text-xs">
-              <thead><tr class="text-left text-gray-500 dark:text-gray-400"><th class="py-1">Válvula</th><th class="py-1">Estado</th><th class="py-1 text-right">Data</th></tr></thead>
-              <tbody>
-                <template x-for="item in manualValves.slice(0, 6)" :key="`${item.valve_name}-${item.ts}`">
-                  <tr class="border-t border-gray-100 dark:border-gray-700"><td class="py-1" x-text="item.valve_name"></td><td class="py-1" x-text="item.state"></td><td class="py-1 text-right" x-text="fmt(item.ts)"></td></tr>
-                </template>
-                <template x-if="manualValves.length === 0"><tr><td colspan="3" class="py-2 text-center text-gray-400">Sem lançamentos.</td></tr></template>
-              </tbody>
-            </table>
-          </div>
+          <button class="btn btn-primary" style="margin-bottom:10px" @click="submitManualValve()">Salvar válvula</button>
+          <table style="width:100%;border-collapse:collapse;font-size:11px">
+            <thead><tr style="border-bottom:1px solid var(--border)"><th style="padding:4px;text-align:left;color:var(--text3);font-weight:500">Válvula</th><th style="padding:4px;text-align:left;color:var(--text3);font-weight:500">Estado</th><th style="padding:4px;text-align:right;color:var(--text3);font-weight:500">Data</th></tr></thead>
+            <tbody>
+              <template x-for="item in manualValves.slice(0, 6)" :key="`${item.valve_name}-${item.ts}`">
+                <tr style="border-bottom:1px solid var(--border)"><td style="padding:4px" x-text="item.valve_name"></td><td style="padding:4px" x-text="item.state"></td><td style="padding:4px;text-align:right;color:var(--text3)" x-text="fmt(item.ts)"></td></tr>
+              </template>
+              <template x-if="manualValves.length === 0"><tr><td colspan="3" style="padding:10px;text-align:center;color:var(--text3)">Sem lançamentos.</td></tr></template>
+            </tbody>
+          </table>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 space-y-3">
-          <h3 class="font-medium text-gray-700 dark:text-gray-200">Reservatórios sem sensor</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <input x-model="manualReservoirForm.reservoir_name" type="text" placeholder="Nome do reservatório" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
-            <label class="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300"><input x-model="manualReservoirForm.has_sensor" type="checkbox" class="rounded border-gray-300 dark:border-gray-600" />Possui sensor</label>
-            <input x-model.number="manualReservoirForm.level_cm" type="number" step="0.1" placeholder="Nível (cm)" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
-            <input x-model.number="manualReservoirForm.volume_l" type="number" step="0.1" placeholder="Volume (L)" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
-            <input x-model.number="manualReservoirForm.pct" type="number" step="0.1" placeholder="Nível (%)" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
-            <input x-model="manualReservoirForm.note" type="text" placeholder="Observação" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700" />
+        <!-- Reservatórios sem sensor -->
+        <div class="card" style="padding:14px 16px">
+          <div class="section-title" style="margin-bottom:10px">Reservatórios sem sensor</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <input class="form-input" type="text" placeholder="Nome do reservatório" x-model="manualReservoirForm.reservoir_name"/>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)"><input type="checkbox" x-model="manualReservoirForm.has_sensor"/> Possui sensor</label>
+            <input class="form-input" type="number" step="0.1" placeholder="Nível (cm)" x-model.number="manualReservoirForm.level_cm"/>
+            <input class="form-input" type="number" step="0.1" placeholder="Volume (L)" x-model.number="manualReservoirForm.volume_l"/>
+            <input class="form-input" type="number" step="0.1" placeholder="Nível (%)" x-model.number="manualReservoirForm.pct"/>
+            <input class="form-input" type="text" placeholder="Observação" x-model="manualReservoirForm.note"/>
           </div>
-          <button @click="submitManualReservoir()" class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">Salvar reservatório</button>
-          <div class="overflow-x-auto">
-            <table class="w-full text-xs">
-              <thead><tr class="text-left text-gray-500 dark:text-gray-400"><th class="py-1">Reservatório</th><th class="py-1 text-right">Nível</th><th class="py-1 text-right">Data</th></tr></thead>
-              <tbody>
-                <template x-for="item in manualReservoirs.slice(0, 6)" :key="`${item.reservoir_name}-${item.ts}`">
-                  <tr class="border-t border-gray-100 dark:border-gray-700"><td class="py-1" x-text="item.reservoir_name"></td><td class="py-1 text-right" x-text="item.pct != null ? `${Number(item.pct).toFixed(1)}%` : '—'"></td><td class="py-1 text-right" x-text="fmt(item.ts)"></td></tr>
-                </template>
-                <template x-if="manualReservoirs.length === 0"><tr><td colspan="3" class="py-2 text-center text-gray-400">Sem lançamentos.</td></tr></template>
-              </tbody>
-            </table>
-          </div>
+          <button class="btn btn-primary" style="margin-bottom:10px" @click="submitManualReservoir()">Salvar reservatório</button>
+          <table style="width:100%;border-collapse:collapse;font-size:11px">
+            <thead><tr style="border-bottom:1px solid var(--border)"><th style="padding:4px;text-align:left;color:var(--text3);font-weight:500">Reservatório</th><th style="padding:4px;text-align:right;color:var(--text3);font-weight:500">Nível</th><th style="padding:4px;text-align:right;color:var(--text3);font-weight:500">Data</th></tr></thead>
+            <tbody>
+              <template x-for="item in manualReservoirs.slice(0, 6)" :key="`${item.reservoir_name}-${item.ts}`">
+                <tr style="border-bottom:1px solid var(--border)"><td style="padding:4px" x-text="item.reservoir_name"></td><td style="padding:4px;text-align:right;font-family:var(--mono)" x-text="item.pct != null ? `${Number(item.pct).toFixed(1)}%` : '—'"></td><td style="padding:4px;text-align:right;color:var(--text3)" x-text="fmt(item.ts)"></td></tr>
+              </template>
+              <template x-if="manualReservoirs.length === 0"><tr><td colspan="3" style="padding:10px;text-align:center;color:var(--text3)">Sem lançamentos.</td></tr></template>
+            </tbody>
+          </table>
         </div>
+
       </div>
-    </section>
-  </main>
+    </div>
+  </div>
+</div>
 
-  <script>
+<script src="assets/shared.js"></script>
+<script defer src="assets/vendor/alpine.min.js"></script>
+<script>
+function dadosApp() {
+  return {
+    period: '24h',
+    filterAlias: '',
+    filterText: '',
+    allRows: [],
+    filtered: [],
+    loading: false,
+    sortCol: 'ts',
+    sortDir: 'desc',
+    page: 1,
+    perPage: 50,
+    manualHydrometers: [],
+    manualPumps: [],
+    manualValves: [],
+    manualReservoirs: [],
+    manualMessage: '',
+    manualMessageType: 'ok',
+    manualHydrometerForm: { meter_name: '', reading: '', unit: 'm3', note: '' },
+    manualPumpForm: { pump_name: '', state: 'ligada', mode: 'manual', note: '' },
+    manualValveForm: { valve_name: '', state: 'aberta', note: '' },
+    manualReservoirForm: { reservoir_name: '', has_sensor: false, level_cm: '', volume_l: '', pct: '', note: '' },
+    gwStatus: 'off',
+    gwLabel: 'GW offline',
 
-  function dadosApp() {
-    return {
-      darkMode: localStorage.getItem('darkMode') === 'true',
-      period: '24h',
-      filterAlias: '',
-      filterText: '',
-      allRows: [],
-      filtered: [],
-      loading: false,
-      sortCol: 'ts',
-      sortDir: 'desc',
-      page: 1,
-      perPage: 50,
-      manualHydrometers: [],
-      manualPumps: [],
-      manualValves: [],
-      manualReservoirs: [],
-      manualMessage: '',
-      manualMessageType: 'ok',
-      manualHydrometerForm: { meter_name: '', reading: '', unit: 'm3', note: '' },
-      manualPumpForm: { pump_name: '', state: 'ligada', mode: 'manual', note: '' },
-      manualValveForm: { valve_name: '', state: 'aberta', note: '' },
-      manualReservoirForm: { reservoir_name: '', has_sensor: false, level_cm: '', volume_l: '', pct: '', note: '' },
+    get totalPages() { return Math.max(1, Math.ceil(this.filtered.length / this.perPage)); },
+    get paged() { const s=(this.page-1)*this.perPage; return this.filtered.slice(s, s+this.perPage); },
 
-      get totalPages() { return Math.max(1, Math.ceil(this.filtered.length / this.perPage)); },
-      get paged() { const s=(this.page-1)*this.perPage; return this.filtered.slice(s, s+this.perPage); },
+    init() { this.loadGateway(); this.loadAll(); this.loadManualData(); },
 
-      init() { this.loadAll(); this.loadManualData(); },
-      toggleDark() { this.darkMode = !this.darkMode; localStorage.setItem('darkMode', this.darkMode); },
+    async loadGateway() {
+      const gw = await fetch('/api/gateway').then(r => r.json()).catch(() => null);
+      if (!gw) return;
+      if (gw.sim_mode) { this.gwStatus = 'sim'; this.gwLabel = 'Simulação'; }
+      else if (gw.connected) { this.gwStatus = 'on'; this.gwLabel = 'GW online'; }
+      else { this.gwStatus = 'off'; this.gwLabel = 'GW offline'; }
+    },
 
-      async loadAll() {
-        this.loading = true;
-        try {
-          const results = await Promise.all(
-            ORDERED_ALIASES.map(a =>
-              fetch(`/api/history/${a}?period=${this.period}`)
-                .then(r => r.ok ? r.json() : [])
-                .then(rows => rows.map((r,i) => ({ ...r, alias: a, _id: `${a}-${i}-${r.ts}` })))
-            )
-          );
-          this.allRows = results.flat().sort((a,b) => b.ts - a.ts);
-          this.applyFilters();
-        } catch(e) {
-          console.error(e);
-        } finally {
-          this.loading = false;
-        }
-      },
+    aliasColor(alias) {
+      return ALIAS_FILL_COLORS[alias] || '#6b82a0';
+    },
 
-      applyFilters() {
-        let rows = this.allRows;
-        if (this.filterAlias) rows = rows.filter(r => r.alias === this.filterAlias);
-        if (this.filterText.trim()) {
-          const q = this.filterText.trim().toLowerCase();
-          rows = rows.filter(r =>
-            String(r.alias||'').toLowerCase().includes(q) ||
-            String(r.distance_cm||'').includes(q) ||
-            String(r.level_cm||'').includes(q) ||
-            String(r.pct||'').includes(q) ||
-            String(Math.round(r.volume_l||0)).includes(q)
-          );
-        }
-        this.doSort(rows);
-        this.page = 1;
-      },
-
-      sortBy(col) {
-        if (this.sortCol === col) this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
-        else { this.sortCol = col; this.sortDir = 'desc'; }
-        this.doSort(this.filtered);
-      },
-
-      doSort(rows) {
-        const col = this.sortCol, dir = this.sortDir;
-        this.filtered = [...rows].sort((a,b) => {
-          const av = a[col] ?? -Infinity, bv = b[col] ?? -Infinity;
-          if (typeof av === 'string') return dir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av);
-          return dir === 'asc' ? av - bv : bv - av;
-        });
-      },
-
-      badgeClass(alias) { return BADGE_COLORS[alias] || 'bg-gray-100 text-gray-700'; },
-
-      fmt(ts) {
-        if (!ts) return '—';
-        return new Date(ts*1000).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
-      },
-
-      notify(msg, type='ok') {
-        this.manualMessage = msg;
-        this.manualMessageType = type;
-        setTimeout(() => { this.manualMessage = ''; }, 4000);
-      },
-
-      async loadManualData() {
-        try {
-          const [h, p, v, r] = await Promise.all([
-            fetch('/api/manual/hydrometers?limit=200').then(res => res.ok ? res.json() : {items: []}),
-            fetch('/api/manual/pumps?limit=200').then(res => res.ok ? res.json() : {items: []}),
-            fetch('/api/manual/valves?limit=200').then(res => res.ok ? res.json() : {items: []}),
-            fetch('/api/manual/reservoirs?limit=200').then(res => res.ok ? res.json() : {items: []}),
-          ]);
-          this.manualHydrometers = h.items || [];
-          this.manualPumps = p.items || [];
-          this.manualValves = v.items || [];
-          this.manualReservoirs = r.items || [];
-        } catch (e) {
-          console.error(e);
-          this.notify('Falha ao carregar lançamentos manuais.', 'err');
-        }
-      },
-
-      async postManual(path, payload) {
-        const res = await fetch(path, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          throw new Error(data.detail || 'Erro no lançamento manual');
-        }
-        return data;
-      },
-
-      async submitManualHydrometer() {
-        try {
-          if (!this.manualHydrometerForm.meter_name || this.manualHydrometerForm.reading === '') {
-            this.notify('Informe nome e leitura do hidrômetro.', 'err');
-            return;
-          }
-          await this.postManual('/api/manual/hydrometers', this.manualHydrometerForm);
-          this.manualHydrometerForm = { meter_name: '', reading: '', unit: 'm3', note: '' };
-          await this.loadManualData();
-          this.notify('Lançamento de hidrômetro salvo.');
-        } catch (e) {
-          this.notify(e.message || 'Erro ao salvar hidrômetro.', 'err');
-        }
-      },
-
-      async submitManualPump() {
-        try {
-          if (!this.manualPumpForm.pump_name) {
-            this.notify('Informe o nome da bomba.', 'err');
-            return;
-          }
-          await this.postManual('/api/manual/pumps', this.manualPumpForm);
-          this.manualPumpForm = { pump_name: '', state: 'ligada', mode: 'manual', note: '' };
-          await this.loadManualData();
-          this.notify('Lançamento de bomba salvo.');
-        } catch (e) {
-          this.notify(e.message || 'Erro ao salvar bomba.', 'err');
-        }
-      },
-
-      async submitManualValve() {
-        try {
-          if (!this.manualValveForm.valve_name) {
-            this.notify('Informe o nome da válvula.', 'err');
-            return;
-          }
-          await this.postManual('/api/manual/valves', this.manualValveForm);
-          this.manualValveForm = { valve_name: '', state: 'aberta', note: '' };
-          await this.loadManualData();
-          this.notify('Lançamento de válvula salvo.');
-        } catch (e) {
-          this.notify(e.message || 'Erro ao salvar válvula.', 'err');
-        }
-      },
-
-      async submitManualReservoir() {
-        try {
-          if (!this.manualReservoirForm.reservoir_name) {
-            this.notify('Informe o nome do reservatório.', 'err');
-            return;
-          }
-          const payload = {
-            ...this.manualReservoirForm,
-            level_cm: this.manualReservoirForm.level_cm === '' ? null : this.manualReservoirForm.level_cm,
-            volume_l: this.manualReservoirForm.volume_l === '' ? null : this.manualReservoirForm.volume_l,
-            pct: this.manualReservoirForm.pct === '' ? null : this.manualReservoirForm.pct,
-          };
-          await this.postManual('/api/manual/reservoirs', payload);
-          this.manualReservoirForm = { reservoir_name: '', has_sensor: false, level_cm: '', volume_l: '', pct: '', note: '' };
-          await this.loadManualData();
-          this.notify('Lançamento de reservatório salvo.');
-        } catch (e) {
-          this.notify(e.message || 'Erro ao salvar reservatório.', 'err');
-        }
+    async loadAll() {
+      this.loading = true;
+      try {
+        const results = await Promise.all(
+          ORDERED_ALIASES.map(a =>
+            fetch(`/api/history/${a}?period=${this.period}`)
+              .then(r => r.ok ? r.json() : [])
+              .then(rows => rows.map((r,i) => ({ ...r, alias: a, _id: `${a}-${i}-${r.ts}` })))
+          )
+        );
+        this.allRows = results.flat().sort((a,b) => b.ts - a.ts);
+        this.applyFilters();
+      } catch(e) {
+        console.error(e);
+      } finally {
+        this.loading = false;
       }
-    };
-  }
-  </script>
+    },
+
+    applyFilters() {
+      let rows = this.allRows;
+      if (this.filterAlias) rows = rows.filter(r => r.alias === this.filterAlias);
+      if (this.filterText.trim()) {
+        const q = this.filterText.trim().toLowerCase();
+        rows = rows.filter(r =>
+          String(r.alias||'').toLowerCase().includes(q) ||
+          String(r.distance_cm||'').includes(q) ||
+          String(r.level_cm||'').includes(q) ||
+          String(r.pct||'').includes(q) ||
+          String(Math.round(r.volume_l||0)).includes(q)
+        );
+      }
+      this.doSort(rows);
+      this.page = 1;
+    },
+
+    sortBy(col) {
+      if (this.sortCol === col) this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+      else { this.sortCol = col; this.sortDir = 'desc'; }
+      this.doSort(this.filtered);
+    },
+
+    doSort(rows) {
+      const col = this.sortCol, dir = this.sortDir;
+      this.filtered = [...rows].sort((a,b) => {
+        const av = a[col] ?? -Infinity, bv = b[col] ?? -Infinity;
+        if (typeof av === 'string') return dir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+        return dir === 'asc' ? av - bv : bv - av;
+      });
+    },
+
+    fmt(ts) {
+      if (!ts) return '—';
+      return new Date(ts*1000).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    },
+
+    notify(msg, type='ok') {
+      this.manualMessage = msg;
+      this.manualMessageType = type;
+      setTimeout(() => { this.manualMessage = ''; }, 4000);
+    },
+
+    async loadManualData() {
+      try {
+        const [h, p, v, r] = await Promise.all([
+          fetch('/api/manual/hydrometers?limit=200').then(res => res.ok ? res.json() : {items:[]}),
+          fetch('/api/manual/pumps?limit=200').then(res => res.ok ? res.json() : {items:[]}),
+          fetch('/api/manual/valves?limit=200').then(res => res.ok ? res.json() : {items:[]}),
+          fetch('/api/manual/reservoirs?limit=200').then(res => res.ok ? res.json() : {items:[]}),
+        ]);
+        this.manualHydrometers = h.items || [];
+        this.manualPumps = p.items || [];
+        this.manualValves = v.items || [];
+        this.manualReservoirs = r.items || [];
+      } catch (e) {
+        console.error(e);
+        this.notify('Falha ao carregar lançamentos manuais.', 'err');
+      }
+    },
+
+    async postManual(path, payload) {
+      const res = await fetch(path, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || 'Erro no lançamento manual');
+      return data;
+    },
+
+    async submitManualHydrometer() {
+      try {
+        if (!this.manualHydrometerForm.meter_name || this.manualHydrometerForm.reading === '') { this.notify('Informe nome e leitura do hidrômetro.', 'err'); return; }
+        await this.postManual('/api/manual/hydrometers', this.manualHydrometerForm);
+        this.manualHydrometerForm = { meter_name:'', reading:'', unit:'m3', note:'' };
+        await this.loadManualData();
+        this.notify('Lançamento de hidrômetro salvo.');
+      } catch (e) { this.notify(e.message || 'Erro ao salvar hidrômetro.', 'err'); }
+    },
+
+    async submitManualPump() {
+      try {
+        if (!this.manualPumpForm.pump_name) { this.notify('Informe o nome da bomba.', 'err'); return; }
+        await this.postManual('/api/manual/pumps', this.manualPumpForm);
+        this.manualPumpForm = { pump_name:'', state:'ligada', mode:'manual', note:'' };
+        await this.loadManualData();
+        this.notify('Lançamento de bomba salvo.');
+      } catch (e) { this.notify(e.message || 'Erro ao salvar bomba.', 'err'); }
+    },
+
+    async submitManualValve() {
+      try {
+        if (!this.manualValveForm.valve_name) { this.notify('Informe o nome da válvula.', 'err'); return; }
+        await this.postManual('/api/manual/valves', this.manualValveForm);
+        this.manualValveForm = { valve_name:'', state:'aberta', note:'' };
+        await this.loadManualData();
+        this.notify('Lançamento de válvula salvo.');
+      } catch (e) { this.notify(e.message || 'Erro ao salvar válvula.', 'err'); }
+    },
+
+    async submitManualReservoir() {
+      try {
+        if (!this.manualReservoirForm.reservoir_name) { this.notify('Informe o nome do reservatório.', 'err'); return; }
+        const payload = {
+          ...this.manualReservoirForm,
+          level_cm: this.manualReservoirForm.level_cm === '' ? null : this.manualReservoirForm.level_cm,
+          volume_l: this.manualReservoirForm.volume_l === '' ? null : this.manualReservoirForm.volume_l,
+          pct: this.manualReservoirForm.pct === '' ? null : this.manualReservoirForm.pct,
+        };
+        await this.postManual('/api/manual/reservoirs', payload);
+        this.manualReservoirForm = { reservoir_name:'', has_sensor:false, level_cm:'', volume_l:'', pct:'', note:'' };
+        await this.loadManualData();
+        this.notify('Lançamento de reservatório salvo.');
+      } catch (e) { this.notify(e.message || 'Erro ao salvar reservatório.', 'err'); }
+    }
+  };
+}
+</script>
 </body>
 </html>

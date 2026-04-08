@@ -1,0 +1,211 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: A
+      - generic [ref=e6]: AGUADA
+    - navigation [ref=e7]:
+      - generic [ref=e8]: Operação
+      - link "Dashboard" [ref=e9] [cursor=pointer]:
+        - /url: index.html
+        - img [ref=e11]
+        - generic [ref=e16]: Dashboard
+      - link "SCADA" [ref=e17] [cursor=pointer]:
+        - /url: scada.html
+        - img [ref=e19]
+        - generic [ref=e22]: SCADA
+      - generic [ref=e23]: Análise
+      - link "Análise" [ref=e24] [cursor=pointer]:
+        - /url: analise.html
+        - img [ref=e26]
+        - generic [ref=e28]: Análise
+      - generic [ref=e29]: Gestão
+      - link "Relatório" [ref=e30] [cursor=pointer]:
+        - /url: report.html
+        - img [ref=e32]
+        - generic [ref=e35]: Relatório
+      - link "Hidráulica" [ref=e36] [cursor=pointer]:
+        - /url: hidraulica.html
+        - img [ref=e38]
+        - generic [ref=e40]: Hidráulica
+      - link "Dispositivos" [ref=e41] [cursor=pointer]:
+        - /url: dispositivos.html
+        - img [ref=e43]
+        - generic [ref=e45]: Dispositivos
+      - link "Documentação" [ref=e46] [cursor=pointer]:
+        - /url: documentacao.html
+        - img [ref=e48]
+        - generic [ref=e51]: Documentação
+    - generic [ref=e54]: GW online
+  - generic [ref=e55]:
+    - generic [ref=e56]:
+      - generic [ref=e57]:
+        - generic [ref=e58]: SCADA — Diagrama Unifilar
+        - generic [ref=e59]: "Volume total: 642 m³ · Nodes: 6/8"
+      - generic [ref=e60]:
+        - generic [ref=e63]: Ao vivo
+        - button [ref=e64] [cursor=pointer]:
+          - img [ref=e65]
+    - generic [ref=e69]:
+      - img [ref=e71]:
+        - generic [ref=e73]: ILHA DAS FLORES
+        - generic [ref=e74]: ÁGUAS RIO
+        - generic [ref=e77]: FI
+        - generic [ref=e78]: CONC
+        - generic [ref=e81] [cursor=pointer]:
+          - generic [ref=e84]: 40%
+          - generic [ref=e85]: CBIF1
+        - generic [ref=e86] [cursor=pointer]:
+          - generic [ref=e89]: 56%
+          - generic [ref=e90]: CBIF2
+        - generic [ref=e99] [cursor=pointer]: BIF-E
+        - generic [ref=e104] [cursor=pointer]: BIF-D
+        - generic [ref=e105]:
+          - generic [ref=e107]: FI
+          - generic [ref=e108]: HID-IF
+          - generic [ref=e109]: HID-IF
+        - generic [ref=e111]: — submarina —
+        - generic [ref=e113]: ILHA DO ENGENHO
+        - generic [ref=e114] [cursor=pointer]:
+          - generic [ref=e117]: 87.5%
+          - generic [ref=e118]: CIE1 (Incêndio)
+        - generic [ref=e119] [cursor=pointer]:
+          - generic [ref=e122]: 92.92%
+          - generic [ref=e123]: CIE2 (Incêndio)
+        - generic [ref=e124] [cursor=pointer]:
+          - generic [ref=e127]: 76%
+          - generic [ref=e128]: CB31
+        - generic [ref=e129] [cursor=pointer]:
+          - generic [ref=e132]: 95%
+          - generic [ref=e133]: CB32
+        - generic [ref=e138] [cursor=pointer]: B03-E
+        - generic [ref=e143] [cursor=pointer]: B03-D
+        - generic [ref=e144] [cursor=pointer]:
+          - generic [ref=e147]: 84.22%
+          - generic [ref=e148]: CON
+          - generic [ref=e149]: Consumo
+        - generic [ref=e150] [cursor=pointer]:
+          - generic [ref=e153]: 80.67%
+          - generic [ref=e154]: CAV
+          - generic [ref=e155]: Incêndio
+        - generic [ref=e160]:
+          - generic [ref=e162]: FI
+          - generic [ref=e163]: PRAIA
+          - generic [ref=e164]: HID-PRAIA
+        - generic [ref=e169] [cursor=pointer]: V-CON-AZ
+        - generic [ref=e174] [cursor=pointer]: V-CON-AV
+        - generic [ref=e179] [cursor=pointer]: V-CON-AVAZ
+        - generic [ref=e184] [cursor=pointer]: V-CAV-AZ
+        - generic [ref=e189] [cursor=pointer]: V-CAV-AV
+        - generic [ref=e194] [cursor=pointer]: V-CAV-BA
+      - generic [ref=e195]:
+        - generic [ref=e196]:
+          - generic [ref=e197]: Bombas
+          - generic [ref=e198]:
+            - generic [ref=e199]:
+              - generic [ref=e201]: B03-D
+              - generic [ref=e202]: desligada
+            - generic [ref=e203]:
+              - button "Ligar" [ref=e204] [cursor=pointer]
+              - button "Desligar" [ref=e205] [cursor=pointer]
+              - button "Manut." [ref=e206] [cursor=pointer]
+          - generic [ref=e207]:
+            - generic [ref=e208]:
+              - generic [ref=e210]: B03-E
+              - generic [ref=e211]: desligada
+            - generic [ref=e212]:
+              - button "Ligar" [ref=e213] [cursor=pointer]
+              - button "Desligar" [ref=e214] [cursor=pointer]
+              - button "Manut." [ref=e215] [cursor=pointer]
+          - generic [ref=e216]:
+            - generic [ref=e217]:
+              - generic [ref=e219]: BIF-D
+              - generic [ref=e220]: desligada
+            - generic [ref=e221]:
+              - button "Ligar" [ref=e222] [cursor=pointer]
+              - button "Desligar" [ref=e223] [cursor=pointer]
+              - button "Manut." [ref=e224] [cursor=pointer]
+          - generic [ref=e225]:
+            - generic [ref=e226]:
+              - generic [ref=e228]: BIF-E
+              - generic [ref=e229]: desligada
+            - generic [ref=e230]:
+              - button "Ligar" [ref=e231] [cursor=pointer]
+              - button "Desligar" [ref=e232] [cursor=pointer]
+              - button "Manut." [ref=e233] [cursor=pointer]
+        - generic [ref=e234]:
+          - generic [ref=e235]: Válvulas
+          - generic [ref=e236]:
+            - generic [ref=e237]:
+              - generic [ref=e239]: V-CAV-AV
+              - generic [ref=e240]: fechada
+            - generic [ref=e241]:
+              - button "Abrir" [ref=e242] [cursor=pointer]
+              - button "Parcial" [ref=e243] [cursor=pointer]
+              - button "Fechar" [ref=e244] [cursor=pointer]
+          - generic [ref=e245]:
+            - generic [ref=e246]:
+              - generic [ref=e248]: V-CAV-AZ
+              - generic [ref=e249]: fechada
+            - generic [ref=e250]:
+              - button "Abrir" [ref=e251] [cursor=pointer]
+              - button "Parcial" [ref=e252] [cursor=pointer]
+              - button "Fechar" [ref=e253] [cursor=pointer]
+          - generic [ref=e254]:
+            - generic [ref=e255]:
+              - generic [ref=e257]: V-CAV-BA
+              - generic [ref=e258]: fechada
+            - generic [ref=e259]:
+              - button "Abrir" [ref=e260] [cursor=pointer]
+              - button "Parcial" [ref=e261] [cursor=pointer]
+              - button "Fechar" [ref=e262] [cursor=pointer]
+          - generic [ref=e263]:
+            - generic [ref=e264]:
+              - generic [ref=e266]: V-CON-AV
+              - generic [ref=e267]: fechada
+            - generic [ref=e268]:
+              - button "Abrir" [ref=e269] [cursor=pointer]
+              - button "Parcial" [ref=e270] [cursor=pointer]
+              - button "Fechar" [ref=e271] [cursor=pointer]
+          - generic [ref=e272]:
+            - generic [ref=e273]:
+              - generic [ref=e275]: V-CON-AVAZ
+              - generic [ref=e276]: fechada
+            - generic [ref=e277]:
+              - button "Abrir" [ref=e278] [cursor=pointer]
+              - button "Parcial" [ref=e279] [cursor=pointer]
+              - button "Fechar" [ref=e280] [cursor=pointer]
+          - generic [ref=e281]:
+            - generic [ref=e282]:
+              - generic [ref=e284]: V-CON-AZ
+              - generic [ref=e285]: fechada
+            - generic [ref=e286]:
+              - button "Abrir" [ref=e287] [cursor=pointer]
+              - button "Parcial" [ref=e288] [cursor=pointer]
+              - button "Fechar" [ref=e289] [cursor=pointer]
+        - generic [ref=e290]:
+          - generic [ref=e291]: Hidrômetros
+          - generic [ref=e292]:
+            - generic [ref=e294]: HID-AV
+            - generic [ref=e295]:
+              - generic [ref=e296]: 0.00 m3
+              - generic [ref=e297]: 05/04/26, 20:46
+          - generic [ref=e298]:
+            - generic [ref=e300]: HID-AV|AZ
+            - generic [ref=e301]:
+              - generic [ref=e302]: 0.00 m3
+              - generic [ref=e303]: 05/04/26, 20:46
+          - generic [ref=e304]:
+            - generic [ref=e306]: HID-CONC
+            - generic [ref=e307]:
+              - generic [ref=e308]: 0.00 m3
+              - generic [ref=e309]: 05/04/26, 20:46
+          - generic [ref=e310]:
+            - generic [ref=e312]: HID-IF
+            - generic [ref=e313]:
+              - generic [ref=e314]: 0.00 m3
+              - generic [ref=e315]: 05/04/26, 20:46
+          - generic [ref=e316]:
+            - generic [ref=e318]: HID-PRAIA
+            - generic [ref=e319]:
+              - generic [ref=e320]: 0.00 m3
+              - generic [ref=e321]: 05/04/26, 20:46
