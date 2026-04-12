@@ -25,7 +25,7 @@
       <a href="consumption.html" class="nav-link active"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></span><span class="nav-label">Consumo</span></a>
       <div class="sidebar-section">Gestão</div>
       <a href="report.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="nav-label">Relatório</span></a>
-            <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
+      <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
       <a href="dispositivos.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span><span class="nav-label">Dispositivos</span></a>
       <a href="documentacao.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span><span class="nav-label">Documentação</span></a>
     </nav>
@@ -176,6 +176,15 @@
 <script>
 const CONS_COLORS = ['#3b82f6','#ef4444','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ec4899','#f97316'];
 
+// Lê variáveis CSS para adaptar gráficos ao tema
+function chartThemeColors() {
+  const s = getComputedStyle(document.documentElement);
+  return {
+    text: s.getPropertyValue('--text3').trim() || '#6b82a0',
+    grid: s.getPropertyValue('--border').trim() || '#1e2d3d',
+  };
+}
+
 function consumptionApp() {
   const today = new Date().toISOString().slice(0,10);
   const chartStore = {};
@@ -268,7 +277,7 @@ function consumptionApp() {
     },
 
     renderHourChart(hourMap, label) {
-      const grid = '#1e2d3d'; const text = '#6b82a0';
+      const { grid, text } = chartThemeColors();
       const labels = [], data = [], colors = [];
       for (let h = 0; h < 24; h++) {
         labels.push(String(h).padStart(2,'0')+':00');
@@ -296,7 +305,7 @@ function consumptionApp() {
         const labels = online.map(r => r.alias);
         const data = online.map(r => Math.round(r.pct));
         const colors = labels.map(a => CONS_COLORS[ORDERED_ALIASES.indexOf(a) % CONS_COLORS.length]);
-        const text = '#6b82a0';
+        const { text } = chartThemeColors();
         this.makeChart('chartDonut', {
           type: 'doughnut',
           data: { labels, datasets: [{ data, backgroundColor: colors.map(c=>c+'cc'), borderColor: colors, borderWidth:2 }] },
@@ -321,7 +330,7 @@ function consumptionApp() {
         }
         const labels = Object.keys(dayMap);
         const data = labels.map(d => { const arr = dayMap[d]; return Math.round(arr.reduce((s,v)=>s+v,0)/arr.length*10)/10; });
-        const grid = '#1e2d3d'; const text = '#6b82a0';
+        const { grid, text } = chartThemeColors();
         this.makeChart('chartTrend', {
           type: 'line',
           data: { labels, datasets:[{ label:`Nível médio — ${this.alias}`, data, borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.12)', borderWidth:2, tension:0.3, fill:true, pointRadius:3, spanGaps:true }] },
@@ -356,7 +365,7 @@ function consumptionApp() {
           if (delta < 0) turnoDeltas[Math.floor(h/6)].push(Math.abs(delta));
         }
         const radarData = turnoDeltas.map(arr => arr.length ? Math.round(arr.reduce((s,v)=>s+v,0)/arr.length*10)/10 : 0);
-        const grid = '#1e2d3d'; const text = '#6b82a0';
+        const { grid, text } = chartThemeColors();
 
         this.makeChart('chartRadar', {
           type: 'radar',

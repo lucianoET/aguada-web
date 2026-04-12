@@ -18,22 +18,21 @@
       right: 14px;
       bottom: 14px;
       z-index: 500;
-      background: rgba(11, 15, 20, 0.88);
-      border: 1px solid rgba(61, 85, 110, 0.5);
+      background: var(--bg2);
+      border: 1px solid var(--border2);
       border-radius: 8px;
       padding: 10px 12px;
-      color: #c9d4e0;
+      color: var(--text);
       font-size: 11px;
       line-height: 1.35;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
       pointer-events: none;
     }
     .map-legend-title {
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #6b82a0;
+      color: var(--text3);
       margin-bottom: 8px;
     }
     .map-legend-row {
@@ -108,16 +107,16 @@
       transition: border-color 0.15s;
     }
     .res-card:hover { border-color: var(--border2); }
-    /* Leaflet layer control — tema escuro */
+    /* Leaflet layer control — tema dinâmico */
     .leaflet-control-layers {
-      background: rgba(11,15,20,0.92) !important;
-      border: 1px solid rgba(61,85,110,0.5) !important;
+      background: var(--bg2) !important;
+      border: 1px solid var(--border2) !important;
       border-radius: 6px !important;
       color: var(--text) !important;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25) !important;
       padding: 4px 8px !important;
     }
-    .leaflet-control-layers label { color: #c9d4e0 !important; font-size: 12px; }
+    .leaflet-control-layers label { color: var(--text) !important; font-size: 12px; }
     .leaflet-control-layers input { margin-right: 4px; }
     @media (max-width: 900px) {
       .dash-grid { grid-template-columns: 1fr; grid-template-rows: 50vh 1fr; }
@@ -166,7 +165,7 @@
         </span>
         <span class="nav-label">Relatório</span>
       </a>
-            <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
+      <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
       <a href="dispositivos.html" class="nav-link">
         <span class="nav-icon">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>

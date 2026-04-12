@@ -1,7 +1,7 @@
 /* ============================================================
-   AGUADA — Design System v1.0
-   Tema escuro (padrão) inspirado no aguada3.
-   Tema claro via [data-theme="light"] no <html>.
+   AGUADA — Design System v1.1
+   Tema escuro (padrão) + Tema claro via [data-theme="light"].
+   Compatível com padrão ISA-101. 100% offline.
    ============================================================ */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,6 +34,33 @@
   --sidebar-w-expanded:  220px;
   --topbar-h: 48px;
   --radius: 8px;
+
+  /* ── Variáveis SCADA / ISA-101 — Tema Escuro ── */
+  --scada-site-hdr-bg:       #1a2740;
+  --scada-site-hdr-border:   #2d4a72;
+  --scada-site-red-hdr-bg:   #2a1515;
+  --scada-site-red-hdr-border: #6b2222;
+  --scada-content-bg:        #131b25;
+  --scada-content-border:    #1e2d3d;
+  --scada-res-bg:            #192030;
+  --scada-res-border:        #243344;
+  --scada-eq-bg:             #192030;
+  --scada-eq-border:         #243344;
+  --scada-eq-hover-border:   #3b82f6;
+  --scada-text-primary:      #c9d4e0;
+  --scada-text-secondary:    #8aa2bf;
+  --scada-band-bg:           #151f2e;
+  --scada-band-border:       #253a54;
+  --scada-band-text:         #6a829f;
+  --scada-sub-hdr-bg:        #111820;
+  --scada-sub-hdr-border:    #1e2d3d;
+  --scada-water-bg:          #0d1a2d;
+  --scada-water-border:      #1e3a5f;
+  --scada-hyd-hdr-bg:        #161e28;
+  --scada-block-bg-blue:     rgba(17, 28, 46, 0.90);
+  --scada-block-bg-red:      rgba(28, 14, 14, 0.90);
+  --pipe-color:              #1a8fff;
+  --pipe-label-color:        #7eb8ff;
 }
 
 /* ── Tema Claro ─────────────────────────────────────────────── */
@@ -48,6 +75,7 @@
   --text2:      #475569;
   --text3:      #64748b;
   --blue:       #2563eb;
+  --blue-dim:   #dbeafe;
   --green:      #16a34a;
   --green-dim:  #dcfce7;
   --yellow:     #d97706;
@@ -57,6 +85,33 @@
   --cyan:       #0891b2;
   --surface1:   #ffffff;
   --surface2:   #f8fafc;
+
+  /* ── Variáveis SCADA / ISA-101 — Tema Claro ── */
+  --scada-site-hdr-bg:       #d7e3f7;
+  --scada-site-hdr-border:   #aac1e4;
+  --scada-site-red-hdr-bg:   #ffd4d4;
+  --scada-site-red-hdr-border: #f18e8e;
+  --scada-content-bg:        #d8d8d8;
+  --scada-content-border:    #7c7c7c;
+  --scada-res-bg:            #efefef;
+  --scada-res-border:        #9b9b9b;
+  --scada-eq-bg:             #f8f8f8;
+  --scada-eq-border:         #888888;
+  --scada-eq-hover-border:   #2563eb;
+  --scada-text-primary:      #111111;
+  --scada-text-secondary:    #333333;
+  --scada-band-bg:           #d9e8fb;
+  --scada-band-border:       #8ea6c7;
+  --scada-band-text:         #3a5275;
+  --scada-sub-hdr-bg:        #cfcfcf;
+  --scada-sub-hdr-border:    #9b9b9b;
+  --scada-water-bg:          #f7f7f7;
+  --scada-water-border:      #444444;
+  --scada-hyd-hdr-bg:        #e8e8e8;
+  --scada-block-bg-blue:     rgba(210, 225, 250, 0.93);
+  --scada-block-bg-red:      rgba(254, 220, 220, 0.93);
+  --pipe-color:              #1060c0;
+  --pipe-label-color:        #1a4a8c;
 }
 
 html, body { height: 100%; font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
@@ -250,9 +305,42 @@ button { cursor: pointer; font-family: var(--sans); border: none; background: no
   .modal-side { width: 100%; }
 }
 
-/* ── Leaflet customização tema escuro ───────────────────────── */
+/* ── Utilitários de cor / estado ────────────────────────────── */
+.text-green  { color: var(--green); }
+.text-yellow { color: var(--yellow); }
+.text-red    { color: var(--red); }
+.text-blue   { color: var(--blue); }
+.text-cyan   { color: var(--cyan); }
+.text-muted  { color: var(--text3); }
+
+/* ── Tabela padrão ──────────────────────────────────────────── */
+.table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.table th { padding: 10px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); border-bottom: 1px solid var(--border); font-weight: 600; background: var(--bg2); }
+.table td { padding: 8px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+.table tr:last-child td { border-bottom: none; }
+.table tbody tr:hover td { background: var(--bg3); }
+
+/* ── KPI Card (usado em várias páginas) ─────────────────────── */
+.kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; }
+.kpi-card-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-bottom: 4px; }
+.kpi-card-value { font-family: var(--mono); font-size: 20px; font-weight: 600; line-height: 1.2; }
+
+/* ── Leaflet customização tema escuro / claro ───────────────── */
 .leaflet-container { background: #0d1520; }
 .leaflet-tile-pane { filter: grayscale(0.3) brightness(0.85); }
+[data-theme="light"] .leaflet-container { background: #e8edf2; }
 [data-theme="light"] .leaflet-tile-pane { filter: none; }
-.leaflet-popup-content-wrapper { background: var(--card); border: 1px solid var(--border2); color: var(--text); border-radius: var(--radius); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+.leaflet-popup-content-wrapper { background: var(--card); border: 1px solid var(--border2); color: var(--text); border-radius: var(--radius); box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
 .leaflet-popup-tip { background: var(--card); }
+.leaflet-control-zoom a { background: var(--card) !important; color: var(--text) !important; border-color: var(--border2) !important; }
+.leaflet-control-zoom a:hover { background: var(--bg3) !important; }
+.leaflet-bar { border: 1px solid var(--border2) !important; box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important; }
+
+/* ── nav-link active no tema claro ─────────────────────────── */
+[data-theme="light"] .nav-link.active { background: var(--blue-dim); color: var(--blue); }
+
+/* ── Scrollbar fina (webkit) ────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }

@@ -23,7 +23,7 @@
       <a href="analise.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="nav-label">Análise</span></a>
       <div class="sidebar-section">Gestão</div>
       <a href="report.html" class="nav-link active"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="nav-label">Relatório</span></a>
-            <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
+      <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
       <a href="dispositivos.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span><span class="nav-label">Dispositivos</span></a>
       <a href="documentacao.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span><span class="nav-label">Documentação</span></a>
     </nav>
@@ -31,7 +31,7 @@
   </aside>
   <div class="main">
     <div class="topbar">
-      <div><div class="topbar-title">Relatório Diário</div></div>
+      <div><div class="topbar-title">Relatório Diário</div><div class="topbar-sub">Resumo e balanço hídrico</div></div>
       <div class="topbar-right"><button class="theme-btn" onclick="toggleTheme()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg></button></div>
     </div>
     <div class="content">
@@ -80,16 +80,16 @@
 
       <!-- Alerts Section -->
       <div x-show="activeTab === 'resumo' && alerts.length > 0" style="margin-bottom:16px">
-        <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:16px">
+        <div style="background:var(--red-dim);border:1px solid var(--red);border-radius:12px;padding:16px">
           <div style="display:flex;align-items:flex-start;gap:12px">
-            <svg xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;color:#ef4444;flex-shrink:0;margin-top:2px" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;color:var(--red);flex-shrink:0;margin-top:2px" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <div>
-              <div style="font-size:13px;font-weight:600;color:#ef4444;margin-bottom:4px">Alertas — Nível Crítico (&lt;20%)</div>
+              <div style="font-size:13px;font-weight:600;color:var(--red);margin-bottom:4px">Alertas — Nível Crítico (&lt;20%)</div>
               <ul style="margin:0;padding:0;list-style:none">
                 <template x-for="(alert, i) in alerts" :key="i">
-                  <li style="font-size:13px;color:#ef4444">
+                  <li style="font-size:13px;color:var(--red)">
                     <span style="font-weight:500" x-text="alert.alias"></span>:
                     <span x-text="alert.name"></span> —
                     <span style="font-weight:700" x-text="alert.pct + '%'"></span>
@@ -134,8 +134,8 @@
                     <span style="font-weight:600"
                       :style="{
                         color: row.pct >= 80 ? 'var(--green)' :
-                               row.pct >= 50 ? '#3b82f6' :
-                               row.pct >= 20 ? '#f59e0b' : 'var(--red)'
+                               row.pct >= 50 ? 'var(--blue)' :
+                               row.pct >= 20 ? 'var(--yellow)' : 'var(--red)'
                       }"
                       x-text="row.pct !== null && row.pct !== undefined ? row.pct + '%' : '—'">
                     </span>
@@ -168,7 +168,7 @@
           </div>
           <div class="card" style="padding:16px">
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3)">Balanço estimado</div>
-            <div style="font-size:22px;font-weight:700" :style="totalBalance() >= 0 ? 'color:#3b82f6' : 'color:#f59e0b'" x-text="formatSigned(totalBalance()) + ' L'"></div>
+            <div style="font-size:22px;font-weight:700" :style="totalBalance() >= 0 ? 'color:var(--blue)' : 'color:var(--yellow)'" x-text="formatSigned(totalBalance()) + ' L'"></div>
           </div>
           <div class="card" style="padding:16px">
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3)">Reservatórios com evento</div>
@@ -201,7 +201,7 @@
                     </td>
                     <td style="padding:10px 16px;text-align:right;font-family:monospace;color:var(--red)" x-text="formatSigned(-row.consumed_l)"></td>
                     <td style="padding:10px 16px;text-align:right;font-family:monospace;color:var(--green)" x-text="formatSigned(row.supplied_l)"></td>
-                    <td style="padding:10px 16px;text-align:right;font-family:monospace" :style="row.balance_l >= 0 ? 'color:#3b82f6' : 'color:#f59e0b'" x-text="formatSigned(row.balance_l)"></td>
+                    <td style="padding:10px 16px;text-align:right;font-family:monospace" :style="row.balance_l >= 0 ? 'color:var(--blue)' : 'color:var(--yellow)'" x-text="formatSigned(row.balance_l)"></td>
                     <td style="padding:10px 16px;text-align:right;color:var(--text3)" x-text="row.events_count"></td>
                   </tr>
                 </template>
@@ -331,20 +331,20 @@
         }
         if (pct < 20) {
           return {
-            background: 'rgba(239,68,68,0.15)',
+            background: 'var(--red-dim)',
             color: 'var(--red)',
           };
         }
         if (pct < 50) {
           return {
-            background: 'rgba(245,158,11,0.15)',
-            color: '#f59e0b',
+            background: 'var(--yellow-dim)',
+            color: 'var(--yellow)',
           };
         }
         if (pct < 80) {
           return {
-            background: 'rgba(59,130,246,0.15)',
-            color: '#3b82f6',
+            background: 'var(--blue-dim)',
+            color: 'var(--blue)',
           };
         }
         return {

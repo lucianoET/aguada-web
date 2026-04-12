@@ -14,7 +14,7 @@
       min-height: 0;
       display: flex;
       flex-direction: column;
-      background: #06090f;
+      background: var(--bg);
     }
 
     .scada-toolbar {
@@ -23,9 +23,9 @@
       justify-content: space-between;
       gap: 12px;
       padding: 10px 14px;
-      border-bottom: 1px solid rgba(130, 154, 188, 0.18);
-      background: rgba(5, 9, 15, 0.94);
-      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      backdrop-filter: none;
     }
 
     .scada-toolbar-left,
@@ -41,9 +41,9 @@
       align-items: center;
       gap: 6px;
       padding: 6px 10px;
-      border: 1px solid rgba(141, 168, 204, 0.2);
+      border: 1px solid var(--border2);
       border-radius: 999px;
-      background: rgba(18, 24, 35, 0.96);
+      background: var(--card);
       color: var(--text2);
       font-size: 11px;
       line-height: 1;
@@ -57,11 +57,11 @@
     .scada-wrap {
       flex: 1;
       min-height: 0;
-      overflow: auto;
-      padding: 8px 10px 10px;
+      overflow: hidden;
+      padding: 6px 8px 8px;
       display: flex;
-      align-items: flex-start;
-      justify-content: flex-start;
+      align-items: center;
+      justify-content: center;
     }
 
     .scada-stage-holder {
@@ -74,12 +74,28 @@
       width: 1850px;
       height: 1120px;
       transform-origin: top left;
-      background: #000000;
-      border: 1px solid #2b3f5f;
+      font-size: 14px;
+      background-color: var(--bg2);
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+      border: 1px solid var(--border2);
       border-radius: 0;
       overflow: hidden;
-      box-shadow: inset 0 0 0 1px rgba(102, 122, 152, 0.24);
+      box-shadow: 0 0 0 1px var(--border);
     }
+    [data-theme="light"] .scada-stage {
+      background-image:
+        linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    }
+
+    /* Garante piso tipografico mesmo em telas menores */
+    .scada-stage [style*="font-size:8px"] { font-size: 12px !important; }
+    .scada-stage [style*="font-size:9px"] { font-size: 12px !important; }
+    .scada-stage [style*="font-size:10px"] { font-size: 12px !important; }
+    .scada-stage [style*="font-size:11px"] { font-size: 13px !important; }
 
     .pipe-layer {
       position: absolute;
@@ -99,27 +115,22 @@
     }
 
     .pipe-main {
-      stroke: #0f8fff;
+      stroke: var(--pipe-color);
       stroke-width: 5;
       stroke-dasharray: 14 9;
-      animation: pipeFlow 1.25s linear infinite;
-      filter: none;
     }
 
     .pipe-branch {
-      stroke: #0f8fff;
+      stroke: var(--pipe-color);
       stroke-width: 4;
       stroke-dasharray: 10 8;
-      animation: pipeFlow 0.95s linear infinite reverse;
-      filter: none;
     }
 
     .pipe-submarine {
-      stroke: #0f8fff;
+      stroke: var(--pipe-color);
       stroke-width: 4;
       stroke-dasharray: 16 9;
       animation: pipeFlow 1.6s linear infinite;
-      filter: none;
     }
 
     @keyframes pipeFlow {
@@ -136,7 +147,7 @@
     }
 
     .pipe-label {
-      fill: #9ec6ff;
+      fill: var(--pipe-label-color);
       font-size: 12px;
       font-family: var(--mono);
       letter-spacing: 0.08em;
@@ -170,19 +181,19 @@
       gap: 10px;
       min-height: 28px;
       padding: 6px 10px;
-      border: 1px solid #aac1e4;
-      background: #d7e3f7;
+      border: 1px solid var(--scada-site-hdr-border);
+      background: var(--scada-site-hdr-bg);
       box-sizing: border-box;
     }
 
     .site.theme-red .site-header {
-      border-color: #f18e8e;
-      background: #ffd4d4;
+      border-color: var(--scada-site-red-hdr-border);
+      background: var(--scada-site-red-hdr-bg);
     }
 
     .site.theme-blue .site-header {
-      border-color: #aac1e4;
-      background: #d7e3f7;
+      border-color: var(--scada-site-hdr-border);
+      background: var(--scada-site-hdr-bg);
     }
 
     .site-eyebrow {
@@ -192,7 +203,7 @@
     .site-title {
       font-size: 12px;
       font-weight: 700;
-      color: #1b1b1b;
+      color: var(--scada-text-primary);
       margin-bottom: 0;
       text-transform: uppercase;
     }
@@ -204,20 +215,21 @@
     .site-info-btn {
       position: relative;
       z-index: 2;
-      width: 32px;
-      height: 32px;
+      width: 22px;
+      height: 22px;
+      font-size: 10px;
       border-radius: 999px;
-      border: 1px solid rgba(42, 56, 77, 0.16);
-      background: rgba(255,255,255,0.58);
-      color: #233247;
+      border: 1px solid var(--scada-site-hdr-border);
+      background: rgba(128,128,128,0.15);
+      color: var(--scada-text-primary);
       font-weight: 700;
       cursor: pointer;
       flex-shrink: 0;
     }
 
     .site-info-btn:hover {
-      background: rgba(59, 130, 246, 0.14);
-      border-color: rgba(96, 165, 250, 0.36);
+      background: rgba(59, 130, 246, 0.2);
+      border-color: var(--blue);
     }
 
     .site-content {
@@ -229,9 +241,9 @@
       min-height: 0;
       flex: 1;
       padding: 10px;
-      border: 1px solid #7c7c7c;
+      border: 1px solid var(--scada-content-border);
       border-top: none;
-      background: #d8d8d8;
+      background: var(--scada-content-bg);
       box-sizing: border-box;
     }
 
@@ -247,9 +259,9 @@
       gap: 8px;
       padding: 6px;
       border-radius: 0;
-      border: 1px solid #7b7b7b;
-      background: #efefef;
-      color: #111111;
+      border: 1px solid var(--scada-res-border);
+      background: var(--scada-res-bg);
+      color: var(--scada-text-primary);
       text-align: left;
       cursor: pointer;
       min-height: 150px;
@@ -258,7 +270,7 @@
     }
 
     .reservoir-card:hover {
-      border-color: #5f7da8;
+      border-color: var(--scada-eq-hover-border);
     }
 
     .reservoir-card.offline {
@@ -290,7 +302,7 @@
       font-size: 12px;
       font-weight: 800;
       letter-spacing: 0;
-      color: #111111;
+      color: var(--scada-text-primary);
     }
 
     .reservoir-capacity {
@@ -305,8 +317,8 @@
       position: relative;
       min-height: 112px;
       border-radius: 0;
-      border: 2px solid #303030;
-      background: #f7f7f7;
+      border: 2px solid var(--scada-water-border);
+      background: var(--scada-water-bg);
       overflow: hidden;
     }
 
@@ -353,7 +365,7 @@
       font-size: 10px;
       text-transform: none;
       letter-spacing: 0;
-      color: #202020;
+      color: var(--scada-text-secondary);
       font-weight: 700;
     }
 
@@ -361,14 +373,14 @@
       font-family: var(--mono);
       font-size: 18px;
       font-weight: 700;
-      color: #111111;
+      color: var(--scada-text-primary);
       line-height: 1;
     }
 
     .reservoir-primary-unit {
       font-family: var(--mono);
       font-size: 11px;
-      color: #232323;
+      color: var(--scada-text-secondary);
       line-height: 1;
     }
 
@@ -376,7 +388,7 @@
       font-family: var(--mono);
       font-size: 15px;
       font-weight: 800;
-      color: #111111;
+      color: var(--scada-text-primary);
       line-height: 1;
       margin-top: auto;
     }
@@ -395,7 +407,7 @@
     }
 
     .metric-label {
-      color: #202020;
+      color: var(--scada-text-secondary);
       text-transform: none;
       letter-spacing: 0;
       font-size: 10px;
@@ -404,7 +416,7 @@
     }
 
     .metric-value {
-      color: #111111;
+      color: var(--scada-text-primary);
       font-family: var(--mono);
       font-size: 10px;
       text-align: right;
@@ -428,9 +440,9 @@
       gap: 4px;
       padding: 6px 4px;
       border-radius: 0;
-      border: 1px solid #666666;
-      background: #f8f8f8;
-      color: #111111;
+      border: 1px solid var(--scada-eq-border);
+      background: var(--scada-eq-bg);
+      color: var(--scada-text-primary);
       text-align: center;
       cursor: pointer;
       min-height: 76px;
@@ -438,8 +450,8 @@
     }
 
     .equipment-card:hover {
-      border-color: #5775a0;
-      background: #fbfbfb;
+      border-color: var(--scada-eq-hover-border);
+      background: var(--scada-res-bg);
     }
 
     .equipment-card img {
@@ -454,13 +466,13 @@
       line-height: 1;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #111111;
+      color: var(--scada-text-secondary);
     }
 
     .equipment-name {
       font-size: 10px;
       line-height: 1.2;
-      color: #111111;
+      color: var(--scada-text-primary);
       font-weight: 700;
     }
 
@@ -471,7 +483,7 @@
       gap: 3px;
       width: 100%;
       font-size: 9px;
-      color: #111111;
+      color: var(--scada-text-secondary);
     }
 
     .equipment-meta-row {
@@ -496,8 +508,8 @@
       width: 100%;
       border-radius: 0;
       padding: 8px 10px;
-      background: #f8f8f8;
-      border: 1px solid #666666;
+      background: var(--scada-eq-bg);
+      border: 1px solid var(--scada-eq-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -507,7 +519,7 @@
     }
 
     .hydro-bubble:hover {
-      border-color: #5775a0;
+      border-color: var(--scada-eq-hover-border);
     }
 
     .hydro-stack {
@@ -546,7 +558,7 @@
 
     .hydro-reading {
       font-family: var(--mono);
-      color: #111111;
+      color: var(--scada-text-primary);
       font-size: 10px;
       text-align: right;
       white-space: nowrap;
@@ -557,7 +569,7 @@
       gap: 2px;
       font-family: var(--mono);
       font-size: 9px;
-      color: #111111;
+      color: var(--scada-text-primary);
       text-align: left;
     }
 
@@ -673,8 +685,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #d9e8fb;
-      border: 1px solid #8ea6c7;
+      background: var(--scada-band-bg);
+      border: 1px solid var(--scada-band-border);
       border-top: none;
       border-bottom: none;
       z-index: 0;
@@ -687,86 +699,93 @@
       font-family: 'Courier New', monospace;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      color: #181818;
+      color: var(--scada-band-text);
       white-space: nowrap;
     }
+    /* ── Bloco de local (container principal) ─────────────────── */
     .scada-block {
       position: absolute;
       display: flex;
       flex-direction: column;
-      border: 1px solid;
-      border-radius: 0;
+      border: 2px solid;
+      border-radius: 3px;
       overflow: hidden;
       z-index: 2;
-      box-shadow: none;
-      transition: border-color 0.3s;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+      transition: border-color 0.25s, box-shadow 0.25s;
+      backdrop-filter: blur(1px);
     }
-    .scada-block.block-blue { 
-      border-color: #7aa2d8; 
-      background: transparent;
+    .scada-block.block-blue {
+      border-color: var(--scada-site-hdr-border);
+      background: var(--scada-block-bg-blue);
     }
-    .scada-block.block-red  { 
-      border-color: #f08f8f; 
-      background: transparent; 
+    .scada-block.block-red  {
+      border-color: var(--scada-site-red-hdr-border);
+      background: var(--scada-block-bg-red);
     }
     .scada-block:hover {
-      border-color: #b2c3dd;
+      border-color: var(--scada-eq-hover-border);
+      box-shadow: 0 4px 20px rgba(59,130,246,0.2);
     }
     .block-title {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       font-family: Arial, sans-serif;
-      padding: 10px 14px;
+      padding: 7px 10px;
       text-transform: uppercase;
       flex-shrink: 0;
-      letter-spacing: 0;
+      letter-spacing: 0.04em;
       line-height: 1.1;
     }
-    .block-blue .block-title { 
-      background: #d7e3f7; 
-      border-bottom: 1px solid #aac1e4; 
-      color: #181818;
-      text-shadow: none;
+    .block-blue .block-title {
+      background: var(--scada-site-hdr-bg);
+      border-bottom: 2px solid var(--scada-site-hdr-border);
+      color: var(--scada-text-primary);
     }
-    .block-red  .block-title { 
-      background: #ffd4d4; 
-      border-bottom: 1px solid #f18e8e; 
-      color: #181818;
-      text-shadow: none;
+    .block-red  .block-title {
+      background: var(--scada-site-red-hdr-bg);
+      border-bottom: 2px solid var(--scada-site-red-hdr-border);
+      color: var(--scada-text-primary);
     }
     .block-body {
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 10px;
-      gap: 8px;
+      padding: 8px;
+      gap: 7px;
       overflow: hidden;
       min-height: 0;
     }
     .block-body.row { flex-direction: row; }
+
+    /* ── Sub-bloco (grupo de elementos) ──────────────────────── */
     .sub-blk {
-      border: 1px solid #7b7b7b;
-      background: #d8d8d8;
-      border-radius: 0;
+      border: 1px solid var(--scada-sub-hdr-border);
+      background: rgba(0,0,0,0.18);
+      border-radius: 3px;
       display: flex;
       flex-direction: column;
       flex: 1;
       overflow: hidden;
       min-height: 0;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.2);
+    }
+    [data-theme="light"] .sub-blk {
+      background: rgba(255,255,255,0.45);
     }
     .sub-blk-title {
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 700;
       font-family: Arial, sans-serif;
-      padding: 8px 10px;
-      background: #cfcfcf;
-      border-bottom: 1px solid #7b7b7b;
-      color: #111111;
+      padding: 5px 8px;
+      background: var(--scada-sub-hdr-bg);
+      border-bottom: 1px solid var(--scada-sub-hdr-border);
+      color: var(--scada-text-secondary);
       text-transform: uppercase;
-      letter-spacing: 0;
+      letter-spacing: 0.06em;
       flex-shrink: 0;
       text-align: center;
     }
@@ -774,83 +793,161 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 6px;
-      gap: 6px;
+      padding: 5px;
+      gap: 5px;
       overflow: hidden;
       min-height: 0;
     }
-    .sub-blk-body.row { flex-direction: row; }
+    .sub-blk-body.row {
+      flex-direction: row;
+    }
     .mini-res {
       flex: 1;
-      border: 2px solid #222;
-      background: #ffffff;
-      border-radius: 0;
+      border: 1px solid var(--scada-water-border);
+      background: var(--scada-res-bg);
+      border-radius: 5px;
+      position: relative;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       cursor: pointer;
       min-height: 0;
       padding: 0;
-      transition: all 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.22);
     }
-    .mini-res:hover { 
-      border-color: #1f4e91;
-      box-shadow: 0 0 0 2px rgba(31, 78, 145, 0.2);
+    .mini-res:hover {
+      border-color: var(--scada-eq-hover-border);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.22);
     }
-    .mini-res-hdr {
-      font-size: 33px;
-      font-weight: 800;
-      font-family: Arial, sans-serif;
-      padding: 10px 8px 4px;
-      background: transparent;
-      border-bottom: none;
-      color: #111111;
+    /* ── Card header ─────────────────────── */
+    .mini-res-title {
+      padding: 5px 6px 4px;
       text-align: center;
+      border-bottom: 1px solid var(--scada-water-border);
+      background: var(--scada-hyd-hdr-bg);
       flex-shrink: 0;
-      letter-spacing: 0;
-      line-height: 1;
     }
+    .mini-res-name {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--scada-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.25;
+    }
+    .mini-res-sub {
+      font-size: 9px;
+      color: var(--scada-text-secondary);
+      line-height: 1.2;
+    }
+    /* ── Tank ────────────────────────────── */
     .mini-res-tank {
-      flex: 1; 
-      position: relative; 
-      overflow: hidden; 
-      min-height: 52px;
-      background: #f7f7f7;
-      box-shadow: inset 0 0 0 1px #303030;
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      min-height: 70px;
+      background: var(--scada-water-bg);
     }
     .mini-res-fill {
       position: absolute; bottom: 0; left: 0; right: 0;
       transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: none;
+    }
+    /* Level lines */
+    .mini-res-level {
+      position: absolute;
+      left: 0; right: 0;
+      height: 1px;
+      background: rgba(255,255,255,0.14);
+      pointer-events: none;
+      z-index: 3;
+    }
+    .mini-res-level::before {
+      content: attr(data-lbl);
+      position: absolute;
+      left: 3px;
+      bottom: 2px;
+      font-size: 7.5px;
+      font-family: var(--mono);
+      color: rgba(255,255,255,0.38);
+      line-height: 1;
+    }
+    [data-theme="light"] .mini-res-level { background: rgba(0,0,0,0.12); }
+    [data-theme="light"] .mini-res-level::before { color: rgba(0,0,0,0.35); }
+    /* Overlaid values */
+    .mini-res-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      z-index: 4;
+      pointer-events: none;
     }
     .mini-res-pct {
-      position: absolute; top: 10px; left: 0; right: 0;
-      text-align: center;
-      font-size: 14px;
-      font-family: Arial, sans-serif;
+      font-size: 24px;
       font-weight: 800;
-      color: #111111;
-      text-shadow: none;
-    }
-    .mini-res-foot {
-      padding: 7px 10px;
-      font-size: 10px;
       font-family: Arial, sans-serif;
-      background: #ffffff;
-      border-top: 1px solid #7b7b7b;
+      color: var(--scada-text-primary);
+      text-shadow: 0 1px 5px rgba(0,0,0,0.45);
+      line-height: 1;
+    }
+    .mini-res-vol {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: var(--mono);
+      color: var(--scada-text-primary);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+      line-height: 1;
+    }
+    .mini-res-unit {
+      font-size: 9px;
+      vertical-align: baseline;
+    }
+    /* ── Footer ──────────────────────────── */
+    .mini-res-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3px 6px;
+      background: var(--scada-hyd-hdr-bg);
+      border-top: 1px solid var(--scada-water-border);
+      flex-shrink: 0;
+      gap: 3px;
+    }
+    .mini-res-ts {
+      font-size: 8px;
+      color: var(--scada-text-secondary);
+      font-family: var(--mono);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mini-res-status {
+      font-size: 7.5px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 1px 5px;
+      border-radius: 9px;
+      border: 1px solid;
+      white-space: nowrap;
       flex-shrink: 0;
     }
-    .mini-res-row { display: flex; justify-content: space-between; }
-    .mini-res-row .lbl { color: #111111; font-weight: 700; }
-    .mini-res-row .val { font-weight: 700; color: #111111; }
-    .mini-res-row .val.positive { color: #0a7a33; text-shadow: none; }
-    .mini-res-row .val.negative { color: #b42318; text-shadow: none; }
+    .mini-res-status.s-online  { color: var(--green);  border-color: var(--green);  background: rgba(34,197,94,0.12); }
+    .mini-res-status.s-offline { color: var(--red);    border-color: var(--red);    background: rgba(239,68,68,0.12); }
+    .mini-res-status.s-manual  { color: var(--yellow); border-color: var(--yellow); background: rgba(245,158,11,0.12); }
+    /* ── Card de equipamento (bomba/válvula) ──────────────────── */
     .mini-eq {
-      flex: 1;
-      min-height: 0;
-      border: 1px solid #666666;
-      background: #f8f8f8;
-      border-radius: 0;
+      flex: 0 0 86px !important;
+      width: 86px;
+      height: 86px;
+      min-height: 86px;
+      border: 1px solid var(--scada-eq-border);
+      background: var(--scada-eq-bg);
+      border-radius: 4px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -859,76 +956,84 @@
       gap: 4px;
       cursor: pointer;
       overflow: hidden;
-      transition: all 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
     }
-    .mini-eq:hover { 
-      border-color: #5775a0;
-      background: #fbfbfb;
+    .mini-eq:hover {
+      border-color: var(--scada-eq-hover-border);
+      box-shadow: 0 2px 8px rgba(59,130,246,0.2);
     }
     .mini-eq img {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       object-fit: contain;
       flex-shrink: 0;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));
     }
     .mini-eq-name {
       font-size: 10px;
       font-weight: 700;
       font-family: Arial, sans-serif;
       text-align: center;
-      word-break: break-all;
-      color: #111111;
+      color: var(--scada-text-primary);
       letter-spacing: 0;
+      max-width: 78px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .mini-eq-state {
-      font-size: 11px;
+      font-size: 9px;
       font-weight: 700;
       font-family: Arial, sans-serif;
-      padding: 2px 4px;
-      border-radius: 0;
+      padding: 2px 5px;
+      border-radius: 9px;
       text-transform: uppercase;
-      letter-spacing: 0;
+      letter-spacing: 0.04em;
+      border: 1px solid currentColor;
     }
+
+    /* ── Hidrômetro ───────────────────────────────────────────── */
     .hyd-chip {
-      border: 1px solid #666666;
-      background: #f8f8f8;
-      border-radius: 0;
+      border: 1px solid var(--scada-eq-border);
+      background: var(--scada-eq-bg);
+      border-radius: 4px;
       cursor: pointer;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       z-index: 2;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      transition: all 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.22);
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .hyd-chip:hover { 
-      border-color: #5775a0;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.28);
+    .hyd-chip:hover {
+      border-color: var(--scada-eq-hover-border);
+      box-shadow: 0 2px 8px rgba(59,130,246,0.2);
     }
     .hyd-chip-hdr {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 800;
       font-family: Arial, sans-serif;
       text-align: center;
       padding: 4px;
-      background: #ededed;
-      border-bottom: 1px solid #666666;
-      color: #111111;
+      background: var(--scada-hyd-hdr-bg);
+      border-bottom: 1px solid var(--scada-eq-border);
+      color: var(--scada-text-primary);
       white-space: nowrap;
       flex-shrink: 0;
-      letter-spacing: 0;
+      letter-spacing: 0.02em;
     }
     .hyd-chip-data {
       flex: 1;
       font-size: 11px;
       font-family: Arial, sans-serif;
-      padding: 6px 8px;
-      line-height: 1.4;
-      color: #111111;
+      padding: 5px 7px;
+      line-height: 1.5;
+      color: var(--scada-text-secondary);
     }
     .hyd-chip-data strong {
-      color: #111111;
+      color: var(--scada-text-primary);
+      font-weight: 700;
     }
   </style>
   <script src="assets/shared.js"></script>
@@ -942,7 +1047,7 @@
       <span class="sidebar-brand-text">AGUADA</span>
     </div>
     <nav class="sidebar-nav">
-      <div class="sidebar-section">Operacao</div>
+      <div class="sidebar-section">Operação</div>
       <a href="index.html" class="nav-link">
         <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
         <span class="nav-label">Dashboard</span>
@@ -955,19 +1060,19 @@
         <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span>
         <span class="nav-label">SCADA</span>
       </a>
-      <div class="sidebar-section">Analise</div>
+      <div class="sidebar-section">Análise</div>
       <a href="analise.html" class="nav-link">
         <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
-        <span class="nav-label">Analise</span>
+        <span class="nav-label">Análise</span>
       </a>
-      <div class="sidebar-section">Gestao</div>
+      <div class="sidebar-section">Gestão</div>
       <a href="report.html" class="nav-link">
         <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
-        <span class="nav-label">Relatorio</span>
+        <span class="nav-label">Relatório</span>
       </a>
       <a href="hidraulica.html" class="nav-link">
         <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span>
-        <span class="nav-label">Hidraulica</span>
+        <span class="nav-label">Hidráulica</span>
       </a>
       <a href="dispositivos.html" class="nav-link">
         <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span>
@@ -975,7 +1080,7 @@
       </a>
       <a href="documentacao.html" class="nav-link">
         <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span>
-        <span class="nav-label">Documentacao</span>
+        <span class="nav-label">Documentação</span>
       </a>
     </nav>
     <div class="sidebar-footer">
@@ -987,7 +1092,7 @@
   <div class="main">
     <div class="topbar">
       <div>
-        <div class="topbar-title">SCADA Hidraulico</div>
+        <div class="topbar-title">SCADA Hidráulico</div>
         <div class="topbar-sub">Diagrama operacional simplificado por local</div>
       </div>
       <div class="topbar-right">
@@ -1005,14 +1110,14 @@
     <div class="scada-main">
       <div class="scada-toolbar">
         <div class="scada-toolbar-left">
-          <span class="scada-chip"><strong x-text="reservoirs.length"></strong> reservatorios</span>
+          <span class="scada-chip"><strong x-text="reservoirs.length"></strong> reservatórios</span>
           <span class="scada-chip"><strong x-text="displayPumpCount()"></strong> bombas</span>
-          <span class="scada-chip"><strong x-text="displayValveCount()"></strong> valvulas</span>
-          <span class="scada-chip"><strong x-text="displayHydrometerCount()"></strong> hidrometros</span>
+          <span class="scada-chip"><strong x-text="displayValveCount()"></strong> válvulas</span>
+          <span class="scada-chip"><strong x-text="displayHydrometerCount()"></strong> hidrômetros</span>
         </div>
         <div class="scada-toolbar-right">
-          <span class="scada-chip">balanco diario <strong x-text="overallBalanceLabel()"></strong></span>
-          <span class="scada-chip">ultima atualizacao <strong x-text="lastUpdate ? timeAgo(lastUpdate) : 'aguardando' "></strong></span>
+          <span class="scada-chip">balanço diário <strong x-text="overallBalanceLabel()"></strong></span>
+          <span class="scada-chip">última atualização <strong x-text="lastUpdate ? timeAgo(lastUpdate) : 'aguardando' "></strong></span>
         </div>
       </div>
 
@@ -1023,18 +1128,17 @@
             <!-- HID-CONC -> CBIF -->
             <path class="pipe pipe-main" d="M 110 900 V 854"/>
             <!-- CBIF -> HID-IF -->
-            <path class="pipe pipe-main" d="M 220 854 V 900"/>
-            <!-- HID-CONC -> HID-IF -> HID-PRAIA -->
-            <path class="pipe pipe-main" d="M 192 946 H 245"/>
+            <path class="pipe pipe-main" d="M 327 854 V 890"/>
+            <!-- HID-IF -> HID-PRAIA -->
             <path class="pipe pipe-main" d="M 409 946 H 560"/>
             <!-- HID-PRAIA -> CIE -->
-            <path class="pipe pipe-submarine" d="M 724 946 C 820 978 902 1008 980 1032 H 1002"/>
+            <path class="pipe pipe-submarine" d="M 724 946 H 870 V 858 H 1002"/>
             <!-- CIE -> CB3 -->
             <path class="pipe pipe-main" d="M 1188 858 H 1314"/>
             <!-- CB3 -> CON -->
-            <path class="pipe pipe-branch" d="M 1544 653 V 610 H 1544 V 523"/>
+            <path class="pipe pipe-branch" d="M 1544 653 V 523"/>
             <!-- CB3 -> CAV -->
-            <path class="pipe pipe-branch" d="M 1450 653 V 610 H 779 V 529"/>
+            <path class="pipe pipe-branch" d="M 1450 653 V 574 H 779 V 529"/>
             <!-- Arrow markers rendered as small triangles via stroke -->
           </svg>
 
@@ -1056,19 +1160,45 @@
                 <div class="sub-blk-title">RESERVATORIO — AGUA — 80 m³ (2 × 40 m³)</div>
                 <div class="sub-blk-body row">
                   <button class="mini-res" @click="openModal('CBIF1')">
-                    <div class="mini-res-hdr">CBIF1</div>
-                    <div class="mini-res-tank"><div class="mini-res-fill" :style="reservoirWaterStyle('CBIF1')"></div><div class="mini-res-pct" x-text="reservoirPctLabel('CBIF1')"></div></div>
+                    <div class="mini-res-title">
+                      <div class="mini-res-name" x-text="reservoirNameLabel('CBIF1')"></div>
+                      <div class="mini-res-sub">CBIF1 · 40m³</div>
+                    </div>
+                    <div class="mini-res-tank">
+                      <div class="mini-res-fill" :style="reservoirWaterStyle('CBIF1')"></div>
+                      <div class="mini-res-level" style="bottom:70%" data-lbl="70%"></div>
+                      <div class="mini-res-level" style="bottom:50%" data-lbl="50%"></div>
+                      <div class="mini-res-level" style="bottom:30%" data-lbl="30%"></div>
+                      <div class="mini-res-level" style="bottom:10%" data-lbl="10%"></div>
+                      <div class="mini-res-overlay">
+                        <div class="mini-res-pct" x-text="reservoirPctLabel('CBIF1')"></div>
+                        <div class="mini-res-vol"><span x-text="reservoirVolumeM3('CBIF1')"></span>&thinsp;<span class="mini-res-unit">m³</span></div>
+                      </div>
+                    </div>
                     <div class="mini-res-foot">
-                      <div class="mini-res-row"><span class="lbl">Vol</span><span class="val" x-text="reservoirVolumeM3('CBIF1') + ' m³'"></span></div>
-                      <div class="mini-res-row"><span class="lbl">Bal</span><span class="val" :class="reservoirBalanceClass('CBIF1')" x-text="reservoirBalanceLabel('CBIF1')"></span></div>
+                      <span class="mini-res-ts" x-text="reservoirShortTs('CBIF1')"></span>
+                      <span class="mini-res-status" :class="reservoirStatusClass('CBIF1')" x-text="reservoirStatusLabel('CBIF1')"></span>
                     </div>
                   </button>
                   <button class="mini-res" @click="openModal('CBIF2')">
-                    <div class="mini-res-hdr">CBIF2</div>
-                    <div class="mini-res-tank"><div class="mini-res-fill" :style="reservoirWaterStyle('CBIF2')"></div><div class="mini-res-pct" x-text="reservoirPctLabel('CBIF2')"></div></div>
+                    <div class="mini-res-title">
+                      <div class="mini-res-name" x-text="reservoirNameLabel('CBIF2')"></div>
+                      <div class="mini-res-sub">CBIF2 · 40m³</div>
+                    </div>
+                    <div class="mini-res-tank">
+                      <div class="mini-res-fill" :style="reservoirWaterStyle('CBIF2')"></div>
+                      <div class="mini-res-level" style="bottom:70%" data-lbl="70%"></div>
+                      <div class="mini-res-level" style="bottom:50%" data-lbl="50%"></div>
+                      <div class="mini-res-level" style="bottom:30%" data-lbl="30%"></div>
+                      <div class="mini-res-level" style="bottom:10%" data-lbl="10%"></div>
+                      <div class="mini-res-overlay">
+                        <div class="mini-res-pct" x-text="reservoirPctLabel('CBIF2')"></div>
+                        <div class="mini-res-vol"><span x-text="reservoirVolumeM3('CBIF2')"></span>&thinsp;<span class="mini-res-unit">m³</span></div>
+                      </div>
+                    </div>
                     <div class="mini-res-foot">
-                      <div class="mini-res-row"><span class="lbl">Vol</span><span class="val" x-text="reservoirVolumeM3('CBIF2') + ' m³'"></span></div>
-                      <div class="mini-res-row"><span class="lbl">Bal</span><span class="val" :class="reservoirBalanceClass('CBIF2')" x-text="reservoirBalanceLabel('CBIF2')"></span></div>
+                      <span class="mini-res-ts" x-text="reservoirShortTs('CBIF2')"></span>
+                      <span class="mini-res-status" :class="reservoirStatusClass('CBIF2')" x-text="reservoirStatusLabel('CBIF2')"></span>
                     </div>
                   </button>
                 </div>
@@ -1089,8 +1219,8 @@
           </div>
 
           <!-- Hydrometers below CBIF -->
-          <div style="position:absolute;left:28px;top:878px;font-size:10px;font-family:'Courier New',monospace;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">PC CONCESSIONARIA</div>
-          <div style="position:absolute;left:28px;top:888px;font-size:9px;font-family:'Courier New',monospace;color:#64748b;letter-spacing:0.05em;">HIDROMETRO</div>
+          <div style="position:absolute;left:28px;top:878px;font-size:10px;font-family:'Courier New',monospace;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">PC CONCESSIONARIA</div>
+          <div style="position:absolute;left:28px;top:888px;font-size:9px;font-family:'Courier New',monospace;color:var(--text3);letter-spacing:0.05em;">HIDROMETRO</div>
           <button class="hyd-chip" style="position:absolute;left:28px;top:900px;width:164px;height:95px;" @click="openEquipment('hydrometer','HID-CONC')">
             <div class="hyd-chip-hdr">HID-CONC</div>
             <div class="hyd-chip-data">
@@ -1099,7 +1229,7 @@
               <div>B: <strong x-text="hydrometerDeltaLabel(hydroRow('HID-CONC').delta)"></strong></div>
             </div>
           </button>
-          <div style="position:absolute;left:245px;top:880px;font-size:9px;font-family:'Courier New',monospace;color:#64748b;letter-spacing:0.05em;">HIDROMETRO</div>
+          <div style="position:absolute;left:245px;top:880px;font-size:9px;font-family:'Courier New',monospace;color:var(--text3);letter-spacing:0.05em;">HIDROMETRO</div>
           <button class="hyd-chip" style="position:absolute;left:245px;top:890px;width:164px;height:105px;" @click="openEquipment('hydrometer','HID-IF')">
             <div class="hyd-chip-hdr">HID-IF</div>
             <div class="hyd-chip-data">
@@ -1108,7 +1238,7 @@
               <div>B: <strong x-text="hydrometerDeltaLabel(hydroRow('HID-IF').delta)"></strong></div>
             </div>
           </button>
-          <div style="position:absolute;left:560px;top:877px;font-size:9px;font-family:'Courier New',monospace;color:#64748b;letter-spacing:0.05em;">HIDROMETRO</div>
+          <div style="position:absolute;left:560px;top:877px;font-size:9px;font-family:'Courier New',monospace;color:var(--text3);letter-spacing:0.05em;">HIDROMETRO</div>
           <button class="hyd-chip" style="position:absolute;left:560px;top:887px;width:164px;height:105px;" @click="openEquipment('hydrometer','HID-PRAIA')">
             <div class="hyd-chip-hdr">HID-PRAIA</div>
             <div class="hyd-chip-data">
@@ -1125,18 +1255,31 @@
             </div>
             <div class="block-body row">
               <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
-                <div style="font-size:8px;font-family:'Courier New',monospace;color:#8aa2bf;padding:2px 4px;white-space:nowrap;">RES. ELEVADO - AGUA - 80 m³</div>
+                <div style="font-size:8px;font-family:'Courier New',monospace;color:var(--text2);padding:2px 4px;white-space:nowrap;">RES. ELEVADO - AGUA - 80 m³</div>
                 <button class="mini-res" style="flex:1;" @click="openModal('CAV')">
-                  <div class="mini-res-hdr">CAV</div>
-                  <div class="mini-res-tank"><div class="mini-res-fill" :style="reservoirWaterStyle('CAV')"></div><div class="mini-res-pct" x-text="reservoirPctLabel('CAV')"></div></div>
+                  <div class="mini-res-title">
+                    <div class="mini-res-name" x-text="reservoirNameLabel('CAV')"></div>
+                    <div class="mini-res-sub">CAV · 80m³</div>
+                  </div>
+                  <div class="mini-res-tank">
+                    <div class="mini-res-fill" :style="reservoirWaterStyle('CAV')"></div>
+                    <div class="mini-res-level" style="bottom:70%" data-lbl="70%"></div>
+                    <div class="mini-res-level" style="bottom:50%" data-lbl="50%"></div>
+                    <div class="mini-res-level" style="bottom:30%" data-lbl="30%"></div>
+                    <div class="mini-res-level" style="bottom:10%" data-lbl="10%"></div>
+                    <div class="mini-res-overlay">
+                      <div class="mini-res-pct" x-text="reservoirPctLabel('CAV')"></div>
+                      <div class="mini-res-vol"><span x-text="reservoirVolumeM3('CAV')"></span>&thinsp;<span class="mini-res-unit">m³</span></div>
+                    </div>
+                  </div>
                   <div class="mini-res-foot">
-                    <div class="mini-res-row"><span class="lbl">Vol</span><span class="val" x-text="reservoirVolumeM3('CAV') + ' m³'"></span></div>
-                    <div class="mini-res-row"><span class="lbl">Bal</span><span class="val" :class="reservoirBalanceClass('CAV')" x-text="reservoirBalanceLabel('CAV')"></span></div>
+                    <span class="mini-res-ts" x-text="reservoirShortTs('CAV')"></span>
+                    <span class="mini-res-status" :class="reservoirStatusClass('CAV')" x-text="reservoirStatusLabel('CAV')"></span>
                   </div>
                 </button>
               </div>
               <div style="flex:0 0 110px;display:flex;flex-direction:column;gap:4px;padding:4px;min-width:0;">
-                <div style="font-size:8px;font-family:'Courier New',monospace;color:#8aa2bf;padding:2px 0;text-align:center;">VALULAS</div>
+                <div style="font-size:8px;font-family:'Courier New',monospace;color:var(--text2);padding:2px 0;text-align:center;">VALULAS</div>
                 <template x-for="item in equipmentForSite('incendio')" :key="item.kind+'-'+item.name">
                   <button class="mini-eq" style="flex:1;" @click="openEquipment(item.kind, item.name)">
                     <img :src="equipmentIcon(item.kind)" :alt="item.kind" style="width:22px;height:22px;object-fit:contain;"/>
@@ -1187,18 +1330,31 @@
             </div>
             <div class="block-body row">
               <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
-                <div style="font-size:8px;font-family:'Courier New',monospace;color:#8aa2bf;padding:2px 4px;white-space:nowrap;">RES. ELEVADO - AGUA - 80 m³</div>
+                <div style="font-size:8px;font-family:'Courier New',monospace;color:var(--text2);padding:2px 4px;white-space:nowrap;">RES. ELEVADO - AGUA - 80 m³</div>
                 <button class="mini-res" style="flex:1;" @click="openModal('CON')">
-                  <div class="mini-res-hdr">CON</div>
-                  <div class="mini-res-tank"><div class="mini-res-fill" :style="reservoirWaterStyle('CON')"></div><div class="mini-res-pct" x-text="reservoirPctLabel('CON')"></div></div>
+                  <div class="mini-res-title">
+                    <div class="mini-res-name" x-text="reservoirNameLabel('CON')"></div>
+                    <div class="mini-res-sub">CON · 80m³</div>
+                  </div>
+                  <div class="mini-res-tank">
+                    <div class="mini-res-fill" :style="reservoirWaterStyle('CON')"></div>
+                    <div class="mini-res-level" style="bottom:70%" data-lbl="70%"></div>
+                    <div class="mini-res-level" style="bottom:50%" data-lbl="50%"></div>
+                    <div class="mini-res-level" style="bottom:30%" data-lbl="30%"></div>
+                    <div class="mini-res-level" style="bottom:10%" data-lbl="10%"></div>
+                    <div class="mini-res-overlay">
+                      <div class="mini-res-pct" x-text="reservoirPctLabel('CON')"></div>
+                      <div class="mini-res-vol"><span x-text="reservoirVolumeM3('CON')"></span>&thinsp;<span class="mini-res-unit">m³</span></div>
+                    </div>
+                  </div>
                   <div class="mini-res-foot">
-                    <div class="mini-res-row"><span class="lbl">Vol</span><span class="val" x-text="reservoirVolumeM3('CON') + ' m³'"></span></div>
-                    <div class="mini-res-row"><span class="lbl">Bal</span><span class="val" :class="reservoirBalanceClass('CON')" x-text="reservoirBalanceLabel('CON')"></span></div>
+                    <span class="mini-res-ts" x-text="reservoirShortTs('CON')"></span>
+                    <span class="mini-res-status" :class="reservoirStatusClass('CON')" x-text="reservoirStatusLabel('CON')"></span>
                   </div>
                 </button>
               </div>
               <div style="flex:0 0 118px;display:flex;flex-direction:column;gap:4px;padding:4px;min-width:0;">
-                <div style="font-size:8px;font-family:'Courier New',monospace;color:#8aa2bf;padding:2px 0;text-align:center;">VALULAS</div>
+                <div style="font-size:8px;font-family:'Courier New',monospace;color:var(--text2);padding:2px 0;text-align:center;">VALULAS</div>
                 <template x-for="item in equipmentForSite('consumo')" :key="item.kind+'-'+item.name">
                   <button class="mini-eq" style="flex:1;" @click="openEquipment(item.kind, item.name)">
                     <img :src="equipmentIcon(item.kind)" :alt="item.kind" style="width:22px;height:22px;object-fit:contain;"/>
@@ -1208,7 +1364,7 @@
                 </template>
               </div>
               <div style="flex:0 0 200px;display:flex;flex-direction:column;gap:4px;padding:4px;min-width:0;">
-                <div style="font-size:8px;font-family:'Courier New',monospace;color:#8aa2bf;padding:2px 0;text-align:center;">HIDROMETROS</div>
+                <div style="font-size:8px;font-family:'Courier New',monospace;color:var(--text2);padding:2px 0;text-align:center;">HIDROMETROS</div>
                 <template x-for="row in hydrometerRowsForSite('consumo')" :key="row.name">
                   <button class="hyd-chip" style="flex:1;" @click="openEquipment('hydrometer', row.name)">
                     <div class="hyd-chip-hdr" x-text="row.name"></div>
@@ -1233,19 +1389,45 @@
                 <div class="sub-blk-title">CISTERNAS</div>
                 <div class="sub-blk-body row">
                   <button class="mini-res" @click="openModal('CIE1')">
-                    <div class="mini-res-hdr">CIE1</div>
-                    <div class="mini-res-tank"><div class="mini-res-fill" :style="reservoirWaterStyle('CIE1')"></div><div class="mini-res-pct" x-text="reservoirPctLabel('CIE1')"></div></div>
+                    <div class="mini-res-title">
+                      <div class="mini-res-name" x-text="reservoirNameLabel('CIE1')"></div>
+                      <div class="mini-res-sub">CIE1 · 245m³</div>
+                    </div>
+                    <div class="mini-res-tank">
+                      <div class="mini-res-fill" :style="reservoirWaterStyle('CIE1')"></div>
+                      <div class="mini-res-level" style="bottom:70%" data-lbl="70%"></div>
+                      <div class="mini-res-level" style="bottom:50%" data-lbl="50%"></div>
+                      <div class="mini-res-level" style="bottom:30%" data-lbl="30%"></div>
+                      <div class="mini-res-level" style="bottom:10%" data-lbl="10%"></div>
+                      <div class="mini-res-overlay">
+                        <div class="mini-res-pct" x-text="reservoirPctLabel('CIE1')"></div>
+                        <div class="mini-res-vol"><span x-text="reservoirVolumeM3('CIE1')"></span>&thinsp;<span class="mini-res-unit">m³</span></div>
+                      </div>
+                    </div>
                     <div class="mini-res-foot">
-                      <div class="mini-res-row"><span class="lbl">Vol</span><span class="val" x-text="reservoirVolumeM3('CIE1') + ' m³'"></span></div>
-                      <div class="mini-res-row"><span class="lbl">Bal</span><span class="val" :class="reservoirBalanceClass('CIE1')" x-text="reservoirBalanceLabel('CIE1')"></span></div>
+                      <span class="mini-res-ts" x-text="reservoirShortTs('CIE1')"></span>
+                      <span class="mini-res-status" :class="reservoirStatusClass('CIE1')" x-text="reservoirStatusLabel('CIE1')"></span>
                     </div>
                   </button>
                   <button class="mini-res" @click="openModal('CIE2')">
-                    <div class="mini-res-hdr">CIE2</div>
-                    <div class="mini-res-tank"><div class="mini-res-fill" :style="reservoirWaterStyle('CIE2')"></div><div class="mini-res-pct" x-text="reservoirPctLabel('CIE2')"></div></div>
+                    <div class="mini-res-title">
+                      <div class="mini-res-name" x-text="reservoirNameLabel('CIE2')"></div>
+                      <div class="mini-res-sub">CIE2 · 245m³</div>
+                    </div>
+                    <div class="mini-res-tank">
+                      <div class="mini-res-fill" :style="reservoirWaterStyle('CIE2')"></div>
+                      <div class="mini-res-level" style="bottom:70%" data-lbl="70%"></div>
+                      <div class="mini-res-level" style="bottom:50%" data-lbl="50%"></div>
+                      <div class="mini-res-level" style="bottom:30%" data-lbl="30%"></div>
+                      <div class="mini-res-level" style="bottom:10%" data-lbl="10%"></div>
+                      <div class="mini-res-overlay">
+                        <div class="mini-res-pct" x-text="reservoirPctLabel('CIE2')"></div>
+                        <div class="mini-res-vol"><span x-text="reservoirVolumeM3('CIE2')"></span>&thinsp;<span class="mini-res-unit">m³</span></div>
+                      </div>
+                    </div>
                     <div class="mini-res-foot">
-                      <div class="mini-res-row"><span class="lbl">Vol</span><span class="val" x-text="reservoirVolumeM3('CIE2') + ' m³'"></span></div>
-                      <div class="mini-res-row"><span class="lbl">Bal</span><span class="val" :class="reservoirBalanceClass('CIE2')" x-text="reservoirBalanceLabel('CIE2')"></span></div>
+                      <span class="mini-res-ts" x-text="reservoirShortTs('CIE2')"></span>
+                      <span class="mini-res-status" :class="reservoirStatusClass('CIE2')" x-text="reservoirStatusLabel('CIE2')"></span>
                     </div>
                   </button>
                 </div>
@@ -1263,19 +1445,45 @@
                 <div class="sub-blk-title">RESERVATORIO — AGUA — 80 m³ (2 × 40)</div>
                 <div class="sub-blk-body row">
                   <button class="mini-res" @click="openModal('CB31')">
-                    <div class="mini-res-hdr">CB31</div>
-                    <div class="mini-res-tank"><div class="mini-res-fill" :style="reservoirWaterStyle('CB31')"></div><div class="mini-res-pct" x-text="reservoirPctLabel('CB31')"></div></div>
+                    <div class="mini-res-title">
+                      <div class="mini-res-name" x-text="reservoirNameLabel('CB31')"></div>
+                      <div class="mini-res-sub">CB31 · 40m³</div>
+                    </div>
+                    <div class="mini-res-tank">
+                      <div class="mini-res-fill" :style="reservoirWaterStyle('CB31')"></div>
+                      <div class="mini-res-level" style="bottom:70%" data-lbl="70%"></div>
+                      <div class="mini-res-level" style="bottom:50%" data-lbl="50%"></div>
+                      <div class="mini-res-level" style="bottom:30%" data-lbl="30%"></div>
+                      <div class="mini-res-level" style="bottom:10%" data-lbl="10%"></div>
+                      <div class="mini-res-overlay">
+                        <div class="mini-res-pct" x-text="reservoirPctLabel('CB31')"></div>
+                        <div class="mini-res-vol"><span x-text="reservoirVolumeM3('CB31')"></span>&thinsp;<span class="mini-res-unit">m³</span></div>
+                      </div>
+                    </div>
                     <div class="mini-res-foot">
-                      <div class="mini-res-row"><span class="lbl">Vol</span><span class="val" x-text="reservoirVolumeM3('CB31') + ' m³'"></span></div>
-                      <div class="mini-res-row"><span class="lbl">Bal</span><span class="val" :class="reservoirBalanceClass('CB31')" x-text="reservoirBalanceLabel('CB31')"></span></div>
+                      <span class="mini-res-ts" x-text="reservoirShortTs('CB31')"></span>
+                      <span class="mini-res-status" :class="reservoirStatusClass('CB31')" x-text="reservoirStatusLabel('CB31')"></span>
                     </div>
                   </button>
                   <button class="mini-res" @click="openModal('CB32')">
-                    <div class="mini-res-hdr">CB32</div>
-                    <div class="mini-res-tank"><div class="mini-res-fill" :style="reservoirWaterStyle('CB32')"></div><div class="mini-res-pct" x-text="reservoirPctLabel('CB32')"></div></div>
+                    <div class="mini-res-title">
+                      <div class="mini-res-name" x-text="reservoirNameLabel('CB32')"></div>
+                      <div class="mini-res-sub">CB32 · 40m³</div>
+                    </div>
+                    <div class="mini-res-tank">
+                      <div class="mini-res-fill" :style="reservoirWaterStyle('CB32')"></div>
+                      <div class="mini-res-level" style="bottom:70%" data-lbl="70%"></div>
+                      <div class="mini-res-level" style="bottom:50%" data-lbl="50%"></div>
+                      <div class="mini-res-level" style="bottom:30%" data-lbl="30%"></div>
+                      <div class="mini-res-level" style="bottom:10%" data-lbl="10%"></div>
+                      <div class="mini-res-overlay">
+                        <div class="mini-res-pct" x-text="reservoirPctLabel('CB32')"></div>
+                        <div class="mini-res-vol"><span x-text="reservoirVolumeM3('CB32')"></span>&thinsp;<span class="mini-res-unit">m³</span></div>
+                      </div>
+                    </div>
                     <div class="mini-res-foot">
-                      <div class="mini-res-row"><span class="lbl">Vol</span><span class="val" x-text="reservoirVolumeM3('CB32') + ' m³'"></span></div>
-                      <div class="mini-res-row"><span class="lbl">Bal</span><span class="val" :class="reservoirBalanceClass('CB32')" x-text="reservoirBalanceLabel('CB32')"></span></div>
+                      <span class="mini-res-ts" x-text="reservoirShortTs('CB32')"></span>
+                      <span class="mini-res-status" :class="reservoirStatusClass('CB32')" x-text="reservoirStatusLabel('CB32')"></span>
                     </div>
                   </button>
                 </div>
@@ -1493,6 +1701,7 @@
       },
       stageBaseWidth: 1850,
       stageBaseHeight: 1120,
+      stageMinScale: 0.25,
       stageScale: 1,
       stageHolderWidth: 1850,
       stageHolderHeight: 1120,
@@ -1634,15 +1843,16 @@
       updateStageScale() {
         const viewport = this.$refs.stageViewport;
         if (!viewport) return;
-        const availableWidth = Math.max(viewport.clientWidth - 8, 320);
-        const availableHeight = Math.max(viewport.clientHeight - 8, 420);
-        const nextScale = Math.min(
-          availableWidth / this.stageBaseWidth,
-          availableHeight / this.stageBaseHeight,
-          1
-        );
-        this.stageScale = Number.isFinite(nextScale) ? nextScale : 1;
-        this.stageHolderWidth = Math.round(this.stageBaseWidth * this.stageScale);
+        const padH = 16, padV = 12;
+        const availW = Math.max(viewport.clientWidth  - padH, 320);
+        const availH = Math.max(viewport.clientHeight - padV, 300);
+        const scaleW = availW / this.stageBaseWidth;
+        const scaleH = availH / this.stageBaseHeight;
+        const nextScale = Math.min(scaleW, scaleH, 1);
+        this.stageScale = Number.isFinite(nextScale)
+          ? Math.max(this.stageMinScale, nextScale)
+          : 1;
+        this.stageHolderWidth  = Math.round(this.stageBaseWidth  * this.stageScale);
         this.stageHolderHeight = Math.round(this.stageBaseHeight * this.stageScale);
       },
 
@@ -1755,12 +1965,43 @@
         return !!this.getReservoir(alias)?.online;
       },
 
+      reservoirNameLabel(alias) {
+        return this.getReservoir(alias)?.name || alias;
+      },
+
+      reservoirStatusLabel(alias) {
+        const r = this.getReservoir(alias);
+        if (!r || !r.online) return 'OFFLINE';
+        return 'ONLINE';
+      },
+
+      reservoirStatusClass(alias) {
+        const r = this.getReservoir(alias);
+        if (!r || !r.online) return 's-offline';
+        return 's-online';
+      },
+
+      reservoirShortTs(alias) {
+        const ts = this.getReservoir(alias)?.ts;
+        if (!ts) return '—';
+        const d = new Date(ts * 1000);
+        const now = new Date();
+        const isToday = d.toDateString() === now.toDateString();
+        const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+        const isYesterday = d.toDateString() === yesterday.toDateString();
+        const hm = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        if (isToday) return hm;
+        if (isYesterday) return `Ontem ${hm}`;
+        return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' + hm;
+      },
+
       reservoirWaterStyle(alias) {
         const reservoir = this.getReservoir(alias);
         const pct = this.reservoirPct(alias);
         const color = statusColor(pct, reservoir?.online ?? false);
         const minVisible = pct > 0 ? Math.max(pct, 2) : 0;
-        return `height:${minVisible}%;background:linear-gradient(180deg, ${color}EE, ${color}B5);box-shadow:inset 0 1px 0 rgba(255,255,255,0.18);`;
+        // Gradiente: topo claro (reflexo), meio saturado, base profunda
+        return `height:${minVisible}%;background:linear-gradient(180deg, ${color}55 0%, ${color}DD 30%, ${color}FF 70%, ${color}CC 100%);box-shadow:inset 0 2px 0 rgba(255,255,255,0.22),inset 0 -1px 0 rgba(0,0,0,0.15);`;
       },
 
       reservoirCapacityM3(alias) {
@@ -1960,6 +2201,14 @@
         return matched.length ? matched : fallback;
       },
 
+      mergeExpectedEquipment(current, expected) {
+        const byName = new Map(current.map((item) => [item.name, item]));
+        return expected.map((base) => {
+          const live = byName.get(base.name);
+          return live ? { ...base, ...live } : base;
+        });
+      },
+
       hydrometerSiteId(name) {
         const normalized = String(name || '').toUpperCase();
         if (normalized.includes('PRAIA') || normalized.includes('CONC') || normalized.endsWith('-IF')) return 'praia';
@@ -2029,51 +2278,58 @@
         const normalizedValves = this.valves.map((item) => this.normalizeValve(item));
 
         if (siteId === 'ilha') {
-          return this.matchCurrentEquipment(
+          const matched = this.matchCurrentEquipment(
             normalizedPumps,
             (name) => name.includes('bif') || name.includes('if'),
             this.pumpDefaults('ilha')
-          ).slice(0, 1);
+          );
+          return this.mergeExpectedEquipment(matched, this.pumpDefaults('ilha')).slice(0, 2);
         }
 
         if (siteId === 'cb2') {
-          return this.matchCurrentEquipment(
+          const matched = this.matchCurrentEquipment(
             normalizedPumps,
             (name) => name.includes('b02') || name.includes('cb2'),
             this.pumpDefaults('cb2')
-          ).slice(0, 2);
+          );
+          return this.mergeExpectedEquipment(matched, this.pumpDefaults('cb2')).slice(0, 2);
         }
 
         if (siteId === 'incendio') {
-          return this.matchCurrentEquipment(
+          const expected = [
+            { kind: 'valve', name: 'V-CAV-AZ',   state: 'fechada', note: '', ts: null },
+            { kind: 'valve', name: 'V-CAV-AV',   state: 'fechada', note: '', ts: null },
+            { kind: 'valve', name: 'V-CAV-BA',   state: 'fechada', note: '', ts: null },
+          ];
+          const matched = this.matchCurrentEquipment(
             normalizedValves,
             (name) => name.includes('v-cav-'),
-            [
-              { kind: 'valve', name: 'V-CAV-AZ',   state: 'fechada', note: '', ts: null },
-              { kind: 'valve', name: 'V-CAV-AV',   state: 'fechada', note: '', ts: null },
-              { kind: 'valve', name: 'V-CAV-BA',   state: 'fechada', note: '', ts: null },
-            ]
-          ).slice(0, 3);
+            expected
+          );
+          return this.mergeExpectedEquipment(matched, expected).slice(0, 3);
         }
 
         if (siteId === 'consumo') {
-          return this.matchCurrentEquipment(
+          const expected = [
+            { kind: 'valve', name: 'V-CON-AVAZ', state: 'fechada', note: '', ts: null },
+            { kind: 'valve', name: 'V-CON-AV',   state: 'fechada', note: '', ts: null },
+            { kind: 'valve', name: 'V-CON-AZ',   state: 'fechada', note: '', ts: null },
+          ];
+          const matched = this.matchCurrentEquipment(
             normalizedValves,
             (name) => name.includes('con') || name.includes('v-con'),
-            [
-              { kind: 'valve', name: 'V-CON-AVAZ', state: 'fechada', note: '', ts: null },
-              { kind: 'valve', name: 'V-CON-AV',   state: 'fechada', note: '', ts: null },
-              { kind: 'valve', name: 'V-CON-AZ',   state: 'fechada', note: '', ts: null },
-            ]
-          ).slice(0, 3);
+            expected
+          );
+          return this.mergeExpectedEquipment(matched, expected).slice(0, 3);
         }
 
         if (siteId === 'cb1') {
-          return this.matchCurrentEquipment(
+          const matched = this.matchCurrentEquipment(
             normalizedPumps,
             (name) => name.includes('b01') || name.includes('cb1'),
             this.pumpDefaults('cb1')
-          ).slice(0, 1);
+          );
+          return this.mergeExpectedEquipment(matched, this.pumpDefaults('cb1')).slice(0, 1);
         }
 
         if (siteId === 'cisternas') {
@@ -2081,11 +2337,12 @@
         }
 
         if (siteId === 'cb3') {
-          return this.matchCurrentEquipment(
+          const matched = this.matchCurrentEquipment(
             normalizedPumps,
             (name) => name.includes('b03') || name.includes('cb3'),
             this.pumpDefaults('cb3')
-          ).slice(0, 2);
+          );
+          return this.mergeExpectedEquipment(matched, this.pumpDefaults('cb3')).slice(0, 2);
         }
 
         return [];
