@@ -1,79 +1,55 @@
-# Aguada Web — workspace standalone
+# Aguada Web
 
-Este diretório foi preparado para funcionar fora do repositório `espnow-ha`, focado no host do `aguada-web`.
+Sistema de monitoramento hídrico via web. O gateway de campo conecta via **WiFi/MQTT**; o backend processa os dados e serve o frontend.
 
-## O que já está contido aqui
+## Fluxo de dados
 
-- `backend/`, `frontend/`, `docs/`, `data/` — aplicação web e dados locais
-- `docs/repo-context/AGUADA_SYSTEM_DOC.md` — especificação canônica do sistema
-- `docs/repo-context/ROADMAP.md` — estado e prioridades do projeto
-- `docs/repo-context/README-root.md` — contexto original do repositório raiz
-- `tools/mqtt_broker.py` — broker MQTT local opcional
-- `tools/start_backend.sh` — inicia o FastAPI/uvicorn do `aguada-web`
-- `tools/install_autostart_user_service.sh` — instala autostart do backend via systemd user
-- `tools/systemd/aguada-web-backend.service` — unit template do backend
+```
+Gateway ESP32 (WiFi) → MQTT (Mosquitto) → backend FastAPI → SQLite + WebSocket → frontend web
+```
 
-## Fluxo recomendado neste workspace
+## Conteúdo
 
-O backend do `aguada-web` já contém a bridge serial em `backend/bridge.py`, com reconexão automática da porta serial.
+- `backend/` — FastAPI + bridge MQTT + SQLite + geração de PDF
+- `frontend/` — SPA estática (HTML/JS), servida pelo nginx
+- `docs/` — documentação do sistema
+- `tools/` — scripts de inicialização e systemd units
+- `docker-compose.wifi.yml` — stack de produção completa (recomendado)
 
-Isso significa que, neste workspace separado, o fluxo principal recomendado é:
+## Início rápido (produção, Docker)
 
-`Gateway USB` → `aguada-web/backend.main:app` → `SQLite/WebSocket` → frontend web
+```bash
+git clone https://github.com/luctronics-ET/aguada-web.git
+cd aguada-web
+docker compose -f docker-compose.wifi.yml up -d
+```
 
-MQTT é opcional e controlado pelas variáveis do `.env`.
-
-Para usar **gateway ESP32 DevKit por Wi‑Fi** com o backend rodando em Docker,
-o fluxo recomendado passa a ser:
-
-`ESP-NOW` → `Gateway ESP32 DevKit (Wi‑Fi + MQTT)` → `broker MQTT` → `aguada-web/backend` → `SQLite/WebSocket`
+Veja [instalacao.md](instalacao.md) para instruções detalhadas.
 
 ## Configuração
 
-1. Copie `.env.example` para `.env`, se necessário.
-2. Ajuste pelo menos:
-   - `SERIAL_PORT`
-   - `DATA_DIR`
-   - `MQTT_HOST` apenas se quiser publicar MQTT
+As variáveis com padrão razoável não precisam de `.env`. Para ajustes:
 
-## Execução manual
+| Variável | Padrão | Descrição |
+|----------|--------|----------|
+| `HTTP_PORT` | `80` | Porta pública do nginx |
+| `TZ` | `America/Sao_Paulo` | Fuso horário do scheduler |
+| `MQTT_PORT` | `1883` | Porta do broker |
+| `MQTT_USER` / `MQTT_PASS` | — | Autenticação MQTT (se configurada) |
 
-### Backend
+## Desenvolvimento local
 
-Use o script:
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+./tools/start_backend.sh          # backend em :8001
+docker compose -f docker-compose.wifi.yml up -d nginx   # nginx em :80
+```
 
-- `./tools/start_backend.sh`
+## Autostart sem Docker
 
-Ou diretamente:
+```bash
+./tools/install_autostart_user_service.sh
+```
 
-- `python3 -m uvicorn backend.main:app --host 127.0.0.1 --port 8001`
-
-### Frontend via Docker/nginx
-
-- `docker compose up -d nginx`
-
-### Gateway Wi‑Fi + Docker
-
-- O compose inclui um broker MQTT opcional na porta `1883`.
-- No backend em Docker, use no `.env`:
-   - `GATEWAY_TRANSPORT=wifi`
-   - `GW_MQTT_HOST=mqtt`
-   - `GW_MQTT_PORT=1883`
-- Se também quiser republicar leituras processadas no mesmo broker, defina:
-   - `MQTT_HOST=mqtt`
-- No firmware do gateway ESP32 DevKit, use o ambiente `gateway-esp32-aguada-web`.
-- O `MQTT_BROKER` compilado no firmware deve apontar para o **IP/LAN do host Docker**.
-
-## Autostart do backend
-
-Para manter a bridge serial sempre ativa quando o gateway estiver ligado, instale o serviço user do systemd:
-
-- `./tools/install_autostart_user_service.sh`
-
-Esse serviço mantém o backend web sempre rodando; a reconexão serial fica por conta do próprio `backend/bridge.py`.
-
-## Observações
-
-- Nenhum arquivo do `homeassistant/` foi copiado nem modificado aqui.
-- O script legado da raiz (`tools/start_bridge_autoswitch.sh`) não é o fluxo recomendado neste workspace standalone.
-- Se você quiser MQTT local para testes, pode iniciar `tools/mqtt_broker.py` separadamente.
+Instala `aguada-web-backend.service` como serviço de usuário systemd.

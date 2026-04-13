@@ -52,17 +52,17 @@ pytest tests/test_calc.py::nome_do_teste
 ### Fluxo de dados
 
 ```
-Gateway USB (ESP-NOW) → serial → bridge.py (thread) → SQLite + WebSocket broadcast → frontend HTML
+Gateway ESP32 (WiFi) → MQTT (Mosquitto) → bridge.py (thread MQTT) → SQLite + WebSocket broadcast → frontend HTML
 ```
 
 O backend é um **FastAPI** com lifespan que inicializa:
-1. `bridge.Bridge` — thread daemon que lê a porta serial, parseia pacotes ESP-NOW e persiste no SQLite
+1. `bridge.Bridge` — thread daemon que recebe pacotes do gateway via MQTT, parseia e persiste no SQLite
 2. `WSManager` — gerencia conexões WebSocket; a bridge chama `ws_manager.broadcast()` via `call_soon_threadsafe` para cruzar a barreira thread→asyncio
 3. `APScheduler` — job diário às 6h que gera relatório PDF do dia anterior
 
 ### Módulos do backend
 
-- `bridge.py` — leitura serial, detecção automática de porta, parse de pacotes, modo simulação, MQTT opcional. Carrega `reservoirs.yaml` para montar `RESERVOIR_INDEX` (chave: `(node_id, sensor_id)`)
+- `bridge.py` — recepção MQTT do gateway WiFi, parse de pacotes, modo simulação. Carrega `reservoirs.yaml` para montar `RESERVOIR_INDEX` (chave: `(node_id, sensor_id)`)
 - `db.py` — schema SQLite e todas as queries (sem lógica de negócio). Tabelas: `readings`, `reservoir_state`, mais tabelas manuais (hidrometros, bombas, válvulas, reservatórios) e `nodes`
 - `calc.py` — cálculo de `level_cm`/`volume_l`/`pct` a partir de `distance_cm`, e agregação de eventos de consumo/abastecimento
 - `report.py` — geração de PDF diário via WeasyPrint
@@ -82,7 +82,7 @@ Páginas HTML puras em `frontend/` servidas como SPA pelo FastAPI (fallback para
 
 ### Variáveis de ambiente (`.env`)
 
-- `SERIAL_PORT` — porta serial do gateway (auto-detectada se omitida)
+- `GATEWAY_TRANSPORT` — transporte do gateway (padrão: `wifi`)
 - `DATA_DIR` — diretório dos dados e relatórios
 - `MQTT_HOST`, `MQTT_PORT`, `MQTT_USER`, `MQTT_PASS` — broker MQTT opcional
 - `TZ` — fuso horário para o scheduler (padrão: `America/Sao_Paulo`)
@@ -90,4 +90,4 @@ Páginas HTML puras em `frontend/` servidas como SPA pelo FastAPI (fallback para
 
 ### Testes
 
-Os testes usam `pytest-asyncio` no modo `auto`. O `conftest.py` provê fixture `db` com SQLite em memória temporária. `test_api.py` testa as rotas FastAPI diretamente sem bridge serial.
+Os testes usam `pytest-asyncio` no modo `auto`. O `conftest.py` provê fixture `db` com SQLite em memória temporária. `test_api.py` testa as rotas FastAPI diretamente sem bridge MQTT.

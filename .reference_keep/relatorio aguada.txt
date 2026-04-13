@@ -1,13 +1,17 @@
-Local                 hora    | Ton
-'Castelo de Consumo | 06h00'  | 74 
-'Castelo de Consumo |  08h00' | 72 
-'Castelo de Consumo |  10h00' | 70 
-'Castelo de Consumo |  13h15' | 66 
-'Castelo de Consumo |  15h00' | 64 
-'Castelo de Consumo |  17h00' | 62 
-'Castelo de Consumo |  21h00' | 61 
-'Castelo de Consumo |  06h00' | 60 
-'Consumo Estimado'            | 14    
+Dia: xx
+
+  
+volumes dos reservatorios   
+hora   |CON (m3) |CAV | CB3 | CIE1 | CIE2 | CBIF
+06h00' | 74 | 70 | 60 | 204 | 150 | 45 
+08h00' | 72 
+10h00' | 70 
+13h15' | 66 
+15h00' | 64 
+17h00' | 62 
+21h00' | 61 
+06h00' | 60 
+'Consumo Estimado'  | 14    
 
 Local               | anterior (T) | atual (T) | Diferença (T) |
 Castelo de Incêndio | 70           | 69        | -1
