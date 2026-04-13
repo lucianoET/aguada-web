@@ -125,86 +125,62 @@
   </style>
 </head>
 <body>
-<div class="layout" x-data="dashboardApp()" x-init="init()" x-cloak>
+<div class="layout" x-data="dashboardApp()" x-init="init()" x-cloak style="flex-direction:column;">
 
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <div class="sidebar-logo">A</div>
-      <span class="sidebar-brand-text">AGUADA</span>
+  <header class="page-header">
+    <div class="ph-brand">
+      <div class="ph-logo">A</div>
+      <span class="ph-name">AGUADA</span>
     </div>
-    <nav class="sidebar-nav">
-      <div class="sidebar-section">Operação</div>
-      <a href="index.html" class="nav-link active">
-        <span class="nav-icon">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        </span>
-        <span class="nav-label">Dashboard</span>
+    <nav class="ph-nav">
+      <a href="index.html" class="active">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
       </a>
-      <a href="painel.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
-        <span class="nav-label">Painel Geral</span>
+      <a href="painel.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Painel
       </a>
-      <a href="scada.html" class="nav-link">
-        <span class="nav-icon">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-        </span>
-        <span class="nav-label">SCADA</span>
+      <a href="scada.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        SCADA
       </a>
-      <div class="sidebar-section">Análise</div>
-      <a href="analise.html" class="nav-link">
-        <span class="nav-icon">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        </span>
-        <span class="nav-label">Análise</span>
+      <a href="analise.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Análise
       </a>
-      <div class="sidebar-section">Gestão</div>
-      <a href="report.html" class="nav-link">
-        <span class="nav-icon">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        </span>
-        <span class="nav-label">Relatório</span>
+      <a href="report.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Relatório
       </a>
-      <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
-      <a href="dispositivos.html" class="nav-link">
-        <span class="nav-icon">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
-        </span>
-        <span class="nav-label">Dispositivos</span>
+      <a href="hidraulica.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg>
+        Hidráulica
       </a>
-      <a href="documentacao.html" class="nav-link">
-        <span class="nav-icon">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
-        </span>
-        <span class="nav-label">Documentação</span>
+      <a href="dispositivos.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+        Dispositivos
+      </a>
+      <a href="documentacao.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        Docs
       </a>
     </nav>
-    <div class="sidebar-footer">
-      <span class="gw-dot" :class="gwStatus"></span>
-      <span class="gw-label" x-text="gwLabel"></span>
+    <div class="ph-right">
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)">
+        <span class="ws-dot" :class="wsConnected ? 'connected':'disconnected'"></span>
+        <span x-text="wsConnected ? 'Ao vivo':'Desconectado'"></span>
+        <span x-show="lastUpdate" x-text="'· '+timeAgo(lastUpdate)" style="color:var(--text3)"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)">
+        <span class="gw-dot" :class="gwStatus"></span>
+        <span x-text="gwLabel"></span>
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
     </div>
-  </aside>
+  </header>
 
-  <!-- Main -->
   <div class="main">
-    <!-- Topbar -->
-    <div class="topbar">
-      <div>
-        <button class="theme-btn" onclick="document.querySelector('#sidebar').classList.toggle('mobile-open')" style="display:none" id="sidebar-toggle">☰</button>
-        <div class="topbar-title">Dashboard</div>
-        <div class="topbar-sub">Monitoramento em tempo real</div>
-      </div>
-      <div class="topbar-right">
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)">
-          <span class="ws-dot" :class="wsConnected ? 'connected' : 'disconnected'"></span>
-          <span x-text="wsConnected ? 'Ao vivo' : 'Desconectado'"></span>
-          <span x-show="lastUpdate" x-text="'· ' + timeAgo(lastUpdate)" style="color:var(--text3)"></span>
-        </div>
-        <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        </button>
-      </div>
-    </div>
 
     <!-- Dashboard 2 colunas -->
     <div class="dash-grid">

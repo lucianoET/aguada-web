@@ -37,10 +37,10 @@
     .pg-cell-actions { display:flex; gap:4px; }
     .pg-cell-body { flex:1; overflow:auto; }
 
-    /* Mapa ocupa 2 colunas linha 1 */
-    .cell-map { grid-column: 1/3; grid-row:1; }
-    /* SCADA ocupa 1 coluna linha 1 */
-    .cell-scada { grid-column:3; grid-row:1; }
+    /* Mapa 1 coluna linha 1 */
+    .cell-map { grid-column: 1; grid-row:1; }
+    /* SCADA ocupa 2 colunas linha 1 */
+    .cell-scada { grid-column:2/4; grid-row:1; }
     /* Linhas 2 – cada datatable ocupa 1 coluna */
     .cell-res  { grid-column:1; grid-row:2; }
     .cell-equip{ grid-column:2; grid-row:2; }
@@ -108,11 +108,11 @@
         grid-template-columns:1fr 1fr;
         grid-template-rows:260px 280px 1fr;
       }
-      .cell-map  { grid-column:1/3; grid-row:1; }
-      .cell-scada{ grid-column:1/3; grid-row:2; }
-      .cell-res  { grid-column:1; grid-row:3; }
-      .cell-equip{ grid-column:2; grid-row:3; }
-      .cell-hid  { grid-column:1/3; grid-row:4; }
+      .cell-map  { grid-column:1; grid-row:1; }
+      .cell-scada{ grid-column:2; grid-row:1; }
+      .cell-res  { grid-column:1/3; grid-row:2; }
+      .cell-equip{ grid-column:1; grid-row:3; }
+      .cell-hid  { grid-column:2; grid-row:3; }
     }
     @media (max-width:700px) {
       .pg-grid { grid-template-columns:1fr; grid-template-rows:none; }
@@ -121,77 +121,66 @@
   </style>
 </head>
 <body>
-<div class="layout" x-data="painelApp()" x-init="init()" x-cloak>
+<div class="layout" x-data="painelApp()" x-init="init()" x-cloak style="flex-direction:column;">
 
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <div class="sidebar-logo">A</div>
-      <span class="sidebar-brand-text">AGUADA</span>
+  <!-- Header de página -->
+  <header class="page-header">
+    <div class="ph-brand">
+      <div class="ph-logo">A</div>
+      <span class="ph-name">AGUADA</span>
     </div>
-    <nav class="sidebar-nav">
-      <div class="sidebar-section">Operação</div>
-      <a href="index.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
-        <span class="nav-label">Dashboard</span>
+    <nav class="ph-nav">
+      <a href="index.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
       </a>
-      <a href="painel.html" class="nav-link active">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
-        <span class="nav-label">Painel Geral</span>
+      <a href="painel.html" class="active">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Painel
       </a>
-      <a href="scada.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span>
-        <span class="nav-label">SCADA</span>
+      <a href="scada.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        SCADA
       </a>
-      <div class="sidebar-section">Análise</div>
-      <a href="analise.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
-        <span class="nav-label">Análise</span>
+      <a href="analise.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Análise
       </a>
-      <div class="sidebar-section">Gestão</div>
-      <a href="report.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
-        <span class="nav-label">Relatório</span>
+      <a href="report.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Relatório
       </a>
-      <a href="hidraulica.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span>
-        <span class="nav-label">Hidráulica</span>
+      <a href="hidraulica.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg>
+        Hidráulica
       </a>
-      <a href="dispositivos.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span>
-        <span class="nav-label">Dispositivos</span>
+      <a href="dispositivos.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+        Dispositivos
       </a>
-      <a href="documentacao.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span>
-        <span class="nav-label">Documentação</span>
+      <a href="documentacao.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        Docs
       </a>
     </nav>
-    <div class="sidebar-footer">
-      <span class="gw-dot" :class="gwStatus"></span>
-      <span class="gw-label" x-text="gwLabel"></span>
+    <div class="ph-right">
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)">
+        <span class="ws-dot" :class="wsConnected ? 'connected':'disconnected'"></span>
+        <span x-text="wsConnected ? 'Ao vivo':'Desconectado'"></span>
+        <span x-show="lastUpdate" x-text="'· '+timeAgo(lastUpdate)" style="color:var(--text3)"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)">
+        <span class="gw-dot" :class="gwStatus"></span>
+        <span x-text="gwLabel"></span>
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
     </div>
-  </aside>
+  </header>
 
   <!-- Main -->
   <div class="main">
-    <!-- Topbar -->
-    <div class="topbar">
-      <div>
-        <div class="topbar-title">Painel Geral</div>
-        <div class="topbar-sub">Visão consolidada do sistema</div>
-      </div>
-      <div class="topbar-right">
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)">
-          <span class="ws-dot" :class="wsConnected ? 'connected':'disconnected'"></span>
-          <span x-text="wsConnected ? 'Ao vivo':'Desconectado'"></span>
-          <span x-show="lastUpdate" x-text="'· '+timeAgo(lastUpdate)" style="color:var(--text3)"></span>
-        </div>
-        <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        </button>
-      </div>
-    </div>
-
     <!-- Grade -->
     <div class="pg-grid">
 
@@ -218,15 +207,12 @@
         <div class="pg-cell-header">
           <span class="pg-cell-title">SCADA</span>
           <div class="pg-cell-actions">
-            <button class="icon-btn" title="Expandir SCADA" @click="openFullScada()">
+            <a href="scada.html" class="icon-btn" title="Expandir SCADA">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-            </button>
-            <a href="scada.html" class="icon-btn" title="Abrir SCADA">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
           </div>
         </div>
-        <iframe class="scada-embed" src="scada.html" id="scada-frame" title="SCADA"></iframe>
+        <iframe class="scada-embed" src="scada.html?embed=1" id="scada-frame" title="SCADA"></iframe>
       </div>
 
       <!-- ── RESERVATÓRIOS ──────────────────────────────────── -->
@@ -265,7 +251,7 @@
               <th>Alias</th><th>%</th><th>Nível</th><th>Volume</th><th>Status</th><th>atualiz.</th>
             </tr></thead>
             <tbody>
-              <template x-for="r in reservoirs" :key="r.alias">
+              <template x-for="r in sortedReservoirs" :key="r.alias">
                 <tr style="cursor:pointer" @click="openResModal(r.alias)">
                   <td class="mono" x-text="r.alias"></td>
                   <td>
@@ -435,24 +421,7 @@
     </div>
   </div>
 
-  <!-- ── Modal fullscreen SCADA ─────────────────────────────── -->
-  <div class="fullscreen-modal" x-show="fullScada" x-cloak>
-    <div class="fullscreen-modal-bar">
-      <span class="fullscreen-modal-title">SCADA — Visão ampliada</span>
-      <div style="display:flex;gap:8px">
-        <a href="scada.html" style="font-size:11px;color:var(--blue);display:flex;align-items:center;gap:4px">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          SCADA completo
-        </a>
-        <button class="icon-btn" @click="fullScada=false" title="Fechar">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-    </div>
-    <div class="fullscreen-modal-body">
-      <iframe style="width:100%;height:100%;border:none" src="scada.html" title="SCADA fullscreen"></iframe>
-    </div>
-  </div>
+
 
 </div><!-- /layout -->
 
@@ -469,7 +438,6 @@ function painelApp() {
     gwStatus: 'off',
     gwLabel: 'GW offline',
     fullMap: false,
-    fullScada: false,
     _miniMap: null,
     _fullMapObj: null,
     _miniMarkers: {},
@@ -482,6 +450,16 @@ function painelApp() {
     },
     get critical() { return (this.reservoirs||[]).filter(r=>r.online&&r.pct<=20).length; },
     get onlineCount() { return (this.reservoirs||[]).filter(r=>r.online).length; },
+
+    get sortedReservoirs() {
+      const order = ['CON', 'CAV', 'CB3', 'CIE', 'CBIF'];
+      const rank = alias => {
+        const u = (alias||'').toUpperCase();
+        for (let i = 0; i < order.length; i++) if (u.startsWith(order[i])) return i;
+        return 99;
+      };
+      return [...(this.reservoirs||[])].sort((a,b) => rank(a.alias) - rank(b.alias));
+    },
 
     get hydrometerRows() {
       // Agrupar por meter_name, retornar curr+prev+delta
@@ -567,7 +545,7 @@ function painelApp() {
         minZoom:13, maxZoom:19,
         maxBounds:bounds, maxBoundsViscosity:0.8,
         layers:[osmLayer],
-      }).setView([-22.8381,-43.1086],16);
+      }).setView([-22.8382228,-43.1080717],17);
       L.control.layers({'Mapa':osmLayer,'Satélite':satLayer},{},{position:'topright',collapsed:true}).addTo(this._miniMap);
       // infra leve (apenas tubulações e bombas)
       try {
@@ -641,7 +619,6 @@ function painelApp() {
 
     closeFullMap() { this.fullMap=false; },
 
-    openFullScada() { this.fullScada=true; },
   };
 }
 </script>

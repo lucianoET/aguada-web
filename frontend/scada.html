@@ -14,7 +14,32 @@
       min-height: 0;
       display: flex;
       flex-direction: column;
-      background: var(--bg);
+      background: #d9dde3;
+      --scada-site-hdr-bg: #dce8f5;
+      --scada-site-hdr-border: #89a6c7;
+      --scada-site-red-hdr-bg: #f5dfdf;
+      --scada-site-red-hdr-border: #cb9a9a;
+      --scada-content-bg: #d9dde3;
+      --scada-content-border: #a7b0bb;
+      --scada-res-bg: #eef3f8;
+      --scada-res-border: #98a6b6;
+      --scada-eq-bg: #eceff3;
+      --scada-eq-border: #a6aeb9;
+      --scada-eq-hover-border: #5b8def;
+      --scada-text-primary: #1c2430;
+      --scada-text-secondary: #4b5a6d;
+      --scada-band-bg: #d8e0eb;
+      --scada-band-border: #9baabe;
+      --scada-band-text: #4d6076;
+      --scada-sub-hdr-bg: #dde3ea;
+      --scada-sub-hdr-border: #b0b8c2;
+      --scada-water-bg: #dde7f2;
+      --scada-water-border: #8e9bac;
+      --scada-hyd-hdr-bg: #dde3ea;
+      --scada-block-bg-blue: rgba(219, 230, 243, 0.96);
+      --scada-block-bg-red: rgba(244, 226, 226, 0.96);
+      --pipe-color: #3b94f4;
+      --pipe-label-color: #4b6f9d;
     }
 
     .scada-toolbar {
@@ -24,7 +49,7 @@
       gap: 12px;
       padding: 10px 14px;
       border-bottom: 1px solid var(--border);
-      background: var(--bg2);
+      background: #eceff3;
       backdrop-filter: none;
     }
 
@@ -43,54 +68,66 @@
       padding: 6px 10px;
       border: 1px solid var(--border2);
       border-radius: 999px;
-      background: var(--card);
-      color: var(--text2);
+      background: #f7f8fa;
+      color: #4b5563;
       font-size: 11px;
       line-height: 1;
     }
 
     .scada-chip strong {
-      color: var(--text);
+      color: #111827;
       font-weight: 600;
     }
 
     .scada-wrap {
       flex: 1;
       min-height: 0;
-      overflow: hidden;
-      padding: 6px 8px 8px;
+      overflow: auto;
+      padding: 12px 18px 18px;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
     }
 
     .scada-stage-holder {
       position: relative;
       flex: 0 0 auto;
+      margin: 0 auto;
     }
 
     .scada-stage {
       position: relative;
       width: 1850px;
-      height: 1120px;
+      height: 1370px;
       transform-origin: top left;
       font-size: 14px;
-      background-color: var(--bg2);
+      background-color: #d7dbe0;
       background-image:
-        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+        linear-gradient(rgba(0,0,0,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.045) 1px, transparent 1px);
       background-size: 40px 40px;
       border: 1px solid var(--border2);
-      border-radius: 0;
+      border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 0 0 1px var(--border);
     }
-    [data-theme="light"] .scada-stage {
-      background-image:
-        linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
-    }
 
+    .stage-system-label {
+      position: absolute;
+      top: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      padding: 12px 26px;
+      border: 1px solid #97a5b6;
+      background: rgba(248, 250, 252, 0.92);
+      color: #233042;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+    }
     /* Garante piso tipografico mesmo em telas menores */
     .scada-stage [style*="font-size:8px"] { font-size: 12px !important; }
     .scada-stage [style*="font-size:9px"] { font-size: 12px !important; }
@@ -117,26 +154,16 @@
     .pipe-main {
       stroke: var(--pipe-color);
       stroke-width: 5;
-      stroke-dasharray: 14 9;
     }
 
     .pipe-branch {
       stroke: var(--pipe-color);
       stroke-width: 4;
-      stroke-dasharray: 10 8;
     }
 
     .pipe-submarine {
       stroke: var(--pipe-color);
       stroke-width: 4;
-      stroke-dasharray: 16 9;
-      animation: pipeFlow 1.6s linear infinite;
-    }
-
-    @keyframes pipeFlow {
-      to {
-        stroke-dashoffset: -24;
-      }
     }
 
     @keyframes ping {
@@ -708,10 +735,10 @@
       display: flex;
       flex-direction: column;
       border: 2px solid;
-      border-radius: 3px;
+      border-radius: 8px;
       overflow: hidden;
       z-index: 2;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+      box-shadow: 0 8px 24px rgba(15,23,42,0.14);
       transition: border-color 0.25s, box-shadow 0.25s;
       backdrop-filter: blur(1px);
     }
@@ -731,10 +758,10 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       font-family: Arial, sans-serif;
-      padding: 7px 10px;
+      padding: 10px 14px;
       text-transform: uppercase;
       flex-shrink: 0;
       letter-spacing: 0.04em;
@@ -754,9 +781,9 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 8px;
-      gap: 7px;
-      overflow: hidden;
+      padding: 14px;
+      gap: 12px;
+      overflow: visible;
       min-height: 0;
     }
     .block-body.row { flex-direction: row; }
@@ -765,7 +792,7 @@
     .sub-blk {
       border: 1px solid var(--scada-sub-hdr-border);
       background: rgba(0,0,0,0.18);
-      border-radius: 3px;
+      border-radius: 8px;
       display: flex;
       flex-direction: column;
       flex: 1;
@@ -777,6 +804,7 @@
       background: rgba(255,255,255,0.45);
     }
     .sub-blk-title {
+      display: none;
       font-size: 9.5px;
       font-weight: 700;
       font-family: Arial, sans-serif;
@@ -793,9 +821,9 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 5px;
-      gap: 5px;
-      overflow: hidden;
+      padding: 10px;
+      gap: 10px;
+      overflow: visible;
       min-height: 0;
     }
     .sub-blk-body.row {
@@ -805,7 +833,7 @@
       flex: 1;
       border: 1px solid var(--scada-water-border);
       background: var(--scada-res-bg);
-      border-radius: 5px;
+      border-radius: 10px;
       position: relative;
       display: flex;
       flex-direction: column;
@@ -822,14 +850,14 @@
     }
     /* ── Card header ─────────────────────── */
     .mini-res-title {
-      padding: 5px 6px 4px;
+      padding: 8px 10px 6px;
       text-align: center;
       border-bottom: 1px solid var(--scada-water-border);
       background: var(--scada-hyd-hdr-bg);
       flex-shrink: 0;
     }
     .mini-res-name {
-      font-size: 10.5px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--scada-text-primary);
       white-space: nowrap;
@@ -838,7 +866,7 @@
       line-height: 1.25;
     }
     .mini-res-sub {
-      font-size: 9px;
+      font-size: 10px;
       color: var(--scada-text-secondary);
       line-height: 1.2;
     }
@@ -853,13 +881,24 @@
     .mini-res-fill {
       position: absolute; bottom: 0; left: 0; right: 0;
       transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0.88;
+    }
+    .mini-res-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: rgba(59, 148, 244, 0.92);
+      box-shadow: 0 0 6px rgba(59, 148, 244, 0.6);
+      border-radius: 2px 2px 0 0;
+      pointer-events: none;
     }
     /* Level lines */
     .mini-res-level {
       position: absolute;
       left: 0; right: 0;
       height: 1px;
-      background: rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.3);
       pointer-events: none;
       z-index: 3;
     }
@@ -868,13 +907,15 @@
       position: absolute;
       left: 3px;
       bottom: 2px;
-      font-size: 7.5px;
+      font-size: 9px;
       font-family: var(--mono);
-      color: rgba(255,255,255,0.38);
+      color: rgba(17,24,39,0.75);
       line-height: 1;
     }
-    [data-theme="light"] .mini-res-level { background: rgba(0,0,0,0.12); }
-    [data-theme="light"] .mini-res-level::before { color: rgba(0,0,0,0.35); }
+    .mini-res-level[data-lbl="70%"] { background: #b8e6c0; }
+    .mini-res-level[data-lbl="50%"] { background: #f7de8a; }
+    .mini-res-level[data-lbl="30%"] { background: #efb1b1; }
+    .mini-res-level[data-lbl="10%"] { background: #111111; }
     /* Overlaid values */
     .mini-res-overlay {
       position: absolute;
@@ -883,28 +924,29 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 1px;
+      gap: 10px;
       z-index: 4;
       pointer-events: none;
+      text-align: center;
     }
     .mini-res-pct {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 800;
       font-family: Arial, sans-serif;
       color: var(--scada-text-primary);
-      text-shadow: 0 1px 5px rgba(0,0,0,0.45);
+      text-shadow: none;
       line-height: 1;
     }
     .mini-res-vol {
-      font-size: 13px;
-      font-weight: 700;
-      font-family: var(--mono);
+      font-size: 28px;
+      font-weight: 800;
+      font-family: Arial, sans-serif;
       color: var(--scada-text-primary);
-      text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+      text-shadow: none;
       line-height: 1;
     }
     .mini-res-unit {
-      font-size: 9px;
+      font-size: 14px;
       vertical-align: baseline;
     }
     /* ── Footer ──────────────────────────── */
@@ -912,14 +954,14 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 3px 6px;
+      padding: 6px 10px;
       background: var(--scada-hyd-hdr-bg);
       border-top: 1px solid var(--scada-water-border);
       flex-shrink: 0;
       gap: 3px;
     }
     .mini-res-ts {
-      font-size: 8px;
+      font-size: 10px;
       color: var(--scada-text-secondary);
       font-family: var(--mono);
       white-space: nowrap;
@@ -927,7 +969,7 @@
       text-overflow: ellipsis;
     }
     .mini-res-status {
-      font-size: 7.5px;
+      font-size: 9px;
       font-weight: 700;
       letter-spacing: 0.04em;
       padding: 1px 5px;
@@ -941,18 +983,18 @@
     .mini-res-status.s-manual  { color: var(--yellow); border-color: var(--yellow); background: rgba(245,158,11,0.12); }
     /* ── Card de equipamento (bomba/válvula) ──────────────────── */
     .mini-eq {
-      flex: 0 0 86px !important;
-      width: 86px;
-      height: 86px;
-      min-height: 86px;
+      flex: 0 0 96px !important;
+      width: 96px;
+      height: 96px;
+      min-height: 96px;
       border: 1px solid var(--scada-eq-border);
       background: var(--scada-eq-bg);
-      border-radius: 4px;
+      border-radius: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 6px 4px;
+      padding: 10px 8px;
       gap: 4px;
       cursor: pointer;
       overflow: hidden;
@@ -964,26 +1006,27 @@
       box-shadow: 0 2px 8px rgba(59,130,246,0.2);
     }
     .mini-eq img {
-      width: 26px;
-      height: 26px;
+      width: 30px !important;
+      height: 30px !important;
       object-fit: contain;
       flex-shrink: 0;
-      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));
+      filter: none;
     }
     .mini-eq-name {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 700;
       font-family: Arial, sans-serif;
       text-align: center;
       color: var(--scada-text-primary);
       letter-spacing: 0;
-      max-width: 78px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      max-width: 88px;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      line-height: 1.15;
     }
     .mini-eq-state {
-      font-size: 9px;
+      font-size: 10px;
       font-weight: 700;
       font-family: Arial, sans-serif;
       padding: 2px 5px;
@@ -991,13 +1034,139 @@
       text-transform: uppercase;
       letter-spacing: 0.04em;
       border: 1px solid currentColor;
+      text-align: center;
+      line-height: 1.1;
+      white-space: normal;
+      word-break: break-word;
+      max-width: 86px;
+    }
+
+    .scada-grid-units {
+      --scada-sq: 96px;
+      --scada-gap: 10px;
+    }
+
+    .res-grid-row {
+      display: grid;
+      grid-auto-flow: column;
+      gap: var(--scada-gap);
+      align-items: stretch;
+      justify-content: start;
+    }
+
+    .res-3x2 {
+      width: calc(var(--scada-sq) * 2 + var(--scada-gap));
+      height: calc(var(--scada-sq) * 3 + var(--scada-gap) * 2);
+      flex: 0 0 auto;
+    }
+
+    .res-6x3 {
+      width: calc(var(--scada-sq) * 6 + var(--scada-gap) * 5);
+      height: calc(var(--scada-sq) * 3 + var(--scada-gap) * 2);
+      flex: 0 0 auto;
+    }
+
+    .res-2x2 {
+      width: calc(var(--scada-sq) * 2 + var(--scada-gap));
+      height: calc(var(--scada-sq) * 2 + var(--scada-gap));
+      flex: 0 0 auto;
+    }
+
+    .equip-col-3 {
+      display: grid;
+      grid-template-rows: repeat(3, var(--scada-sq));
+      gap: var(--scada-gap);
+      width: var(--scada-sq);
+      flex: 0 0 auto;
+      align-content: start;
+    }
+
+    .equip-col-2 {
+      display: grid;
+      grid-template-rows: repeat(2, var(--scada-sq));
+      gap: var(--scada-gap);
+      width: var(--scada-sq);
+      flex: 0 0 auto;
+      align-content: start;
+    }
+
+    .equip-row-2 {
+      display: grid;
+      grid-template-columns: repeat(2, var(--scada-sq));
+      gap: var(--scada-gap);
+      align-items: start;
+      justify-content: start;
+      width: calc(var(--scada-sq) * 2 + var(--scada-gap));
+    }
+
+    .equip-row-auto {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: var(--scada-sq);
+      gap: var(--scada-gap);
+      align-items: start;
+      justify-content: start;
+      width: fit-content;
+    }
+
+    .mini-eq.sq-1x1 {
+      width: var(--scada-sq);
+      height: var(--scada-sq);
+      min-height: var(--scada-sq);
+      flex: 0 0 var(--scada-sq) !important;
+    }
+
+    .valve-hydro-grid {
+      display: grid;
+      grid-template-columns: var(--scada-sq) calc(var(--scada-sq) * 2 + var(--scada-gap));
+      grid-template-rows: repeat(3, var(--scada-sq));
+      gap: var(--scada-gap);
+      align-items: stretch;
+      justify-content: start;
+      min-width: 0;
+    }
+
+    .hyd-chip.hyd-1x1 {
+      width: var(--scada-sq);
+      height: var(--scada-sq);
+      min-height: var(--scada-sq);
+      flex: 0 0 var(--scada-sq);
+    }
+
+    .hyd-chip.hyd-2x1 {
+      width: calc(var(--scada-sq) * 2 + var(--scada-gap));
+      height: var(--scada-sq);
+      min-height: var(--scada-sq);
+      flex: 0 0 calc(var(--scada-sq) * 2 + var(--scada-gap));
+    }
+
+    .hyd-chip.hyd-1x1 .hyd-chip-hdr {
+      font-size: 10px;
+      padding: 4px 6px;
+    }
+
+    .hyd-chip.hyd-1x1 .hyd-chip-data {
+      font-size: 9px;
+      padding: 4px 6px;
+      line-height: 1.15;
+    }
+
+    .hyd-chip.hyd-2x1 .hyd-chip-hdr {
+      font-size: 12px;
+      padding: 6px 8px;
+    }
+
+    .hyd-chip.hyd-2x1 .hyd-chip-data {
+      font-size: 12px;
+      padding: 6px 8px;
+      line-height: 1.2;
     }
 
     /* ── Hidrômetro ───────────────────────────────────────────── */
     .hyd-chip {
       border: 1px solid var(--scada-eq-border);
       background: var(--scada-eq-bg);
-      border-radius: 4px;
+      border-radius: 10px;
       cursor: pointer;
       overflow: hidden;
       display: flex;
@@ -1015,7 +1184,7 @@
       font-weight: 800;
       font-family: Arial, sans-serif;
       text-align: center;
-      padding: 4px;
+      padding: 8px 10px;
       background: var(--scada-hyd-hdr-bg);
       border-bottom: 1px solid var(--scada-eq-border);
       color: var(--scada-text-primary);
@@ -1027,72 +1196,88 @@
       flex: 1;
       font-size: 11px;
       font-family: Arial, sans-serif;
-      padding: 5px 7px;
-      line-height: 1.5;
+      padding: 10px 12px;
+      line-height: 1.3;
       color: var(--scada-text-secondary);
     }
     .hyd-chip-data strong {
       color: var(--scada-text-primary);
       font-weight: 700;
     }
+
+    /* — Embed mode (iframe embed=1) ——————————————— */
+    body.embed-mode .page-header,
+    body.embed-mode .scada-toolbar { display: none !important; }
+    body.embed-mode .layout { flex-direction: column !important; }
+    body.embed-mode .main { overflow: hidden; }
   </style>
   <script src="assets/shared.js"></script>
+  <script>
+    if (new URLSearchParams(location.search).has('embed')) {
+      document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('embed-mode');
+      });
+    }
+  </script>
   <script defer src="assets/vendor/alpine.min.js"></script>
 </head>
 <body>
-<div class="layout" x-data="scadaApp()" x-init="init()" @keydown.escape.window="closeAllModals()" x-cloak>
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <div class="sidebar-logo">A</div>
-      <span class="sidebar-brand-text">AGUADA</span>
+<div class="layout" x-data="scadaApp()" x-init="init()" @keydown.escape.window="closeAllModals()" x-cloak style="flex-direction:column;">
+
+  <header class="page-header">
+    <div class="ph-brand">
+      <div class="ph-logo">A</div>
+      <span class="ph-name">AGUADA</span>
     </div>
-    <nav class="sidebar-nav">
-      <div class="sidebar-section">Operação</div>
-      <a href="index.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
-        <span class="nav-label">Dashboard</span>
+    <nav class="ph-nav">
+      <a href="index.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
       </a>
-      <a href="painel.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
-        <span class="nav-label">Painel Geral</span>
+      <a href="painel.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Painel
       </a>
-      <a href="scada.html" class="nav-link active">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span>
-        <span class="nav-label">SCADA</span>
+      <a href="scada.html" class="active">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        SCADA
       </a>
-      <div class="sidebar-section">Análise</div>
-      <a href="analise.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
-        <span class="nav-label">Análise</span>
+      <a href="analise.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Análise
       </a>
-      <div class="sidebar-section">Gestão</div>
-      <a href="report.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
-        <span class="nav-label">Relatório</span>
+      <a href="report.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Relatório
       </a>
-      <a href="hidraulica.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span>
-        <span class="nav-label">Hidráulica</span>
+      <a href="hidraulica.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg>
+        Hidráulica
       </a>
-      <a href="dispositivos.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span>
-        <span class="nav-label">Dispositivos</span>
+      <a href="dispositivos.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+        Dispositivos
       </a>
-      <a href="documentacao.html" class="nav-link">
-        <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span>
-        <span class="nav-label">Documentação</span>
+      <a href="documentacao.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        Docs
       </a>
     </nav>
-    <div class="sidebar-footer">
-      <span class="gw-dot" :class="gatewayClass()"></span>
-      <span class="gw-label" x-text="gatewayLabel()"></span>
+    <div class="ph-right">
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)">
+        <span class="ws-dot" :class="wsConnected ? 'connected':'disconnected'"></span>
+        <span x-text="wsConnected ? 'Ao vivo':'Desconectado'"></span>
+        <span x-show="lastUpdate" x-text="'· '+timeAgo(lastUpdate)" style="color:var(--text3)"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)">
+        <span class="gw-dot" :class="gatewayClass()"></span>
+        <span x-text="gatewayLabel()"></span>
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
     </div>
-  </aside>
+  </header>
 
   <div class="main">
-    <div class="topbar">
-      <div>
-        <div class="topbar-title">SCADA Hidráulico</div>
         <div class="topbar-sub">Diagrama operacional simplificado por local</div>
       </div>
       <div class="topbar-right">
@@ -1124,42 +1309,30 @@
       <div class="scada-wrap" x-ref="stageViewport">
         <div class="scada-stage-holder" :style="`width:${stageHolderWidth}px;height:${stageHolderHeight}px;`">
         <div class="scada-stage" :style="`transform:scale(${stageScale});`">
-          <svg class="pipe-layer" viewBox="0 0 1850 1120" preserveAspectRatio="none" aria-hidden="true">
-            <!-- HID-CONC -> CBIF -->
-            <path class="pipe pipe-main" d="M 110 900 V 854"/>
-            <!-- CBIF -> HID-IF -->
-            <path class="pipe pipe-main" d="M 327 854 V 890"/>
-            <!-- HID-IF -> HID-PRAIA -->
-            <path class="pipe pipe-main" d="M 409 946 H 560"/>
-            <!-- HID-PRAIA -> CIE -->
-            <path class="pipe pipe-submarine" d="M 724 946 H 870 V 858 H 1002"/>
-            <!-- CIE -> CB3 -->
-            <path class="pipe pipe-main" d="M 1188 858 H 1314"/>
-            <!-- CB3 -> CON -->
-            <path class="pipe pipe-branch" d="M 1544 653 V 523"/>
-            <!-- CB3 -> CAV -->
-            <path class="pipe pipe-branch" d="M 1450 653 V 574 H 779 V 529"/>
-            <!-- Arrow markers rendered as small triangles via stroke -->
+          <svg class="pipe-layer" viewBox="0 0 1850 1370" preserveAspectRatio="none" aria-hidden="true">
+            <path class="pipe pipe-branch" d="M 410 464 V 498"/>
+            <path class="pipe pipe-branch" d="M 1275 464 V 498"/>
+            <path class="pipe pipe-main"   d="M 840 643 H 980"/>
+            <path class="pipe pipe-branch" d="M 530 788 V 914 H 621"/>
+            <path class="pipe pipe-branch" d="M 1275 788 V 914 H 1229"/>
+            <path class="pipe pipe-main"   d="M 621 914 H 1229"/>
+            <path class="pipe pipe-branch" d="M 621 914 V 818"/>
+            <path class="pipe pipe-branch" d="M 925 914 V 818"/>
+            <path class="pipe pipe-branch" d="M 1229 914 V 818"/>
+            <path class="pipe pipe-main"   d="M 925 914 V 934"/>
           </svg>
 
-          <!-- Vertical region bands (SVG-mapped positions) -->
-          <div class="vert-band" style="position:absolute;left:424px;top:0;width:32px;height:1120px;">
-            <span class="vert-band-text">ILHA DAS FLORES</span>
-          </div>
-          <div class="vert-band" style="position:absolute;left:505px;top:0;width:32px;height:1120px;">
-            <span class="vert-band-text">ILHA DO ENGENHO</span>
-          </div>
+          <div class="stage-system-label">Sistema Hidraulico - CMASM</div>
 
           <!-- CBIF — C. BOMBAS ILHA DAS FLORES -->
-          <div class="scada-block block-blue" style="left:52px;top:131px;width:336px;height:723px;">
+          <div class="scada-block block-blue scada-grid-units" style="left:220px;top:498px;width:620px;height:290px;">
             <div class="block-title">CBIF — C. BOMBAS ILHA DAS FLORES
               <button class="site-info-btn" @click.stop="openLocationModal('if_res')" title="Detalhes">i</button>
             </div>
-            <div class="block-body">
-              <div class="sub-blk" style="flex:2;">
-                <div class="sub-blk-title">RESERVATORIO — AGUA — 80 m³ (2 × 40 m³)</div>
-                <div class="sub-blk-body row">
-                  <button class="mini-res" @click="openModal('CBIF1')">
+            <div class="block-body row" style="gap:10px;align-items:flex-start;">
+              <div class="sub-blk" style="flex:0 0 auto;">
+                <div class="sub-blk-body res-grid-row" style="padding:6px;">
+                  <button class="mini-res res-2x2" @click="openModal('CBIF1')">
                     <div class="mini-res-title">
                       <div class="mini-res-name" x-text="reservoirNameLabel('CBIF1')"></div>
                       <div class="mini-res-sub">CBIF1 · 40m³</div>
@@ -1180,7 +1353,7 @@
                       <span class="mini-res-status" :class="reservoirStatusClass('CBIF1')" x-text="reservoirStatusLabel('CBIF1')"></span>
                     </div>
                   </button>
-                  <button class="mini-res" @click="openModal('CBIF2')">
+                  <button class="mini-res res-2x2" @click="openModal('CBIF2')">
                     <div class="mini-res-title">
                       <div class="mini-res-name" x-text="reservoirNameLabel('CBIF2')"></div>
                       <div class="mini-res-sub">CBIF2 · 40m³</div>
@@ -1203,25 +1376,24 @@
                   </button>
                 </div>
               </div>
-              <div class="sub-blk" style="flex:1;">
-                <div class="sub-blk-title">BOMBAS</div>
-                <div class="sub-blk-body row">
-                  <template x-for="item in equipmentForSite('ilha')" :key="item.kind+'-'+item.name">
-                    <button class="mini-eq" @click="openEquipment(item.kind, item.name)">
-                      <img :src="equipmentIcon(item.kind)" :alt="item.kind" style="width:26px;height:26px;object-fit:contain;"/>
-                      <span class="mini-eq-name" x-text="item.name"></span>
-                      <span class="mini-eq-state" :class="equipmentBadgeClass(item)" x-text="equipmentPrimaryLabel(item)"></span>
-                    </button>
-                  </template>
+              <div class="sub-blk" style="flex:0 0 auto;">
+                <div class="sub-blk-body" style="padding:6px;">
+                  <div class="equip-col-2">
+                    <template x-for="item in equipmentForSite('ilha')" :key="item.kind+'-'+item.name">
+                      <button class="mini-eq sq-1x1" @click="openEquipment(item.kind, item.name)">
+                        <img :src="equipmentIcon(item.kind)" :alt="item.kind" style="width:26px;height:26px;object-fit:contain;"/>
+                        <span class="mini-eq-name" x-text="item.name"></span>
+                        <span class="mini-eq-state" :class="equipmentBadgeClass(item)" x-text="equipmentPrimaryLabel(item)"></span>
+                      </button>
+                    </template>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Hydrometers below CBIF -->
-          <div style="position:absolute;left:28px;top:878px;font-size:10px;font-family:'Courier New',monospace;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">PC CONCESSIONARIA</div>
-          <div style="position:absolute;left:28px;top:888px;font-size:9px;font-family:'Courier New',monospace;color:var(--text3);letter-spacing:0.05em;">HIDROMETRO</div>
-          <button class="hyd-chip" style="position:absolute;left:28px;top:900px;width:164px;height:95px;" @click="openEquipment('hydrometer','HID-CONC')">
+          <!-- Hydrometers below CIE and CB3 -->
+          <button class="hyd-chip hyd-2x1 scada-grid-units" style="position:absolute;left:520px;top:818px;" @click="openEquipment('hydrometer','HID-CONC')">
             <div class="hyd-chip-hdr">HID-CONC</div>
             <div class="hyd-chip-data">
               <div>L1: <strong x-text="hydrometerReadLabel(hydroRow('HID-CONC').prev)"></strong></div>
@@ -1229,8 +1401,7 @@
               <div>B: <strong x-text="hydrometerDeltaLabel(hydroRow('HID-CONC').delta)"></strong></div>
             </div>
           </button>
-          <div style="position:absolute;left:245px;top:880px;font-size:9px;font-family:'Courier New',monospace;color:var(--text3);letter-spacing:0.05em;">HIDROMETRO</div>
-          <button class="hyd-chip" style="position:absolute;left:245px;top:890px;width:164px;height:105px;" @click="openEquipment('hydrometer','HID-IF')">
+          <button class="hyd-chip hyd-2x1 scada-grid-units" style="position:absolute;left:824px;top:818px;" @click="openEquipment('hydrometer','HID-IF')">
             <div class="hyd-chip-hdr">HID-IF</div>
             <div class="hyd-chip-data">
               <div>L1: <strong x-text="hydrometerReadLabel(hydroRow('HID-IF').prev)"></strong></div>
@@ -1238,8 +1409,7 @@
               <div>B: <strong x-text="hydrometerDeltaLabel(hydroRow('HID-IF').delta)"></strong></div>
             </div>
           </button>
-          <div style="position:absolute;left:560px;top:877px;font-size:9px;font-family:'Courier New',monospace;color:var(--text3);letter-spacing:0.05em;">HIDROMETRO</div>
-          <button class="hyd-chip" style="position:absolute;left:560px;top:887px;width:164px;height:105px;" @click="openEquipment('hydrometer','HID-PRAIA')">
+          <button class="hyd-chip hyd-2x1 scada-grid-units" style="position:absolute;left:1128px;top:818px;" @click="openEquipment('hydrometer','HID-PRAIA')">
             <div class="hyd-chip-hdr">HID-PRAIA</div>
             <div class="hyd-chip-data">
               <div>L1: <strong x-text="hydrometerReadLabel(hydroRow('HID-PRAIA').prev)"></strong></div>
@@ -1249,14 +1419,13 @@
           </button>
 
           <!-- CAV — CASTELO DE INCENDIO -->
-          <div class="scada-block block-red" style="left:628px;top:120px;width:302px;height:409px;">
+          <div class="scada-block block-red scada-grid-units" style="left:220px;top:90px;width:380px;height:374px;">
             <div class="block-title">CAV — CASTELO DE INCENDIO
               <button class="site-info-btn" @click.stop="openLocationModal('incendio')" title="Detalhes">i</button>
             </div>
-            <div class="block-body row">
-              <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
-                <div style="font-size:8px;font-family:'Courier New',monospace;color:var(--text2);padding:2px 4px;white-space:nowrap;">RES. ELEVADO - AGUA - 80 m³</div>
-                <button class="mini-res" style="flex:1;" @click="openModal('CAV')">
+            <div class="block-body row" style="gap:8px;align-items:flex-start;">
+              <div style="display:flex;flex-direction:column;gap:6px;min-width:0;flex:0 0 auto;">
+                <button class="mini-res res-3x2" @click="openModal('CAV')">
                   <div class="mini-res-title">
                     <div class="mini-res-name" x-text="reservoirNameLabel('CAV')"></div>
                     <div class="mini-res-sub">CAV · 80m³</div>
@@ -1278,26 +1447,27 @@
                   </div>
                 </button>
               </div>
-              <div style="flex:0 0 110px;display:flex;flex-direction:column;gap:4px;padding:4px;min-width:0;">
-                <div style="font-size:8px;font-family:'Courier New',monospace;color:var(--text2);padding:2px 0;text-align:center;">VALULAS</div>
-                <template x-for="item in equipmentForSite('incendio')" :key="item.kind+'-'+item.name">
-                  <button class="mini-eq" style="flex:1;" @click="openEquipment(item.kind, item.name)">
-                    <img :src="equipmentIcon(item.kind)" :alt="item.kind" style="width:22px;height:22px;object-fit:contain;"/>
-                    <span class="mini-eq-name" x-text="item.name"></span>
-                    <span class="mini-eq-state" :class="equipmentBadgeClass(item)" x-text="equipmentPrimaryLabel(item)"></span>
-                  </button>
-                </template>
+              <div style="display:flex;flex-direction:column;gap:6px;min-width:0;flex:0 0 auto;">
+                <div class="equip-col-3">
+                  <template x-for="item in equipmentForSite('incendio')" :key="item.kind+'-'+item.name">
+                    <button class="mini-eq sq-1x1" @click="openEquipment(item.kind, item.name)">
+                      <img :src="equipmentIcon(item.kind)" :alt="item.kind" style="width:22px;height:22px;object-fit:contain;"/>
+                      <span class="mini-eq-name" x-text="item.name"></span>
+                      <span class="mini-eq-state" :class="equipmentBadgeClass(item)" x-text="equipmentPrimaryLabel(item)"></span>
+                    </button>
+                  </template>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- CB2 — C. BOMBAS N2 -->
-          <div class="scada-block block-red" style="left:944px;top:115px;width:123px;height:414px;">
-            <div class="block-title" style="font-size:10px;">C. BOMBAS N2
+          <!-- CB1/CB2 — C. BOMBAS N1/N2 -->
+          <div class="scada-block block-red" style="left:640px;top:90px;width:210px;height:378px;">
+            <div class="block-title">CB1/CB2 — BOMBAS
               <button class="site-info-btn" @click.stop="openLocationModal('cb2')" title="Detalhes">i</button>
             </div>
             <div class="block-body">
-              <template x-for="item in equipmentForSite('cb2')" :key="item.kind+'-'+item.name">
+              <template x-for="item in [...equipmentForSite('cb2'), ...equipmentForSite('cb1')]" :key="item.kind+'-'+item.name">
                 <button class="mini-eq" style="flex:1;" @click="openEquipment(item.kind, item.name)">
                   <img :src="equipmentIcon(item.kind)" :alt="item.kind" style="width:22px;height:22px;object-fit:contain;"/>
                   <span class="mini-eq-name" x-text="item.name"></span>
@@ -1307,31 +1477,15 @@
             </div>
           </div>
 
-          <!-- CB1 — C. BOMBAS N1 -->
-          <div class="scada-block block-red" style="left:1091px;top:115px;width:122px;height:407px;">
-            <div class="block-title" style="font-size:10px;">C. BOMBAS N1
-              <button class="site-info-btn" @click.stop="openLocationModal('cb1')" title="Detalhes">i</button>
-            </div>
-            <div class="block-body">
-              <template x-for="item in equipmentForSite('cb1')" :key="item.kind+'-'+item.name">
-                <button class="mini-eq" style="flex:1;" @click="openEquipment(item.kind, item.name)">
-                  <img :src="equipmentIcon(item.kind)" :alt="item.kind" style="width:22px;height:22px;object-fit:contain;"/>
-                  <span class="mini-eq-name" x-text="item.name"></span>
-                  <span class="mini-eq-state" :class="equipmentBadgeClass(item)" x-text="equipmentPrimaryLabel(item)"></span>
-                </button>
-              </template>
-            </div>
-          </div>
 
           <!-- CON — CASTELO DE CONSUMO -->
-          <div class="scada-block block-blue" style="left:1278px;top:122px;width:531px;height:401px;">
+          <div class="scada-block block-blue scada-grid-units" style="left:980px;top:90px;width:590px;height:374px;">
             <div class="block-title">CON — CASTELO DE CONSUMO
               <button class="site-info-btn" @click.stop="openLocationModal('consumo')" title="Detalhes">i</button>
             </div>
-            <div class="block-body row">
-              <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
-                <div style="font-size:8px;font-family:'Courier New',monospace;color:var(--text2);padding:2px 4px;white-space:nowrap;">RES. ELEVADO - AGUA - 80 m³</div>
-                <button class="mini-res" style="flex:1;" @click="openModal('CON')">
+            <div class="block-body row" style="gap:8px;align-items:flex-start;">
+              <div style="display:flex;flex-direction:column;gap:6px;min-width:0;flex:0 0 auto;">
+                <button class="mini-res res-3x2" @click="openModal('CON')">
                   <div class="mini-res-title">
                     <div class="mini-res-name" x-text="reservoirNameLabel('CON')"></div>
                     <div class="mini-res-sub">CON · 80m³</div>
@@ -1353,42 +1507,63 @@
                   </div>
                 </button>
               </div>
-              <div style="flex:0 0 118px;display:flex;flex-direction:column;gap:4px;padding:4px;min-width:0;">
-                <div style="font-size:8px;font-family:'Courier New',monospace;color:var(--text2);padding:2px 0;text-align:center;">VALULAS</div>
-                <template x-for="item in equipmentForSite('consumo')" :key="item.kind+'-'+item.name">
-                  <button class="mini-eq" style="flex:1;" @click="openEquipment(item.kind, item.name)">
-                    <img :src="equipmentIcon(item.kind)" :alt="item.kind" style="width:22px;height:22px;object-fit:contain;"/>
-                    <span class="mini-eq-name" x-text="item.name"></span>
-                    <span class="mini-eq-state" :class="equipmentBadgeClass(item)" x-text="equipmentPrimaryLabel(item)"></span>
+              <div style="display:flex;flex-direction:column;gap:6px;min-width:0;flex:0 0 auto;">
+                <div class="valve-hydro-grid">
+                  <button class="mini-eq sq-1x1" @click="openEquipment('valve', 'V-CON-AVAZ')">
+                    <img :src="equipmentIcon('valve')" alt="valve" style="width:22px;height:22px;object-fit:contain;"/>
+                    <span class="mini-eq-name">V-CON-AVAZ</span>
+                    <span class="mini-eq-state" :class="equipmentBadgeClass(equipmentByName('consumo', 'valve', 'V-CON-AVAZ'))" x-text="equipmentPrimaryLabel(equipmentByName('consumo', 'valve', 'V-CON-AVAZ'))"></span>
                   </button>
-                </template>
-              </div>
-              <div style="flex:0 0 200px;display:flex;flex-direction:column;gap:4px;padding:4px;min-width:0;">
-                <div style="font-size:8px;font-family:'Courier New',monospace;color:var(--text2);padding:2px 0;text-align:center;">HIDROMETROS</div>
-                <template x-for="row in hydrometerRowsForSite('consumo')" :key="row.name">
-                  <button class="hyd-chip" style="flex:1;" @click="openEquipment('hydrometer', row.name)">
-                    <div class="hyd-chip-hdr" x-text="row.name"></div>
+                  <button class="hyd-chip hyd-2x1" @click="openEquipment('hydrometer', 'HID-AVAZ')">
+                    <div class="hyd-chip-hdr">HID-AV/AZ</div>
                     <div class="hyd-chip-data">
-                      <div>L1: <strong x-text="hydrometerReadLabel(row.prev)"></strong></div>
-                      <div>L2: <strong x-text="hydrometerReadLabel(row.curr)"></strong></div>
-                      <div>B: <strong x-text="hydrometerDeltaLabel(row.delta)"></strong></div>
+                      <div>L1: <strong x-text="hydrometerReadLabel(hydroRow('HID-AVAZ').prev)"></strong></div>
+                      <div>L2: <strong x-text="hydrometerReadLabel(hydroRow('HID-AVAZ').curr)"></strong></div>
+                      <div>B: <strong x-text="hydrometerDeltaLabel(hydroRow('HID-AVAZ').delta)"></strong></div>
                     </div>
                   </button>
-                </template>
+
+                  <button class="mini-eq sq-1x1" @click="openEquipment('valve', 'V-CON-AV')">
+                    <img :src="equipmentIcon('valve')" alt="valve" style="width:22px;height:22px;object-fit:contain;"/>
+                    <span class="mini-eq-name">V-CON-AV</span>
+                    <span class="mini-eq-state" :class="equipmentBadgeClass(equipmentByName('consumo', 'valve', 'V-CON-AV'))" x-text="equipmentPrimaryLabel(equipmentByName('consumo', 'valve', 'V-CON-AV'))"></span>
+                  </button>
+                  <button class="hyd-chip hyd-2x1" @click="openEquipment('hydrometer', 'HID-AV')">
+                    <div class="hyd-chip-hdr">HID-AV</div>
+                    <div class="hyd-chip-data">
+                      <div>L1: <strong x-text="hydrometerReadLabel(hydroRow('HID-AV').prev)"></strong></div>
+                      <div>L2: <strong x-text="hydrometerReadLabel(hydroRow('HID-AV').curr)"></strong></div>
+                      <div>B: <strong x-text="hydrometerDeltaLabel(hydroRow('HID-AV').delta)"></strong></div>
+                    </div>
+                  </button>
+
+                  <button class="mini-eq sq-1x1" @click="openEquipment('valve', 'V-CON-AZ')">
+                    <img :src="equipmentIcon('valve')" alt="valve" style="width:22px;height:22px;object-fit:contain;"/>
+                    <span class="mini-eq-name">V-CON-AZ</span>
+                    <span class="mini-eq-state" :class="equipmentBadgeClass(equipmentByName('consumo', 'valve', 'V-CON-AZ'))" x-text="equipmentPrimaryLabel(equipmentByName('consumo', 'valve', 'V-CON-AZ'))"></span>
+                  </button>
+                  <button class="hyd-chip hyd-2x1" @click="openEquipment('hydrometer', 'HID-AZ')">
+                    <div class="hyd-chip-hdr">HID-AZ</div>
+                    <div class="hyd-chip-data">
+                      <div>L1: <strong x-text="hydrometerReadLabel(hydroRow('HID-AZ').prev)"></strong></div>
+                      <div>L2: <strong x-text="hydrometerReadLabel(hydroRow('HID-AZ').curr)"></strong></div>
+                      <div>B: <strong x-text="hydrometerDeltaLabel(hydroRow('HID-AZ').delta)"></strong></div>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- CIE — CISTERNAS ILHA DO ENGENHO -->
-          <div class="scada-block block-blue" style="left:817px;top:653px;width:371px;height:411px;">
+          <div class="scada-block block-blue scada-grid-units" style="left:220px;top:934px;width:1350px;height:396px;">
             <div class="block-title">CIE — CISTERNAS ILHA DO ENGENHO
               <button class="site-info-btn" @click.stop="openLocationModal('cisternas')" title="Detalhes">i</button>
             </div>
-            <div class="block-body">
-              <div class="sub-blk" style="flex:2;">
-                <div class="sub-blk-title">CISTERNAS</div>
-                <div class="sub-blk-body row">
-                  <button class="mini-res" @click="openModal('CIE1')">
+            <div class="block-body" style="gap:8px;">
+              <div class="sub-blk" style="flex:1;">
+                <div class="sub-blk-body res-grid-row">
+                  <button class="mini-res res-6x3" @click="openModal('CIE1')">
                     <div class="mini-res-title">
                       <div class="mini-res-name" x-text="reservoirNameLabel('CIE1')"></div>
                       <div class="mini-res-sub">CIE1 · 245m³</div>
@@ -1409,7 +1584,7 @@
                       <span class="mini-res-status" :class="reservoirStatusClass('CIE1')" x-text="reservoirStatusLabel('CIE1')"></span>
                     </div>
                   </button>
-                  <button class="mini-res" @click="openModal('CIE2')">
+                  <button class="mini-res res-6x3" @click="openModal('CIE2')">
                     <div class="mini-res-title">
                       <div class="mini-res-name" x-text="reservoirNameLabel('CIE2')"></div>
                       <div class="mini-res-sub">CIE2 · 245m³</div>
@@ -1436,15 +1611,14 @@
           </div>
 
           <!-- CB3 — CASA DE BOMBAS N3 -->
-          <div class="scada-block block-blue" style="left:1314px;top:653px;width:461px;height:411px;">
+          <div class="scada-block block-blue scada-grid-units" style="left:980px;top:498px;width:590px;height:290px;">
             <div class="block-title">CB3 — CASA DE BOMBAS N3
               <button class="site-info-btn" @click.stop="openLocationModal('cb3')" title="Detalhes">i</button>
             </div>
-            <div class="block-body row">
-              <div class="sub-blk" style="flex:2;">
-                <div class="sub-blk-title">RESERVATORIO — AGUA — 80 m³ (2 × 40)</div>
-                <div class="sub-blk-body row">
-                  <button class="mini-res" @click="openModal('CB31')">
+            <div class="block-body row" style="gap:10px;align-items:flex-start;">
+              <div class="sub-blk" style="flex:0 0 auto;">
+                <div class="sub-blk-body res-grid-row">
+                  <button class="mini-res res-2x2" @click="openModal('CB31')">
                     <div class="mini-res-title">
                       <div class="mini-res-name" x-text="reservoirNameLabel('CB31')"></div>
                       <div class="mini-res-sub">CB31 · 40m³</div>
@@ -1465,7 +1639,7 @@
                       <span class="mini-res-status" :class="reservoirStatusClass('CB31')" x-text="reservoirStatusLabel('CB31')"></span>
                     </div>
                   </button>
-                  <button class="mini-res" @click="openModal('CB32')">
+                  <button class="mini-res res-2x2" @click="openModal('CB32')">
                     <div class="mini-res-title">
                       <div class="mini-res-name" x-text="reservoirNameLabel('CB32')"></div>
                       <div class="mini-res-sub">CB32 · 40m³</div>
@@ -1488,16 +1662,17 @@
                   </button>
                 </div>
               </div>
-              <div class="sub-blk" style="flex:1;">
-                <div class="sub-blk-title">BOMBAS</div>
+              <div class="sub-blk" style="flex:0 0 auto;">
                 <div class="sub-blk-body">
+                  <div class="equip-col-2">
                   <template x-for="item in equipmentForSite('cb3')" :key="item.kind+'-'+item.name">
-                    <button class="mini-eq" style="flex:1;" @click="openEquipment(item.kind, item.name)">
+                    <button class="mini-eq sq-1x1" @click="openEquipment(item.kind, item.name)">
                       <img :src="equipmentIcon(item.kind)" :alt="item.kind" style="width:22px;height:22px;object-fit:contain;"/>
                       <span class="mini-eq-name" x-text="item.name"></span>
                       <span class="mini-eq-state" :class="equipmentBadgeClass(item)" x-text="equipmentPrimaryLabel(item)"></span>
                     </button>
                   </template>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1700,11 +1875,11 @@
         CBIF2: 40000,
       },
       stageBaseWidth: 1850,
-      stageBaseHeight: 1120,
+      stageBaseHeight: 1370,
       stageMinScale: 0.25,
       stageScale: 1,
       stageHolderWidth: 1850,
-      stageHolderHeight: 1120,
+      stageHolderHeight: 1370,
       stageResizeHandler: null,
       refreshTimer: null,
 
@@ -1751,19 +1926,19 @@
         {
           id: 'cb2',
           eyebrow: 'Pressurizacao',
-          title: 'Casa de Bombas No 2',
-          subtitle: 'Duas bombas para a rede de hidrantes.',
-          footer: 'Pressuriza a rede de hidrantes e o engate de mangueiras de combate a incendio.',
-          summary: 'Casa de bombas dedicada a incendio, com duas bombas para pressurizacao da rede de hidrantes.',
+          title: 'CB2',
+          subtitle: 'Bombas auxiliares do sistema de incendio.',
+          footer: 'Conjunto auxiliar de bombeamento para apoio ao sistema de incendio.',
+          summary: 'CB2 concentra duas bombas auxiliares usadas no apoio operacional do sistema de incendio.',
           x: 1134, y: 116, w: 184, h: 236,
         },
         {
           id: 'cb1',
           eyebrow: 'Emergencia',
-          title: 'Casa de Bombas No 1',
-          subtitle: 'Uma bomba de contingencia.',
-          footer: 'Bomba usada apenas em situacao de emergencia.',
-          summary: 'Casa de bombas no 1 com um unico conjunto de emergencia para apoio operacional.',
+          title: 'CB1',
+          subtitle: 'Bomba auxiliar do sistema de incendio.',
+          footer: 'Conjunto auxiliar reservado para contingencia no sistema de incendio.',
+          summary: 'CB1 abriga a bomba auxiliar de contingencia que apoia o sistema de incendio quando necessario.',
           x: 1334, y: 116, w: 184, h: 236,
         },
         {
@@ -1843,12 +2018,10 @@
       updateStageScale() {
         const viewport = this.$refs.stageViewport;
         if (!viewport) return;
-        const padH = 16, padV = 12;
-        const availW = Math.max(viewport.clientWidth  - padH, 320);
-        const availH = Math.max(viewport.clientHeight - padV, 300);
+        const padH = 36;
+        const availW = Math.max(viewport.clientWidth - padH, 320);
         const scaleW = availW / this.stageBaseWidth;
-        const scaleH = availH / this.stageBaseHeight;
-        const nextScale = Math.min(scaleW, scaleH, 1);
+        const nextScale = Math.min(scaleW, 1);
         this.stageScale = Number.isFinite(nextScale)
           ? Math.max(this.stageMinScale, nextScale)
           : 1;
@@ -1998,10 +2171,9 @@
       reservoirWaterStyle(alias) {
         const reservoir = this.getReservoir(alias);
         const pct = this.reservoirPct(alias);
-        const color = statusColor(pct, reservoir?.online ?? false);
+        const color = '#4da3ff';
         const minVisible = pct > 0 ? Math.max(pct, 2) : 0;
-        // Gradiente: topo claro (reflexo), meio saturado, base profunda
-        return `height:${minVisible}%;background:linear-gradient(180deg, ${color}55 0%, ${color}DD 30%, ${color}FF 70%, ${color}CC 100%);box-shadow:inset 0 2px 0 rgba(255,255,255,0.22),inset 0 -1px 0 rgba(0,0,0,0.15);`;
+        return `height:${minVisible}%;background:linear-gradient(180deg, rgba(153, 211, 255, 0.45) 0%, rgba(95, 177, 255, 0.62) 35%, rgba(77, 163, 255, 0.78) 68%, rgba(42, 125, 214, 0.88) 100%);box-shadow:inset 0 2px 0 rgba(255,255,255,0.45),inset 0 -1px 0 rgba(29,78,137,0.22);`;
       },
 
       reservoirCapacityM3(alias) {
@@ -2126,7 +2298,6 @@
 
       valveDefaults(siteId) {
         if (siteId === 'ilha') return [{ kind: 'valve', name: 'VALV-IF-PRINCIPAL', state: 'fechada', note: '', ts: null }];
-        if (siteId === 'cisternas') return [{ kind: 'valve', name: 'VALV-IE-INTERLIG', state: 'fechada', note: '', ts: null }];
         if (siteId === 'cb2') return [{ kind: 'valve', name: 'V-CAV-AVAZ', state: 'fechada', note: '', ts: null }];
         if (siteId === 'cb1') return [{ kind: 'valve', name: 'VALV-CB1-SAIDA', state: 'fechada', note: '', ts: null }];
         return [{ kind: 'valve', name: 'VALV-CB3-SAIDA', state: 'fechada', note: '', ts: null }];
@@ -2145,10 +2316,10 @@
 
       canonicalPumpName(name) {
         const lower = String(name || '').toLowerCase();
-        if (lower.includes('if') || lower.includes('bif')) return lower.includes('02') || lower.includes('-e') ? 'BIF-E' : 'BIF-D';
+        if (lower.includes('if') || lower.includes('bif')) return lower.includes('-e') ? 'BIF-E' : 'BIF-D';
         if (lower.includes('cb1') || lower.includes('b01')) return 'B01-D';
-        if (lower.includes('cb2') || lower.includes('b02')) return lower.includes('02') || lower.includes('-e') ? 'B02-E' : 'B02-D';
-        if (lower.includes('cb3') || lower.includes('b03') || lower.includes('bomba 3')) return lower.includes('02') || lower.includes('-e') ? 'B03-E' : 'B03-D';
+        if (lower.includes('cb2') || lower.includes('b02')) return lower.includes('-e') ? 'B02-E' : 'B02-D';
+        if (lower.includes('cb3') || lower.includes('b03') || lower.includes('bomba 3')) return lower.includes('-e') ? 'B03-E' : 'B03-D';
         return String(name || '').toUpperCase();
       },
 
@@ -2161,7 +2332,26 @@
       canonicalHydrometerName(name) {
         const upper = String(name || '').toUpperCase();
         if (upper === 'HID-PCA') return 'HID-CONC';
+        if (upper === 'HID-AV|AZ') return 'HID-AVAZ';
         return upper;
+      },
+
+      currentPumpNames() {
+        return [...new Set(this.pumps.map((item) => this.canonicalPumpName(item.pump_name)).filter(Boolean))];
+      },
+
+      currentValveNames() {
+        return [...new Set(this.valves.map((item) => this.canonicalValveName(item.valve_name)).filter(Boolean))];
+      },
+
+      currentHydrometerNames() {
+        const ordering = ['HID-CONC', 'HID-IF', 'HID-PRAIA', 'HID-AVAZ', 'HID-AV', 'HID-AZ'];
+        const names = new Set();
+        this.hydrometers.forEach((item) => names.add(this.canonicalHydrometerName(item.meter_name)));
+        this.hydrometerHistory.forEach((item) => names.add(this.canonicalHydrometerName(item?.meter_name)));
+        return [...names]
+          .filter((name) => ordering.includes(name))
+          .sort((a, b) => ordering.indexOf(a) - ordering.indexOf(b));
       },
 
       normalizePump(item) {
@@ -2207,6 +2397,11 @@
           const live = byName.get(base.name);
           return live ? { ...base, ...live } : base;
         });
+      },
+
+      orderedLiveEquipment(current, expected) {
+        const byName = new Map(current.map((item) => [item.name, item]));
+        return expected.map((base) => byName.get(base.name)).filter(Boolean);
       },
 
       hydrometerSiteId(name) {
@@ -2353,17 +2548,26 @@
       },
 
       displayValveCount() {
-        return 6;
+        return 5;
       },
 
       displayHydrometerCount() {
         return 6;
       },
 
+      hasSiteEquipment(siteId) {
+        return this.equipmentForSite(siteId).length > 0;
+      },
+
       hydroRow(name) {
         const siteId = this.hydrometerSiteId(name);
         return this.hydrometerRowsForSite(siteId).find((r) => r.name === name)
           || { name, curr: null, prev: null, delta: null };
+      },
+
+      equipmentByName(siteId, kind, name) {
+        return this.equipmentForSite(siteId).find((item) => item.kind === kind && item.name === name)
+          || { kind, name, state: kind === 'valve' ? 'fechada' : 'desligada' };
       },
 
       findEquipment(kind, name) {

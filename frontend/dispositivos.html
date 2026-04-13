@@ -15,35 +15,160 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.4; }
     }
+
+    .table-wrapper {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead {
+      background: var(--bg2);
+      border-bottom: 2px solid var(--border);
+    }
+
+    thead th {
+      padding: 12px 14px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 11px;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border2);
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover {
+      background: var(--bg2);
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    td {
+      padding: 10px 14px;
+      color: var(--text);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-badge.online {
+      background: rgba(34,197,94,0.15);
+      color: var(--green);
+    }
+
+    .status-badge.offline {
+      background: rgba(0,0,0,0.1);
+      color: var(--text3);
+    }
+
+    .tbl-actions {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .tbl-btn {
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 500;
+      border: 1px solid var(--border2);
+      background: var(--bg3);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .tbl-btn:hover { color: var(--text); border-color: var(--text3); }
+    .tbl-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .ts-cell { font-size: 12px; color: var(--text3); font-family: var(--mono); }
+    .num-cell { font-family: var(--mono); font-weight: 600; }
+
+    .rssi-cell { font-family: var(--mono); font-weight: 600; }
+    .rssi-cell.strong { color: var(--green); }
+    .rssi-cell.medium { color: #f59e0b; }
+    .rssi-cell.weak { color: var(--red); }
   </style>
 </head>
 <body>
-<div class="layout" x-data="dispositivosApp()" x-init="init()" x-cloak>
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-brand"><div class="sidebar-logo">A</div><span class="sidebar-brand-text">AGUADA</span></div>
-    <nav class="sidebar-nav">
-      <div class="sidebar-section">Operação</div>
-      <a href="index.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="nav-label">Dashboard</span></a>
-      <a href="painel.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span><span class="nav-label">Painel Geral</span></a>
-      <a href="scada.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></span><span class="nav-label">SCADA</span></a>
-      <div class="sidebar-section">Análise</div>
-      <a href="analise.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="nav-label">Análise</span></a>
-      <div class="sidebar-section">Gestão</div>
-      <a href="report.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="nav-label">Relatório</span></a>
-      <a href="hidraulica.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg></span><span class="nav-label">Hidráulica</span></a>
-      <a href="dispositivos.html" class="nav-link active"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span><span class="nav-label">Dispositivos</span></a>
-      <a href="documentacao.html" class="nav-link"><span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span><span class="nav-label">Documentação</span></a>
-    </nav>
-    <div class="sidebar-footer">
-      <span :class="wsConnected ? 'gw-dot on' : 'gw-dot off pulse-dot'"></span>
-      <span class="gw-label" x-text="wsConnected ? 'Ao vivo' : 'GW'"></span>
+<div class="layout" x-data="dispositivosApp()" x-init="init()" x-cloak style="flex-direction:column;">
+  <header class="page-header">
+    <div class="ph-brand">
+      <div class="ph-logo">A</div>
+      <span class="ph-name">AGUADA</span>
     </div>
-  </aside>
+    <nav class="ph-nav">
+      <a href="index.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="painel.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Painel
+      </a>
+      <a href="scada.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        SCADA
+      </a>
+      <a href="analise.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Análise
+      </a>
+      <a href="report.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Relatório
+      </a>
+      <a href="hidraulica.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg>
+        Hidráulica
+      </a>
+      <a href="dispositivos.html" class="active">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+        Dispositivos
+      </a>
+      <a href="documentacao.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        Docs
+      </a>
+    </nav>
+    <div class="ph-right">
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)">
+        <span class="ws-dot" :class="wsConnected ? 'connected':'disconnected'"></span>
+        <span x-text="wsConnected ? 'Ao vivo':'Desconectado'"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)">
+        <span class="gw-dot" :class="gwStatus"></span>
+        <span x-text="gwLabel"></span>
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+    </div>
+  </header>
+
   <div class="main">
-    <div class="topbar">
-      <div>
-        <div class="topbar-title">Dispositivos</div>
         <div class="topbar-sub">Gateway USB · Nós ESP-NOW · Última atualização: <span x-text="lastRefresh || '—'"></span></div>
       </div>
       <div class="topbar-right">
@@ -161,99 +286,61 @@
         <p style="font-size:12px;color:var(--text3);margin-top:4px">Os nós aparecem aqui após enviar um pacote HELLO ao gateway</p>
       </div>
 
-      <!-- Node cards grid -->
-      <div x-show="nodes.length > 0" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
-        <template x-for="node in nodes" :key="node.node_id">
-          <div class="card" style="padding:20px;display:flex;flex-direction:column;gap:16px">
-
-            <!-- Card header -->
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
-              <div style="display:flex;align-items:center;gap:12px;min-width:0">
-                <div style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"
-                     :style="node.online ? 'background:rgba(59,130,246,0.15)' : 'background:var(--bg3)'">
-                  <svg x-show="node.num_sensors > 0"
-                       style="width:20px;height:20px" :style="node.online ? 'color:#3b82f6' : 'color:var(--text3)'"
-                       fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
-                  </svg>
-                  <svg x-show="node.num_sensors === 0"
-                       style="width:20px;height:20px" :style="node.online ? 'color:#3b82f6' : 'color:var(--text3)'"
-                       fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.14 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
-                  </svg>
-                </div>
-                <div style="min-width:0">
-                  <div style="font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-                       x-text="node.alias || node.node_id"></div>
-                  <div style="font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-                       x-text="node.name || (node.num_sensors > 0 ? 'Nó sensor' : 'Relay')"></div>
-                </div>
-              </div>
-              <!-- Online badge -->
-              <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500;flex-shrink:0"
-                    :style="node.online
-                      ? 'background:rgba(34,197,94,0.15);color:var(--green)'
-                      : 'background:var(--bg3);color:var(--text3)'">
-                <span x-text="node.online ? 'Online' : 'Offline'"></span>
-              </span>
-            </div>
-
-            <!-- Metrics grid -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
-              <div style="background:var(--bg3);border-radius:8px;padding:10px">
-                <div style="color:var(--text3);margin-bottom:2px">Node ID</div>
-                <div class="mono" style="font-weight:500;color:var(--text)" x-text="node.node_id"></div>
-              </div>
-              <div style="background:var(--bg3);border-radius:8px;padding:10px">
-                <div style="color:var(--text3);margin-bottom:2px">Sensores</div>
-                <div style="font-weight:500;color:var(--text)"
-                     x-text="node.num_sensors > 0 ? node.num_sensors + ' HC-SR04' : 'Relay (0)'"></div>
-              </div>
-              <div style="background:var(--bg3);border-radius:8px;padding:10px">
-                <div style="color:var(--text3);margin-bottom:2px">RSSI</div>
-                <div style="font-weight:500" :style="rssiStyle(node.last_rssi)" x-text="node.last_rssi != null ? node.last_rssi + ' dBm' : '—'"></div>
-              </div>
-              <div style="background:var(--bg3);border-radius:8px;padding:10px">
-                <div style="color:var(--text3);margin-bottom:2px">Bateria</div>
-                <div style="font-weight:500;color:var(--text)"
-                     x-text="node.last_vbat != null ? node.last_vbat.toFixed(1) + ' V' : '—'"></div>
-              </div>
-              <div style="background:var(--bg3);border-radius:8px;padding:10px;grid-column:span 2">
-                <div style="color:var(--text3);margin-bottom:2px">Último pacote</div>
-                <div style="font-weight:500;color:var(--text)"
-                     x-text="node.last_seen ? timeAgo(node.last_seen) : '—'"></div>
-              </div>
-              <div x-show="node.fw_version" style="background:var(--bg3);border-radius:8px;padding:10px;grid-column:span 2">
-                <div style="color:var(--text3);margin-bottom:2px">Firmware</div>
-                <div class="mono" style="font-weight:500;color:var(--text)" x-text="node.fw_version"></div>
-              </div>
-            </div>
-
-            <!-- Note (if set) -->
-            <div x-show="node.note" style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);border-radius:8px;padding:8px 12px;font-size:12px;color:#ca8a04" x-text="node.note"></div>
-
-            <!-- Action buttons -->
-            <div style="display:flex;gap:8px;padding-top:4px;border-top:1px solid var(--border)">
-              <button @click="openEdit(node)"
-                      style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;background:var(--bg3);color:var(--text2);border:none;cursor:pointer">
-                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                Editar
-              </button>
-              <button @click="openDetails(node)"
-                      style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;background:var(--bg3);color:var(--text2);border:none;cursor:pointer">
-                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Detalhes
-              </button>
-              <button @click="confirmRestart(node)"
-                      style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;background:var(--bg3);color:var(--text2);border:none;cursor:pointer"
-                      title="Reiniciar nó">
-                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M20 20v-5h-.581M4.582 9A8 8 0 0120 15m-.581-5A8 8 0 014 9"/></svg>
-              </button>
-            </div>
-          </div>
-        </template>
+      <!-- Node cards table -->
+      <div x-show="nodes.length > 0" class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Node ID</th>
+              <th>Alias / Nome</th>
+              <th>Status</th>
+              <th style="text-align:center">Sensores</th>
+              <th style="text-align:center">RSSI (dBm)</th>
+              <th style="text-align:center">Vbat (V)</th>
+              <th style="text-align:center">Firmware</th>
+              <th style="text-align:right">Último pacote</th>
+              <th style="text-align:center">Ações</th>
+            </tr>
+          </thead>
+          <tbody x-show="nodes.length > 0">
+            <template x-for="node in nodes" :key="node.node_id">
+              <tr>
+                <td class="mono" style="font-size:12px;font-weight:500" x-text="node.node_id"></td>
+                <td>
+                  <div style="font-weight:500" x-text="node.alias || node.node_id"></div>
+                  <div style="font-size:12px;color:var(--text3)" x-text="node.name ? node.name : (node.num_sensors > 0 ? 'HC-SR04' : 'Relay')"></div>
+                </td>
+                <td>
+                  <span class="state-badge"
+                        :class="node.online ? 'online' : 'offline'"
+                        x-text="node.online ? 'Online' : 'Offline'"></span>
+                </td>
+                <td style="text-align:center;font-size:13px;font-weight:500"
+                    :style="node.num_sensors > 0 ? 'color:var(--text)' : 'color:var(--text3)'"
+                    x-text="node.num_sensors"></td>
+                <td class="rssi-cell" :class="rssiClass(node.last_rssi)" style="font-size:12px;font-weight:500;text-align:center">
+                  <span x-text="node.last_rssi != null ? node.last_rssi : '—'"></span>
+                </td>
+                <td style="text-align:center;font-size:13px;font-weight:500" x-text="node.last_vbat != null ? node.last_vbat.toFixed(1) : '—'"></td>
+                <td class="mono" style="font-size:11px;text-align:center" x-text="node.fw_version ? node.fw_version : '—'"></td>
+                <td style="text-align:right;font-size:12px;color:var(--text3)" x-text="node.last_seen ? timeAgo(node.last_seen) : '—'"></td>
+                <td style="text-align:center">
+                  <div class="tbl-actions">
+                    <button class="tbl-btn" @click="openEdit(node)" title="Editar">
+                      <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    </button>
+                    <button class="tbl-btn" @click="openDetails(node)" title="Detalhes">
+                      <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </button>
+                    <button class="tbl-btn" @click="confirmRestart(node)" title="Reiniciar">
+                      <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M20 20v-5h-.581M4.582 9A8 8 0 0120 15m-.581-5A8 8 0 014 9"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
       </div>
 
     </div>
@@ -511,6 +598,13 @@ function dispositivosApp() {
       if (rssi >= -65)  return 'color:var(--green)';
       if (rssi >= -80)  return 'color:#f59e0b';
       return 'color:var(--red)';
+    },
+
+    rssiClass(rssi) {
+      if (rssi == null) return 'neutral';
+      if (rssi >= -65)  return 'strong';
+      if (rssi >= -80)  return 'medium';
+      return 'weak';
     },
 
     detailRows(node) {

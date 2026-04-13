@@ -339,6 +339,38 @@ button { cursor: pointer; font-family: var(--sans); border: none; background: no
 /* ── nav-link active no tema claro ─────────────────────────── */
 [data-theme="light"] .nav-link.active { background: var(--blue-dim); color: var(--blue); }
 
+/* ── Page Header (topbar horizontal) ───────────────────────── */
+.page-header {
+  display:flex; align-items:center; height:48px; flex-shrink:0;
+  background:var(--bg2); border-bottom:1px solid var(--border);
+  padding:0 12px; gap:0;
+}
+.ph-brand {
+  display:flex; align-items:center; gap:8px;
+  padding-right:16px; margin-right:8px;
+  border-right:1px solid var(--border); flex-shrink:0;
+}
+.ph-logo {
+  width:26px; height:26px; background:var(--blue); border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:13px; color:#fff; flex-shrink:0;
+}
+.ph-name { font-family:var(--mono); font-size:12px; color:var(--cyan); letter-spacing:2px; }
+.ph-nav { display:flex; gap:2px; flex:1; overflow-x:auto; min-width:0; }
+.ph-nav::-webkit-scrollbar { display:none; }
+.ph-nav a {
+  display:flex; align-items:center; gap:5px; padding:4px 10px;
+  border-radius:6px; font-size:12px; color:var(--text2);
+  text-decoration:none; white-space:nowrap;
+}
+.ph-nav a svg { flex-shrink:0; }
+.ph-nav a:hover { background:var(--bg3); color:var(--text); }
+.ph-nav a.active { color:var(--blue); background:rgba(59,130,246,0.1); }
+.ph-right {
+  display:flex; align-items:center; gap:8px;
+  padding-left:12px; border-left:1px solid var(--border); flex-shrink:0;
+}
+
 /* ── Scrollbar fina (webkit) ────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
