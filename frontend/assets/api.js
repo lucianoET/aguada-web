@@ -120,7 +120,7 @@ const aguadaAPI = (() => {
     },
 
     /**
-     * Gera o HTML do admin-header com o link ativo marcado.
+     * Gera o HTML do admin-header com o link ativo marcado e o toggle de temas.
      * Uso: document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('dados.html');
      */
     navHTML(active) {
@@ -141,10 +141,30 @@ const aguadaAPI = (() => {
       return `
         <span class="admin-header-brand">💧 AGUADA</span>
         <nav class="admin-nav">${navItems}</nav>
-        <div class="admin-status">
-          <div class="status-dot" id="statusDot"></div>
-          <span id="statusText">Conectando...</span>
+        <div class="admin-status" style="display:flex; align-items:center; gap:16px;">
+          <button onclick="aguadaAPI.toggleTheme()" title="Alternar Tema Claro/Escuro" style="color:var(--text); cursor:pointer; background:none; border:none; display:flex; align-items:center;">
+             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+          </button>
+          <div style="display:flex; align-items:center; gap:6px;">
+             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0114.08 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+             <div class="status-dot" id="statusDot"></div>
+             <span id="statusText">Buscando rede...</span>
+          </div>
         </div>`;
     },
+
+    toggleTheme() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      document.documentElement.setAttribute('data-theme', isLight ? 'dark' : 'light');
+      localStorage.setItem('aguada_theme', isLight ? 'dark' : 'light');
+    },
+    
+    initTheme() {
+      const savedTheme = localStorage.getItem('aguada_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
   };
 })();
+
+// Auto-init fallback theme
+aguadaAPI.initTheme();

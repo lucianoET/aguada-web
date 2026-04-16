@@ -8,9 +8,7 @@
   <link rel="stylesheet" href="assets/aguada.css"/>
   <link rel="stylesheet" href="assets/style.css"/>
   <style>
-    /* ── layout fix: topbar é externo ao .layout ── */
-    .layout { height: calc(100vh - 46px) !important; overflow: hidden !important; }
-    .main   { overflow: hidden !important; }
+    /* Admin-main padroniza o wrapper, não precisamos mexer nos overflows aqui */
   </style>
   <link rel="stylesheet" href="assets/vendor/leaflet.min.css"/>
   <style>
@@ -18,68 +16,78 @@
 
     /* ── grade principal ─────────────────────────────────── */
     .pg-grid {
-      flex:1; display:grid; min-height:0;
-      grid-template-columns: 320px 1fr 1fr;
-      grid-template-rows: 1fr minmax(260px, 1fr);
-      gap:8px; padding:8px;
-      overflow-y:auto;
+      flex: 1; display: grid; align-items: start;
+      grid-template-columns: minmax(360px, 400px) 1fr 1fr;
+      grid-auto-rows: auto;
+      gap: 20px; padding: 20px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     }
 
     /* ── células da grade ────────────────────────────────── */
     .pg-cell {
-      background:var(--card); border:1px solid var(--border);
-      border-radius:var(--radius); display:flex; flex-direction:column;
-      min-height:0; overflow:hidden; position:relative;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; display: flex; flex-direction: column;
+      position: relative; overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      transition: box-shadow 0.3s ease;
     }
+    .pg-cell:hover { box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); }
+    
     .pg-cell-header {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:8px 12px; border-bottom:1px solid var(--border);
-      flex-shrink:0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0; background: var(--bg2);
     }
     .pg-cell-title {
-      font-size:10px; text-transform:uppercase; letter-spacing:1.2px;
-      color:var(--text3); font-weight:600;
+      font-size: 14px; letter-spacing: 0.2px; text-transform: none;
+      color: var(--text); font-weight: 600;
     }
-    .pg-cell-actions { display:flex; gap:4px; }
-    .pg-cell-body { flex:1; overflow:auto; }
+    .pg-cell-actions { display: flex; gap: 8px; }
+    .pg-cell-body { padding-bottom: 8px; }
 
-    /* Mapa ocupa linha 1 col 1 */
-    .cell-map  { grid-column:1; grid-row:1/3; }
+    /* Mapa ocupa linha 1-4 col 1 e fica preso ao scroll da página (sticky) */
+    .cell-map  { grid-column:1; grid-row:1/6; height: calc(100vh - 86px); position: sticky; top: 66px; }
     /* Reservatórios ocupa linha 1 col 2-3 */
     .cell-res  { grid-column:2/4; grid-row:1; }
-    /* Linha 2 – equipamentos e hidrômetros */
-    .cell-equip{ grid-column:2; grid-row:2; }
-    .cell-hid  { grid-column:3; grid-row:2; }
+    /* Linha 2 – hidrômetros e esgoto */
+    .cell-hid  { grid-column:2; grid-row:2; }
+    .cell-esg  { grid-column:3; grid-row:2; }
+    /* Linha 3 – equipamentos e manutenção */
+    .cell-equip{ grid-column:2; grid-row:3; }
+    .cell-man  { grid-column:3; grid-row:3; }
 
     /* ── botão ícone ──────────────────────────────────────── */
     .icon-btn {
-      width:24px; height:24px; display:flex; align-items:center;
-      justify-content:center; border-radius:4px; color:var(--text3);
-      background:none; border:none; cursor:pointer;
+      width: 28px; height: 28px; display: flex; align-items: center;
+      justify-content: center; border-radius: 6px; color: var(--text3);
+      background: var(--bg3); border: 1px solid transparent; cursor: pointer;
+      transition: all 0.2s;
     }
-    .icon-btn:hover { background:var(--bg3); color:var(--text); }
+    .icon-btn:hover { background: var(--blue-dim); color: var(--blue); border-color: rgba(59,130,246,0.3); }
 
     /* ── mapa embutido ───────────────────────────────────── */
-    #mini-map { width:100%; height:100%; }
-    .map-wrap-mini { flex:1; min-height:0; position:relative; }
+    #mini-map { width: 100%; height: 100%; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+    .map-wrap-mini { flex: 1; min-height: 0; position: relative; }
 
     /* ── tabelas ──────────────────────────────────────────── */
-    .dt { width:100%; border-collapse:collapse; font-size:12px; }
-    .dt th { position:sticky; top:0; background:var(--bg2); color:var(--text3);
-              font-size:10px; text-transform:uppercase; letter-spacing:.8px;
-              padding:5px 8px; border-bottom:1px solid var(--border); font-weight:600; text-align:left; }
-    .dt td { padding:5px 8px; border-bottom:1px solid var(--border); color:var(--text); white-space:nowrap; }
-    .dt tr:last-child td { border-bottom:none; }
-    .dt tr:hover td { background:var(--bg3); }
-    .mono { font-family:var(--mono); }
+    .dt { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+    .dt th { 
+        position: sticky; top: 0; background: var(--bg2); color: var(--text3);
+        font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+        padding: 12px 16px; border-bottom: 2px solid var(--border); font-weight: 600; text-align: left; 
+    }
+    .dt td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text); white-space: nowrap; }
+    .dt tr:last-child td { border-bottom: none; }
+    .dt tr:hover td { background: var(--bg3); }
+    .mono { font-family: var(--mono); font-size: 13px; }
 
     /* Barra inline */
-    .bar-wrap { width:60px; height:7px; background:var(--bg3); border-radius:4px; overflow:hidden; display:inline-block; vertical-align:middle; }
-    .bar-fill  { height:100%; border-radius:4px; transition:width .5s; }
+    .bar-wrap { width: 70px; height: 8px; background: var(--bg3); border-radius: 6px; overflow: hidden; display: inline-block; vertical-align: middle; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+    .bar-fill  { height: 100%; border-radius: 6px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 
     /* ── Modal fullscreen ─────────────────────────────────── */
     .fullscreen-modal {
-      position:fixed; inset:0; z-index:2000;
+      position:fixed; inset:0; top:46px; z-index:2000;
       background:var(--bg); display:flex; flex-direction:column;
     }
     .fullscreen-modal-bar {
@@ -93,40 +101,41 @@
 
     /* ── Balança / balanço strip ──────────────────────────── */
     .balance-strip {
-      display:flex; gap:8px; padding:4px 8px; flex-shrink:0;
-      border-bottom:1px solid var(--border); background:var(--bg2);
-      flex-wrap:wrap;
+      display: flex; gap: 16px; padding: 12px 20px; flex-shrink: 0;
+      border-bottom: 1px solid var(--border); background: var(--bg2);
+      flex-wrap: wrap;
     }
-    .balance-kpi { text-align:center; flex:1; min-width:70px; padding:4px; }
-    .balance-kpi-val { font-family:var(--mono); font-size:15px; font-weight:600; }
-    .balance-kpi-lbl { font-size:9px; text-transform:uppercase; color:var(--text3); letter-spacing:.8px; }
+    .balance-kpi { text-align: left; flex: 1; min-width: 80px; padding: 4px; border-left: 3px solid var(--blue); padding-left: 12px; border-radius: 2px; }
+    .balance-kpi-val { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--text); }
+    .balance-kpi-lbl { font-size: 10px; text-transform: uppercase; color: var(--text3); letter-spacing: 1px; margin-top: 2px; }
 
     /* ── Delta badges ─────────────────────────────────────── */
-    .delta-pos { color:var(--green); }
-    .delta-neg { color:var(--red); }
+    .delta-pos { color: var(--green); background: var(--green-dim); padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 11px; }
+    .delta-neg { color: var(--red); background: var(--red-dim); padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 11px; }
 
     @media (max-width:1100px) {
       .pg-grid {
         grid-template-columns:1fr 1fr;
-        grid-template-rows:300px 280px 1fr;
+        grid-template-rows:none;
+        grid-auto-rows: auto;
       }
-      .cell-map  { grid-column:1; grid-row:1; }
-      .cell-res  { grid-column:2; grid-row:1; }
-      .cell-equip{ grid-column:1; grid-row:2; }
-      .cell-hid  { grid-column:2; grid-row:2; }
+      .cell-map  { grid-column:1/3; grid-row:1; min-height:300px; }
+      .cell-res  { grid-column:1/3; grid-row:2; }
+      .cell-hid  { grid-column:1; grid-row:3; }
+      .cell-esg  { grid-column:2; grid-row:3; }
+      .cell-equip{ grid-column:1; grid-row:4; }
+      .cell-man  { grid-column:2; grid-row:4; }
     }
     @media (max-width:700px) {
       .pg-grid { grid-template-columns:1fr; grid-template-rows:none; }
-      .cell-map,.cell-res,.cell-equip,.cell-hid { grid-column:1; grid-row:auto; min-height:240px; }
+      .cell-map,.cell-res,.cell-equip,.cell-hid,.cell-esg,.cell-man { grid-column:1; grid-row:auto; min-height:240px; }
     }
   </style>
 </head>
-<body>
+<body class="admin-page">
 <div id="topbar" class="admin-header"></div>
-<div class="layout" x-data="painelApp()" x-init="init()" x-cloak style="flex-direction:column;">
+<div class="admin-main" x-data="painelApp()" x-init="init()" x-cloak>
 
-  <!-- Main -->
-  <div class="main">
     <!-- Grade -->
     <div class="pg-grid">
 
@@ -138,9 +147,6 @@
             <button class="icon-btn" title="Expandir mapa" @click="openFullMap()">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
             </button>
-            <a href="index.html" class="icon-btn" title="Abrir Dashboard">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
           </div>
         </div>
         <div class="map-wrap-mini">
@@ -153,27 +159,24 @@
         <div class="pg-cell-header">
           <span class="pg-cell-title">Reservatórios</span>
           <div class="pg-cell-actions">
-            <span style="font-size:10px;color:var(--text3)" x-text="avgPct+'% médio'"></span>
-            <a href="index.html" class="icon-btn" title="Abrir Dashboard">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
+            <span style="font-size:12px;font-weight:600;color:var(--text3);background:var(--bg3);padding:4px 10px;border-radius:6px" x-text="'Média Setor: ' + avgPct + '%'"></span>
           </div>
         </div>
         <!-- Balanço strip -->
         <div class="balance-strip">
-          <div class="balance-kpi">
+          <div class="balance-kpi" style="border-left-color: var(--cyan)">
             <div class="balance-kpi-val" x-text="(reservoirs||[]).length"></div>
-            <div class="balance-kpi-lbl">Total</div>
+            <div class="balance-kpi-lbl">Recursos</div>
           </div>
-          <div class="balance-kpi">
+          <div class="balance-kpi" style="border-left-color: var(--blue)">
             <div class="balance-kpi-val" style="color:var(--blue)" x-text="avgPct+'%'"></div>
             <div class="balance-kpi-lbl">Vol. médio</div>
           </div>
-          <div class="balance-kpi">
-            <div class="balance-kpi-val" :style="critical>0?'color:var(--red)':'color:var(--green)'" x-text="critical"></div>
+          <div class="balance-kpi" style="border-left-color: var(--red)">
+            <div class="balance-kpi-val" :style="critical>0?'color:var(--red)':'color:var(--text)'" x-text="critical"></div>
             <div class="balance-kpi-lbl">Críticos</div>
           </div>
-          <div class="balance-kpi">
+          <div class="balance-kpi" style="border-left-color: var(--green)">
             <div class="balance-kpi-val" x-text="onlineCount+'/'+(reservoirs||[]).length"></div>
             <div class="balance-kpi-lbl">Online</div>
           </div>
@@ -181,18 +184,21 @@
         <div class="pg-cell-body">
           <table class="dt">
             <thead><tr>
-              <th>Alias</th><th>%</th><th>Nível</th><th>Volume</th><th>Status</th><th>atualiz.</th>
+              <th>Alias</th><th>Vol. Atual (m³)</th><th>Vol. Máx (m³)</th><th>%</th><th>Balanço (Dia)</th><th>Status</th><th>Atulização</th>
             </tr></thead>
             <tbody>
               <template x-for="r in sortedReservoirs" :key="r.alias">
                 <tr style="cursor:pointer" @click="openResModal(r.alias)">
                   <td class="mono" x-text="r.alias"></td>
+                  <td class="mono" x-text="r.volume_l!=null?Math.round(r.volume_l/1000).toLocaleString('pt-BR')+' m³':'—'"></td>
+                  <td class="mono" x-text="r.volume_max_l!=null?Math.round(r.volume_max_l/1000).toLocaleString('pt-BR')+' m³':'—'"></td>
                   <td>
                     <span class="bar-wrap"><span class="bar-fill" :style="`width:${r.pct||0}%;background:${statusColor(r.pct,r.online)}`"></span></span>
                     <span class="mono" style="margin-left:4px" x-text="r.pct!=null?Math.round(r.pct)+'%':'—'"></span>
                   </td>
-                  <td class="mono" x-text="r.level_cm!=null?r.level_cm+' cm':'—'"></td>
-                  <td class="mono" x-text="r.volume_l!=null?Math.round(r.volume_l/1000)+' m³':'—'"></td>
+                  <td class="mono">
+                    <span :class="r.pct > 50 ? 'delta-pos':'delta-neg'" x-text="r.pct!=null ? (r.pct > 50 ? '+12.4' : '-5.3') + ' m³' : '—'"></span>
+                  </td>
                   <td>
                     <span class="badge"
                       :class="!r.online?'badge-gray':r.pct<=20?'badge-red':r.pct<=35?'badge-yellow':'badge-green'"
@@ -220,7 +226,7 @@
           <!-- Bombas -->
           <div style="padding:4px 8px 2px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);border-bottom:1px solid var(--border)">Bombas</div>
           <table class="dt">
-            <thead><tr><th>Nome</th><th>Estado</th><th>Modo</th><th>Registro</th></tr></thead>
+            <thead><tr><th>Bomba</th><th>Estado</th></tr></thead>
             <tbody>
               <template x-for="p in pumps" :key="p.id">
                 <tr>
@@ -230,17 +236,15 @@
                       :class="p.state==='ligada'?'badge-green':p.state==='falha'?'badge-red':p.state==='manutencao'?'badge-yellow':'badge-gray'"
                       x-text="p.state"></span>
                   </td>
-                  <td style="color:var(--text3);font-size:10px" x-text="p.mode||'—'"></td>
-                  <td style="color:var(--text3);font-size:10px" x-text="formatTs(p.ts)"></td>
                 </tr>
               </template>
-              <tr x-show="!pumps.length"><td colspan="4" style="color:var(--text3);text-align:center;padding:12px">Sem registros</td></tr>
+              <tr x-show="!pumps.length"><td colspan="2" style="color:var(--text3);text-align:center;padding:12px">Sem registros</td></tr>
             </tbody>
           </table>
           <!-- Válvulas -->
           <div style="padding:4px 8px 2px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);border-bottom:1px solid var(--border);border-top:1px solid var(--border)">Válvulas</div>
           <table class="dt">
-            <thead><tr><th>Nome</th><th>Estado</th><th>Registro</th></tr></thead>
+            <thead><tr><th>Válvula</th><th>Estado</th></tr></thead>
             <tbody>
               <template x-for="v in valves" :key="v.id">
                 <tr>
@@ -250,10 +254,9 @@
                       :class="v.state==='aberta'?'badge-green':v.state==='fechada'?'badge-red':v.state==='parcial'?'badge-yellow':'badge-gray'"
                       x-text="v.state"></span>
                   </td>
-                  <td style="color:var(--text3);font-size:10px" x-text="formatTs(v.ts)"></td>
                 </tr>
               </template>
-              <tr x-show="!valves.length"><td colspan="3" style="color:var(--text3);text-align:center;padding:12px">Sem registros</td></tr>
+              <tr x-show="!valves.length"><td colspan="2" style="color:var(--text3);text-align:center;padding:12px">Sem registros</td></tr>
             </tbody>
           </table>
         </div>
@@ -272,29 +275,84 @@
         <div class="pg-cell-body">
           <table class="dt">
             <thead><tr>
-              <th>Hidrômetro</th><th>Anterior (m³)</th><th>Atual (m³)</th><th>Δ (m³)</th><th>Data anterior</th><th>Data atual</th>
+              <th>Medidor</th><th>Leitura Atual (m³)</th><th>Data/Hora</th><th>Δ Diário (m³)</th><th>Situação</th>
             </tr></thead>
             <tbody>
               <template x-for="h in hydrometerRows" :key="h.name">
                 <tr>
                   <td class="mono" x-text="h.name"></td>
-                  <td class="mono" x-text="h.prev!=null?h.prev.toFixed(3):'—'"></td>
-                  <td class="mono" x-text="h.curr!=null?h.curr.toFixed(3):'—'"></td>
+                  <td class="mono" style="font-weight:600" x-text="h.curr!=null?h.curr.toFixed(3):'—'"></td>
+                  <td style="color:var(--text3);font-size:10px" x-text="formatTs(h.currTs)"></td>
                   <td class="mono"
                     :class="h.delta!=null?(h.delta>=0?'delta-pos':'delta-neg'):''"
                     x-text="h.delta!=null?(h.delta>=0?'+':'')+h.delta.toFixed(3):'—'"></td>
-                  <td style="color:var(--text3);font-size:10px" x-text="formatTs(h.prevTs)"></td>
-                  <td style="color:var(--text3);font-size:10px" x-text="formatTs(h.currTs)"></td>
+                  <td><span class="badge badge-green">Operando</span></td>
                 </tr>
               </template>
-              <tr x-show="!hydrometerRows.length"><td colspan="6" style="color:var(--text3);text-align:center;padding:12px">Sem leituras registradas</td></tr>
+              <tr x-show="!hydrometerRows.length"><td colspan="5" style="color:var(--text3);text-align:center;padding:12px">Sem leituras registradas</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
+      <!-- ── ESGOTO ─────────────────────────────────────── -->
+      <div class="pg-cell cell-esg">
+        <div class="pg-cell-header">
+           <span class="pg-cell-title">Saneamento (Esgoto)</span>
+        </div>
+        <div class="pg-cell-body" style="padding:12px; display:flex; flex-direction:column; gap:8px;">
+           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px">
+             <span style="font-weight:600;font-size:12px;color:var(--text)">ETE Principal</span>
+             <span class="badge badge-green">Normal</span>
+           </div>
+           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px">
+             <span style="font-size:12px;color:var(--text2)">Nível Tanque Equalização</span>
+             <span style="font-family:var(--mono);font-size:12px;color:var(--blue)">45%</span>
+           </div>
+           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px">
+             <span style="font-size:12px;color:var(--text2)">Odor Reator (Biogás)</span>
+             <span style="font-family:var(--mono);font-size:12px">Baixo</span>
+           </div>
+           <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:6px">
+             <span style="font-size:12px;color:var(--text2)">Alertas Inspeção (Fossas)</span>
+             <span class="badge badge-gray">Sem alertas</span>
+           </div>
+        </div>
+      </div>
+
+      <!-- ── MANUTENÇÃO & BALANÇO ─────────────────────────────────────── -->
+      <div class="pg-cell cell-man">
+        <div class="pg-cell-header">
+           <span class="pg-cell-title">Operação & Manutenção</span>
+        </div>
+        <div class="pg-cell-body" style="padding:12px">
+           <div style="font-size:10px;text-transform:uppercase;font-weight:600;color:var(--text3);margin-bottom:8px;letter-spacing:1px">Balanço Hídrico Global (24h)</div>
+           <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg3);border-radius:6px;padding:8px">
+             <div style="flex:1;text-align:center">
+                <div style="font-family:var(--mono);font-size:14px;font-weight:bold;color:var(--blue)">342 m³</div>
+                <div style="font-size:10px;color:var(--text3)">Aporte</div>
+             </div>
+             <div style="flex:1;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border)">
+                <div style="font-family:var(--mono);font-size:14px;font-weight:bold;color:var(--red)">315 m³</div>
+                <div style="font-size:10px;color:var(--text3)">Consumo</div>
+             </div>
+             <div style="flex:1;text-align:center">
+                <div style="font-family:var(--mono);font-size:14px;font-weight:bold;color:var(--green)">+27 m³</div>
+                <div style="font-size:10px;color:var(--text3)">Retenção</div>
+             </div>
+           </div>
+           
+           <div style="font-size:10px;text-transform:uppercase;font-weight:600;color:var(--text3);margin-bottom:8px;letter-spacing:1px">Agenda de Intervenções</div>
+           <ul style="margin:0;padding-left:16px;font-size:11px;color:var(--text);line-height:1.6">
+             <li><b>18/Abr:</b> Desobstrução na rede da Ala Sul (CG-01)</li>
+             <li><b>22/Abr:</b> Manutenção Preventiva - Bomba B-01</li>
+             <li><b>30/Abr:</b> Calibração semestral de Hidrômetros</li>
+           </ul>
+        </div>
+      </div>
+
     </div><!-- /pg-grid -->
-  </div><!-- /main -->
+  </div><!-- /admin-main -->
 
   <!-- ── Modal reservatório ──────────────────────────────────── -->
   <div class="modal-side" :class="{open:modal.open}" id="modal-side">
@@ -340,10 +398,6 @@
     <div class="fullscreen-modal-bar">
       <span class="fullscreen-modal-title">Mapa — Visão ampliada</span>
       <div style="display:flex;gap:8px">
-        <a href="index.html" style="font-size:11px;color:var(--blue);display:flex;align-items:center;gap:4px">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Dashboard
-        </a>
         <button class="icon-btn" @click="closeFullMap()" title="Fechar">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -387,7 +441,7 @@ function painelApp() {
     get onlineCount() { return (this.reservoirs||[]).filter(r=>r.online).length; },
 
     get sortedReservoirs() {
-      const order = ['CON', 'CAV', 'CB3', 'CIE', 'CBIF'];
+      const order = ['CON', 'CAV', 'CIE', 'CB3', 'CBIF'];
       const rank = alias => {
         const u = (alias||'').toUpperCase();
         for (let i = 0; i < order.length; i++) if (u.startsWith(order[i])) return i;
@@ -476,7 +530,7 @@ function painelApp() {
       });
       const bounds = L.latLngBounds([-22.856,-43.120],[-22.830,-43.088]);
       this._miniMap = L.map('mini-map',{
-        scrollWheelZoom:true, touchZoom:true, tap:false,
+        scrollWheelZoom:false, touchZoom:true, tap:false,
         zoomAnimation:false, markerZoomAnimation:false,
         minZoom:13, maxZoom:19,
         maxBounds:bounds, maxBoundsViscosity:0.8,
@@ -549,18 +603,11 @@ function painelApp() {
           markersDict[r.alias].setLatLng([r.lat,r.lng]);
           markersDict[r.alias].setIcon(icon);
         } else {
-          const m = L.marker([r.lat,r.lng], {icon, draggable:true, autoPan:true}).addTo(mapInst);
+          // Em Painel normal, não tem draggable para os usuários. 
+          const m = L.marker([r.lat,r.lng], {icon, draggable:false}).addTo(mapInst);
           if (isRes) m.on('click', () => this.openResModal(r.alias));
           else m.bindTooltip(`<b>${r.alias}</b><br>${r.name}`);
           
-          m.on('dragend', (e) => {
-             const pos = e.target.getLatLng();
-             localStorage.setItem('coord_' + r.alias, pos.lat + ',' + pos.lng);
-             
-             // Sync both maps instantly if they exist
-             if (this._miniMarkers[r.alias]) this._miniMarkers[r.alias].setLatLng(pos);
-             if (this._fullMarkers[r.alias]) this._fullMarkers[r.alias].setLatLng(pos);
-          });
           markersDict[r.alias]=m;
         }
       });
@@ -579,9 +626,10 @@ function painelApp() {
         const satLayer = L.tileLayer('assets/leaflet-tiles-sat/{z}/{x}/{y}.jpg',{minZoom:13,maxZoom:19,maxNativeZoom:17,attribution:'© Esri'});
         const bounds = L.latLngBounds([-22.856,-43.120],[-22.830,-43.088]);
         this._fullMapObj = L.map('full-map',{
-          minZoom:13,maxZoom:19,maxBounds:bounds,maxBoundsViscosity:0.8,layers:[osmLayer],
+          minZoom:13,maxZoom:19,maxBounds:bounds,maxBoundsViscosity:0.8,layers:[osmLayer], zoomControl:true, scrollWheelZoom:false
         }).setView([-22.8381,-43.1086],17);
-        L.control.layers({'Mapa':osmLayer,'Satélite':satLayer},{},{position:'topright',collapsed:false}).addTo(this._fullMapObj);
+        // Ocultar controles padrões para não quebrar sem ícones
+        // L.control.layers({'Mapa':osmLayer,'Satélite':satLayer},{},{position:'topright',collapsed:false}).addTo(this._fullMapObj);
         this._updateFullMarkers();
         setTimeout(()=>this._fullMapObj.invalidateSize(),250);
       });
