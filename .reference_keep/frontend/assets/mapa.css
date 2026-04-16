@@ -1,0 +1,184 @@
+body.map-page {
+  padding: 20px;
+}
+
+.map-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(260px, 1fr);
+  gap: 20px;
+  min-height: calc(100vh - 220px);
+}
+
+.map-pane,
+.map-side-panel {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.map-pane {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.map-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eef2ff;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.map-toolbar h2 {
+  margin-bottom: 4px;
+  font-size: 20px;
+  color: #1e3c72;
+}
+
+.map-toolbar p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.toolbar-actions button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.toolbar-actions button:last-child {
+  background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+}
+
+.toolbar-actions button:hover {
+  opacity: 0.9;
+}
+
+.map-canvas {
+  flex: 1;
+  min-height: 520px;
+  height: 100%;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+.map-side-panel {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.map-side-panel h3 {
+  color: #1e3c72;
+  font-size: 18px;
+}
+
+.reservoir-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+.reservoir-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  gap: 10px;
+}
+
+.reservoir-item strong {
+  color: #1f2937;
+}
+
+.reservoir-item span {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.reservoir-item button {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  background: #1e3c72;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.reservoir-item button:hover {
+  opacity: 0.85;
+}
+
+.map-meta {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #4b5563;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+.map-tip {
+  font-size: 12px;
+  color: #60a5fa;
+}
+
+.map-link {
+  display: inline-flex;
+  margin-top: 8px;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.popup-chart {
+  width: 260px;
+  height: 120px;
+}
+
+.popup-buttons {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+}
+
+.popup-buttons button {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 12px;
+}
+
+@media (max-width: 1100px) {
+  .map-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .map-side-panel {
+    order: -1;
+  }
+}

@@ -1,0 +1,401 @@
+/**
+ * AGUADA Loading States & Skeleton Screens
+ * Melhora a UX durante carregamento de dados
+ */
+
+/* ============================================================================
+   SKELETON BASE
+   ============================================================================ */
+
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-text {
+    height: 14px;
+    margin-bottom: 8px;
+}
+
+.skeleton-text.large {
+    height: 20px;
+}
+
+.skeleton-text.small {
+    height: 10px;
+}
+
+.skeleton-circle {
+    border-radius: 50%;
+}
+
+.skeleton-card {
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
+}
+
+/* ============================================================================
+   LOADING OVERLAY
+   ============================================================================ */
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.loading-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--accent-purple);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    margin-top: 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ============================================================================
+   DASHBOARD SKELETON
+   ============================================================================ */
+
+.dashboard-skeleton {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.card-skeleton {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-skeleton-header {
+    height: 60px;
+    background: linear-gradient(90deg, #667eea 25%, #764ba2 50%, #667eea 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+.card-skeleton-body {
+    padding: 20px;
+}
+
+.skeleton-gauge {
+    width: 100%;
+    height: 200px;
+    margin: 10px 0;
+}
+
+.skeleton-data-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.skeleton-data-item {
+    height: 60px;
+}
+
+/* ============================================================================
+   TABLE SKELETON
+   ============================================================================ */
+
+.table-skeleton {
+    width: 100%;
+}
+
+.table-skeleton-row {
+    display: flex;
+    gap: 15px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table-skeleton-cell {
+    flex: 1;
+    height: 20px;
+}
+
+/* ============================================================================
+   MAP SKELETON
+   ============================================================================ */
+
+.map-skeleton {
+    width: 100%;
+    height: 100%;
+    min-height: 520px;
+    background: linear-gradient(to bottom, #e3f2fd 0%, #bbdefb 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.map-skeleton::before {
+    content: '🗺️';
+    font-size: 80px;
+    opacity: 0.3;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.1; }
+}
+
+/* ============================================================================
+   ERROR STATES
+   ============================================================================ */
+
+.error-state {
+    background: white;
+    border-radius: 10px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.error-state-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+
+.error-state-title {
+    font-size: 20px;
+    color: var(--danger-red);
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.error-state-message {
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.error-state-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* ============================================================================
+   EMPTY STATES
+   ============================================================================ */
+
+.empty-state {
+    background: white;
+    border-radius: 10px;
+    padding: 60px 40px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    opacity: 0.3;
+}
+
+.empty-state-title {
+    font-size: 18px;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.empty-state-message {
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+/* ============================================================================
+   PROGRESS INDICATORS
+   ============================================================================ */
+
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--background-light);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--accent-purple);
+    transition: width 0.3s ease;
+}
+
+.progress-bar-indeterminate {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30%;
+    height: 100%;
+    background: var(--accent-purple);
+    animation: indeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes indeterminate {
+    0% {
+        left: -30%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* ============================================================================
+   TOAST NOTIFICATIONS
+   ============================================================================ */
+
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    background: white;
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 300px;
+    max-width: 400px;
+    pointer-events: all;
+    animation: toast-slide-in 0.3s ease;
+    border-left: 4px solid var(--accent-purple);
+}
+
+@keyframes toast-slide-in {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast.toast-success {
+    border-left-color: var(--success-green);
+}
+
+.toast.toast-error {
+    border-left-color: var(--danger-red);
+}
+
+.toast.toast-warning {
+    border-left-color: var(--warning-orange);
+}
+
+.toast.toast-info {
+    border-left-color: var(--accent-purple);
+}
+
+.toast-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.toast-content {
+    flex: 1;
+}
+
+.toast-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text-dark);
+}
+
+.toast-message {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: var(--text-muted);
+    font-size: 20px;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.toast-close:hover {
+    color: var(--text-dark);
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .dashboard-skeleton {
+        grid-template-columns: 1fr;
+    }
+
+    .toast-container {
+        left: 20px;
+        right: 20px;
+    }
+
+    .toast {
+        min-width: auto;
+    }
+}

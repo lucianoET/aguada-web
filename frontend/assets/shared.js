@@ -3,6 +3,14 @@
 
 const ORDERED_ALIASES = ['CON', 'CAV', 'CB31', 'CB32', 'CIE1', 'CIE2', 'CBIF1', 'CBIF2'];
 
+// Sincroniza o indicador de status do topbar unificado (navHTML)
+function _syncTopbarStatus(online) {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  if (dot) dot.className = 'status-dot ' + (online ? 'online' : 'offline');
+  if (txt) txt.textContent = online ? 'Ao vivo' : 'Desconectado';
+}
+
 // Cor de preenchimento das barras de nível por alias
 const ALIAS_FILL_COLORS = {
   CON:   '#059669', CAV:   '#dc2626',
@@ -122,11 +130,13 @@ function wsMixin() {
     _ws: null,
 
     wsConnect(onMessage) {
+      const isFile = location.protocol === 'file:';
       const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-      const url = `${proto}://${location.host}/ws`;
+      const host = location.host || 'localhost:8001';
+      const url = `${proto}://${host}/ws`;
       this._ws = new WebSocket(url);
-      this._ws.onopen  = () => { this.wsConnected = true; };
-      this._ws.onclose = () => { this.wsConnected = false; setTimeout(() => this.wsConnect(onMessage), 5000); };
+      this._ws.onopen  = () => { this.wsConnected = true;  _syncTopbarStatus(true); };
+      this._ws.onclose = () => { this.wsConnected = false; _syncTopbarStatus(false); setTimeout(() => this.wsConnect(onMessage), 5000); };
       this._ws.onerror = () => { this._ws.close(); };
       this._ws.onmessage = (e) => {
         try {
@@ -189,7 +199,7 @@ function reservoirModalMixin() {
         const body = { alias: this.modal.alias };
         if (this.modal.manualMode === 'pct') body.pct = val;
         else body.volume_l = val;
-        const res = await fetch('/api/readings/manual', {
+        const res = await fetch(aguadaAPI.BASE + '/api/readings/manual', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),

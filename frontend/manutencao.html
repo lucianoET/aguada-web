@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>AGUADA — Manutenção</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .maint-layout { display:grid; grid-template-columns:2fr 1fr; gap:16px; }
+  @media(max-width:900px){ .maint-layout{grid-template-columns:1fr} }
+  .box { background:white; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; margin-bottom:0; }
+  .box-header { padding:13px 18px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; }
+  .box-header h2 { font-size:var(--font-lg); font-weight:600; color:#1e3a5f; margin:0; }
+  .box-body { padding:16px; }
+  .maint-item { padding:13px; border:1px solid var(--border-color); border-radius:8px; margin-bottom:10px; transition:all .2s; }
+  .maint-item:hover { border-color:var(--accent-purple); background:var(--background-light); }
+  .maint-item.overdue   { border-left:4px solid var(--danger-red); }
+  .maint-item.pending   { border-left:4px solid var(--warning-orange); }
+  .maint-item.completed { border-left:4px solid var(--success-green); }
+  .maint-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; gap:8px; }
+  .maint-title  { font-weight:600; color:var(--text-dark); font-size:var(--font-base); }
+  .maint-badge  { padding:2px 10px; border-radius:8px; font-size:var(--font-xxs); font-weight:600; white-space:nowrap; flex-shrink:0; }
+  .maint-details { font-size:var(--font-xs); color:var(--text-muted); }
+  .badge-overdue   { background:#fee2e2; color:#991b1b; }
+  .badge-pending   { background:#fef3c7; color:#92400e; }
+  .badge-completed { background:#d1fae5; color:#065f46; }
+  .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+  .stat-box { background:white; padding:14px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,.08); text-align:center; }
+  .stat-box .num { font-size:28px; font-weight:700; margin:6px 0; }
+  .stat-box .lbl { font-size:var(--font-xs); color:var(--text-muted); }
+  .checklist { list-style:none; padding:0; }
+  .checklist li { padding:8px 10px; border-bottom:1px solid #f3f4f6; font-size:var(--font-sm); display:flex; align-items:center; gap:8px; }
+  .checklist li:last-child { border-bottom:none; }
+  .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  td, th { font-size:var(--font-xs); }
+  .side-col { display:flex; flex-direction:column; gap:16px; }
+  .tab-bar { display:flex; gap:4px; margin-bottom:16px; background:white; border-radius:10px; padding:6px; box-shadow:0 2px 6px rgba(0,0,0,.07); width:fit-content; }
+  .tab-btn { padding:7px 18px; border-radius:7px; border:none; cursor:pointer; font-size:var(--font-sm); font-weight:500; background:transparent; color:var(--text-muted); transition:all .15s; }
+  .tab-btn.active { background:var(--accent-purple); color:white; }
+  .sys-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px; }
+  .sys-card { background:white; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; }
+  .sys-card-header { padding:12px 18px; color:white; font-size:var(--font-sm); font-weight:600; display:flex; justify-content:space-between; align-items:center; }
+  .sys-card-body { padding:14px 18px; }
+  .frow { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f3f4f6; font-size:var(--font-sm); }
+  .frow:last-child { border-bottom:none; }
+  .frow .flbl { font-size:var(--font-xxs); color:var(--text-muted); text-transform:uppercase; font-weight:600; letter-spacing:.4px; }
+  .frow .fval { font-weight:600; color:#1e3a5f; font-size:var(--font-sm); }
+  .tag-online  { background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:8px; font-size:var(--font-xxs); font-weight:600; }
+  .tag-offline { background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:8px; font-size:var(--font-xxs); font-weight:600; }
+  .tag-sim     { background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:8px; font-size:var(--font-xxs); font-weight:600; }
+</style>
+</head>
+<body class="admin-page">
+<div id="topbar" class="admin-header"></div>
+
+<div class="admin-main">
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabMaint" onclick="switchTab('maint')">Manutenção</button>
+    <button class="tab-btn" id="tabSys" onclick="switchTab('sys')">Sistema</button>
+  </div>
+
+  <!-- ── MANUTENÇÃO ── -->
+  <div id="viewMaint">
+  <div class="stats-row">
+    <div class="stat-box"><div class="num" style="color:var(--danger-red)">2</div><div class="lbl">Atrasadas</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--warning-orange)">3</div><div class="lbl">Pendentes</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--success-green)">8</div><div class="lbl">Concluídas (30d)</div></div>
+  </div>
+
+  <div class="maint-layout">
+    <div class="box">
+      <div class="box-header">
+        <h2>🔧 Ordens de Serviço (Tarefas Locais)</h2>
+        <button class="btn-primary" style="font-size:var(--font-xs);padding:6px 14px" onclick="openMaintModal()">+ Nova OS</button>
+      </div>
+      <div class="box-body" id="maintList">
+        <!-- Preenchido via JS -->
+      </div>
+    </div>
+
+    <div class="side-col">
+      <div class="box">
+        <div class="box-header"><h2>📋 Checklist Diário</h2></div>
+        <div class="box-body">
+          <ul class="checklist">
+            <li><span class="dot" style="background:#10b981"></span>Verificar níveis de todos os reservatórios</li>
+            <li><span class="dot" style="background:#10b981"></span>Confirmar conectividade dos sensores</li>
+            <li><span class="dot" style="background:#10b981"></span>Checar alertas do sistema</li>
+            <li><span class="dot" style="background:#f59e0b"></span>Inspecionar pressão das tubulações</li>
+            <li><span class="dot" style="background:#f59e0b"></span>Registrar leituras dos hidrômetros</li>
+            <li><span class="dot" style="background:#e5e7eb"></span>Revisar relatório do dia anterior</li>
+          </ul>
+          <div style="font-size:var(--font-xxs);color:var(--text-muted);margin-top:8px;padding-top:8px;border-top:1px solid #f3f4f6">
+            🟢 Concluído &nbsp;·&nbsp; 🟡 Em andamento &nbsp;·&nbsp; ⚪ Pendente
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <div class="box-header"><h2>📅 Próximas</h2></div>
+        <div class="box-body">
+          <table>
+            <thead><tr><th>Data</th><th>Tipo</th><th>Local</th></tr></thead>
+            <tbody>
+              <tr><td>15/04</td><td>Fw gateway</td><td>Sala TI</td></tr>
+              <tr><td>20/04</td><td>Bateria</td><td>Campo</td></tr>
+              <tr><td>30/04</td><td>Limpeza</td><td>CB31/32</td></tr>
+              <tr><td>15/05</td><td>Inspeção geral</td><td>Todos</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div><!-- /viewMaint -->
+
+  <!-- ── SISTEMA ── -->
+  <div id="viewSys" style="display:none">
+    <div class="sys-grid" id="sysGrid"><div class="loader"></div></div>
+  </div>
+</div>
+
+<!-- Modal Nova OS -->
+<div id="maintModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:white;padding:24px;border-radius:12px;width:100%;max-width:400px;box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+    <h3 style="margin-top:0;margin-bottom:16px;">Adicionar Ordem de Serviço</h3>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <input type="text" id="osTitle" placeholder="Título da tarefa..." style="padding:10px;border:1px solid #ccc;border-radius:6px;width:100%;box-sizing:border-box;">
+      <input type="text" id="osResp" placeholder="Responsável..." style="padding:10px;border:1px solid #ccc;border-radius:6px;width:100%;box-sizing:border-box;">
+      <input type="date" id="osDate" style="padding:10px;border:1px solid #ccc;border-radius:6px;width:100%;box-sizing:border-box;">
+      <input type="text" id="osLocal" placeholder="Local/Equipamento..." style="padding:10px;border:1px solid #ccc;border-radius:6px;width:100%;box-sizing:border-box;">
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+      <button style="padding:8px 16px;border:none;background:#e5e7eb;border-radius:6px;cursor:pointer;" onclick="closeMaintModal()">Cancelar</button>
+      <button class="btn-primary" style="padding:8px 16px;border:none;border-radius:6px;cursor:pointer;" onclick="saveMaintOrder()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('manutencao.html');
+
+let maintOrders = JSON.parse(localStorage.getItem('aguada_maint_orders') || '[]');
+
+function saveMaintOrders() {
+  localStorage.setItem('aguada_maint_orders', JSON.stringify(maintOrders));
+  renderMaintOrders();
+}
+
+function openMaintModal() {
+  document.getElementById('maintModal').style.display = 'flex';
+}
+function closeMaintModal() {
+  document.getElementById('maintModal').style.display = 'none';
+  document.getElementById('osTitle').value = '';
+  document.getElementById('osResp').value = '';
+  document.getElementById('osLocal').value = '';
+}
+
+function saveMaintOrder() {
+  const title = document.getElementById('osTitle').value.trim();
+  const resp = document.getElementById('osResp').value.trim();
+  const date = document.getElementById('osDate').value;
+  const local = document.getElementById('osLocal').value.trim();
+  if(!title) return alert("Título é obrigatório!");
+  maintOrders.push({ id: Date.now(), title, resp, date, local, status: 'pending' });
+  saveMaintOrders();
+  closeMaintModal();
+}
+
+function deleteMaintOrder(id) {
+  if(confirm("Excluir esta ordem?")) {
+    maintOrders = maintOrders.filter(o => o.id !== id);
+    saveMaintOrders();
+  }
+}
+
+function toggleMaintStatus(id) {
+  const o = maintOrders.find(o => o.id === id);
+  if(o) {
+    o.status = o.status === 'completed' ? 'pending' : 'completed';
+    saveMaintOrders();
+  }
+}
+
+function renderMaintOrders() {
+  const listEl = document.getElementById('maintList');
+  if(!maintOrders.length) {
+    listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">Nenhuma OS pendente.</div>';
+    return;
+  }
+  
+  // Sort: pending first, then by date priority
+  const sorted = [...maintOrders].sort((a,b) => {
+    if(a.status !== b.status) return a.status === 'completed' ? 1 : -1;
+    return new Date(a.date||'2099') - new Date(b.date||'2099');
+  });
+
+  let html = '';
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  sorted.forEach(o => {
+    let cssClass = 'pending';
+    let badge = '<span class="maint-badge badge-pending">🕐 Pendente</span>';
+    
+    if(o.status === 'completed') {
+      cssClass = 'completed';
+      badge = '<span class="maint-badge badge-completed">✅ Concluído</span>';
+    } else if(o.date && o.date < todayStr) {
+      cssClass = 'overdue';
+      badge = '<span class="maint-badge badge-overdue">⚠️ Atrasado</span>';
+    }
+
+    const dStr = o.date ? new Date(o.date+'T12:00:00').toLocaleDateString('pt-BR') : 'Sem data';
+
+    html += `<div class="maint-item ${cssClass}">
+      <div class="maint-header">
+        <span class="maint-title" style="cursor:pointer; ${o.status==='completed'?'text-decoration:line-through;color:#aaa':''}" onclick="toggleMaintStatus(${o.id})">${o.title}</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          ${badge}
+          <button style="border:none;background:transparent;cursor:pointer;font-size:14px;" onclick="deleteMaintOrder(${o.id})">❌</button>
+        </div>
+      </div>
+      <div class="maint-details">Resp.: ${o.resp||'—'} &nbsp;·&nbsp; Venc.: ${dStr} &nbsp;·&nbsp; ${o.local||'Geral'}</div>
+    </div>`;
+  });
+  listEl.innerHTML = html;
+  
+  // Update stats
+  const delayed = maintOrders.filter(o => o.status === 'pending' && o.date && o.date < todayStr).length;
+  const pending = maintOrders.filter(o => o.status === 'pending').length - delayed;
+  const completed = maintOrders.filter(o => o.status === 'completed').length;
+  
+  document.querySelector('.stats-row').innerHTML = `
+    <div class="stat-box"><div class="num" style="color:var(--danger-red)">${delayed}</div><div class="lbl">Atrasadas</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--warning-orange)">${pending}</div><div class="lbl">Pendentes</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--success-green)">${completed}</div><div class="lbl">Concluídas</div></div>
+  `;
+}
+
+// Initial render
+renderMaintOrders();
+
+function switchTab(tab) {
+  document.getElementById('viewMaint').style.display = tab === 'maint' ? '' : 'none';
+  document.getElementById('viewSys').style.display   = tab === 'sys'   ? '' : 'none';
+  document.getElementById('tabMaint').classList.toggle('active', tab === 'maint');
+  document.getElementById('tabSys').classList.toggle('active',   tab === 'sys');
+  if (tab === 'sys') loadSys();
+}
+
+function frow(lbl, val) {
+  return `<div class="frow"><span class="flbl">${lbl}</span><span class="fval">${val}</span></div>`;
+}
+
+function gatewayCard(gw) {
+  const tag = gw.sim_mode
+    ? '<span class="tag-sim">● Simulação</span>'
+    : gw.connected ? '<span class="tag-online">● Conectado</span>' : '<span class="tag-offline">● Desconectado</span>';
+  return `<div class="sys-card">
+    <div class="sys-card-header" style="background:linear-gradient(135deg,#667eea,#764ba2)">
+      <span>⚡ Gateway</span>${tag}
+    </div>
+    <div class="sys-card-body">
+      ${frow('Conectado', gw.connected ? 'Sim' : 'Não')}
+      ${frow('Modo', gw.sim_mode ? 'Simulação' : 'Real')}
+      ${frow('Porta', gw.port||'—')}
+      ${frow('MAC', gw.mac ? `<code style="font-size:var(--font-xs)">${gw.mac}</code>` : '—')}
+      ${frow('Firmware', gw.fw||'—')}
+      ${frow('Último pacote', aguadaAPI.fmtTs(gw.last_seen))}
+    </div>
+  </div>`;
+}
+
+function nodesCard(nodes) {
+  if (!nodes?.length) return `<div class="sys-card">
+    <div class="sys-card-header" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">
+      <span>📡 Nodes</span><span style="font-size:var(--font-xs);opacity:.8">0 nodes</span>
+    </div>
+    <div class="sys-card-body"><div style="text-align:center;color:var(--text-muted);padding:20px">Nenhum node encontrado</div></div>
+  </div>`;
+  const rows = nodes.map(n => `<tr>
+    <td><code style="font-size:var(--font-xxs)">${n.node_id||'—'}</code></td>
+    <td>${n.alias||'—'}</td><td>${n.name||'—'}</td>
+    <td>${n.online?'<span class="tag-online">Online</span>':'<span class="tag-offline">Offline</span>'}</td>
+    <td>${n.rssi!=null?n.rssi+' dBm':'—'}</td>
+    <td>${aguadaAPI.fmtTs(n.last_seen)}</td>
+  </tr>`).join('');
+  return `<div class="sys-card" style="grid-column:1/-1">
+    <div class="sys-card-header" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">
+      <span>📡 Nodes (${nodes.length})</span>
+      <span style="font-size:var(--font-xs);opacity:.8">${nodes.filter(n=>n.online).length} online</span>
+    </div>
+    <div class="sys-card-body">
+      <table><thead><tr><th>Node ID</th><th>Alias</th><th>Nome</th><th>Status</th><th>RSSI</th><th>Último sinal</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+    </div>
+  </div>`;
+}
+
+let sysLoaded = false;
+async function loadSys() {
+  if (sysLoaded) return;
+  sysLoaded = true;
+  try {
+    const [gw, nodes] = await Promise.all([
+      aguadaAPI.getGateway().catch(()=>null),
+      aguadaAPI.getNodes().catch(()=>[]),
+    ]);
+    const backendCard = `<div class="sys-card">
+      <div class="sys-card-header" style="background:linear-gradient(135deg,#43e97b,#38f9d7)">
+        <span>🖥️ Backend</span><span class="tag-online">● Online</span>
+      </div>
+      <div class="sys-card-body">
+        ${frow('URL', location.origin)}
+        ${frow('Hora do cliente', new Date().toLocaleString('pt-BR'))}
+      </div>
+    </div>`;
+    document.getElementById('sysGrid').innerHTML =
+      (gw ? gatewayCard(gw) : '') + backendCard + nodesCard(nodes);
+  } catch(e) {
+    document.getElementById('sysGrid').innerHTML = `<div style="color:var(--text-muted);padding:20px">Erro: ${e.message}</div>`;
+  }
+}
+</script>
+</body>
+</html>

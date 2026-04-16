@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGUADA - Teste API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #fff;
+        }
+        .status { padding: 20px; margin: 10px 0; border-radius: 8px; background: #0f3460; }
+        .success { background: #10b981; }
+        .error { background: #ef4444; }
+        pre { background: #000; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        button { padding: 10px 20px; margin: 5px; background: #667eea; border: none; color: white; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #5a67d8; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Integração AGUADA</h1>
+    
+    <div id="status" class="status">Iniciando...</div>
+    
+    <div>
+        <button onclick="testAPI()">Testar API</button>
+        <button onclick="testWebSocket()">Testar WebSocket</button>
+        <button onclick="showReadings()">Mostrar Leituras</button>
+    </div>
+    
+    <h2>Dados da API:</h2>
+    <pre id="output">Aguardando...</pre>
+
+    <script src="assets/api-service.js"></script>
+    <script src="assets/app.js"></script>
+    <script>
+        const statusEl = document.getElementById('status');
+        const outputEl = document.getElementById('output');
+
+        // Verificar inicialização
+        setTimeout(() => {
+            if (window.apiService) {
+                statusEl.textContent = '✅ API Service carregado!';
+                statusEl.className = 'status success';
+                outputEl.textContent = 'URL Base: ' + window.apiService.baseURL;
+            } else {
+                statusEl.textContent = '❌ API Service NÃO carregado';
+                statusEl.className = 'status error';
+            }
+            
+            if (window.latestReadings) {
+                console.log('✅ latestReadings disponível:', window.latestReadings);
+            } else {
+                console.log('❌ latestReadings NÃO disponível');
+            }
+        }, 1000);
+
+        async function testAPI() {
+            try {
+                outputEl.textContent = 'Buscando dados...';
+                const data = await window.apiService.getLatestReadings();
+                outputEl.textContent = JSON.stringify(data, null, 2);
+                statusEl.textContent = '✅ API respondeu com sucesso!';
+                statusEl.className = 'status success';
+            } catch (error) {
+                outputEl.textContent = 'ERRO: ' + error.message;
+                statusEl.textContent = '❌ Erro na API';
+                statusEl.className = 'status error';
+            }
+        }
+
+        async function testWebSocket() {
+            try {
+                await window.apiService.connectWebSocket((data) => {
+                    outputEl.textContent = 'WebSocket recebeu:\n' + JSON.stringify(data, null, 2);
+                });
+                statusEl.textContent = '✅ WebSocket conectado!';
+                statusEl.className = 'status success';
+            } catch (error) {
+                outputEl.textContent = 'ERRO WebSocket: ' + error.message;
+                statusEl.textContent = '❌ Erro no WebSocket';
+                statusEl.className = 'status error';
+            }
+        }
+
+        function showReadings() {
+            if (window.latestReadings) {
+                outputEl.textContent = JSON.stringify(window.latestReadings, null, 2);
+                statusEl.textContent = '✅ Mostrando leituras do cache local';
+                statusEl.className = 'status success';
+            } else {
+                outputEl.textContent = 'Nenhuma leitura disponível';
+                statusEl.textContent = '❌ Cache vazio';
+                statusEl.className = 'status error';
+            }
+        }
+    </script>
+</body>
+</html>

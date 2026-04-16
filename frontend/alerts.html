@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>AGUADA — Alertas</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .alerts-layout { display:grid; grid-template-columns:1fr 300px; gap:16px; }
+  @media(max-width:900px){ .alerts-layout{grid-template-columns:1fr} }
+  .box { background:white; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; }
+  .box-header { padding:13px 18px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; }
+  .box-header h2 { font-size:var(--font-lg); font-weight:600; color:#1e3a5f; margin:0; }
+  .box-body { padding:16px; }
+  .alert-item { padding:11px 14px; border-radius:8px; margin-bottom:10px; font-size:var(--font-sm); border-left:4px solid; }
+  .alert-crit { background:#fef2f2; border-color:#ef4444; color:#991b1b; }
+  .alert-warn { background:#fef3c7; border-color:#f59e0b; color:#92400e; }
+  .alert-info { background:#eff6ff; border-color:#667eea; color:#1e40af; }
+  .alert-ok   { background:#f0fdf4; border-color:#10b981; color:#065f46; }
+  .alert-item strong { display:block; margin-bottom:3px; font-size:var(--font-base); }
+  .alert-meta { font-size:var(--font-xxs); opacity:.7; margin-top:4px; }
+  .sum-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border-color); font-size:var(--font-sm); }
+  .sum-row:last-child { border-bottom:none; }
+  .badge { padding:3px 10px; border-radius:8px; font-size:var(--font-xxs); font-weight:600; }
+  .badge-crit { background:#fee2e2; color:#991b1b; }
+  .badge-warn { background:#fef3c7; color:#92400e; }
+  .badge-ok   { background:#d1fae5; color:#065f46; }
+  .badge-info { background:#eff6ff; color:#1e40af; }
+</style>
+</head>
+<body class="admin-page">
+<div id="topbar" class="admin-header"></div>
+
+<div class="admin-main">
+  <div class="alerts-layout">
+    <div class="box">
+      <div class="box-header">
+        <h2>🚨 Alertas Ativos</h2>
+        <span id="alertCount" class="badge badge-info">—</span>
+      </div>
+      <div class="box-body" id="alertsList"><div class="loader"></div></div>
+    </div>
+    <div class="box">
+      <div class="box-header"><h2>📊 Resumo</h2></div>
+      <div class="box-body" id="summary"><div class="loader"></div></div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('alerts.html');
+
+const THRESH = { crit: 20, warn: 35 };
+
+function setStatus(online) {
+  document.getElementById('statusDot').className    = 'status-dot '+(online?'online':'offline');
+  document.getElementById('statusText').textContent = online ? 'Online' : 'Offline';
+}
+
+function generateAlerts(reservoirs) {
+  const alerts = [];
+  const now    = Date.now()/1000;
+  reservoirs.forEach(r => {
+    const pct  = r.pct ?? 0;
+    const name = r.name ? `${r.alias} (${r.name})` : r.alias;
+    if (!r.online) {
+      const minsAgo = r.ts ? Math.round((now-r.ts)/60) : '?';
+      alerts.push({ level:'crit',
+        title:`🔴 CRÍTICO — ${name} sem comunicação`,
+        body:`Último dado há ${minsAgo} minutos. Verifique o sensor e a alimentação.` });
+    } else if (pct <= THRESH.crit) {
+      alerts.push({ level:'crit',
+        title:`🔴 CRÍTICO — ${name} com nível baixo`,
+        body:`Nível: ${pct.toFixed(1)}% (limite crítico: ${THRESH.crit}%). Volume: ${r.volume_l!=null?(r.volume_l/1000).toFixed(2)+' m³':'—'}.` });
+    } else if (pct <= THRESH.warn) {
+      alerts.push({ level:'warn',
+        title:`🟡 AVISO — ${name} com nível reduzido`,
+        body:`Nível: ${pct.toFixed(1)}% (limite: ${THRESH.warn}%). Considere acionar abastecimento.` });
+    }
+    if (r.out_of_range) {
+      alerts.push({ level:'warn',
+        title:`🟡 AVISO — ${name} com leitura fora do alcance`,
+        body:`Sensor reportou distância inválida. Verifique obstrução ou posicionamento.` });
+    }
+  });
+  if (!alerts.length)
+    alerts.push({ level:'ok',
+      title:'✅ Todos os reservatórios em condições normais',
+      body:`${reservoirs.filter(r=>r.online).length} de ${reservoirs.length} sensores online. Níveis dentro dos limites.` });
+  return alerts;
+}
+
+function render(raw) {
+  const reservoirs = aguadaAPI.sortReservoirs(raw);
+  const alerts  = generateAlerts(reservoirs);
+  const crits   = alerts.filter(a=>a.level==='crit').length;
+  const warns   = alerts.filter(a=>a.level==='warn').length;
+  const active  = crits + warns;
+
+  const cntEl = document.getElementById('alertCount');
+  cntEl.textContent = active;
+  cntEl.className   = `badge ${crits>0?'badge-crit':warns>0?'badge-warn':'badge-ok'}`;
+
+  document.getElementById('alertsList').innerHTML = alerts.map(a => `
+    <div class="alert-item alert-${a.level}">
+      <strong>${a.title}</strong>
+      ${a.body}
+      <div class="alert-meta">Verificado: ${new Date().toLocaleString('pt-BR')}</div>
+    </div>`).join('');
+
+  document.getElementById('summary').innerHTML = `
+    <div class="sum-row"><span>🔴 Críticos</span><span class="badge badge-crit">${crits}</span></div>
+    <div class="sum-row"><span>🟡 Avisos</span><span class="badge badge-warn">${warns}</span></div>
+    <div class="sum-row"><span>✅ Normais</span><span class="badge badge-ok">${reservoirs.filter(r=>r.online&&(r.pct??0)>THRESH.warn).length}</span></div>
+    <div class="sum-row"><span>📡 Online</span><span class="badge badge-info">${reservoirs.filter(r=>r.online).length}/${reservoirs.length}</span></div>
+    <div class="sum-row"><span style="font-size:var(--font-xs);color:var(--text-muted)">Última verificação: ${new Date().toLocaleTimeString('pt-BR')}</span></div>`;
+}
+
+let reservoirs = [];
+async function load() {
+  try {
+    reservoirs = await aguadaAPI.getReservoirs();
+    setStatus(reservoirs.some(r=>r.online));
+    render(reservoirs);
+  } catch(e) {
+    setStatus(false);
+    document.getElementById('alertsList').innerHTML = `<div class="alert">Erro: ${e.message}</div>`;
+  }
+}
+
+aguadaAPI.connectWS(msg => {
+  if (msg.type==='snapshot') {
+    const data = Array.isArray(msg.data)?msg.data:(msg.data?.reservoirs||[]);
+    if (data.length) { reservoirs=data; render(data); setStatus(data.some(r=>r.online)); }
+  }
+});
+
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>

@@ -6,15 +6,21 @@
   <link rel="icon" href="data:,">
   <title>Aguada — Painel Geral</title>
   <link rel="stylesheet" href="assets/aguada.css"/>
+  <link rel="stylesheet" href="assets/style.css"/>
+  <style>
+    /* ── layout fix: topbar é externo ao .layout ── */
+    .layout { height: calc(100vh - 46px) !important; overflow: hidden !important; }
+    .main   { overflow: hidden !important; }
+  </style>
   <link rel="stylesheet" href="assets/vendor/leaflet.min.css"/>
   <style>
     [x-cloak]{display:none}
 
     /* ── grade principal ─────────────────────────────────── */
     .pg-grid {
-      flex:1; display:grid; min-height:0; overflow:hidden;
-      grid-template-columns: 1fr 1fr 1fr;
-      grid-template-rows: 400px 1fr;
+      flex:1; display:grid; min-height:0;
+      grid-template-columns: 320px 1fr 1fr;
+      grid-template-rows: 1fr minmax(260px, 1fr);
       gap:8px; padding:8px;
       overflow-y:auto;
     }
@@ -37,12 +43,11 @@
     .pg-cell-actions { display:flex; gap:4px; }
     .pg-cell-body { flex:1; overflow:auto; }
 
-    /* Mapa 1 coluna linha 1 */
-    .cell-map { grid-column: 1; grid-row:1; }
-    /* SCADA ocupa 2 colunas linha 1 */
-    .cell-scada { grid-column:2/4; grid-row:1; }
-    /* Linhas 2 – cada datatable ocupa 1 coluna */
-    .cell-res  { grid-column:1; grid-row:2; }
+    /* Mapa ocupa linha 1 col 1 */
+    .cell-map  { grid-column:1; grid-row:1/3; }
+    /* Reservatórios ocupa linha 1 col 2-3 */
+    .cell-res  { grid-column:2/4; grid-row:1; }
+    /* Linha 2 – equipamentos e hidrômetros */
     .cell-equip{ grid-column:2; grid-row:2; }
     .cell-hid  { grid-column:3; grid-row:2; }
 
@@ -71,9 +76,6 @@
     /* Barra inline */
     .bar-wrap { width:60px; height:7px; background:var(--bg3); border-radius:4px; overflow:hidden; display:inline-block; vertical-align:middle; }
     .bar-fill  { height:100%; border-radius:4px; transition:width .5s; }
-
-    /* SCADA iframe */
-    .scada-embed { flex:1; width:100%; border:none; background:var(--bg); min-height:0; display:block; }
 
     /* ── Modal fullscreen ─────────────────────────────────── */
     .fullscreen-modal {
@@ -106,78 +108,22 @@
     @media (max-width:1100px) {
       .pg-grid {
         grid-template-columns:1fr 1fr;
-        grid-template-rows:360px 280px 1fr;
+        grid-template-rows:300px 280px 1fr;
       }
       .cell-map  { grid-column:1; grid-row:1; }
-      .cell-scada{ grid-column:2; grid-row:1; }
-      .cell-res  { grid-column:1/3; grid-row:2; }
-      .cell-equip{ grid-column:1; grid-row:3; }
-      .cell-hid  { grid-column:2; grid-row:3; }
+      .cell-res  { grid-column:2; grid-row:1; }
+      .cell-equip{ grid-column:1; grid-row:2; }
+      .cell-hid  { grid-column:2; grid-row:2; }
     }
     @media (max-width:700px) {
       .pg-grid { grid-template-columns:1fr; grid-template-rows:none; }
-      .cell-map,.cell-scada,.cell-res,.cell-equip,.cell-hid { grid-column:1; grid-row:auto; min-height:240px; }
+      .cell-map,.cell-res,.cell-equip,.cell-hid { grid-column:1; grid-row:auto; min-height:240px; }
     }
   </style>
 </head>
 <body>
+<div id="topbar" class="admin-header"></div>
 <div class="layout" x-data="painelApp()" x-init="init()" x-cloak style="flex-direction:column;">
-
-  <!-- Header de página -->
-  <header class="page-header">
-    <div class="ph-brand">
-      <div class="ph-logo">A</div>
-      <span class="ph-name">AGUADA</span>
-    </div>
-    <nav class="ph-nav">
-      <a href="index.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        Dashboard
-      </a>
-      <a href="painel.html" class="active">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        Painel
-      </a>
-      <a href="scada.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-        SCADA
-      </a>
-      <a href="analise.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Análise
-      </a>
-      <a href="report.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Relatório
-      </a>
-      <a href="hidraulica.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg>
-        Hidráulica
-      </a>
-      <a href="dispositivos.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
-        Dispositivos
-      </a>
-      <a href="documentacao.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
-        Docs
-      </a>
-    </nav>
-    <div class="ph-right">
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)">
-        <span class="ws-dot" :class="wsConnected ? 'connected':'disconnected'"></span>
-        <span x-text="wsConnected ? 'Ao vivo':'Desconectado'"></span>
-        <span x-show="lastUpdate" x-text="'· '+timeAgo(lastUpdate)" style="color:var(--text3)"></span>
-      </div>
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)">
-        <span class="gw-dot" :class="gwStatus"></span>
-        <span x-text="gwLabel"></span>
-      </div>
-      <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      </button>
-    </div>
-  </header>
 
   <!-- Main -->
   <div class="main">
@@ -200,19 +146,6 @@
         <div class="map-wrap-mini">
           <div id="mini-map"></div>
         </div>
-      </div>
-
-      <!-- ── SCADA ─────────────────────────────────────────── -->
-      <div class="pg-cell cell-scada">
-        <div class="pg-cell-header">
-          <span class="pg-cell-title">SCADA</span>
-          <div class="pg-cell-actions">
-            <a href="scada.html" class="icon-btn" title="Expandir SCADA">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-            </a>
-          </div>
-        </div>
-        <iframe class="scada-embed" src="scada.html?embed=1" id="scada-frame" title="SCADA"></iframe>
       </div>
 
       <!-- ── RESERVATÓRIOS ──────────────────────────────────── -->
@@ -403,7 +336,7 @@
   <div x-show="modal.open" @click="closeModal()" style="position:fixed;inset:0;z-index:1400;background:rgba(0,0,0,0.4)" x-cloak></div>
 
   <!-- ── Modal fullscreen mapa ──────────────────────────────── -->
-  <div class="fullscreen-modal" x-show="fullMap" x-cloak>
+  <div class="fullscreen-modal" :style="fullMap ? 'display:flex' : 'display:none'" style="display:none;" x-cloak>
     <div class="fullscreen-modal-bar">
       <span class="fullscreen-modal-title">Mapa — Visão ampliada</span>
       <div style="display:flex;gap:8px">
@@ -425,6 +358,7 @@
 
 </div><!-- /layout -->
 
+<script src="assets/api.js"></script>
 <script src="assets/shared.js"></script>
 <script src="assets/vendor/leaflet.min.js"></script>
 <script defer src="assets/vendor/alpine.min.js"></script>
@@ -441,6 +375,7 @@ function painelApp() {
     _miniMap: null,
     _fullMapObj: null,
     _miniMarkers: {},
+    _fullMarkers: {},
     _initialized: false,
 
     get avgPct() {
@@ -488,10 +423,10 @@ function painelApp() {
 
       // Dados
       const [resData, equipData, gwData, hidData] = await Promise.all([
-        fetch('/api/reservoirs').then(r=>r.json()).catch(()=>[]),
-        fetch('/api/equip/current').then(r=>r.json()).catch(()=>({pumps:[],valves:[],hydrometers:[]})),
-        fetch('/api/gateway').then(r=>r.json()).catch(()=>null),
-        fetch('/api/manual/hydrometers?limit=200').then(r=>r.json()).catch(()=>({items:[]})),
+        aguadaAPI.getReservoirs().catch(()=>[]),
+        aguadaAPI.getEquipCurrent().catch(()=>({pumps:[],valves:[],hydrometers:[]})),
+        aguadaAPI.getGateway().catch(()=>null),
+        aguadaAPI.getManualHydrometers(200).catch(()=>({items:[]})),
       ]);
 
       this.reservoirs = Array.isArray(resData) ? resData : [];
@@ -516,6 +451,7 @@ function painelApp() {
           this.reservoirs=[...this.reservoirs];
         }
         this._updateMiniMarkers();
+        if (this.fullMap) this._updateFullMarkers();
         if (this.modal.open){
           const r=this.reservoirs.find(r=>r.alias===this.modal.alias);
           if(r) this._fillModal(r);
@@ -553,11 +489,18 @@ function painelApp() {
         const canvasRenderer = L.canvas({padding:0.5});
         const lg = L.layerGroup().addTo(this._miniMap);
         (infra.pipelines||[]).forEach(p=>{
-          L.polyline(p.coords.map(c=>[c[0],c[1]]),{
+          const pts = p.coords.map(c=>[c[0],c[1]]);
+          // Border (White shadow) to cleanly separate pipelines
+          L.polyline(pts,{
+            renderer:canvasRenderer, color:'#ffffff', weight:6, opacity:0.7, lineCap:'round', lineJoin:'round'
+          }).addTo(lg);
+          // Core pipeline
+          L.polyline(pts,{
             renderer:canvasRenderer,
             color:p.submarine?'#06b6d4':'#3b82f6',
-            weight:2, opacity:0.6,
+            weight:3, opacity:0.8,
             dashArray:p.submarine?'8 4':null,
+            lineCap:'round', lineJoin:'round'
           }).addTo(lg);
         });
       } catch(e){/**/}
@@ -565,26 +508,60 @@ function painelApp() {
     },
 
     _updateMiniMarkers() {
-      if (!this._miniMap) return;
-      (this.reservoirs||[]).forEach(r=>{
-        if (!r.lat||!r.lng) return;
-        const color = markerColor(r.pct,r.online);
-        const pct = r.pct!=null?Math.round(r.pct):'?';
+      this._syncMarkers(this._miniMap, this._miniMarkers);
+    },
+
+    _updateFullMarkers() {
+      if (this.fullMap) this._syncMarkers(this._fullMapObj, this._fullMarkers);
+    },
+
+    _syncMarkers(mapInst, markersDict) {
+      if (!mapInst) return;
+      const elements = [
+        ...(this.reservoirs||[]).map(r => ({...r, type:'res'})),
+        { alias:'ETE', name:'Estação Trat.', type:'ete', lat:-22.8402, lng:-43.1021 },
+        { alias:'FS-01', name:'Fossa Séptica', type:'fossa', lat:-22.8423, lng:-43.1051 },
+        { alias:'CG-01', name:'Caixa de Gordura', type:'gordura', lat:-22.8398, lng:-43.1102 }
+      ];
+
+      elements.forEach(r => {
+        const savedPos = localStorage.getItem('coord_' + r.alias);
+        if (savedPos) {
+          const parts = savedPos.split(',');
+          r.lat = parseFloat(parts[0]);
+          r.lng = parseFloat(parts[1]);
+        } else if (!r.lat || !r.lng) return;
+
+        const isRes = r.type === 'res';
+        const color = isRes ? markerColor(r.pct, r.online) : (r.type === 'ete' ? '#8b5cf6' : '#d97706');
+        const pctText = isRes ? (r.pct!=null?Math.round(r.pct)+'%':'?') : (r.type === 'ete' ? 'ETE' : 'ESG');
+        
         const icon = L.divIcon({
           className:'aguada-marker',
-          html:`<div style="background:${color};border:2px solid rgba(0,0,0,0.4);border-radius:50%;width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 6px ${color}44">
-                  <div style="font-size:7px;font-weight:700;color:white;line-height:1">${r.alias}</div>
-                  <div style="font-size:8px;font-weight:700;color:white;line-height:1">${pct}%</div>
+          html:`<div style="background:${color};border:2px solid rgba(0,0,0,0.4);border-radius:50%;width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:move;box-shadow:0 3px 8px rgba(0,0,0,0.5)">
+                  <div style="font-size:7px;font-weight:700;color:white;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,0.8)">${r.alias}</div>
+                  <div style="font-size:8px;font-weight:700;color:white;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,0.8)">${pctText}</div>
                 </div>`,
           iconSize:[32,32], iconAnchor:[16,16],
         });
-        if (this._miniMarkers[r.alias]) {
-          this._miniMarkers[r.alias].setLatLng([r.lat,r.lng]);
-          this._miniMarkers[r.alias].setIcon(icon);
+        
+        if (markersDict[r.alias]) {
+          markersDict[r.alias].setLatLng([r.lat,r.lng]);
+          markersDict[r.alias].setIcon(icon);
         } else {
-          const m = L.marker([r.lat,r.lng],{icon}).addTo(this._miniMap);
-          m.on('click',()=>this.openResModal(r.alias));
-          this._miniMarkers[r.alias]=m;
+          const m = L.marker([r.lat,r.lng], {icon, draggable:true, autoPan:true}).addTo(mapInst);
+          if (isRes) m.on('click', () => this.openResModal(r.alias));
+          else m.bindTooltip(`<b>${r.alias}</b><br>${r.name}`);
+          
+          m.on('dragend', (e) => {
+             const pos = e.target.getLatLng();
+             localStorage.setItem('coord_' + r.alias, pos.lat + ',' + pos.lng);
+             
+             // Sync both maps instantly if they exist
+             if (this._miniMarkers[r.alias]) this._miniMarkers[r.alias].setLatLng(pos);
+             if (this._fullMarkers[r.alias]) this._fullMarkers[r.alias].setLatLng(pos);
+          });
+          markersDict[r.alias]=m;
         }
       });
     },
@@ -605,14 +582,7 @@ function painelApp() {
           minZoom:13,maxZoom:19,maxBounds:bounds,maxBoundsViscosity:0.8,layers:[osmLayer],
         }).setView([-22.8381,-43.1086],17);
         L.control.layers({'Mapa':osmLayer,'Satélite':satLayer},{},{position:'topright',collapsed:false}).addTo(this._fullMapObj);
-        // Copiar markers
-        (this.reservoirs||[]).forEach(r=>{
-          if (!r.lat||!r.lng) return;
-          const color=markerColor(r.pct,r.online);
-          const pct=r.pct!=null?Math.round(r.pct):'?';
-          const icon=L.divIcon({className:'aguada-marker',html:`<div style="background:${color};border:2px solid rgba(0,0,0,0.4);border-radius:50%;width:36px;height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 8px ${color}44"><div style="font-size:8px;font-weight:700;color:white;line-height:1">${r.alias}</div><div style="font-size:9px;font-weight:700;color:white;line-height:1">${pct}%</div></div>`,iconSize:[36,36],iconAnchor:[18,18]});
-          L.marker([r.lat,r.lng],{icon}).bindTooltip(`<b>${r.alias}</b> — ${pct}%`).addTo(this._fullMapObj);
-        });
+        this._updateFullMarkers();
         setTimeout(()=>this._fullMapObj.invalidateSize(),250);
       });
     },
@@ -621,6 +591,9 @@ function painelApp() {
 
   };
 }
+</script>
+<script>
+document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('painel.html');
 </script>
 </body>
 </html>

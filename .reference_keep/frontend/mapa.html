@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mapa Operacional - AGUADA</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="assets/mapa.css" />
+</head>
+<body class="map-page">
+  <div class="container">
+    <header>
+      <h1>🗺️ Mapa Operacional</h1>
+      <nav>
+        <a href="index.html">Dashboard</a>
+        <a href="mapa.html" class="active">Mapa</a>
+        <a href="painel.html">Painel</a>
+        <a href="dados.html">Dados</a>
+        <a href="consumo.html">Consumo</a>
+        <a href="abastecimento.html">Abastecimento</a>
+        <a href="manutencao.html">Manutenção</a>
+        <a href="history.html">Histórico</a>
+        <a href="alerts.html">Alertas</a>
+        <a href="config.html">Config</a>
+        <a href="system.html">Sistema</a>
+      </nav>
+      <div class="header-info">
+        <div>Visualização geográfica dos ativos hidráulicos</div>
+        <div class="status-badge status-online pulsing">● Online</div>
+      </div>
+    </header>
+
+    <main class="map-layout">
+      <section class="map-pane">
+        <div class="map-toolbar">
+          <div>
+            <h2>OpenStreetMap • São Gonçalo / RJ</h2>
+            <p>Referência: <a href="https://www.openstreetmap.org/#map=16/-22.83735/-43.10719" target="_blank" rel="noopener">link oficial</a></p>
+          </div>
+          <div class="toolbar-actions">
+            <button id="recenterMap">Centralizar</button>
+            <button id="refreshLayers">Atualizar dados</button>
+          </div>
+        </div>
+        <div id="map" class="map-canvas" aria-label="Mapa interativo do complexo hidráulico"></div>
+      </section>
+
+      <aside class="map-side-panel">
+        <h3>Reservatórios monitorados</h3>
+        <ul id="reservoirList" class="reservoir-list"></ul>
+        <div class="map-meta">
+          <strong>Camadas:</strong>
+          <p>• Base OpenStreetMap (tiles oficiais)<br>• Marcadores dinâmicos dos sensores AGUADA</p>
+          <p class="map-tip">Clique em um marcador para visualizar o histórico da última hora.</p>
+          <a class="map-link" href="https://www.openstreetmap.org/#map=16/-22.83735/-43.10719" target="_blank" rel="noopener">
+            Abrir mapa no OpenStreetMap ↗
+          </a>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="assets/api-service.js"></script>
+  <script src="assets/ui-utils.js"></script>
+  <script src="assets/mapa.js"></script>
+</body>
+</html>

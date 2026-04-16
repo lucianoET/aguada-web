@@ -6,12 +6,14 @@
   <link rel="icon" href="data:,">
   <title>Aguada - SCADA</title>
   <link rel="stylesheet" href="assets/aguada.css"/>
+  <link rel="stylesheet" href="assets/style.css"/>
   <style>
+    /* ── layout: topbar fora do .layout, rolagem de página ── */
+    .layout { height: auto !important; min-height: calc(100vh - 46px) !important; overflow: visible !important; }
+    .main   { overflow: visible !important; }
     [x-cloak] { display: none; }
 
     .scada-main {
-      flex: 1;
-      min-height: 0;
       display: flex;
       flex-direction: column;
       background: #d9dde3;
@@ -80,10 +82,8 @@
     }
 
     .scada-wrap {
-      flex: 1;
-      min-height: 0;
-      overflow: auto;
-      padding: 12px 18px 18px;
+      overflow: visible;
+      padding: 12px 18px 24px;
       display: flex;
       align-items: flex-start;
       justify-content: center;
@@ -101,33 +101,14 @@
       height: 1370px;
       transform-origin: top left;
       font-size: 14px;
-      background-color: #d7dbe0;
-      background-image:
-        linear-gradient(rgba(0,0,0,0.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,0,0,0.045) 1px, transparent 1px);
-      background-size: 40px 40px;
+      background-color: #d9dde3;
       border: 1px solid var(--border2);
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 0 0 1px var(--border);
     }
 
-    .stage-system-label {
-      position: absolute;
-      top: 28px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 3;
-      padding: 12px 26px;
-      border: 1px solid #97a5b6;
-      background: rgba(248, 250, 252, 0.92);
-      color: #233042;
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
-    }
+    .stage-system-label { display: none; }
     /* Garante piso tipografico mesmo em telas menores */
     .scada-stage [style*="font-size:8px"] { font-size: 12px !important; }
     .scada-stage [style*="font-size:9px"] { font-size: 12px !important; }
@@ -695,10 +676,7 @@
     }
 
     @media (max-width: 1200px) {
-      .layout { flex-direction: column; height: auto; min-height: 100vh; }
       .sidebar { width: 100%; height: auto; }
-      .main { min-height: 0; }
-      .scada-main { min-height: calc(100vh - 82px); }
     }
 
     @media (max-width: 760px) {
@@ -1219,77 +1197,27 @@
       });
     }
   </script>
+  <script src="assets/api.js"></script>
   <script defer src="assets/vendor/alpine.min.js"></script>
 </head>
 <body>
+<div id="topbar" class="admin-header"></div>
 <div class="layout" x-data="scadaApp()" x-init="init()" @keydown.escape.window="closeAllModals()" x-cloak style="flex-direction:column;">
-
-  <header class="page-header">
-    <div class="ph-brand">
-      <div class="ph-logo">A</div>
-      <span class="ph-name">AGUADA</span>
-    </div>
-    <nav class="ph-nav">
-      <a href="index.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        Dashboard
-      </a>
-      <a href="painel.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        Painel
-      </a>
-      <a href="scada.html" class="active">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-        SCADA
-      </a>
-      <a href="analise.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Análise
-      </a>
-      <a href="report.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Relatório
-      </a>
-      <a href="hidraulica.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg>
-        Hidráulica
-      </a>
-      <a href="dispositivos.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
-        Dispositivos
-      </a>
-      <a href="documentacao.html">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
-        Docs
-      </a>
-    </nav>
-    <div class="ph-right">
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)">
-        <span class="ws-dot" :class="wsConnected ? 'connected':'disconnected'"></span>
-        <span x-text="wsConnected ? 'Ao vivo':'Desconectado'"></span>
-        <span x-show="lastUpdate" x-text="'· '+timeAgo(lastUpdate)" style="color:var(--text3)"></span>
-      </div>
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)">
-        <span class="gw-dot" :class="gatewayClass()"></span>
-        <span x-text="gatewayLabel()"></span>
-      </div>
-      <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
-    </div>
-  </header>
 
   <div class="main">
 
     <div class="scada-main">
       <div class="scada-toolbar">
         <div class="scada-toolbar-left">
+          <span style="font-size:12px;font-weight:700;color:#1c2430;letter-spacing:.04em;margin-right:6px">SISTEMA HIDRÁULICO — CMASM</span>
           <span class="scada-chip"><strong x-text="reservoirs.length"></strong> reservatórios</span>
           <span class="scada-chip"><strong x-text="displayPumpCount()"></strong> bombas</span>
           <span class="scada-chip"><strong x-text="displayValveCount()"></strong> válvulas</span>
           <span class="scada-chip"><strong x-text="displayHydrometerCount()"></strong> hidrômetros</span>
         </div>
         <div class="scada-toolbar-right">
-          <span class="scada-chip">balanço diário <strong x-text="overallBalanceLabel()"></strong></span>
-          <span class="scada-chip">última atualização <strong x-text="lastUpdate ? timeAgo(lastUpdate) : 'aguardando' "></strong></span>
+          <span class="scada-chip">balanço <strong x-text="overallBalanceLabel()"></strong></span>
+          <span class="scada-chip">atualizado <strong x-text="lastUpdate ? timeAgo(lastUpdate) : 'aguardando' "></strong></span>
         </div>
       </div>
 
@@ -2005,8 +1933,7 @@
       updateStageScale() {
         const viewport = this.$refs.stageViewport;
         if (!viewport) return;
-        const padH = 36;
-        const availW = Math.max(viewport.clientWidth - padH, 320);
+        const availW = Math.max(viewport.clientWidth - 24, 320);
         const scaleW = availW / this.stageBaseWidth;
         const nextScale = Math.min(scaleW, 1);
         this.stageScale = Number.isFinite(nextScale)
@@ -2033,7 +1960,7 @@
 
       async fetchReservoirs() {
         try {
-          const res = await fetch('/api/reservoirs');
+          const res = await fetch(aguadaAPI.BASE + '/api/reservoirs');
           const json = await res.json();
           this.reservoirs = this.sortReservoirs(Array.isArray(json) ? json : []);
         } catch (_) {}
@@ -2046,7 +1973,7 @@
         const next = { ...this.balances };
         await Promise.all(aliases.map(async (alias) => {
           try {
-            const res = await fetch(`/api/consumption?alias=${encodeURIComponent(alias)}&date=${date}`);
+            const res = await fetch(`${aguadaAPI.BASE}/api/consumption?alias=${encodeURIComponent(alias)}&date=${date}`);
             if (!res.ok) return;
             const json = await res.json();
             const balanceL = Number(json?.summary?.balance_l);
@@ -2059,11 +1986,11 @@
       async fetchEquipment() {
         try {
           const [equipmentRes, hydrometerHistoryRes] = await Promise.all([
-            fetch('/api/equip/current'),
-            fetch('/api/manual/hydrometers?limit=200'),
+            aguadaAPI.getEquipCurrent().catch(()=>({pumps:[],valves:[],hydrometers:[]})),
+            aguadaAPI.getManualHydrometers(200).catch(()=>({items:[]})),
           ]);
-          const json = await equipmentRes.json();
-          const hydrometerHistoryJson = await hydrometerHistoryRes.json();
+          const json = equipmentRes.pumps ? equipmentRes : {pumps:[],valves:[],hydrometers:[]};
+          const hydrometerHistoryJson = hydrometerHistoryRes.items ? hydrometerHistoryRes : {items:[]};
           this.pumps = Array.isArray(json?.pumps) ? json.pumps : [];
           this.valves = Array.isArray(json?.valves) ? json.valves : [];
           this.hydrometers = Array.isArray(json?.hydrometers) ? json.hydrometers : [];
@@ -2073,8 +2000,7 @@
 
       async fetchGateway() {
         try {
-          const res = await fetch('/api/gateway');
-          this.gateway = await res.json();
+          this.gateway = await aguadaAPI.getGateway();
         } catch (_) {}
       },
 
@@ -2635,7 +2561,7 @@
           let body = {};
 
           if (this.equipmentModal.kind === 'pump') {
-            url = '/api/manual/pumps';
+            url = aguadaAPI.BASE + '/api/manual/pumps';
             body = {
               pump_name: this.equipmentModal.name,
               state: this.equipmentModal.state,
@@ -2643,7 +2569,7 @@
               note: this.equipmentModal.note || null,
             };
           } else if (this.equipmentModal.kind === 'valve') {
-            url = '/api/manual/valves';
+            url = aguadaAPI.BASE + '/api/manual/valves';
             body = {
               valve_name: this.equipmentModal.name,
               state: this.equipmentModal.state,
@@ -2652,7 +2578,7 @@
           } else {
             const reading = parseFloat(this.equipmentModal.reading);
             if (Number.isNaN(reading)) throw new Error('Leitura invalida');
-            url = '/api/manual/hydrometers';
+            url = aguadaAPI.BASE + '/api/manual/hydrometers';
             body = {
               meter_name: this.equipmentModal.name,
               reading,
@@ -2705,6 +2631,9 @@
       },
     };
   }
+</script>
+<script>
+document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('scada.html');
 </script>
 </body>
 </html>

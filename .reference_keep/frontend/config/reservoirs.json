@@ -1,0 +1,188 @@
+{
+  "reservoirs": [
+    {
+      "id": "RCON",
+      "nome": "Castelo de Consumo",
+      "alias": "CON",
+      "tipo": "cilindrico",
+      "capacidade_l": 80000,
+      "dimensoes": {
+        "altura_cm": 400,
+        "diametro_cm": 510,
+        "hsensor_cm": 40
+      },
+      "calculos": {
+        "raio_m": 2.55,
+        "area_m2": 20.43,
+        "volume_max_m3": 81.7
+      },
+      "niveis": {
+        "critico_percent": 10,
+        "alerta_percent": 20,
+        "normal_min_percent": 20,
+        "normal_max_percent": 95
+      },
+      "coordenadas": {
+        "x": 150.3,
+        "y": 290.7,
+        "z": 0,
+        "latitude": null,
+        "longitude": null
+      },
+      "conexoes": {
+        "entradas": ["valv_entrada_ie.out"],
+        "saidas": ["valv_saida_az.in", "valv_saida_av.in"]
+      }
+    },
+    {
+      "id": "RCAV",
+      "nome": "Castelo de Incêndio",
+      "alias": "CAV",
+      "tipo": "cilindrico",
+      "capacidade_l": 80000,
+      "dimensoes": {
+        "altura_cm": 400,
+        "diametro_cm": 510,
+        "hsensor_cm": 20
+      },
+      "calculos": {
+        "raio_m": 2.55,
+        "area_m2": 20.43,
+        "volume_max_m3": 81.7
+      },
+      "niveis": {
+        "critico_percent": 70,
+        "alerta_percent": 75,
+        "normal_min_percent": 75,
+        "normal_max_percent": 95
+      },
+      "coordenadas": {
+        "x": 200.0,
+        "y": 290.0,
+        "z": 0
+      },
+      "conexoes": {
+        "entradas": ["bomba_b03.out_cav"],
+        "saidas": ["rede_hidrantes.in"]
+      },
+      "alertas_especiais": {
+        "nivel_critico": {
+          "threshold_percent": 70,
+          "tipo": "URGENTE",
+          "notificacao": true
+        }
+      }
+    },
+    {
+      "id": "RB03",
+      "nome": "Reservatório Casa de Bombas N03",
+      "alias": "B03",
+      "tipo": "cilindrico",
+      "capacidade_l": 80000,
+      "dimensoes": {
+        "altura_cm": 400,
+        "diametro_cm": 510,
+        "hsensor_cm": 20
+      },
+      "calculos": {
+        "raio_m": 2.55,
+        "area_m2": 20.43,
+        "volume_max_m3": 81.7
+      },
+      "niveis": {
+        "critico_percent": 10,
+        "alerta_percent": 20,
+        "normal_min_percent": 20,
+        "normal_max_percent": 95
+      },
+      "coordenadas": {
+        "x": 50.0,
+        "y": 150.0,
+        "z": 0
+      },
+      "local": "CB03 - Casa de Bombas N03",
+      "bombas_associadas": ["B03E", "B03D"],
+      "conexoes": {
+        "entradas": ["cisterna_ie01.out", "cisterna_ie02.out"],
+        "saidas": ["valv_out_con.in", "valv_out_cav.in"]
+      }
+    },
+    {
+      "id": "IE01",
+      "nome": "Cisterna IE 01",
+      "alias": "IE01",
+      "tipo": "retangular",
+      "capacidade_l": 254000,
+      "dimensoes": {
+        "altura_cm": 240,
+        "comprimento_cm": 585,
+        "largura_cm": 1810,
+        "hsensor_cm": 20
+      },
+      "calculos": {
+        "area_m2": 105.885,
+        "volume_max_m3": 254.124
+      },
+      "niveis": {
+        "critico_percent": 10,
+        "alerta_percent": 20,
+        "normal_min_percent": 20,
+        "normal_max_percent": 95
+      },
+      "coordenadas": {
+        "x": 100.0,
+        "y": 200.0,
+        "z": 0
+      },
+      "conexoes": {
+        "entradas": ["rede_if.out"],
+        "saidas": ["bomba_b03.in", "valv_out_con.in"]
+      }
+    },
+    {
+      "id": "IE02",
+      "nome": "Cisterna IE 02",
+      "alias": "IE02",
+      "tipo": "retangular",
+      "capacidade_l": 254000,
+      "dimensoes": {
+        "altura_cm": 240,
+        "comprimento_cm": 585,
+        "largura_cm": 1810,
+        "hsensor_cm": 20
+      },
+      "calculos": {
+        "area_m2": 105.885,
+        "volume_max_m3": 254.124
+      },
+      "niveis": {
+        "critico_percent": 10,
+        "alerta_percent": 20,
+        "normal_min_percent": 20,
+        "normal_max_percent": 95
+      },
+      "coordenadas": {
+        "x": 100.0,
+        "y": 250.0,
+        "z": 0
+      },
+      "conexoes": {
+        "entradas": ["rede_if.out"],
+        "saidas": ["bomba_b03.in", "valv_out_con.in"]
+      }
+    }
+  ],
+  "formulas": {
+    "cilindrico": {
+      "raio_m": "diametro_cm / 200",
+      "nivel_cm": "altura_cm - (distancia_sensor_cm - hsensor_cm)",
+      "volume_m3": "PI * raio_m^2 * (nivel_cm / 100)",
+      "percentual": "(volume_m3 / volume_max_m3) * 100"
+    },
+    "retangular": {
+      "nivel_cm": "altura_cm - (distancia_sensor_cm - hsensor_cm)",
+      "volume_m3": "(comprimento_cm / 100) * (largura_cm / 100) * (nivel_cm / 100)",
+      "percentual": "(volume_m3 / volume_max_m3) * 100"
+    }
+  }
+}

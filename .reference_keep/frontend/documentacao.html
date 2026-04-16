@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação - AGUADA Dashboard</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        .docs-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .docs-nav {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .docs-nav h3 {
+            margin-top: 0;
+            color: #1e3c72;
+            font-size: 14px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .docs-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .docs-nav li {
+            margin: 8px 0;
+        }
+
+        .docs-nav a {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 14px;
+            display: block;
+            padding: 5px 0;
+            border-left: 3px solid transparent;
+            padding-left: 10px;
+            transition: all 0.2s;
+        }
+
+        .docs-nav a:hover {
+            border-left-color: #0066cc;
+            background: rgba(0, 102, 204, 0.05);
+        }
+
+        .docs-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+        }
+
+        .docs-section {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .docs-section:last-child {
+            border-bottom: none;
+        }
+
+        .doc-file {
+            display: grid;
+            grid-template-columns: 50px 1fr 100px;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin: 10px 0;
+            transition: all 0.2s;
+        }
+
+        .doc-file:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .doc-file-icon {
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .doc-file-info h4 {
+            margin: 0;
+            color: #1e3c72;
+            font-size: 14px;
+        }
+
+        .doc-file-info p {
+            margin: 3px 0 0 0;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .doc-file-link {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+
+        .doc-file-link:hover {
+            background: #0052a3;
+            transform: scale(1.05);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-obrigatorio {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .badge-recomendado {
+            background: #fef3c7;
+            color: #78350f;
+        }
+
+        .badge-opcional {
+            background: #f0fdf4;
+            color: #065f46;
+        }
+
+        @media (max-width: 768px) {
+            .docs-container {
+                grid-template-columns: 1fr;
+            }
+
+            .docs-nav {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Documentação - AGUADA</h1>
+            <div class="header-info">
+                <div>Centro de Recursos e Referência do Sistema</div>
+            </div>
+        </header>
+
+        <div class="docs-container">
+            <nav class="docs-nav">
+                <input type="text" class="search-box" id="searchBox" placeholder="Buscar documentos...">
+                
+                <h3>Instruções</h3>
+                <ul>
+                    <li><a href="#operacao">Operação</a></li>
+                    <li><a href="#calibracao">Calibração</a></li>
+                    <li><a href="#manutencao">Manutenção</a></li>
+                    <li><a href="#emergencias">Emergências</a></li>
+                </ul>
+
+                <h3>Formulários</h3>
+                <ul>
+                    <li><a href="#form-calibracao">Calibração</a></li>
+                    <li><a href="#form-manutencao">Manutenção</a></li>
+                    <li><a href="#form-incidente">Incidente</a></li>
+                </ul>
+
+                <h3>Relatórios</h3>
+                <ul>
+                    <li><a href="#rel-diario">Diário</a></li>
+                    <li><a href="#rel-mensal">Mensal</a></li>
+                </ul>
+
+                <h3>Técnico</h3>
+                <ul>
+                    <li><a href="#rules">RULES.md</a></li>
+                    <li><a href="#pinout">Pinout ESP32</a></li>
+                </ul>
+            </nav>
+
+            <div class="docs-content">
+                <!-- INSTRUÇÕES -->
+                <div class="docs-section">
+                    <h2>📖 Instruções de Operação</h2>
+                    
+                    <div class="doc-file" id="operacao">
+                        <div class="doc-file-icon">📋</div>
+                        <div class="doc-file-info">
+                            <h4>Manual de Operação</h4>
+                            <p>Como iniciar, monitorar e usar o sistema AGUADA</p>
+                        </div>
+                        <a href="../Documents/instrucoes/operacao.md" class="doc-file-link" download>Abrir</a>
+                    </div>
+
+                    <div class="doc-file" id="calibracao">
+                        <div class="doc-file-icon">⚙️</div>
+                        <div class="doc-file-info">
+                            <h4>Guia de Calibração</h4>
+                            <p>Procedimentos para calibração de sensores ultrassônicos</p>
+                        </div>
+                        <a href="../Documents/instrucoes/calibracao.md" class="doc-file-link" download>Abrir</a>
+                    </div>
+
+                    <div class="doc-file" id="manutencao">
+                        <div class="doc-file-icon">🛠️</div>
+                        <div class="doc-file-info">
+                            <h4>Manutenção Preventiva</h4>
+                            <p>Checklists e procedimentos de manutenção regular</p>
+                        </div>
+                        <a href="../Documents/instrucoes/manutencao.md" class="doc-file-link" download>Abrir</a>
+                    </div>
+
+                    <div class="doc-file" id="emergencias">
+                        <div class="doc-file-icon">🚨</div>
+                        <div class="doc-file-info">
+                            <h4>Procedimentos de Emergência</h4>
+                            <p>Como agir em situações críticas e falhas</p>
+                        </div>
+                        <a href="../Documents/instrucoes/emergencias.md" class="doc-file-link" download>Abrir</a>
+                    </div>
+                </div>
+
+                <!-- FORMULÁRIOS -->
+                <div class="docs-section">
+                    <h2>📋 Formulários</h2>
+                    <p>Modelos prontos para impressão ou preenchimento digital</p>
+
+                    <div class="doc-file" id="form-calibracao">
+                        <div class="doc-file-icon">📝</div>
+                        <div class="doc-file-info">
+                            <h4>Formulário de Calibração</h4>
+                            <p>Registro de calibração de todos os 5 sensores <span class="badge badge-obrigatorio">Obrigatório</span></p>
+                        </div>
+                        <a href="../Documents/formularios/CALIBRACAO.md" class="doc-file-link" download>Abrir</a>
+                    </div>
+
+                    <div class="doc-file" id="form-manutencao">
+                        <div class="doc-file-icon">📝</div>
+                        <div class="doc-file-info">
+                            <h4>Formulário de Manutenção</h4>
+                            <p>Checklist mensal de manutenção preventiva <span class="badge badge-obrigatorio">Obrigatório</span></p>
+                        </div>
+                        <a href="../Documents/formularios/MANUTENCAO.md" class="doc-file-link" download>Abrir</a>
+                    </div>
+
+                    <div class="doc-file" id="form-incidente">
+                        <div class="doc-file-icon">📝</div>
+                        <div class="doc-file-info">
+                            <h4>Formulário de Incidente</h4>
+                            <p>Registro de problemas e soluções <span class="badge badge-recomendado">Recomendado</span></p>
+                        </div>
+                        <a href="../Documents/formularios/INCIDENTE.md" class="doc-file-link" download>Abrir</a>
+                    </div>
+                </div>
+
+                <!-- RELATÓRIOS -->
+                <div class="docs-section">
+                    <h2>📊 Relatórios</h2>
+                    <p>Modelos de relatórios para análise e documentação</p>
+
+                    <div class="doc-file" id="rel-diario">
+                        <div class="doc-file-icon">📋</div>
+                        <div class="doc-file-info">
+                            <h4>Relatório Diário</h4>
+                            <p>Summary diário de performance e eventos <span class="badge badge-recomendado">Recomendado</span></p>
+                        </div>
+                        <a href="../Documents/relatorios/DIARIO.md" class="doc-file-link" download>Abrir</a>
+                    </div>
+
+                    <div class="doc-file" id="rel-mensal">
+                        <div class="doc-file-icon">📋</div>
+                        <div class="doc-file-info">
+                            <h4>Relatório Mensal</h4>
+                            <p>Análise de performance, consumo e recomendações <span class="badge badge-obrigatorio">Obrigatório</span></p>
+                        </div>
+                        <a href="../Documents/relatorios/MENSAL.md" class="doc-file-link" download>Abrir</a>
+                    </div>
+                </div>
+
+                <!-- TÉCNICO -->
+                <div class="docs-section">
+                    <h2>🔧 Referência Técnica</h2>
+
+                    <div class="doc-file" id="rules">
+                        <div class="doc-file-icon">📖</div>
+                        <div class="doc-file-info">
+                            <h4>RULES.md - Especificação Completa</h4>
+                            <p>Documento técnico com arquitetura, protocolo, cálculos e algoritmos</p>
+                        </div>
+                        <a href="../docs/RULES.md" class="doc-file-link" download>Abrir</a>
+                    </div>
+
+                    <div class="doc-file" id="pinout">
+                        <div class="doc-file-icon">📟</div>
+                        <div class="doc-file-info">
+                            <h4>ESP32-C3 SuperMini Pinout</h4>
+                            <p>Diagrama de pinos e referência de hardware</p>
+                        </div>
+                        <a href="../docs/ESP32_C3_SUPER_MINI_PINOUT.md" class="doc-file-link" download>Abrir</a>
+                    </div>
+                </div>
+
+                <!-- RESUMO -->
+                <div class="docs-section">
+                    <h2>ℹ️ Estrutura de Documentos</h2>
+                    <p>Todos os documentos estão organizados em três categorias principais:</p>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 15px;">
+                        <h4>📂 Documents/instrucoes/</h4>
+                        <p>Guias de operação, calibração, manutenção e procedimentos de emergência. Leia quando precisa de instruções sobre como fazer algo.</p>
+
+                        <h4>📂 Documents/formularios/</h4>
+                        <p>Modelos de formulários para calibração, manutenção e registro de incidentes. Imprima ou preencha digitalmente para documentar atividades.</p>
+
+                        <h4>📂 Documents/relatorios/</h4>
+                        <p>Modelos de relatórios diários e mensais. Use para análise de performance e documentação operacional.</p>
+                    </div>
+                </div>
+
+                <!-- LINKS RÁPIDOS -->
+                <div class="docs-section">
+                    <h2>🔗 Links Rápidos</h2>
+                    <ul style="list-style: none; padding: 0;">
+                        <li><a href="index.html" style="color: #0066cc;">← Voltar ao Dashboard</a></li>
+                        <li><a href="history.html" style="color: #0066cc;">📊 Ver Histórico de Dados</a></li>
+                        <li><a href="alerts.html" style="color: #0066cc;">🚨 Ver Alertas Ativos</a></li>
+                        <li><a href="system.html" style="color: #0066cc;">⚙️ Status do Sistema</a></li>
+                        <li><a href="config.html" style="color: #0066cc;">⚙️ Configurações</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/api-service.js"></script>
+    <script src="assets/ui-utils.js"></script>
+    <script src="assets/app.js"></script>
+    <script>
+        // Simple search functionality
+        document.getElementById('searchBox').addEventListener('keyup', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const docFiles = document.querySelectorAll('.doc-file');
+            
+            docFiles.forEach(file => {
+                const text = file.innerText.toLowerCase();
+                file.style.display = text.includes(searchTerm) ? 'grid' : 'none';
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

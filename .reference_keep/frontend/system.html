@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema - AGUADA Dashboard</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ Status do Sistema</h1>
+            <nav>
+                <a href="index.html">Dashboard</a>
+                <a href="painel.html">Painel</a>
+                <a href="dados.html">Dados</a>
+                <a href="consumo.html">Consumo</a>
+                <a href="abastecimento.html">Abastecimento</a>
+                <a href="manutencao.html">Manutenção</a>
+                <a href="history.html">Histórico</a>
+                <a href="alerts.html">Alertas</a>
+                <a href="config.html">Config</a>
+                <a href="system.html" class="active">Sistema</a>
+            </nav>
+            <div class="header-info">
+                <div>Sistema de Monitoramento Hidráulico</div>
+                <div class="status-badge status-online pulsing">● Online</div>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <span>Gateway ESP32</span>
+                    <span class="status-badge status-online">● Online</span>
+                </div>
+                <div class="card-body">
+                    <div class="data-row">
+                        <div class="data-item">
+                            <div class="data-label">MAC Address</div>
+                            <div class="data-value" style="font-size: 14px; font-family: monospace;">80:F1:B2:50:2E:C4</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Uptime</div>
+                            <div class="data-value">12d 5h 42m</div>
+                        </div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-item">
+                            <div class="data-label">Canal ESP-NOW</div>
+                            <div class="data-value">1</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Packets Recebidos</div>
+                            <div class="data-value">15,428</div>
+                        </div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-item">
+                            <div class="data-label">WiFi RSSI</div>
+                            <div class="data-value">-42 dBm</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Memory Free</div>
+                            <div class="data-value">156 KB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span>Backend API</span>
+                    <span class="status-badge status-online">● Online</span>
+                </div>
+                <div class="card-body">
+                    <div class="data-row">
+                        <div class="data-item">
+                            <div class="data-label">Host</div>
+                            <div class="data-value" style="font-size: 14px;">192.168.0.100:3000</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Uptime</div>
+                            <div class="data-value">45d 12h 15m</div>
+                        </div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-item">
+                            <div class="data-label">Requisições/min</div>
+                            <div class="data-value">1,247</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Tempo Médio</div>
+                            <div class="data-value">142 ms</div>
+                        </div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-item">
+                            <div class="data-label">CPU</div>
+                            <div class="data-value">8.2%</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Memória</div>
+                            <div class="data-value">512 MB / 2 GB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span>Banco de Dados</span>
+                    <span class="status-badge status-online">● Online</span>
+                </div>
+                <div class="card-body">
+                    <div class="data-row">
+                        <div class="data-item">
+                            <div class="data-label">SGBD</div>
+                            <div class="data-value" style="font-size: 14px;">PostgreSQL + TimescaleDB</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Versão</div>
+                            <div class="data-value">14.9</div>
+                        </div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-item">
+                            <div class="data-label">Tamanho</div>
+                            <div class="data-value">4.2 GB</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Conexões</div>
+                            <div class="data-value">18 / 100</div>
+                        </div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-item">
+                            <div class="data-label">Hypertables</div>
+                            <div class="data-value">5</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Registros</div>
+                            <div class="data-value">2.1M</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 30px;">
+            <div class="card-header">
+                <span>Status dos Sensores</span>
+                <span style="font-size: 12px;">5 nós ativos</span>
+            </div>
+            <div class="card-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sensor</th>
+                            <th>MAC Address</th>
+                            <th>Status</th>
+                            <th>Última Leitura</th>
+                            <th>Bateria</th>
+                            <th>RSSI</th>
+                            <th>Uptime</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>RCON</strong></td>
+                            <td style="font-family: monospace; font-size: 12px;">20:6E:F1:6B:77:58</td>
+                            <td><span class="status-badge status-online">● Online</span></td>
+                            <td>há 3s</td>
+                            <td>4.85V ✅</td>
+                            <td>-48 dBm</td>
+                            <td>7d 14h</td>
+                        </tr>
+                        <tr>
+                            <td><strong>RCAV</strong></td>
+                            <td style="font-family: monospace; font-size: 12px;">DC:06:75:67:6A:CC</td>
+                            <td><span class="status-badge status-online">● Online</span></td>
+                            <td>há 5s</td>
+                            <td>4.92V ✅</td>
+                            <td>-52 dBm</td>
+                            <td>5d 22h</td>
+                        </tr>
+                        <tr>
+                            <td><strong>RB03</strong></td>
+                            <td style="font-family: monospace; font-size: 12px;">XX:XX:XX:XX:XX:XX</td>
+                            <td><span class="status-badge status-offline">● Offline</span></td>
+                            <td>há 45m</td>
+                            <td>- </td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IE01</strong></td>
+                            <td style="font-family: monospace; font-size: 12px;">XX:XX:XX:XX:XX:XX</td>
+                            <td><span class="status-badge status-online">● Online</span></td>
+                            <td>há 8s</td>
+                            <td>4.78V ✅</td>
+                            <td>-58 dBm</td>
+                            <td>3d 02h</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IE02</strong></td>
+                            <td style="font-family: monospace; font-size: 12px;">XX:XX:XX:XX:XX:XX</td>
+                            <td><span class="status-badge status-online">● Online</span></td>
+                            <td>há 4s</td>
+                            <td>4.65V ⚠️</td>
+                            <td>-62 dBm</td>
+                            <td>2d 16h</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <span>Tráfego de Rede</span>
+                </div>
+                <div class="card-body">
+                    <div class="data-row">
+                        <div class="data-item">
+                            <div class="data-label">ESP-NOW (24h)</div>
+                            <div class="data-value">15.4K</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">HTTP POST (24h)</div>
+                            <div class="data-value">15.2K</div>
+                        </div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-item">
+                            <div class="data-label">Taxa de Sucesso</div>
+                            <div class="data-value">99.8%</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Taxa de Erro</div>
+                            <div class="data-value">0.2%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span>Armazenamento</span>
+                </div>
+                <div class="card-body">
+                    <div class="data-row">
+                        <div class="data-item">
+                            <div class="data-label">Dados (Últimos 30 dias)</div>
+                            <div class="data-value">2.1 GB</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Projeção (1 ano)</div>
+                            <div class="data-value">25.2 GB</div>
+                        </div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-item">
+                            <div class="data-label">Disco Livre</div>
+                            <div class="data-value">127 GB</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Retenção</div>
+                            <div class="data-value">2 anos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-footer">
+            <div class="stat">
+                <div class="stat-value">4/5</div>
+                <div class="stat-label">Sensores Ativos</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">99.8%</div>
+                <div class="stat-label">Uptime (30d)</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">2.1M</div>
+                <div class="stat-label">Registros no DB</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">45d</div>
+                <div class="stat-label">Backend Uptime</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/api-service.js"></script>
+    <script src="assets/ui-utils.js"></script>
+    <script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>AGUADA — Histórico</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .filters-bar {
+    background:white; border-radius:10px; padding:14px 20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08); margin-bottom:16px;
+    display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap;
+  }
+  .filters-bar label { font-size:var(--font-xs); font-weight:600; margin-bottom:3px; color:var(--text-muted); }
+  .filters-bar select, .filters-bar button { width:auto; font-size:var(--font-sm); }
+  .chart-box { background:white; border-radius:10px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+  .chart-box h3 { font-size:var(--font-base); color:#1e3a5f; font-weight:600; margin-bottom:16px; }
+  .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:16px; }
+  .stat-box { background:#f9fafb; border-radius:8px; padding:10px 12px; }
+  .stat-box .lbl { font-size:var(--font-xxs); color:var(--text-muted); text-transform:uppercase; font-weight:600; letter-spacing:.5px; }
+  .stat-box .val { font-size:var(--font-xl); font-weight:700; color:#1e3a5f; margin-top:3px; }
+</style>
+</head>
+<body class="admin-page">
+<div id="topbar" class="admin-header"></div>
+
+<div class="admin-main">
+  <div class="filters-bar">
+    <div>
+      <label>Reservatório</label>
+      <select id="selAlias"></select>
+    </div>
+    <div>
+      <label>Período</label>
+      <select id="selPeriod">
+        <option value="24h">Últimas 24h</option>
+        <option value="7d">7 dias</option>
+        <option value="30d">30 dias</option>
+      </select>
+    </div>
+    <div>
+      <label>Variável</label>
+      <select id="selVar">
+        <option value="pct">Nível (%)</option>
+        <option value="volume_l">Volume (L)</option>
+        <option value="level_cm">Nível (cm)</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="loadChart()">Carregar</button>
+  </div>
+
+  <div class="stats-row" id="statsRow"></div>
+
+  <div class="chart-box">
+    <h3 id="chartTitle">Selecione um reservatório e clique em Carregar</h3>
+    <canvas id="histChart" height="90"></canvas>
+  </div>
+</div>
+
+<script src="assets/vendor/chart.min.js"></script>
+<script src="assets/api.js"></script>
+<script>
+document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('history.html');
+
+let chart = null;
+
+function setStatus(online) {
+  document.getElementById('statusDot').className    = 'status-dot '+(online?'online':'offline');
+  document.getElementById('statusText').textContent = online ? 'Online' : 'Offline';
+}
+
+async function initAliases() {
+  try {
+    const raw  = await aguadaAPI.getReservoirs();
+    const data = aguadaAPI.sortReservoirs(raw);
+    const sel  = document.getElementById('selAlias');
+    sel.innerHTML = data.map(r => `<option value="${r.alias}">${r.alias}${r.name ? ' — '+r.name : ''}</option>`).join('');
+    setStatus(data.some(r => r.online));
+    if (data.length) loadChart();
+  } catch(e) { setStatus(false); }
+}
+
+const VAR_LABEL = {pct:'Nível (%)', volume_l:'Volume (L)', level_cm:'Nível (cm)'};
+
+async function loadChart() {
+  const alias    = document.getElementById('selAlias').value;
+  const period   = document.getElementById('selPeriod').value;
+  const variable = document.getElementById('selVar').value;
+  if (!alias) return;
+
+  document.getElementById('chartTitle').textContent = `${alias} — ${VAR_LABEL[variable]||variable} — ${period}`;
+  document.getElementById('statsRow').innerHTML = '<div style="color:var(--text-muted);font-size:var(--font-sm)">Carregando...</div>';
+
+  try {
+    const rows = await aguadaAPI.getHistory(alias, period);
+    if (!rows.length) {
+      document.getElementById('statsRow').innerHTML = '<div style="color:var(--text-muted);font-size:var(--font-sm)">Sem dados para este período.</div>';
+      if (chart) { chart.destroy(); chart = null; }
+      return;
+    }
+
+    const labels = rows.map(r => {
+      const d = new Date(r.ts*1000);
+      return d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    });
+    const values      = rows.map(r => r[variable] ?? null);
+    const valuesClean = values.filter(v => v != null);
+    const min  = Math.min(...valuesClean).toFixed(1);
+    const max  = Math.max(...valuesClean).toFixed(1);
+    const avg  = (valuesClean.reduce((a,b)=>a+b,0)/valuesClean.length).toFixed(1);
+    const last = valuesClean.at(-1)?.toFixed(1) ?? '—';
+    const unit = variable==='pct' ? '%' : variable==='volume_l' ? ' L' : ' cm';
+
+    document.getElementById('statsRow').innerHTML = [
+      ['Mínimo',   min+unit],
+      ['Máximo',   max+unit],
+      ['Média',    avg+unit],
+      ['Atual',    last+unit],
+      ['Leituras', rows.length],
+    ].map(([l,v]) => `<div class="stat-box"><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join('');
+
+    if (chart) chart.destroy();
+    chart = new Chart(document.getElementById('histChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: VAR_LABEL[variable]||variable,
+          data: values,
+          borderColor: '#667eea',
+          backgroundColor: 'rgba(102,126,234,.08)',
+          borderWidth: 2,
+          pointRadius: rows.length > 200 ? 0 : 2,
+          tension: 0.3,
+          fill: true,
+          spanGaps: true,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { maxTicksLimit:12, font:{size:10} }, grid:{display:false} },
+          y: { ticks: { font:{size:11} } }
+        }
+      }
+    });
+  } catch(e) {
+    document.getElementById('statsRow').innerHTML = `<div class="alert">Erro: ${e.message}</div>`;
+  }
+}
+
+initAliases();
+</script>
+</body>
+</html>

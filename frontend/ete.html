@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>AGUADA — Esgoto (ETE)</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .tab-bar { display:flex; gap:4px; margin-bottom:16px; background:white; border-radius:10px; padding:6px; box-shadow:0 2px 6px rgba(0,0,0,.07); flex-wrap:wrap; width:fit-content; }
+  .tab-btn { padding:7px 18px; border-radius:7px; border:none; cursor:pointer; font-size:var(--font-sm); font-weight:500; background:transparent; color:var(--text-muted); transition:all .15s; }
+  .tab-btn.active { background:var(--accent-purple); color:white; }
+
+  .page-box { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .page-title { color: #1e3a5f; margin-bottom: 15px; font-size: 1.25rem; font-weight: 600; display:flex; justify-content:space-between; align-items:center; }
+  .page-subtitle { color: var(--text-muted); font-size: var(--font-sm); margin-top: -10px; margin-bottom: 20px; display: block; }
+
+  .param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .param-card { border: 1px solid var(--border-color); border-radius: 10px; padding: 16px; background: #fafafa; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .param-card .lbl { font-size: var(--font-xs); color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+  .param-card .val { font-size: 24px; font-weight: 700; color: var(--primary-blue); margin-top: 6px; }
+  .param-card .sub { font-size: var(--font-xs); color: var(--text-muted); margin-top: 4px; }
+  
+  .diagram-ph { background:#f0f4f8; border:1px dashed #b0c4df; border-radius:10px; padding:40px; text-align:center; color:var(--text-muted); font-weight:500; }
+
+  table { width: 100%; border-collapse: collapse; margin-top:10px; }
+  th { text-align: left; padding: 12px 10px; font-size: var(--font-xs); color: var(--text-muted); border-bottom: 1px solid var(--border-color); text-transform:uppercase; letter-spacing:0.5px; }
+  td { padding: 12px 10px; font-size: var(--font-sm); border-bottom: 1px solid var(--border-color); color: var(--text-dark); }
+  tr:hover td { background: #f9f9f9; }
+  
+  .badge-warn { background:#fef3c7; color:#92400e; padding:4px 10px; border-radius:6px; font-size:10px; font-weight:700; text-transform:uppercase; }
+  .badge-danger { background:#fee2e2; color:#991b1b; padding:4px 10px; border-radius:6px; font-size:10px; font-weight:700; text-transform:uppercase; }
+  .badge-ok { background:#d1fae5; color:#065f46; padding:4px 10px; border-radius:6px; font-size:10px; font-weight:700; text-transform:uppercase; }
+</style>
+</head>
+<body class="admin-page">
+<div id="topbar" class="admin-header"></div>
+
+<div class="admin-main">
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('ete', this)">Estação (ETE)</button>
+    <button class="tab-btn" onclick="switchTab('fossas', this)">Fossas Sépticas</button>
+    <button class="tab-btn" onclick="switchTab('gordura', this)">Caixas de Gordura</button>
+    <button class="tab-btn" onclick="switchTab('sao', this)">Caixas SAO</button>
+  </div>
+
+  <!-- ETE -->
+  <div id="viewEte" class="page-box">
+    <div class="page-title">Monitoramento Central — ETE
+      <button class="btn-primary" style="font-size:12px;padding:6px 14px">Modo Manual</button>
+    </div>
+    <span class="page-subtitle">Demonstração de Parâmetros Operacionais (Mockup SCADA)</span>
+    
+    <div class="param-grid">
+      <div class="param-card">
+        <div class="lbl">Elevatória (Afluente)</div>
+        <div class="val" style="color:var(--yellow)">65%</div>
+        <div class="sub">Vazão Entrada: 2.4 L/s</div>
+      </div>
+      <div class="param-card">
+        <div class="lbl">Tanque de Aeração</div>
+        <div class="val">4.5 mg/L O₂</div>
+        <div class="sub">Soprador: <span style="color:var(--success-green);font-weight:600">● Ligado</span></div>
+      </div>
+      <div class="param-card">
+        <div class="lbl">Decantador</div>
+        <div class="val">Normal</div>
+        <div class="sub">Recirculação: Lodo Ativo</div>
+      </div>
+      <div class="param-card">
+        <div class="lbl">Efluente Final</div>
+        <div class="val" style="color:var(--success-green)">1.8 L/s</div>
+        <div class="sub">Dosagem Cloro: Automática</div>
+      </div>
+    </div>
+    
+    <div class="diagram-ph">
+      <div style="font-size:32px;margin-bottom:10px">⚙️💧</div>
+      Diagrama P&ID da ETE será montado aqui integrado ao WebSockets (SCADA).<br>
+      <span style="font-size:12px;opacity:0.7">Controle de bombas (Ligar/Desligar), Válvulas e Níveis em tempo real.</span>
+    </div>
+  </div>
+
+  <!-- FOSSAS SÉPTICAS -->
+  <div id="viewFossas" class="page-box" style="display:none">
+    <div class="page-title">Controle de Fossas Sépticas
+      <button class="btn-primary" style="font-size:12px;padding:6px 14px">+ Nova Inspeção</button>
+    </div>
+    <span class="page-subtitle">Mapeamento de fossas no complexo e cronograma de esgotamento.</span>
+    <table>
+      <thead><tr><th>Código</th><th>Local</th><th>Volume (L)</th><th>Última Limpeza</th><th>Próxima Limpeza</th><th>Status</th><th>Ações</th></tr></thead>
+      <tbody id="fossaList"></tbody>
+    </table>
+  </div>
+
+  <!-- CAIXAS GORDURA -->
+  <div id="viewGordura" class="page-box" style="display:none">
+    <div class="page-title">Caixas de Gordura
+      <button class="btn-primary" style="font-size:12px;padding:6px 14px">+ Registro de Limpeza</button>
+    </div>
+    <span class="page-subtitle">Frequência alta de limpeza preventiva (Cozinhas e Refeitórios).</span>
+    <table>
+      <thead><tr><th>Código</th><th>Local</th><th>Origem</th><th>Ciclo</th><th>Última Limpeza</th><th>Status</th><th>Ações</th></tr></thead>
+      <tbody id="gorduraList"></tbody>
+    </table>
+  </div>
+
+  <!-- CAIXAS SAO -->
+  <div id="viewSao" class="page-box" style="display:none">
+    <div class="page-title">Separadoras de Água e Óleo (SAO)
+      <button class="btn-primary" style="font-size:12px;padding:6px 14px">+ Relatório Manutenção</button>
+    </div>
+    <span class="page-subtitle">Destinação correta de resíduos de oficinas e lava-jatos.</span>
+    <table>
+      <thead><tr><th>Código</th><th>Local</th><th>Responsável</th><th>Capacidade</th><th>Nível Borra/Óleo</th><th>Status</th><th>Ações</th></tr></thead>
+      <tbody id="saoList"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('ete.html');
+
+function switchTab(view, btn) {
+  ['ete', 'fossas', 'gordura', 'sao'].forEach(v => document.getElementById('view'+(v.charAt(0).toUpperCase() + v.slice(1))).style.display = 'none');
+  document.getElementById('view'+(view.charAt(0).toUpperCase() + view.slice(1))).style.display = 'block';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Renderizar Mocks para Fossas
+const fossas = [
+  { cod:'FS-01', local:'Setor Administrativo', vol:'5.000', ult:'10/01/2026', prox:'10/07/2026', sts:'ok' },
+  { cod:'FS-02', local:'Refeitório', vol:'10.000', ult:'05/01/2026', prox:'05/04/2026', sts:'warn' },
+  { cod:'FS-03', local:'Alojamento Norte', vol:'15.000', ult:'15/02/2026', prox:'15/08/2026', sts:'ok' },
+  { cod:'FS-04', local:'Alojamento Sul', vol:'15.000', ult:'16/02/2026', prox:'16/08/2026', sts:'ok' },
+  { cod:'FS-05', local:'Oficina', vol:'8.000', ult:'10/10/2025', prox:'10/04/2026', sts:'danger' },
+];
+
+document.getElementById('fossaList').innerHTML = fossas.map(f => `
+  <tr>
+    <td><strong>${f.cod}</strong></td><td>${f.local}</td><td style="color:var(--text-muted)">${f.vol} L</td>
+    <td>${f.ult}</td><td style="font-weight:600">${f.prox}</td>
+    <td><span class="badge-${f.sts}">${f.sts==='ok'?'No Prazo':f.sts==='warn'?'Atenção':'Atrasado'}</span></td>
+    <td><a href="#" style="color:var(--primary-blue);font-size:12px;font-weight:600;text-decoration:none">Ver Ficha</a></td>
+  </tr>
+`).join('');
+
+// Renderizar Mocks para Caixas de Gordura
+const gorduras = [
+  { cod:'CG-01', local:'Refeitório Principal', orig:'Pias Coz. Quente', ciclo:'30 dias', ult:'20/03/2026', sts:'ok' },
+  { cod:'CG-02', local:'Refeitório Principal', orig:'Preparação Carnes', ciclo:'30 dias', ult:'15/03/2026', sts:'warn' },
+  { cod:'CG-03', local:'Lanchonete Admin', orig:'Pia Geral', ciclo:'90 dias', ult:'05/01/2026', sts:'danger' },
+];
+
+document.getElementById('gorduraList').innerHTML = gorduras.map(g => `
+  <tr>
+    <td><strong>${g.cod}</strong></td><td>${g.local}</td><td style="color:var(--text-muted)">${g.orig}</td>
+    <td style="color:var(--text-muted)">${g.ciclo}</td><td>${g.ult}</td>
+    <td><span class="badge-${g.sts}">${g.sts==='ok'?'Limpa':g.sts==='warn'?'Agendar':'Crítico'}</span></td>
+    <td><a href="#" style="color:var(--primary-blue);font-size:12px;font-weight:600;text-decoration:none">Gerir</a></td>
+  </tr>
+`).join('');
+
+// Renderizar Mocks para SAO
+const saos = [
+  { cod:'SAO-01', local:'Oficina MecânicaPesada', resp:'Equipe Manut.', cap:'2.500', nivel:'Alto (80%)', sts:'danger' },
+  { cod:'SAO-02', local:'Lava Jato Frota Leve', resp:'Equipe Transporte', cap:'1.000', nivel:'Baixo (20%)', sts:'ok' },
+  { cod:'SAO-03', local:'Abastecimento (Bomba)', resp:'Equipe Logística', cap:'1.500', nivel:'Médio (45%)', sts:'ok' },
+];
+
+document.getElementById('saoList').innerHTML = saos.map(s => `
+  <tr>
+    <td><strong>${s.cod}</strong></td><td>${s.local}</td><td>${s.resp}</td>
+    <td style="color:var(--text-muted)">${s.cap} L</td>
+    <td style="font-weight:600;color:${s.sts==='danger'?'var(--red)':'var(--text-dark)'}">${s.nivel}</td>
+    <td><span class="badge-${s.sts==='danger'?'warn':'ok'}">${s.sts==='danger'?'Limpeza Urgente':'Limpa'}</span></td>
+    <td><a href="#" style="color:var(--primary-blue);font-size:12px;font-weight:600;text-decoration:none">Coleta</a></td>
+  </tr>
+`).join('');
+</script>
+</body>
+</html>
