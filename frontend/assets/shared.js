@@ -1,8 +1,6 @@
 // shared.js — constantes, helpers e mixins comuns a todas as páginas
 // Versão offline: sem referências a CDN
 
-const ORDERED_ALIASES = ['CON', 'CAV', 'CB31', 'CB32', 'CIE1', 'CIE2', 'CBIF1', 'CBIF2'];
-
 // Sincroniza o indicador de status do topbar unificado (navHTML)
 function _syncTopbarStatus(online) {
   const dot = document.getElementById('statusDot');
@@ -21,14 +19,6 @@ const ALIAS_FILL_COLORS = {
 
 // Cor ISA-101 baseada em percentual
 function statusColor(pct, online) {
-  if (!online) return '#3d556e';
-  if (pct <= 20) return '#ef4444';
-  if (pct <= 35) return '#f59e0b';
-  return '#22c55e';
-}
-
-// Cor para marcador Leaflet baseada em percentual e online
-function markerColor(pct, online) {
   if (!online) return '#3d556e';
   if (pct <= 20) return '#ef4444';
   if (pct <= 35) return '#f59e0b';
@@ -92,12 +82,12 @@ function normalizeWsMessage(message) {
 
 // ── Tema claro/escuro ──────────────────────────────────────────
 function getTheme() {
-  return localStorage.getItem('aguada-theme') || 'dark';
+  return localStorage.getItem('aguada-theme') || 'light';
 }
 
 function applyTheme(theme) {
-  if (theme === 'light') {
-    document.documentElement.setAttribute('data-theme', 'light');
+  if (theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
   } else {
     document.documentElement.removeAttribute('data-theme');
   }
@@ -224,6 +214,6 @@ function reservoirModalMixin() {
       }
     },
 
-    formatTs, timeAgo, rssiColor, statusColor, markerColor,
+    formatTs, timeAgo, rssiColor, statusColor,
   };
 }

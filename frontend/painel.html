@@ -5,11 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" href="data:,">
   <title>Aguada — Painel Geral</title>
-  <link rel="stylesheet" href="assets/aguada.css"/>
+  <link rel="stylesheet" href="assets/aguada.css?v=2"/>
   <link rel="stylesheet" href="assets/style.css"/>
-  <style>
-    /* Admin-main padroniza o wrapper, não precisamos mexer nos overflows aqui */
-  </style>
   <link rel="stylesheet" href="assets/vendor/leaflet.min.css"/>
   <style>
     [x-cloak]{display:none}
@@ -184,7 +181,7 @@
         <div class="pg-cell-body">
           <table class="dt">
             <thead><tr>
-              <th>Alias</th><th>Vol. Atual (m³)</th><th>Vol. Máx (m³)</th><th>%</th><th>Balanço (Dia)</th><th>Status</th><th>Atulização</th>
+              <th>Alias</th><th>Vol. Atual (m³)</th><th>Vol. Máx (m³)</th><th>%</th><th>Balanço (Dia)</th><th>Status</th><th>Atualização</th>
             </tr></thead>
             <tbody>
               <template x-for="r in sortedReservoirs" :key="r.alias">
@@ -196,9 +193,7 @@
                     <span class="bar-wrap"><span class="bar-fill" :style="`width:${r.pct||0}%;background:${statusColor(r.pct,r.online)}`"></span></span>
                     <span class="mono" style="margin-left:4px" x-text="r.pct!=null?Math.round(r.pct)+'%':'—'"></span>
                   </td>
-                  <td class="mono">
-                    <span :class="r.pct > 50 ? 'delta-pos':'delta-neg'" x-text="r.pct!=null ? (r.pct > 50 ? '+12.4' : '-5.3') + ' m³' : '—'"></span>
-                  </td>
+                  <td class="mono" style="color:var(--text3)">---</td>
                   <td>
                     <span class="badge"
                       :class="!r.online?'badge-gray':r.pct<=20?'badge-red':r.pct<=35?'badge-yellow':'badge-green'"
@@ -217,7 +212,7 @@
         <div class="pg-cell-header">
           <span class="pg-cell-title">Equipamentos</span>
           <div class="pg-cell-actions">
-            <a href="dispositivos.html" class="icon-btn" title="Abrir Dispositivos">
+            <a href="manutencao.html" class="icon-btn" title="Abrir Dispositivos">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
           </div>
@@ -267,7 +262,7 @@
         <div class="pg-cell-header">
           <span class="pg-cell-title">Hidrômetros</span>
           <div class="pg-cell-actions">
-            <a href="analise.html" class="icon-btn" title="Abrir Análise">
+            <a href="dados.html" class="icon-btn" title="Abrir Análise">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
           </div>
@@ -587,7 +582,7 @@ function painelApp() {
         } else if (!r.lat || !r.lng) return;
 
         const isRes = r.type === 'res';
-        const color = isRes ? markerColor(r.pct, r.online) : (r.type === 'ete' ? '#8b5cf6' : '#d97706');
+        const color = isRes ? statusColor(r.pct, r.online) : (r.type === 'ete' ? '#8b5cf6' : '#d97706');
         const pctText = isRes ? (r.pct!=null?Math.round(r.pct)+'%':'?') : (r.type === 'ete' ? 'ETE' : 'ESG');
         
         const icon = L.divIcon({

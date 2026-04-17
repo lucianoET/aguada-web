@@ -1,0 +1,86 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: 💧 AGUADA
+    - navigation [ref=e4]:
+      - link "Painel" [ref=e5] [cursor=pointer]:
+        - /url: painel.html
+      - link "SCADA" [ref=e6] [cursor=pointer]:
+        - /url: scada.html
+      - link "Dados" [ref=e7] [cursor=pointer]:
+        - /url: dados.html
+      - link "Relatório" [ref=e8] [cursor=pointer]:
+        - /url: report.html
+      - link "Alertas" [ref=e9] [cursor=pointer]:
+        - /url: alerts.html
+      - link "Manutenção" [ref=e10] [cursor=pointer]:
+        - /url: manutencao.html
+      - link "Qualidade" [ref=e11] [cursor=pointer]:
+        - /url: qualidade.html
+      - link "Esgoto" [ref=e12] [cursor=pointer]:
+        - /url: ete.html
+      - link "Documentação" [ref=e13] [cursor=pointer]:
+        - /url: documentacao.html
+    - generic [ref=e14]:
+      - button "Alternar Tema Claro/Escuro" [ref=e15] [cursor=pointer]:
+        - img [ref=e16]
+      - generic [ref=e18]:
+        - img [ref=e19]
+        - generic [ref=e22]: Buscando rede...
+  - generic [ref=e23]:
+    - generic [ref=e24]:
+      - button "Manutenção" [ref=e25] [cursor=pointer]
+      - button "Sistema" [ref=e26] [cursor=pointer]
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - generic [ref=e30]: "2"
+          - generic [ref=e31]: Atrasadas
+        - generic [ref=e32]:
+          - generic [ref=e33]: "3"
+          - generic [ref=e34]: Pendentes
+        - generic [ref=e35]:
+          - generic [ref=e36]: "8"
+          - generic [ref=e37]: Concluídas (30d)
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - generic [ref=e40]:
+            - heading "🔧 Ordens de Serviço (Tarefas Locais)" [level=2] [ref=e41]
+            - button "+ Nova OS" [ref=e42] [cursor=pointer]
+          - generic [ref=e44]: Nenhuma OS pendente.
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - heading "📋 Checklist Diário" [level=2] [ref=e48]
+            - generic [ref=e49]:
+              - list [ref=e50]:
+                - listitem [ref=e51]: Verificar níveis de todos os reservatórios
+                - listitem [ref=e53]: Confirmar conectividade dos sensores
+                - listitem [ref=e55]: Checar alertas do sistema
+                - listitem [ref=e57]: Inspecionar pressão das tubulações
+                - listitem [ref=e59]: Registrar leituras dos hidrômetros
+                - listitem [ref=e61]: Revisar relatório do dia anterior
+              - generic [ref=e63]: 🟢 Concluído · 🟡 Em andamento · ⚪ Pendente
+          - generic [ref=e64]:
+            - heading "📅 Próximas" [level=2] [ref=e66]
+            - table [ref=e68]:
+              - rowgroup [ref=e69]:
+                - row "Data Tipo Local" [ref=e70]:
+                  - columnheader "Data" [ref=e71]
+                  - columnheader "Tipo" [ref=e72]
+                  - columnheader "Local" [ref=e73]
+              - rowgroup [ref=e74]:
+                - row "15/04 Fw gateway Sala TI" [ref=e75]:
+                  - cell "15/04" [ref=e76]
+                  - cell "Fw gateway" [ref=e77]
+                  - cell "Sala TI" [ref=e78]
+                - row "20/04 Bateria Campo" [ref=e79]:
+                  - cell "20/04" [ref=e80]
+                  - cell "Bateria" [ref=e81]
+                  - cell "Campo" [ref=e82]
+                - row "30/04 Limpeza CB31/32" [ref=e83]:
+                  - cell "30/04" [ref=e84]
+                  - cell "Limpeza" [ref=e85]
+                  - cell "CB31/32" [ref=e86]
+                - row "15/05 Inspeção geral Todos" [ref=e87]:
+                  - cell "15/05" [ref=e88]
+                  - cell "Inspeção geral" [ref=e89]
+                  - cell "Todos" [ref=e90]

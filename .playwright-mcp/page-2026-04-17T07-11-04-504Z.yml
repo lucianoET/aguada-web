@@ -1,0 +1,361 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: 💧 AGUADA
+    - navigation [ref=e4]:
+      - link "Painel" [ref=e5] [cursor=pointer]:
+        - /url: painel.html
+      - link "SCADA" [ref=e6] [cursor=pointer]:
+        - /url: scada.html
+      - link "Dados" [ref=e7] [cursor=pointer]:
+        - /url: dados.html
+      - link "Relatório" [ref=e8] [cursor=pointer]:
+        - /url: report.html
+      - link "Alertas" [ref=e9] [cursor=pointer]:
+        - /url: alerts.html
+      - link "Manutenção" [ref=e10] [cursor=pointer]:
+        - /url: manutencao.html
+      - link "Qualidade" [ref=e11] [cursor=pointer]:
+        - /url: qualidade.html
+      - link "Esgoto" [ref=e12] [cursor=pointer]:
+        - /url: ete.html
+      - link "Documentação" [ref=e13] [cursor=pointer]:
+        - /url: documentacao.html
+    - generic [ref=e14]:
+      - button "Alternar Tema Claro/Escuro" [ref=e15] [cursor=pointer]:
+        - img [ref=e16]
+      - generic [ref=e18]:
+        - img [ref=e19]
+        - generic [ref=e22]: Ao vivo
+  - generic [ref=e24]:
+    - generic [ref=e25]:
+      - generic [ref=e26]:
+        - generic [ref=e27]: Mapa
+        - button "Expandir mapa" [ref=e29] [cursor=pointer]:
+          - img
+      - generic [ref=e35]:
+        - generic:
+          - generic:
+            - button "CB31 75%" [ref=e37] [cursor=pointer]:
+              - generic [ref=e38]:
+                - generic [ref=e39]: CB31
+                - generic [ref=e40]: 75%
+            - button "CB32 95%" [ref=e41] [cursor=pointer]:
+              - generic [ref=e42]:
+                - generic [ref=e43]: CB32
+                - generic [ref=e44]: 95%
+            - button "CON 85%" [ref=e45] [cursor=pointer]:
+              - generic [ref=e46]:
+                - generic [ref=e47]: CON
+                - generic [ref=e48]: 85%
+            - button "CIE1 80%" [ref=e49] [cursor=pointer]:
+              - generic [ref=e50]:
+                - generic [ref=e51]: CIE1
+                - generic [ref=e52]: 80%
+            - button "CIE2 66%" [ref=e53] [cursor=pointer]:
+              - generic [ref=e54]:
+                - generic [ref=e55]: CIE2
+                - generic [ref=e56]: 66%
+            - button "CBIF2 70%" [ref=e57] [cursor=pointer]:
+              - generic [ref=e58]:
+                - generic [ref=e59]: CBIF2
+                - generic [ref=e60]: 70%
+            - button "CBIF1 40%" [ref=e61] [cursor=pointer]:
+              - generic [ref=e62]:
+                - generic [ref=e63]: CBIF1
+                - generic [ref=e64]: 40%
+            - button "CAV 81%" [ref=e65] [cursor=pointer]:
+              - generic [ref=e66]:
+                - generic [ref=e67]: CAV
+                - generic [ref=e68]: 81%
+            - button "ETE ETE" [ref=e69] [cursor=pointer]:
+              - generic [ref=e70]:
+                - generic [ref=e71]: ETE
+                - generic [ref=e72]: ETE
+            - button "FS-01 ESG" [ref=e73] [cursor=pointer]:
+              - generic [ref=e74]:
+                - generic [ref=e75]: FS-01
+                - generic [ref=e76]: ESG
+            - button "CG-01 ESG" [ref=e77] [cursor=pointer]:
+              - generic [ref=e78]:
+                - generic [ref=e79]: CG-01
+                - generic [ref=e80]: ESG
+        - generic:
+          - generic [ref=e81]:
+            - button "Zoom in" [ref=e82] [cursor=pointer]: +
+            - button "Zoom out" [ref=e83] [cursor=pointer]: −
+          - button "Layers" [ref=e85] [cursor=pointer]
+          - generic [ref=e86]:
+            - link "Leaflet" [ref=e87] [cursor=pointer]:
+              - /url: https://leafletjs.com
+              - img [ref=e88]
+              - text: Leaflet
+            - text: "| © OpenStreetMap"
+    - generic [ref=e92]:
+      - generic [ref=e93]:
+        - generic [ref=e94]: Reservatórios
+        - generic [ref=e96]: "Média Setor: 80%"
+      - generic [ref=e97]:
+        - generic [ref=e98]:
+          - generic [ref=e99]: "8"
+          - generic [ref=e100]: Recursos
+        - generic [ref=e101]:
+          - generic [ref=e102]: 80%
+          - generic [ref=e103]: Vol. médio
+        - generic [ref=e104]:
+          - generic [ref=e105]: "0"
+          - generic [ref=e106]: Críticos
+        - generic [ref=e107]:
+          - generic [ref=e108]: 6/8
+          - generic [ref=e109]: Online
+      - table [ref=e111]:
+        - rowgroup [ref=e112]:
+          - row "Alias Vol. Atual (m³) Vol. Máx (m³) % Balanço (Dia) Status Atualização" [ref=e113]:
+            - columnheader "Alias" [ref=e114]
+            - columnheader "Vol. Atual (m³)" [ref=e115]
+            - columnheader "Vol. Máx (m³)" [ref=e116]
+            - columnheader "%" [ref=e117]
+            - columnheader "Balanço (Dia)" [ref=e118]
+            - columnheader "Status" [ref=e119]
+            - columnheader "Atualização" [ref=e120]
+        - rowgroup [ref=e121]:
+          - row "CON 68 m³ 80 m³ 85% --- Normal 2min atrás" [ref=e122] [cursor=pointer]:
+            - cell "CON" [ref=e123]
+            - cell "68 m³" [ref=e124]
+            - cell "80 m³" [ref=e125]
+            - cell "85%" [ref=e126]: 85%
+            - cell "---" [ref=e128]
+            - cell "Normal" [ref=e129]:
+              - generic [ref=e130]: Normal
+            - cell "2min atrás" [ref=e131]
+          - row "CAV 65 m³ 80 m³ 81% --- Normal 47s atrás" [ref=e132] [cursor=pointer]:
+            - cell "CAV" [ref=e133]
+            - cell "65 m³" [ref=e134]
+            - cell "80 m³" [ref=e135]
+            - cell "81%" [ref=e136]: 81%
+            - cell "---" [ref=e138]
+            - cell "Normal" [ref=e139]:
+              - generic [ref=e140]: Normal
+            - cell "47s atrás" [ref=e141]
+          - row "CIE1 195 m³ 245 m³ 80% --- Normal 4min atrás" [ref=e142] [cursor=pointer]:
+            - cell "CIE1" [ref=e143]
+            - cell "195 m³" [ref=e144]
+            - cell "245 m³" [ref=e145]
+            - cell "80%" [ref=e146]: 80%
+            - cell "---" [ref=e148]
+            - cell "Normal" [ref=e149]:
+              - generic [ref=e150]: Normal
+            - cell "4min atrás" [ref=e151]
+          - row "CIE2 161 m³ 245 m³ 66% --- Normal 1min atrás" [ref=e152] [cursor=pointer]:
+            - cell "CIE2" [ref=e153]
+            - cell "161 m³" [ref=e154]
+            - cell "245 m³" [ref=e155]
+            - cell "66%" [ref=e156]: 66%
+            - cell "---" [ref=e158]
+            - cell "Normal" [ref=e159]:
+              - generic [ref=e160]: Normal
+            - cell "1min atrás" [ref=e161]
+          - row "CB31 30 m³ 40 m³ 75% --- Normal 1min atrás" [ref=e162] [cursor=pointer]:
+            - cell "CB31" [ref=e163]
+            - cell "30 m³" [ref=e164]
+            - cell "40 m³" [ref=e165]
+            - cell "75%" [ref=e166]: 75%
+            - cell "---" [ref=e168]
+            - cell "Normal" [ref=e169]:
+              - generic [ref=e170]: Normal
+            - cell "1min atrás" [ref=e171]
+          - row "CB32 38 m³ 40 m³ 95% --- Normal 1min atrás" [ref=e172] [cursor=pointer]:
+            - cell "CB32" [ref=e173]
+            - cell "38 m³" [ref=e174]
+            - cell "40 m³" [ref=e175]
+            - cell "95%" [ref=e176]: 95%
+            - cell "---" [ref=e178]
+            - cell "Normal" [ref=e179]:
+              - generic [ref=e180]: Normal
+            - cell "1min atrás" [ref=e181]
+          - row "CBIF2 28 m³ 40 m³ 70% --- Offline 246h atrás" [ref=e182] [cursor=pointer]:
+            - cell "CBIF2" [ref=e183]
+            - cell "28 m³" [ref=e184]
+            - cell "40 m³" [ref=e185]
+            - cell "70%" [ref=e186]: 70%
+            - cell "---" [ref=e188]
+            - cell "Offline" [ref=e189]:
+              - generic [ref=e190]: Offline
+            - cell "246h atrás" [ref=e191]
+          - row "CBIF1 16 m³ 40 m³ 40% --- Offline 246h atrás" [ref=e192] [cursor=pointer]:
+            - cell "CBIF1" [ref=e193]
+            - cell "16 m³" [ref=e194]
+            - cell "40 m³" [ref=e195]
+            - cell "40%" [ref=e196]: 40%
+            - cell "---" [ref=e198]
+            - cell "Offline" [ref=e199]:
+              - generic [ref=e200]: Offline
+            - cell "246h atrás" [ref=e201]
+    - generic [ref=e202]:
+      - generic [ref=e203]:
+        - generic [ref=e204]: Equipamentos
+        - link "Abrir Dispositivos" [ref=e206] [cursor=pointer]:
+          - /url: manutencao.html
+          - img [ref=e207]
+      - generic [ref=e211]:
+        - generic [ref=e212]: Bombas
+        - table [ref=e213]:
+          - rowgroup [ref=e214]:
+            - row "Bomba Estado" [ref=e215]:
+              - columnheader "Bomba" [ref=e216]
+              - columnheader "Estado" [ref=e217]
+          - rowgroup [ref=e218]:
+            - row "B02-D manutencao" [ref=e219]:
+              - cell "B02-D" [ref=e220]
+              - cell "manutencao" [ref=e221]:
+                - generic [ref=e222]: manutencao
+            - row "B03-D ligada" [ref=e223]:
+              - cell "B03-D" [ref=e224]
+              - cell "ligada" [ref=e225]:
+                - generic [ref=e226]: ligada
+            - row "B03-E desligada" [ref=e227]:
+              - cell "B03-E" [ref=e228]
+              - cell "desligada" [ref=e229]:
+                - generic [ref=e230]: desligada
+            - row "BIF-D desligada" [ref=e231]:
+              - cell "BIF-D" [ref=e232]
+              - cell "desligada" [ref=e233]:
+                - generic [ref=e234]: desligada
+            - row "BIF-E desligada" [ref=e235]:
+              - cell "BIF-E" [ref=e236]
+              - cell "desligada" [ref=e237]:
+                - generic [ref=e238]: desligada
+        - generic [ref=e239]: Válvulas
+        - table [ref=e240]:
+          - rowgroup [ref=e241]:
+            - row "Válvula Estado" [ref=e242]:
+              - columnheader "Válvula" [ref=e243]
+              - columnheader "Estado" [ref=e244]
+          - rowgroup [ref=e245]:
+            - row "V-CAV-AV fechada" [ref=e246]:
+              - cell "V-CAV-AV" [ref=e247]
+              - cell "fechada" [ref=e248]:
+                - generic [ref=e249]: fechada
+            - row "V-CAV-AZ fechada" [ref=e250]:
+              - cell "V-CAV-AZ" [ref=e251]
+              - cell "fechada" [ref=e252]:
+                - generic [ref=e253]: fechada
+            - row "V-CAV-BA aberta" [ref=e254]:
+              - cell "V-CAV-BA" [ref=e255]
+              - cell "aberta" [ref=e256]:
+                - generic [ref=e257]: aberta
+            - row "V-CON-AV fechada" [ref=e258]:
+              - cell "V-CON-AV" [ref=e259]
+              - cell "fechada" [ref=e260]:
+                - generic [ref=e261]: fechada
+            - row "V-CON-AVAZ fechada" [ref=e262]:
+              - cell "V-CON-AVAZ" [ref=e263]
+              - cell "fechada" [ref=e264]:
+                - generic [ref=e265]: fechada
+            - row "V-CON-AZ fechada" [ref=e266]:
+              - cell "V-CON-AZ" [ref=e267]
+              - cell "fechada" [ref=e268]:
+                - generic [ref=e269]: fechada
+            - row "VALV-IE-INTERLIG fechada" [ref=e270]:
+              - cell "VALV-IE-INTERLIG" [ref=e271]
+              - cell "fechada" [ref=e272]:
+                - generic [ref=e273]: fechada
+    - generic [ref=e274]:
+      - generic [ref=e275]:
+        - generic [ref=e276]: Hidrômetros
+        - link "Abrir Análise" [ref=e278] [cursor=pointer]:
+          - /url: dados.html
+          - img [ref=e279]
+      - table [ref=e284]:
+        - rowgroup [ref=e285]:
+          - row "Medidor Leitura Atual (m³) Data/Hora Δ Diário (m³) Situação" [ref=e286]:
+            - columnheader "Medidor" [ref=e287]
+            - columnheader "Leitura Atual (m³)" [ref=e288]
+            - columnheader "Data/Hora" [ref=e289]
+            - columnheader "Δ Diário (m³)" [ref=e290]
+            - columnheader "Situação" [ref=e291]
+        - rowgroup [ref=e292]:
+          - row "HID-CONC 56779865.000 14/04/26, 01:06 +985.000 Operando" [ref=e293]:
+            - cell "HID-CONC" [ref=e294]
+            - cell "56779865.000" [ref=e295]
+            - cell "14/04/26, 01:06" [ref=e296]
+            - cell "+985.000" [ref=e297]
+            - cell "Operando" [ref=e298]:
+              - generic [ref=e299]: Operando
+          - row "HID-AV 12345.500 11/04/26, 17:24 +0.100 Operando" [ref=e300]:
+            - cell "HID-AV" [ref=e301]
+            - cell "12345.500" [ref=e302]
+            - cell "11/04/26, 17:24" [ref=e303]
+            - cell "+0.100" [ref=e304]
+            - cell "Operando" [ref=e305]:
+              - generic [ref=e306]: Operando
+          - row "HID-AV|AZ 12345.700 11/04/26, 17:24 +0.600 Operando" [ref=e307]:
+            - cell "HID-AV|AZ" [ref=e308]
+            - cell "12345.700" [ref=e309]
+            - cell "11/04/26, 17:24" [ref=e310]
+            - cell "+0.600" [ref=e311]
+            - cell "Operando" [ref=e312]:
+              - generic [ref=e313]: Operando
+          - row "HID-PRAIA 23456.680 11/04/26, 17:22 +0.200 Operando" [ref=e314]:
+            - cell "HID-PRAIA" [ref=e315]
+            - cell "23456.680" [ref=e316]
+            - cell "11/04/26, 17:22" [ref=e317]
+            - cell "+0.200" [ref=e318]
+            - cell "Operando" [ref=e319]:
+              - generic [ref=e320]: Operando
+          - row "HID-IF 23456.800 11/04/26, 17:21 +0.210 Operando" [ref=e321]:
+            - cell "HID-IF" [ref=e322]
+            - cell "23456.800" [ref=e323]
+            - cell "11/04/26, 17:21" [ref=e324]
+            - cell "+0.210" [ref=e325]
+            - cell "Operando" [ref=e326]:
+              - generic [ref=e327]: Operando
+    - generic [ref=e328]:
+      - generic [ref=e330]: Saneamento (Esgoto)
+      - generic [ref=e331]:
+        - generic [ref=e332]:
+          - generic [ref=e333]: ETE Principal
+          - generic [ref=e334]: Normal
+        - generic [ref=e335]:
+          - generic [ref=e336]: Nível Tanque Equalização
+          - generic [ref=e337]: 45%
+        - generic [ref=e338]:
+          - generic [ref=e339]: Odor Reator (Biogás)
+          - generic [ref=e340]: Baixo
+        - generic [ref=e341]:
+          - generic [ref=e342]: Alertas Inspeção (Fossas)
+          - generic [ref=e343]: Sem alertas
+    - generic [ref=e344]:
+      - generic [ref=e346]: Operação & Manutenção
+      - generic [ref=e347]:
+        - generic [ref=e348]: Balanço Hídrico Global (24h)
+        - generic [ref=e349]:
+          - generic [ref=e350]:
+            - generic [ref=e351]: 342 m³
+            - generic [ref=e352]: Aporte
+          - generic [ref=e353]:
+            - generic [ref=e354]: 315 m³
+            - generic [ref=e355]: Consumo
+          - generic [ref=e356]:
+            - generic [ref=e357]: +27 m³
+            - generic [ref=e358]: Retenção
+        - generic [ref=e359]: Agenda de Intervenções
+        - list [ref=e360]:
+          - listitem [ref=e361]: "18/Abr: Desobstrução na rede da Ala Sul (CG-01)"
+          - listitem [ref=e362]: "22/Abr: Manutenção Preventiva - Bomba B-01"
+          - listitem [ref=e363]: "30/Abr: Calibração semestral de Hidrômetros"
+  - generic [ref=e364]:
+    - button [ref=e369] [cursor=pointer]:
+      - img
+    - generic [ref=e372]:
+      - generic [ref=e375]:
+        - generic [ref=e377]: Volume
+        - generic [ref=e379]: Nível
+        - generic [ref=e381]: RSSI
+        - generic [ref=e383]: Atualizado
+      - generic [ref=e384]: Leitura Manual
+      - generic [ref=e385]:
+        - button "%" [ref=e386] [cursor=pointer]
+        - button "Litros" [ref=e387] [cursor=pointer]
+      - generic [ref=e388]:
+        - spinbutton [ref=e389]
+        - button [ref=e390] [cursor=pointer]

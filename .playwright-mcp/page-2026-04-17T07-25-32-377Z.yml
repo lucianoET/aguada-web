@@ -1,0 +1,62 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: 💧 AGUADA
+    - navigation [ref=e4]:
+      - link "Painel" [ref=e5] [cursor=pointer]:
+        - /url: painel.html
+      - link "SCADA" [ref=e6] [cursor=pointer]:
+        - /url: scada.html
+      - link "Dados" [ref=e7] [cursor=pointer]:
+        - /url: dados.html
+      - link "Relatório" [ref=e8] [cursor=pointer]:
+        - /url: report.html
+      - link "Alertas" [ref=e9] [cursor=pointer]:
+        - /url: alerts.html
+      - link "Manutenção" [ref=e10] [cursor=pointer]:
+        - /url: manutencao.html
+      - link "Qualidade" [ref=e11] [cursor=pointer]:
+        - /url: qualidade.html
+      - link "Esgoto" [ref=e12] [cursor=pointer]:
+        - /url: ete.html
+      - link "Documentação" [ref=e13] [cursor=pointer]:
+        - /url: documentacao.html
+    - generic [ref=e14]:
+      - button "Alternar Tema Claro/Escuro" [ref=e15] [cursor=pointer]:
+        - img [ref=e16]
+      - generic [ref=e18]:
+        - img [ref=e19]
+        - generic [ref=e22]: Online
+  - generic [ref=e24]:
+    - generic [ref=e25]:
+      - generic [ref=e26]:
+        - heading "🚨 Alertas Ativos" [level=2] [ref=e27]
+        - generic [ref=e28]: "3"
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - strong [ref=e31]: 🔴 CRÍTICO — CIE2 (Cisterna IE-2) sem comunicação
+          - text: Último dado há 11 minutos. Verifique o sensor e a alimentação.
+          - generic [ref=e32]: "Verificado: 17/04/2026, 04:25:32"
+        - generic [ref=e33]:
+          - strong [ref=e34]: 🔴 CRÍTICO — CBIF1 (Casa de Bombas IF-1) sem comunicação
+          - text: Último dado há 14790 minutos. Verifique o sensor e a alimentação.
+          - generic [ref=e35]: "Verificado: 17/04/2026, 04:25:32"
+        - generic [ref=e36]:
+          - strong [ref=e37]: 🔴 CRÍTICO — CBIF2 (Casa de Bombas IF-2) sem comunicação
+          - text: Último dado há 14790 minutos. Verifique o sensor e a alimentação.
+          - generic [ref=e38]: "Verificado: 17/04/2026, 04:25:32"
+    - generic [ref=e39]:
+      - heading "📊 Resumo" [level=2] [ref=e41]
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: 🔴 Críticos
+          - generic [ref=e45]: "3"
+        - generic [ref=e46]:
+          - generic [ref=e47]: 🟡 Avisos
+          - generic [ref=e48]: "0"
+        - generic [ref=e49]:
+          - generic [ref=e50]: ✅ Normais
+          - generic [ref=e51]: "5"
+        - generic [ref=e52]:
+          - generic [ref=e53]: 📡 Online
+          - generic [ref=e54]: 5/8
+        - generic [ref=e56]: "Última verificação: 04:25:32"

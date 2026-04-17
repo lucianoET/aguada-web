@@ -1,0 +1,333 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: 💧 AGUADA
+    - navigation [ref=e4]:
+      - link "Painel" [ref=e5] [cursor=pointer]:
+        - /url: painel.html
+      - link "SCADA" [ref=e6] [cursor=pointer]:
+        - /url: scada.html
+      - link "Dados" [ref=e7] [cursor=pointer]:
+        - /url: dados.html
+      - link "Relatório" [ref=e8] [cursor=pointer]:
+        - /url: report.html
+      - link "Alertas" [ref=e9] [cursor=pointer]:
+        - /url: alerts.html
+      - link "Manutenção" [ref=e10] [cursor=pointer]:
+        - /url: manutencao.html
+      - link "Qualidade" [ref=e11] [cursor=pointer]:
+        - /url: qualidade.html
+      - link "Esgoto" [ref=e12] [cursor=pointer]:
+        - /url: ete.html
+      - link "Documentação" [ref=e13] [cursor=pointer]:
+        - /url: documentacao.html
+    - generic [ref=e14]:
+      - button "Alternar Tema Claro/Escuro" [ref=e15] [cursor=pointer]:
+        - img [ref=e16]
+      - generic [ref=e18]:
+        - img [ref=e19]
+        - generic [ref=e22]: Ao vivo
+  - generic [ref=e25]:
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - generic [ref=e28]: SISTEMA HIDRÁULICO — CMASM
+        - generic [ref=e29]:
+          - strong [ref=e30]: "0"
+          - text: reservatórios
+        - generic [ref=e31]:
+          - strong [ref=e32]: "7"
+          - text: bombas
+        - generic [ref=e33]:
+          - strong [ref=e34]: "5"
+          - text: válvulas
+        - generic [ref=e35]:
+          - strong [ref=e36]: "6"
+          - text: hidrômetros
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - text: balanço
+          - strong [ref=e39]: —
+        - generic [ref=e40]:
+          - text: atualizado
+          - strong [ref=e41]: 0s atrás
+    - generic [ref=e44]:
+      - img
+      - generic [ref=e45]:
+        - generic [ref=e46]:
+          - text: CBIF — C. BOMBAS ILHA DAS FLORES
+          - button "i" [ref=e47] [cursor=pointer]
+        - generic [ref=e48]:
+          - generic [ref=e50]:
+            - button "CBIF1 CBIF1 · 40m³ 70% 50% 30% 10% 0.0% — m³ — OFFLINE" [ref=e51] [cursor=pointer]:
+              - generic [ref=e52]:
+                - generic [ref=e53]: CBIF1
+                - generic [ref=e54]: CBIF1 · 40m³
+              - generic [ref=e55]:
+                - generic: 70%
+                - generic: 50%
+                - generic: 30%
+                - generic: 10%
+                - generic:
+                  - generic: 0.0%
+                  - generic: — m³
+              - generic [ref=e56]:
+                - generic [ref=e57]: —
+                - generic [ref=e58]: OFFLINE
+            - button "CBIF2 CBIF2 · 40m³ 70% 50% 30% 10% 0.0% — m³ — OFFLINE" [ref=e59] [cursor=pointer]:
+              - generic [ref=e60]:
+                - generic [ref=e61]: CBIF2
+                - generic [ref=e62]: CBIF2 · 40m³
+              - generic [ref=e63]:
+                - generic: 70%
+                - generic: 50%
+                - generic: 30%
+                - generic: 10%
+                - generic:
+                  - generic: 0.0%
+                  - generic: — m³
+              - generic [ref=e64]:
+                - generic [ref=e65]: —
+                - generic [ref=e66]: OFFLINE
+          - generic [ref=e69]:
+            - button "pump BIF-D desligada" [ref=e70] [cursor=pointer]:
+              - img "pump" [ref=e71]
+              - generic [ref=e72]: BIF-D
+              - generic [ref=e73]: desligada
+            - button "pump BIF-E desligada" [ref=e74] [cursor=pointer]:
+              - img "pump" [ref=e75]
+              - generic [ref=e76]: BIF-E
+              - generic [ref=e77]: desligada
+      - 'button "HID-CONC L1: 56778880.00 L2: 56779865.00 B: +985.00" [ref=e78] [cursor=pointer]':
+        - generic [ref=e79]: HID-CONC
+        - generic [ref=e80]:
+          - generic [ref=e81]:
+            - text: "L1:"
+            - strong [ref=e82]: "56778880.00"
+          - generic [ref=e83]:
+            - text: "L2:"
+            - strong [ref=e84]: "56779865.00"
+          - generic [ref=e85]:
+            - text: "B:"
+            - strong [ref=e86]: "+985.00"
+      - 'button "HID-IF L1: 23456.59 L2: 23456.80 B: +0.21" [ref=e87] [cursor=pointer]':
+        - generic [ref=e88]: HID-IF
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - text: "L1:"
+            - strong [ref=e91]: "23456.59"
+          - generic [ref=e92]:
+            - text: "L2:"
+            - strong [ref=e93]: "23456.80"
+          - generic [ref=e94]:
+            - text: "B:"
+            - strong [ref=e95]: "+0.21"
+      - 'button "HID-PRAIA L1: 23456.48 L2: 23456.68 B: +0.20" [ref=e96] [cursor=pointer]':
+        - generic [ref=e97]: HID-PRAIA
+        - generic [ref=e98]:
+          - generic [ref=e99]:
+            - text: "L1:"
+            - strong [ref=e100]: "23456.48"
+          - generic [ref=e101]:
+            - text: "L2:"
+            - strong [ref=e102]: "23456.68"
+          - generic [ref=e103]:
+            - text: "B:"
+            - strong [ref=e104]: "+0.20"
+      - generic [ref=e105]:
+        - generic [ref=e106]:
+          - text: CAV — CASTELO DE INCENDIO
+          - button "i" [ref=e107] [cursor=pointer]
+        - generic [ref=e108]:
+          - button "CAV CAV · 80m³ 70% 50% 30% 10% 0.0% — m³ — OFFLINE" [ref=e110] [cursor=pointer]:
+            - generic [ref=e111]:
+              - generic [ref=e112]: CAV
+              - generic [ref=e113]: CAV · 80m³
+            - generic [ref=e114]:
+              - generic: 70%
+              - generic: 50%
+              - generic: 30%
+              - generic: 10%
+              - generic:
+                - generic: 0.0%
+                - generic: — m³
+            - generic [ref=e115]:
+              - generic [ref=e116]: —
+              - generic [ref=e117]: OFFLINE
+          - generic [ref=e119]:
+            - button "valve V-CAV-AZ fechada" [ref=e120] [cursor=pointer]:
+              - img "valve" [ref=e121]
+              - generic [ref=e122]: V-CAV-AZ
+              - generic [ref=e123]: fechada
+            - button "valve V-CAV-AV fechada" [ref=e124] [cursor=pointer]:
+              - img "valve" [ref=e125]
+              - generic [ref=e126]: V-CAV-AV
+              - generic [ref=e127]: fechada
+            - button "valve V-CAV-BA aberta" [ref=e128] [cursor=pointer]:
+              - img "valve" [ref=e129]
+              - generic [ref=e130]: V-CAV-BA
+              - generic [ref=e131]: aberta
+      - generic [ref=e132]:
+        - generic [ref=e133]:
+          - text: CB1/CB2 — BOMBAS
+          - button "i" [ref=e134] [cursor=pointer]
+        - generic [ref=e135]:
+          - button "pump B02-D manutencao" [ref=e136] [cursor=pointer]:
+            - img "pump" [ref=e137]
+            - generic [ref=e138]: B02-D
+            - generic [ref=e139]: manutencao
+          - button "pump B02-E desligada" [ref=e140] [cursor=pointer]:
+            - img "pump" [ref=e141]
+            - generic [ref=e142]: B02-E
+            - generic [ref=e143]: desligada
+          - button "pump B01-D desligada" [ref=e144] [cursor=pointer]:
+            - img "pump" [ref=e145]
+            - generic [ref=e146]: B01-D
+            - generic [ref=e147]: desligada
+      - generic [ref=e148]:
+        - generic [ref=e149]:
+          - text: CON — CASTELO DE CONSUMO
+          - button "i" [ref=e150] [cursor=pointer]
+        - generic [ref=e151]:
+          - button "CON CON · 80m³ 70% 50% 30% 10% 0.0% — m³ — OFFLINE" [ref=e153] [cursor=pointer]:
+            - generic [ref=e154]:
+              - generic [ref=e155]: CON
+              - generic [ref=e156]: CON · 80m³
+            - generic [ref=e157]:
+              - generic: 70%
+              - generic: 50%
+              - generic: 30%
+              - generic: 10%
+              - generic:
+                - generic: 0.0%
+                - generic: — m³
+            - generic [ref=e158]:
+              - generic [ref=e159]: —
+              - generic [ref=e160]: OFFLINE
+          - generic [ref=e162]:
+            - button "valve V-CON-AVAZ fechada" [ref=e163] [cursor=pointer]:
+              - img "valve" [ref=e164]
+              - generic [ref=e165]: V-CON-AVAZ
+              - generic [ref=e166]: fechada
+            - 'button "HID-AV/AZ L1: 12345.10 L2: 12345.70 B: +0.60" [ref=e167] [cursor=pointer]':
+              - generic [ref=e168]: HID-AV/AZ
+              - generic [ref=e169]:
+                - generic [ref=e170]:
+                  - text: "L1:"
+                  - strong [ref=e171]: "12345.10"
+                - generic [ref=e172]:
+                  - text: "L2:"
+                  - strong [ref=e173]: "12345.70"
+                - generic [ref=e174]:
+                  - text: "B:"
+                  - strong [ref=e175]: "+0.60"
+            - button "valve V-CON-AV fechada" [ref=e176] [cursor=pointer]:
+              - img "valve" [ref=e177]
+              - generic [ref=e178]: V-CON-AV
+              - generic [ref=e179]: fechada
+            - 'button "HID-AV L1: 12345.40 L2: 12345.50 B: +0.10" [ref=e180] [cursor=pointer]':
+              - generic [ref=e181]: HID-AV
+              - generic [ref=e182]:
+                - generic [ref=e183]:
+                  - text: "L1:"
+                  - strong [ref=e184]: "12345.40"
+                - generic [ref=e185]:
+                  - text: "L2:"
+                  - strong [ref=e186]: "12345.50"
+                - generic [ref=e187]:
+                  - text: "B:"
+                  - strong [ref=e188]: "+0.10"
+            - button "valve V-CON-AZ fechada" [ref=e189] [cursor=pointer]:
+              - img "valve" [ref=e190]
+              - generic [ref=e191]: V-CON-AZ
+              - generic [ref=e192]: fechada
+            - 'button "HID-AZ L1: 0.00 L2: 0.00 B: 0.00" [ref=e193] [cursor=pointer]':
+              - generic [ref=e194]: HID-AZ
+              - generic [ref=e195]:
+                - generic [ref=e196]:
+                  - text: "L1:"
+                  - strong [ref=e197]: "0.00"
+                - generic [ref=e198]:
+                  - text: "L2:"
+                  - strong [ref=e199]: "0.00"
+                - generic [ref=e200]:
+                  - text: "B:"
+                  - strong [ref=e201]: "0.00"
+      - generic [ref=e202]:
+        - generic [ref=e203]:
+          - text: CIE — CISTERNAS ILHA DO ENGENHO
+          - button "i" [ref=e204] [cursor=pointer]
+        - generic [ref=e207]:
+          - button "CIE1 CIE1 · 245m³ 70% 50% 30% 10% 0.0% — m³ — OFFLINE" [ref=e208] [cursor=pointer]:
+            - generic [ref=e209]:
+              - generic [ref=e210]: CIE1
+              - generic [ref=e211]: CIE1 · 245m³
+            - generic [ref=e212]:
+              - generic: 70%
+              - generic: 50%
+              - generic: 30%
+              - generic: 10%
+              - generic:
+                - generic: 0.0%
+                - generic: — m³
+            - generic [ref=e213]:
+              - generic [ref=e214]: —
+              - generic [ref=e215]: OFFLINE
+          - button "CIE2 CIE2 · 245m³ 70% 50% 30% 10% 0.0% — m³ — OFFLINE" [ref=e216] [cursor=pointer]:
+            - generic [ref=e217]:
+              - generic [ref=e218]: CIE2
+              - generic [ref=e219]: CIE2 · 245m³
+            - generic [ref=e220]:
+              - generic: 70%
+              - generic: 50%
+              - generic: 30%
+              - generic: 10%
+              - generic:
+                - generic: 0.0%
+                - generic: — m³
+            - generic [ref=e221]:
+              - generic [ref=e222]: —
+              - generic [ref=e223]: OFFLINE
+      - generic [ref=e224]:
+        - generic [ref=e225]:
+          - text: CB3 — CASA DE BOMBAS N3
+          - button "i" [ref=e226] [cursor=pointer]
+        - generic [ref=e227]:
+          - generic [ref=e229]:
+            - button "CB31 CB31 · 40m³ 70% 50% 30% 10% 0.0% — m³ — OFFLINE" [ref=e230] [cursor=pointer]:
+              - generic [ref=e231]:
+                - generic [ref=e232]: CB31
+                - generic [ref=e233]: CB31 · 40m³
+              - generic [ref=e234]:
+                - generic: 70%
+                - generic: 50%
+                - generic: 30%
+                - generic: 10%
+                - generic:
+                  - generic: 0.0%
+                  - generic: — m³
+              - generic [ref=e235]:
+                - generic [ref=e236]: —
+                - generic [ref=e237]: OFFLINE
+            - button "CB32 CB32 · 40m³ 70% 50% 30% 10% 0.0% — m³ — OFFLINE" [ref=e238] [cursor=pointer]:
+              - generic [ref=e239]:
+                - generic [ref=e240]: CB32
+                - generic [ref=e241]: CB32 · 40m³
+              - generic [ref=e242]:
+                - generic: 70%
+                - generic: 50%
+                - generic: 30%
+                - generic: 10%
+                - generic:
+                  - generic: 0.0%
+                  - generic: — m³
+              - generic [ref=e243]:
+                - generic [ref=e244]: —
+                - generic [ref=e245]: OFFLINE
+          - generic [ref=e248]:
+            - button "pump B03-D ligada" [ref=e249] [cursor=pointer]:
+              - img "pump" [ref=e250]
+              - generic [ref=e251]: B03-D
+              - generic [ref=e252]: ligada
+            - button "pump B03-E desligada" [ref=e253] [cursor=pointer]:
+              - img "pump" [ref=e254]
+              - generic [ref=e255]: B03-E
+              - generic [ref=e256]: desligada
