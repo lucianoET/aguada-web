@@ -257,6 +257,55 @@
     .map-container { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; height: 100%; }
     .cell-map { display: flex; flex-direction: column; }
     .cell-map .cell-body { flex: 1; padding: 0; min-height: 0; }
+    .map-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .map-filter-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .map-filter-chip {
+      border: 1px solid var(--border2);
+      background: var(--bg3);
+      color: var(--text2);
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .map-filter-chip:hover {
+      border-color: var(--blue);
+      color: var(--text);
+    }
+    .map-filter-chip.active {
+      background: var(--blue-dim);
+      border-color: rgba(37, 99, 235, 0.45);
+      color: var(--blue);
+    }
+    .fs-bar {
+      min-height: 40px;
+      height: auto;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 8px 16px;
+    }
+    .fs-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-left: auto;
+    }
 
     /* ── Sanitation mini ── */
     .san-row {
@@ -514,9 +563,23 @@ const locationNotesKey = 'aguada-painel-location-notes';
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
           Mapa da Rede
         </span>
-        <button class="icon-btn" title="Expandir mapa" @click="openFullMap()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-        </button>
+        <div class="map-toolbar">
+          <div class="map-filter-row">
+            <template x-for="filter in mapFilterOptions" :key="'mini-' + filter.key">
+              <button
+                type="button"
+                class="map-filter-chip"
+                :class="mapFilters[filter.key] ? 'active' : ''"
+                :title="filter.label"
+                @click="toggleMapFilter(filter.key)"
+                x-text="filter.shortLabel"
+              ></button>
+            </template>
+          </div>
+          <button class="icon-btn" title="Expandir mapa" @click="openFullMap()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          </button>
+        </div>
       </div>
       <div class="cell-body">
         <div id="mini-map"></div>
@@ -807,9 +870,23 @@ const locationNotesKey = 'aguada-painel-location-notes';
   <div class="fullscreen-modal" :style="fullMap ? 'display:flex' : 'display:none'" style="display:none;" x-cloak>
     <div class="fs-bar">
       <span class="fs-title">Mapa — Visão ampliada</span>
-      <button class="icon-btn" @click="closeFullMap()" title="Fechar">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+      <div class="fs-controls">
+        <div class="map-filter-row">
+          <template x-for="filter in mapFilterOptions" :key="'full-' + filter.key">
+            <button
+              type="button"
+              class="map-filter-chip"
+              :class="mapFilters[filter.key] ? 'active' : ''"
+              :title="filter.label"
+              @click="toggleMapFilter(filter.key)"
+              x-text="filter.label"
+            ></button>
+          </template>
+        </div>
+        <button class="icon-btn" @click="closeFullMap()" title="Fechar">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
     </div>
     <div style="flex:1;min-height:0;position:relative">
       <div id="full-map"></div>
@@ -837,10 +914,20 @@ function painelApp() {
     gwMac: null,
     gwLastSeen: null,
     fullMap: false,
+    mapFilters: {
+      reservoirs: true,
+      pumps: true,
+      valves: true,
+      hydrometers: true,
+      sanitation: true,
+    },
+    infra: null,
     _miniMap: null,
     _fullMapObj: null,
     _miniMarkers: {},
     _fullMarkers: {},
+    _miniInfraLayer: null,
+    _fullInfraLayer: null,
     _initialized: false,
     locationNotes: {},
     sites: [
@@ -996,12 +1083,28 @@ function painelApp() {
       });
     },
 
+    get mapFilterOptions() {
+      return [
+        { key:'reservoirs', label:'Reservatórios', shortLabel:'Res' },
+        { key:'pumps', label:'Bombas', shortLabel:'Bomb' },
+        { key:'valves', label:'Válvulas', shortLabel:'Válv' },
+        { key:'hydrometers', label:'Hidrômetros', shortLabel:'Hidr' },
+        { key:'sanitation', label:'Saneamento', shortLabel:'Esg' },
+      ];
+    },
+
     loadLocationNotes() {
       try {
         this.locationNotes = JSON.parse(localStorage.getItem(locationNotesKey) || '{}');
       } catch (_) {
         this.locationNotes = {};
       }
+    },
+
+    toggleMapFilter(key) {
+      this.mapFilters[key] = !this.mapFilters[key];
+      this._updateMiniMarkers();
+      this._updateFullMarkers();
     },
 
     ...wsMixin(),
@@ -1020,6 +1123,7 @@ function painelApp() {
         fetch('assets/infra.json').then(r=>r.json()).catch(()=>null)
       ]);
 
+      this.infra = infra || null;
       this.reservoirs = Array.isArray(resData) ? resData : [];
       
       const fallbackPumps = infra?.pumps?.length ? infra.pumps.map(p=>({id:p.id, pump_name:p.name, state:'ligada'})) : [
@@ -1102,58 +1206,251 @@ function painelApp() {
         layers:[osmLayer],
       }).setView([-22.8382228,-43.1080717],17);
       L.control.layers({'Mapa':osmLayer,'Satélite':satLayer},{},{position:'topright',collapsed:true}).addTo(this._miniMap);
-      try {
-        const infra = await fetch('assets/infra.json').then(r=>r.json());
-        const canvasRenderer = L.canvas({padding:0.5});
-        const lg = L.layerGroup().addTo(this._miniMap);
-        (infra.pipelines||[]).forEach(p=>{
-          const pts = p.coords.map(c=>[c[0],c[1]]);
-          L.polyline(pts,{renderer:canvasRenderer, color:'#ffffff', weight:6, opacity:0.7, lineCap:'round', lineJoin:'round'}).addTo(lg);
-          L.polyline(pts,{renderer:canvasRenderer, color:p.submarine?'#06b6d4':'#3b82f6', weight:3, opacity:0.8, dashArray:p.submarine?'8 4':null, lineCap:'round', lineJoin:'round'}).addTo(lg);
-        });
-      } catch(e){/**/}
+      this._ensureInfraLayer(this._miniMap, '_miniInfraLayer');
       setTimeout(()=>this._miniMap.invalidateSize(),200);
     },
 
-    _updateMiniMarkers() { this._syncMarkers(this._miniMap, this._miniMarkers); },
-    _updateFullMarkers() { if (this.fullMap) this._syncMarkers(this._fullMapObj, this._fullMarkers); },
+    _ensureInfraLayer(mapInst, layerKey) {
+      if (!mapInst || this[layerKey] || !this.infra) return;
+      const canvasRenderer = L.canvas({padding:0.5});
+      const layerGroup = L.layerGroup().addTo(mapInst);
+      (this.infra.pipelines || []).forEach((pipeline) => {
+        const points = (pipeline.coords || []).map((coord) => [coord[0], coord[1]]);
+        if (!points.length) return;
+        L.polyline(points, {renderer:canvasRenderer, color:'#ffffff', weight:6, opacity:0.7, lineCap:'round', lineJoin:'round'}).addTo(layerGroup);
+        L.polyline(points, {
+          renderer:canvasRenderer,
+          color:pipeline.submarine ? '#06b6d4' : '#3b82f6',
+          weight:3,
+          opacity:0.8,
+          dashArray:pipeline.submarine ? '8 4' : null,
+          lineCap:'round',
+          lineJoin:'round'
+        }).addTo(layerGroup);
+      });
+      this[layerKey] = layerGroup;
+    },
 
-    _syncMarkers(mapInst, markersDict) {
-      if (!mapInst) return;
-      const elements = [
-        ...(this.reservoirs||[]).map(r => ({...r, type:'res'})),
-        { alias:'ETE', name:'Estação Trat.', type:'ete', lat:-22.8402, lng:-43.1021 },
-        { alias:'FS-01', name:'Fossa Séptica', type:'fossa', lat:-22.8423, lng:-43.1051 },
-        { alias:'CG-01', name:'Caixa de Gordura', type:'gordura', lat:-22.8398, lng:-43.1102 }
+    _updateMiniMarkers() { this._syncMarkers(this._miniMap, this._miniMarkers, true); },
+    _updateFullMarkers() { if (this.fullMap) this._syncMarkers(this._fullMapObj, this._fullMarkers, true); },
+
+    isMapTypeVisible(type) {
+      if (type === 'res') return this.mapFilters.reservoirs;
+      if (type === 'pump') return this.mapFilters.pumps;
+      if (type === 'valve') return this.mapFilters.valves;
+      if (type === 'hydrometer') return this.mapFilters.hydrometers;
+      return this.mapFilters.sanitation;
+    },
+
+    normalizeMapKey(value) {
+      return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    },
+
+    getFeatureCoords(feature) {
+      const lat = Number(feature?.lat);
+      const lng = Number(feature?.lng ?? feature?.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      return { lat, lng };
+    },
+
+    findInfraItem(collection, name) {
+      const target = this.normalizeMapKey(name);
+      return (this.infra?.[collection] || []).find((item) => {
+        return [item.name, item.ref, item.id].some((candidate) => this.normalizeMapKey(candidate) === target);
+      }) || null;
+    },
+
+    reservoirInfraAlias(alias) {
+      const normalized = this.normalizeMapKey(alias);
+      if (normalized.startsWith('CB3')) return 'CB03';
+      if (normalized.startsWith('CIE')) return 'CIE';
+      if (normalized.startsWith('CBIF')) return 'CBIF';
+      return normalized;
+    },
+
+    pumpSiteKey(name) {
+      const normalized = this.normalizeMapKey(name);
+      if (normalized.includes('IF')) return 'CBIF';
+      if (normalized.includes('02') || normalized.includes('CB2')) return 'CB2';
+      if (normalized.includes('03') || normalized.includes('CB3') || normalized.includes('01')) return 'CB3';
+      return normalized || 'BOMBA';
+    },
+
+    getPumpSummary(siteKey) {
+      const related = this.pumps.filter((item) => this.pumpSiteKey(item.pump_name) === siteKey);
+      if (!related.length) return { label:'BMB', color:'#2563eb', detail:'Sem telemetria' };
+      const active = related.filter((item) => item.state === 'ligada').length;
+      const inAlarm = related.some((item) => item.state === 'falha');
+      return {
+        label:`${active}/${related.length}`,
+        color:inAlarm ? '#dc2626' : (active > 0 ? '#2563eb' : '#64748b'),
+        detail:related.map((item) => `${item.pump_name}: ${item.state || '—'}`).join('<br>')
+      };
+    },
+
+    getValveSummary(name) {
+      const current = this.valves.find((item) => this.normalizeMapKey(item.valve_name) === this.normalizeMapKey(name));
+      const state = current?.state || 'desconhecida';
+      return {
+        label:state === 'aberta' ? 'ABR' : (state === 'fechada' ? 'FEC' : 'VAL'),
+        color:state === 'aberta' ? '#16a34a' : (state === 'fechada' ? '#dc2626' : '#d97706'),
+        detail:`<b>${name}</b><br>${state}`
+      };
+    },
+
+    getHydrometerSummary(name) {
+      const current = this.hydrometers.find((item) => this.normalizeMapKey(item.meter_name) === this.normalizeMapKey(name));
+      const reading = Number(current?.reading);
+      return {
+        label:Number.isFinite(reading) ? `${reading.toFixed(1)}m3` : 'HID',
+        color:'#0f766e',
+        detail:Number.isFinite(reading) ? `<b>${name}</b><br>${reading.toFixed(3)} ${current?.unit || 'm3'}` : `<b>${name}</b><br>Sem leitura`
+      };
+    },
+
+    buildMapElements(includeEquipment) {
+      const reservoirElements = (this.reservoirs || []).map((reservoir) => {
+        const fallback = this.findInfraItem('reservoirs', this.reservoirInfraAlias(reservoir.alias));
+        const coords = this.getFeatureCoords(reservoir) || this.getFeatureCoords(fallback);
+        return coords ? { ...reservoir, ...coords, key:`res:${reservoir.alias}`, type:'res' } : null;
+      }).filter(Boolean);
+
+      const siteElements = [
+        { key:'site:ETE', alias:'ETE', name:'Estação Trat.', type:'ete', lat:-22.8402, lng:-43.1021 },
+        { key:'site:FS-01', alias:'FS-01', name:'Fossa Séptica', type:'fossa', lat:-22.8423, lng:-43.1051 },
+        { key:'site:CG-01', alias:'CG-01', name:'Caixa de Gordura', type:'gordura', lat:-22.8398, lng:-43.1102 }
       ];
-      elements.forEach(r => {
-        const savedPos = localStorage.getItem('coord_' + r.alias);
-        if (savedPos) {
-          const parts = savedPos.split(',');
-          r.lat = parseFloat(parts[0]);
-          r.lng = parseFloat(parts[1]);
-        } else if (!r.lat || !r.lng) return;
-        const isRes = r.type === 'res';
-        const color = isRes ? statusColor(r.pct, r.online) : (r.type === 'ete' ? '#8b5cf6' : '#d97706');
-        const pctText = isRes ? (r.pct!=null?Math.round(r.pct)+'%':'?') : (r.type === 'ete' ? 'ETE' : 'ESG');
-        const icon = L.divIcon({
-          className:'aguada-marker',
-          html:`<div style="background:${color};border:2px solid rgba(0,0,0,0.4);border-radius:50%;width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,0.5)">
-                  <div style="font-size:7px;font-weight:700;color:white;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,0.8)">${r.alias}</div>
-                  <div style="font-size:8px;font-weight:700;color:white;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,0.8)">${pctText}</div>
-                </div>`,
-          iconSize:[32,32], iconAnchor:[16,16],
-        });
-        if (markersDict[r.alias]) {
-          markersDict[r.alias].setLatLng([r.lat,r.lng]);
-          markersDict[r.alias].setIcon(icon);
-        } else {
-          const m = L.marker([r.lat,r.lng], {icon, draggable:false}).addTo(mapInst);
-          if (isRes) m.on('click', () => this.openResModal(r.alias));
-          else if (r.type === 'ete') m.on('click', () => this.openLocationModal('ete'));
-          else m.bindTooltip(`<b>${r.alias}</b><br>${r.name}`);
-          markersDict[r.alias]=m;
+
+      if (!includeEquipment) return [...reservoirElements, ...siteElements].filter((item) => this.isMapTypeVisible(item.type));
+
+      const pumpElements = [
+        { alias:'CB3', name:'Casa de Bombas 3', feature:this.findInfraItem('reservoirs', 'CB03') },
+        { alias:'CB2', name:'Casa de Bombas 2', feature:this.findInfraItem('pumps', 'CB02') || this.findInfraItem('pumps', 'CB01') },
+        { alias:'CBIF', name:'Casa de Bombas IF', feature:this.findInfraItem('reservoirs', 'CBIF') }
+      ].map((item) => {
+        const coords = this.getFeatureCoords(item.feature);
+        if (!coords) return null;
+        return { key:`pump:${item.alias}`, alias:item.alias, name:item.name, type:'pump', ...coords, summary:this.getPumpSummary(item.alias) };
+      }).filter(Boolean);
+
+      const valveElements = (this.infra?.valves || []).filter((item) => String(item.name || '').startsWith('V-')).map((item) => {
+        const coords = this.getFeatureCoords(item);
+        if (!coords) return null;
+        return { key:`valve:${item.name}`, alias:item.name.replace(/^V-/, ''), name:item.name, type:'valve', ...coords, summary:this.getValveSummary(item.name) };
+      }).filter(Boolean);
+
+      const hydrometerElements = (this.infra?.hydrometers || []).map((item) => {
+        const coords = this.getFeatureCoords(item);
+        if (!coords) return null;
+        return { key:`hyd:${item.name}`, alias:item.name, name:item.name, type:'hydrometer', ...coords, summary:this.getHydrometerSummary(item.name) };
+      }).filter(Boolean);
+
+      return [...reservoirElements, ...pumpElements, ...valveElements, ...hydrometerElements, ...siteElements]
+        .filter((item) => this.isMapTypeVisible(item.type));
+    },
+
+    mapAlias(item) {
+      if (item.type === 'valve') return item.alias.replace(/^V-/, '').replace(/^VALV-/, '');
+      if (item.type === 'hydrometer') return item.alias.replace(/^HID-/, 'H-');
+      return item.alias;
+    },
+
+    distributeMarkerPositions(mapInst, elements) {
+      const clusters = [];
+      const thresholdPx = 22;
+      elements.forEach((item) => {
+        const point = mapInst.latLngToLayerPoint([item.lat, item.lng]);
+        let cluster = null;
+        for (const candidate of clusters) {
+          const dx = candidate.point.x - point.x;
+          const dy = candidate.point.y - point.y;
+          if (Math.hypot(dx, dy) <= thresholdPx) {
+            cluster = candidate;
+            break;
+          }
         }
+        if (!cluster) {
+          cluster = { point, items: [] };
+          clusters.push(cluster);
+        }
+        cluster.items.push({ ...item, basePoint: point });
+      });
+      return clusters.flatMap((cluster) => {
+        if (cluster.items.length === 1) return cluster.items;
+        return cluster.items.map((item, index) => {
+          const ring = Math.floor(index / 6);
+          const ringIndex = index % 6;
+          const slots = ring === 0 ? Math.min(cluster.items.length, 6) : 6;
+          const radius = 18 + (ring * 12);
+          const angle = ((Math.PI * 2) / slots) * ringIndex;
+          const spreadPoint = L.point(
+            cluster.point.x + (Math.cos(angle) * radius),
+            cluster.point.y + (Math.sin(angle) * radius)
+          );
+          const spreadLatLng = mapInst.layerPointToLatLng(spreadPoint);
+          return { ...item, renderLat: spreadLatLng.lat, renderLng: spreadLatLng.lng };
+        });
+      });
+    },
+
+    markerAppearance(item) {
+      if (item.type === 'res') return { color:statusColor(item.pct, item.online), label:item.pct != null ? `${Math.round(item.pct)}%` : '?', size:32 };
+      if (item.type === 'ete') return { color:'#8b5cf6', label:'ETE', size:32 };
+      if (item.type === 'fossa' || item.type === 'gordura') return { color:'#d97706', label:'ESG', size:32 };
+      if (item.type === 'pump') return { color:item.summary.color, label:item.summary.label, size:30 };
+      if (item.type === 'valve') return { color:item.summary.color, label:item.summary.label, size:26 };
+      return { color:item.summary.color, label:item.summary.label, size:28 };
+    },
+
+    buildMarkerIcon(item) {
+      const appearance = this.markerAppearance(item);
+      const displayAlias = this.mapAlias(item);
+      return L.divIcon({
+        className:'aguada-marker',
+        html:`<div style="background:${appearance.color};border:2px solid rgba(0,0,0,0.4);border-radius:50%;width:${appearance.size}px;height:${appearance.size}px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,0.5)">
+                <div style="font-size:${item.type === 'valve' ? 6 : 7}px;font-weight:700;color:white;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,0.8)">${displayAlias}</div>
+                <div style="font-size:${item.type === 'hydrometer' ? 7 : 8}px;font-weight:700;color:white;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,0.8)">${appearance.label}</div>
+              </div>`,
+        iconSize:[appearance.size, appearance.size],
+        iconAnchor:[appearance.size / 2, appearance.size / 2],
+      });
+    },
+
+    bindMarkerInteraction(marker, item) {
+      if (item.type === 'res') {
+        marker.on('click', () => this.openResModal(item.alias));
+        return;
+      }
+      if (item.type === 'ete') {
+        marker.on('click', () => this.openLocationModal('ete'));
+        return;
+      }
+      if (item.type === 'valve') marker.on('click', () => this.openEquipment('valve', item.name));
+      if (item.type === 'hydrometer') marker.on('click', () => this.openEquipment('hydrometer', item.name));
+      marker.bindTooltip(item.summary?.detail || `<b>${item.name}</b>`);
+    },
+
+    _syncMarkers(mapInst, markersDict, includeEquipment) {
+      if (!mapInst) return;
+      const elements = this.distributeMarkerPositions(mapInst, this.buildMapElements(includeEquipment));
+      const activeKeys = new Set(elements.map((item) => item.key));
+      Object.keys(markersDict).forEach((key) => {
+        if (activeKeys.has(key)) return;
+        markersDict[key].remove();
+        delete markersDict[key];
+      });
+      elements.forEach((item) => {
+        const icon = this.buildMarkerIcon(item);
+        const lat = item.renderLat ?? item.lat;
+        const lng = item.renderLng ?? item.lng;
+        if (markersDict[item.key]) {
+          markersDict[item.key].setLatLng([lat, lng]);
+          markersDict[item.key].setIcon(icon);
+          return;
+        }
+        const marker = L.marker([lat, lng], {icon, draggable:false}).addTo(mapInst);
+        this.bindMarkerInteraction(marker, item);
+        markersDict[item.key] = marker;
       });
     },
 
@@ -1319,15 +1616,24 @@ function painelApp() {
     openFullMap() {
       this.fullMap = true;
       this.$nextTick(()=>{
-        if (this._fullMapObj) { this._fullMapObj.invalidateSize(); return; }
+        if (this._fullMapObj) {
+          this._fullMapObj.invalidateSize();
+          this._updateFullMarkers();
+          return;
+        }
         const osmLayer = L.tileLayer('assets/leaflet-tiles/{z}/{x}/{y}.png',{minZoom:13,maxZoom:19,maxNativeZoom:17,attribution:'© OSM'});
         const satLayer = L.tileLayer('assets/leaflet-tiles-sat/{z}/{x}/{y}.jpg',{minZoom:13,maxZoom:19,maxNativeZoom:17,attribution:'© Esri'});
         const bounds = L.latLngBounds([-22.856,-43.120],[-22.830,-43.088]);
         this._fullMapObj = L.map('full-map',{
           minZoom:13,maxZoom:19,maxBounds:bounds,maxBoundsViscosity:0.8,layers:[osmLayer], zoomControl:true, scrollWheelZoom:false
         }).setView([-22.8381,-43.1086],17);
+        L.control.layers({'Mapa':osmLayer,'Satélite':satLayer},{},{position:'topright',collapsed:true}).addTo(this._fullMapObj);
+        this._ensureInfraLayer(this._fullMapObj, '_fullInfraLayer');
         this._updateFullMarkers();
-        setTimeout(()=>this._fullMapObj.invalidateSize(),250);
+        setTimeout(() => {
+          this._fullMapObj.invalidateSize();
+          this._updateFullMarkers();
+        }, 250);
       });
     },
 
