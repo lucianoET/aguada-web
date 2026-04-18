@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Optional
 from collections import defaultdict
 import datetime
+import statistics
 
 
 def calc_level(
@@ -29,36 +30,91 @@ def calc_level(
     }
 
 
-def calc_consumption_events(readings: list[dict], date: str) -> list[dict]:
+def _classify_delta(delta_l: float, min_delta_l: float) -> str:
+    if delta_l <= -min_delta_l:
+        return "consumption"
+    if delta_l >= min_delta_l:
+        return "supply"
+    return "stable"
+
+
+def calc_consumption_events(readings: list[dict], date: str, min_delta_l: float = 50.0) -> list[dict]:
     """
-    Agrupa leituras por hora e retorna eventos de consumo/abastecimento.
+    Agrupa leituras por hora usando volume mediano e retorna eventos de consumo/abastecimento.
+
+    O volume mediano por hora reduz o impacto de oscilações rápidas do sensor e, ao
+    comparar horas consecutivas, evita perder recuperações que cruzam a virada da hora.
     Cada reading deve ter: {ts (unix int), volume_l}.
     """
-    buckets: dict[int, list[dict]] = defaultdict(list)
-    for r in readings:
-        hour = datetime.datetime.fromtimestamp(r["ts"], tz=datetime.timezone.utc).hour
-        buckets[hour].append(r)
+    valid = sorted(
+        (r for r in readings if r.get("ts") is not None and r.get("volume_l") is not None),
+        key=lambda item: item["ts"],
+    )
+    if len(valid) < 2:
+        return []
 
-    events = []
-    for hour in sorted(buckets.keys()):
-        pts = sorted(buckets[hour], key=lambda x: x["ts"])
-        vol_start = pts[0]["volume_l"]
-        vol_end = pts[-1]["volume_l"]
-        delta = vol_end - vol_start
-        if delta < -50:
-            etype = "consumption"
-        elif delta > 50:
-            etype = "supply"
-        else:
-            etype = "stable"
-        events.append({
-            "hour": f"{hour:02d}:00",
+    buckets: dict[tuple[int, int, int, int], list[dict]] = defaultdict(list)
+    for reading in valid:
+        dt = datetime.datetime.fromtimestamp(reading["ts"])
+        buckets[(dt.year, dt.month, dt.day, dt.hour)].append(reading)
+
+    bucket_states = []
+    for key in sorted(buckets.keys()):
+        pts = sorted(buckets[key], key=lambda item: item["ts"])
+        volumes = [float(item["volume_l"]) for item in pts]
+        bucket_states.append({
+            "hour": f"{key[3]:02d}:00",
+            "ts": pts[-1]["ts"],
+            "vol": float(statistics.median(volumes)),
+        })
+
+    if len(bucket_states) == 1:
+        vol_start = float(valid[0]["volume_l"])
+        vol_end = float(valid[-1]["volume_l"])
+        delta_l = vol_end - vol_start
+        return [{
+            "hour": datetime.datetime.fromtimestamp(valid[-1]["ts"]).strftime("%H:00"),
+            "ts_start": valid[0]["ts"],
+            "ts_end": valid[-1]["ts"],
+            "duration_min": round(max(0, valid[-1]["ts"] - valid[0]["ts"]) / 60.0, 1),
             "vol_start": round(vol_start, 1),
             "vol_end": round(vol_end, 1),
-            "delta_l": round(delta, 1),
-            "type": etype,
+            "delta_l": round(delta_l, 1),
+            "type": _classify_delta(delta_l, min_delta_l),
+        }]
+
+    raw_events = []
+    previous = bucket_states[0]
+    for current in bucket_states[1:]:
+        delta_l = current["vol"] - previous["vol"]
+        raw_events.append({
+            "hour": current["hour"],
+            "ts_start": previous["ts"],
+            "ts_end": current["ts"],
+            "duration_min": round(max(0, current["ts"] - previous["ts"]) / 60.0, 1),
+            "vol_start": round(previous["vol"], 1),
+            "vol_end": round(current["vol"], 1),
+            "delta_l": round(delta_l, 1),
+            "type": _classify_delta(delta_l, min_delta_l),
         })
-    return events
+        previous = current
+
+    merged_events = []
+    for event in raw_events:
+        if not merged_events or event["type"] == "stable":
+            merged_events.append(event)
+            continue
+        previous_event = merged_events[-1]
+        if previous_event["type"] != event["type"]:
+            merged_events.append(event)
+            continue
+        previous_event["ts_end"] = event["ts_end"]
+        previous_event["duration_min"] = round(max(0, previous_event["ts_end"] - previous_event["ts_start"]) / 60.0, 1)
+        previous_event["vol_end"] = event["vol_end"]
+        previous_event["delta_l"] = round(previous_event["delta_l"] + event["delta_l"], 1)
+        previous_event["hour"] = event["hour"]
+
+    return merged_events
 
 
 def decimate_readings(readings: list[dict], max_points: int = 500) -> list[dict]:

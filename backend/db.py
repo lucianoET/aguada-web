@@ -98,6 +98,15 @@ CREATE TABLE IF NOT EXISTS manual_reservoir_logs (
     note           TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_manual_reservoir_ts ON manual_reservoir_logs(ts DESC);
+
+CREATE TABLE IF NOT EXISTS report_notes (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    date         TEXT    NOT NULL,
+    note         TEXT    NOT NULL,
+    created_ts   INTEGER NOT NULL,
+    archived_ts  INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_report_notes_date_archived ON report_notes(date, archived_ts, created_ts DESC);
 """
 
 async def init_db(conn: aiosqlite.Connection) -> None:
@@ -244,15 +253,17 @@ async def get_all_states(conn: aiosqlite.Connection) -> list[dict]:
 
 
 async def get_history(
-    conn: aiosqlite.Connection, alias: str, since_ts: int
+    conn: aiosqlite.Connection, alias: str, since_ts: int, until_ts: int | None = None
 ) -> list[dict]:
-    async with conn.execute(
-        """SELECT ts, distance_cm, level_cm, volume_l, pct, rssi, vbat, seq
+    query = """SELECT ts, distance_cm, level_cm, volume_l, pct, rssi, vbat, seq
            FROM readings
-           WHERE alias=? AND ts>=?
-           ORDER BY ts ASC""",
-        (alias, since_ts),
-    ) as cur:
+           WHERE alias=? AND ts>=?"""
+    params: tuple = (alias, since_ts)
+    if until_ts is not None:
+        query += " AND ts<?"
+        params = (alias, since_ts, until_ts)
+    query += " ORDER BY ts ASC"
+    async with conn.execute(query, params) as cur:
         rows = await cur.fetchall()
     return [dict(r) for r in rows]
 
@@ -505,3 +516,35 @@ async def get_manual_hydrometer_summary_for_date(conn: aiosqlite.Connection, dat
         })
 
     return out
+
+
+async def insert_report_note(conn: aiosqlite.Connection, item: dict) -> int:
+    cur = await conn.execute(
+        """INSERT INTO report_notes (date, note, created_ts, archived_ts)
+           VALUES (:date, :note, :created_ts, NULL)""",
+        item,
+    )
+    await conn.commit()
+    return int(cur.lastrowid)
+
+
+async def get_report_notes(conn: aiosqlite.Connection, date_str: str, active_only: bool = True) -> list[dict]:
+    query = """SELECT id, date, note, created_ts, archived_ts
+       FROM report_notes
+       WHERE date=?"""
+    params: tuple = (date_str,)
+    if active_only:
+        query += " AND archived_ts IS NULL"
+    query += " ORDER BY created_ts DESC, id DESC"
+    async with conn.execute(query, params) as cur:
+        rows = await cur.fetchall()
+    return [dict(r) for r in rows]
+
+
+async def archive_report_note(conn: aiosqlite.Connection, note_id: int, archived_ts: int) -> bool:
+    cur = await conn.execute(
+        "UPDATE report_notes SET archived_ts=? WHERE id=? AND archived_ts IS NULL",
+        (archived_ts, note_id),
+    )
+    await conn.commit()
+    return cur.rowcount > 0

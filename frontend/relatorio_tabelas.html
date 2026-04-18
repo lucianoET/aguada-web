@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <title>AGUADA — Relatório Tabular</title>
+  <link rel="stylesheet" href="assets/aguada.css?v=2">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .simple-stack { display:flex; flex-direction:column; gap:16px; }
+    .simple-card { background:var(--card, white); border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; }
+    .simple-card header { padding:14px 16px; border-bottom:1px solid var(--border-color, var(--border)); display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+    .simple-card h2 { margin:0; font-size:var(--font-lg); color:var(--text, #1e3a5f); }
+    .simple-card p { margin:0; color:var(--text-muted); font-size:var(--font-sm); }
+    .filter-bar { display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+    .filter-bar label { display:block; font-size:var(--font-xs); font-weight:600; color:var(--text-muted); margin-bottom:4px; }
+    .table-wrap { overflow-x:auto; }
+    .simple-table { width:100%; border-collapse:collapse; min-width:700px; table-layout:fixed; }
+    .simple-table th, .simple-table td { padding:8px 9px; border-bottom:1px solid var(--border-color, var(--border)); text-align:right; vertical-align:middle; font-variant-numeric:tabular-nums; }
+    .simple-table th:first-child, .simple-table td:first-child { text-align:left; width:108px; }
+    .simple-table th:not(:first-child), .simple-table td:not(:first-child) { white-space:nowrap; }
+    .simple-table th { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); background:rgba(148,163,184,.08); }
+    .simple-table td { font-size:13px; color:var(--text, #1e3a5f); }
+    .simple-table tbody tr:last-child td { border-bottom:none; }
+    .simple-table tbody tr:hover td { background:rgba(148,163,184,.06); }
+    .muted { color:var(--text-muted); }
+    .metric-row td { font-weight:700; background:rgba(14,165,233,.06); }
+    .neg { color:#b91c1c; }
+    .empty { padding:24px 16px; color:var(--text-muted); }
+    .state-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
+    .state-badge { display:inline-flex; align-items:center; justify-content:center; min-width:96px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+    .state-ok { background:rgba(22,163,74,.12); color:#166534; }
+    .state-warn { background:rgba(217,119,6,.12); color:#92400e; }
+    .state-off { background:rgba(100,116,139,.14); color:#475569; }
+    .state-fail { background:rgba(220,38,38,.12); color:#991b1b; }
+    .notes-toolbar { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
+    .notes-toolbar textarea { width:100%; min-height:112px; resize:vertical; }
+    .notes-list { display:flex; flex-direction:column; gap:12px; }
+    .note-item { border:1px solid var(--border-color, var(--border)); border-radius:10px; padding:14px; background:rgba(148,163,184,.05); }
+    .note-item p { margin:0 0 10px 0; white-space:pre-wrap; }
+    .note-meta { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; color:var(--text-muted); font-size:12px; }
+    .print-only { display:none; }
+
+    #pumpTable th:last-child,
+    #pumpTable td:last-child,
+    #valveTable th:last-child,
+    #valveTable td:last-child {
+      text-align:center;
+      width:128px;
+    }
+
+    #hydrometerTable th:first-child,
+    #hydrometerTable td:first-child {
+      width:210px;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 14mm;
+    }
+
+    @media print {
+      html, body {
+        background:#fff !important;
+        color:#111827 !important;
+        width:210mm;
+        height:297mm;
+        overflow:hidden;
+      }
+
+      body.admin-page {
+        margin:0;
+        padding:0;
+      }
+
+      #topbar,
+      .filter-bar,
+      .notes-toolbar,
+      #notesStatus,
+      .archive-note-btn,
+      #addNoteBtn,
+      .no-print {
+        display:none !important;
+      }
+
+      .print-only {
+        display:block;
+      }
+
+      .admin-main {
+        padding:0 !important;
+      }
+
+      .simple-stack {
+        gap:6px;
+      }
+
+      .simple-card {
+        box-shadow:none;
+        border:1px solid #d1d5db;
+        border-radius:6px;
+        break-inside:avoid;
+        page-break-inside:avoid;
+      }
+
+      .simple-card header {
+        padding:5px 7px;
+      }
+
+      .simple-card h2 {
+        font-size:12px;
+      }
+
+      .simple-card p,
+      .muted,
+      .note-meta {
+        font-size:9px;
+        line-height:1.2;
+      }
+
+      .table-wrap {
+        overflow:visible;
+      }
+
+      .simple-table {
+        min-width:0;
+      }
+
+      .simple-table th,
+      .simple-table td {
+        padding:3px 4px;
+        font-size:9px;
+        line-height:1.15;
+      }
+
+      .simple-table th {
+        font-size:8px;
+      }
+
+      .simple-table th:first-child,
+      .simple-table td:first-child {
+        width:78px;
+      }
+
+      #hydrometerTable th:first-child,
+      #hydrometerTable td:first-child {
+        width:150px;
+      }
+
+      #pumpTable th:last-child,
+      #pumpTable td:last-child,
+      #valveTable th:last-child,
+      #valveTable td:last-child {
+        width:88px;
+      }
+
+      .state-grid {
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+        gap:6px;
+      }
+
+      .state-badge {
+        min-width:72px;
+        padding:3px 6px;
+        font-size:8px;
+      }
+
+      .note-item {
+        padding:8px;
+        border-radius:6px;
+      }
+
+      .note-item p {
+        margin-bottom:4px;
+        font-size:9px;
+        line-height:1.2;
+      }
+    }
+  </style>
+</head>
+<body class="admin-page">
+<div id="topbar" class="admin-header"></div>
+
+<div class="admin-main simple-stack">
+  <div class="print-only muted" id="printHeader" style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Relatório Tabular</div>
+  <div class="filter-bar">
+    <div>
+      <label>Data</label>
+      <input id="dateInput" class="form-input" type="date">
+    </div>
+    <button id="loadBtn" class="btn btn-primary">Carregar Tabelas</button>
+    <button id="printBtn" class="btn btn-secondary">Gerar PDF</button>
+    <div class="muted" id="statusText">Preparando dados do dia...</div>
+  </div>
+
+  <section class="simple-card">
+    <header>
+      <div>
+        <h2>Volumes dos Reservatórios</h2>
+        <p>Modelo simples do relatório operacional com checkpoints fixos do dia.</p>
+      </div>
+      <div class="muted" id="selectedDateLabel">—</div>
+    </header>
+    <div class="table-wrap">
+      <table class="simple-table" id="volumeTable">
+        <thead>
+          <tr>
+            <th>Hora</th>
+            <th>CON (m³)</th>
+            <th>CAV (m³)</th>
+            <th>CB3 (m³)</th>
+            <th>CIE1 (m³)</th>
+            <th>CIE2 (m³)</th>
+            <th>CBIF (m³)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="simple-card">
+    <header>
+      <div>
+        <h2>Hidrômetros</h2>
+        <p>Leitura anterior, leitura atual e diferença acumulada até o fim do dia selecionado.</p>
+      </div>
+    </header>
+    <div class="table-wrap">
+      <table class="simple-table" id="hydrometerTable">
+        <thead>
+          <tr>
+            <th>Hidrômetro</th>
+            <th>Leitura anterior</th>
+            <th>Leitura atual</th>
+            <th>Diferença</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="state-grid">
+    <div class="simple-card">
+      <header>
+        <div>
+          <h2>Bombas</h2>
+          <p>Apenas o estado final registrado até a data selecionada.</p>
+        </div>
+      </header>
+      <div class="table-wrap">
+        <table class="simple-table" id="pumpTable">
+          <thead>
+            <tr>
+              <th>Bomba</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="simple-card">
+      <header>
+        <div>
+          <h2>Válvulas</h2>
+          <p>Apenas o estado final registrado até a data selecionada.</p>
+        </div>
+      </header>
+      <div class="table-wrap">
+        <table class="simple-table" id="valveTable">
+          <thead>
+            <tr>
+              <th>Válvula</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="simple-card">
+    <header>
+      <div>
+        <h2>Observações</h2>
+        <p>Observações persistentes por data. Ao arquivar, a observação sai da página.</p>
+      </div>
+    </header>
+    <div style="padding:16px; display:flex; flex-direction:column; gap:16px;">
+      <div class="notes-toolbar">
+        <div style="flex:1 1 420px;">
+          <label for="noteInput">Nova observação</label>
+          <textarea id="noteInput" class="form-input" placeholder="Escreva a observação desta data..."></textarea>
+        </div>
+        <button id="addNoteBtn" class="btn btn-primary">Adicionar</button>
+      </div>
+      <div id="notesStatus" class="muted"></div>
+      <div id="notesList" class="notes-list"></div>
+    </div>
+  </section>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('relatorio_tabelas.html');
+
+const DAY_S = 86400;
+const CHECKPOINTS = [
+  { label: '00h00', offsetMinutes: 0 },
+  { label: '06h00', offsetMinutes: 360 },
+  { label: '08h00', offsetMinutes: 480 },
+  { label: '10h00', offsetMinutes: 600 },
+  { label: '13h15', offsetMinutes: 795 },
+  { label: '15h00', offsetMinutes: 900 },
+  { label: '17h00', offsetMinutes: 1020 },
+  { label: '21h00', offsetMinutes: 1260 },
+  { label: '24h00', offsetMinutes: 1440 },
+];
+
+const RESERVOIR_GROUPS = [
+  { key: 'CON', aliases: ['CON'] },
+  { key: 'CAV', aliases: ['CAV'] },
+  { key: 'CB3', aliases: ['CB31', 'CB32'] },
+  { key: 'CIE1', aliases: ['CIE1'] },
+  { key: 'CIE2', aliases: ['CIE2'] },
+  { key: 'CBIF', aliases: ['CBIF1', 'CBIF2'] },
+];
+
+const dateInput = document.getElementById('dateInput');
+const statusText = document.getElementById('statusText');
+const selectedDateLabel = document.getElementById('selectedDateLabel');
+const noteInput = document.getElementById('noteInput');
+const notesStatus = document.getElementById('notesStatus');
+const printHeader = document.getElementById('printHeader');
+
+function startOfDayTs(dateStr) {
+  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000);
+}
+
+function formatDateLabel(dateStr) {
+  return new Date(`${dateStr}T12:00:00`).toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+function updatePrintHeader(dateStr) {
+  printHeader.textContent = `Relatório Tabular • ${formatDateLabel(dateStr)}`;
+}
+
+function formatVolume(value) {
+  if (value == null) return '—';
+  return value.toFixed(1).replace('.', ',');
+}
+
+function formatReading(value) {
+  if (value == null) return '—';
+  return value.toFixed(2).replace('.', ',');
+}
+
+function latestValueAt(rows, ts) {
+  let current = null;
+  for (const row of rows) {
+    if ((row.ts || 0) > ts) break;
+    if (row.volume_l != null) current = row.volume_l / 1000;
+  }
+  return current;
+}
+
+function sumAvailable(values) {
+  const valid = values.filter((value) => value != null);
+  if (!valid.length) return null;
+  return valid.reduce((sum, value) => sum + value, 0);
+}
+
+function buildVolumeRows(histories, dayStart, isToday) {
+  const rows = CHECKPOINTS.map((checkpoint) => {
+    if (isToday && checkpoint.offsetMinutes > 0) {
+      const emptyValues = {};
+      RESERVOIR_GROUPS.forEach((group) => {
+        emptyValues[group.key] = null;
+      });
+      return { label: checkpoint.label, values: emptyValues };
+    }
+    const checkpointTs = dayStart + checkpoint.offsetMinutes * 60;
+    const values = {};
+    RESERVOIR_GROUPS.forEach((group) => {
+      values[group.key] = sumAvailable(group.aliases.map((alias) => latestValueAt(histories[alias] || [], checkpointTs)));
+    });
+    return { label: checkpoint.label, values };
+  });
+
+  const consumption = {};
+  RESERVOIR_GROUPS.forEach((group) => {
+    let total = 0;
+    for (let index = 1; index < rows.length; index += 1) {
+      const previous = rows[index - 1].values[group.key];
+      const current = rows[index].values[group.key];
+      if (previous == null || current == null) continue;
+      total += Math.max(previous - current, 0);
+    }
+    consumption[group.key] = total || null;
+  });
+
+  rows.push({ label: 'Consumo Estimado', values: consumption, isMetric: true });
+  return rows;
+}
+
+function renderVolumeTable(rows) {
+  const tbody = document.querySelector('#volumeTable tbody');
+  tbody.innerHTML = rows.map((row) => {
+    const rowClass = row.isMetric ? ' class="metric-row"' : '';
+    return `<tr${rowClass}>
+      <td>${row.label}</td>
+      <td>${formatVolume(row.values.CON)}</td>
+      <td>${formatVolume(row.values.CAV)}</td>
+      <td>${formatVolume(row.values.CB3)}</td>
+      <td>${formatVolume(row.values.CIE1)}</td>
+      <td>${formatVolume(row.values.CIE2)}</td>
+      <td>${formatVolume(row.values.CBIF)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function summarizeHydrometers(items, dateStr) {
+  const tsStart = startOfDayTs(dateStr);
+  const tsEnd = tsStart + DAY_S;
+  const byMeter = new Map();
+  items.forEach((item) => {
+    const rows = byMeter.get(item.meter_name) || [];
+    rows.push(item);
+    byMeter.set(item.meter_name, rows);
+  });
+
+  return Array.from(byMeter.entries())
+    .sort((left, right) => left[0].localeCompare(right[0], 'pt-BR'))
+    .map(([meterName, rows]) => {
+      const ordered = rows.slice().sort((left, right) => left.ts - right.ts);
+      let previous = null;
+      let current = null;
+      let unit = 'm3';
+      ordered.forEach((row) => {
+        if (row.ts < tsStart) previous = row;
+        if (row.ts < tsEnd) current = row;
+        unit = row.unit || unit;
+      });
+      const previousValue = previous ? Number(previous.reading) : null;
+      const currentValue = current ? Number(current.reading) : null;
+      return {
+        meterName,
+        unit,
+        previous: previousValue,
+        current: currentValue,
+        diff: previousValue != null && currentValue != null ? currentValue - previousValue : null,
+      };
+    });
+}
+
+function renderHydrometerTable(rows) {
+  const tbody = document.querySelector('#hydrometerTable tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">Sem leituras manuais para montar o resumo.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map((row) => `
+    <tr>
+      <td>${row.meterName}</td>
+      <td>${formatReading(row.previous)} ${row.unit || 'm3'}</td>
+      <td>${formatReading(row.current)} ${row.unit || 'm3'}</td>
+      <td class="${row.diff != null && row.diff < 0 ? 'neg' : ''}">${formatReading(row.diff)} ${row.unit || 'm3'}</td>
+    </tr>
+  `).join('');
+}
+
+function stateLabel(kind, value) {
+  const labels = {
+    pump: { ligada: 'Ligada', desligada: 'Desligada', falha: 'Falha', manutencao: 'Manutenção' },
+    valve: { aberta: 'Aberta', fechada: 'Fechada', parcial: 'Parcial', falha: 'Falha' },
+  };
+  return labels[kind]?.[value] || value || '—';
+}
+
+function stateClass(value) {
+  if (value === 'ligada' || value === 'aberta') return 'state-badge state-ok';
+  if (value === 'parcial' || value === 'manutencao') return 'state-badge state-warn';
+  if (value === 'desligada' || value === 'fechada') return 'state-badge state-off';
+  if (value === 'falha') return 'state-badge state-fail';
+  return 'state-badge state-off';
+}
+
+function renderStateTable(tableId, rows, kind, nameKey) {
+  const tbody = document.querySelector(`#${tableId} tbody`);
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="2" class="empty">Sem estado registrado para esta data.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map((row) => `
+    <tr>
+      <td>${row[nameKey]}</td>
+      <td><span class="${stateClass(row.state)}">${stateLabel(kind, row.state)}</span></td>
+    </tr>
+  `).join('');
+}
+
+function formatNoteTime(ts) {
+  if (!ts) return '—';
+  return new Date(ts * 1000).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+function renderNotes(items) {
+  const list = document.getElementById('notesList');
+  if (!items.length) {
+    list.innerHTML = '<div class="empty">Nenhuma observação ativa nesta data.</div>';
+    return;
+  }
+  list.innerHTML = items.map((item) => `
+    <div class="note-item" data-note-id="${item.id}">
+      <p>${item.note.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+      <div class="note-meta">
+        <span>Criado em ${formatNoteTime(item.created_ts)}</span>
+        <button class="btn btn-secondary archive-note-btn" data-note-id="${item.id}">Arquivar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function loadNotes(date) {
+  const payload = await fetch(`${aguadaAPI.BASE}/api/report/notes?date=${date}`).then((response) => response.json()).catch(() => ({ items: [] }));
+  renderNotes(payload.items || []);
+}
+
+async function addNote() {
+  const note = noteInput.value.trim();
+  const date = dateInput.value || aguadaAPI.today();
+  if (!note) {
+    notesStatus.textContent = 'Escreva uma observação antes de adicionar.';
+    return;
+  }
+  notesStatus.textContent = 'Salvando observação...';
+  try {
+    const response = await fetch(`${aguadaAPI.BASE}/api/report/notes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date, note }),
+    });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.detail || 'Falha ao salvar observação');
+    noteInput.value = '';
+    notesStatus.textContent = 'Observação salva.';
+    await loadNotes(date);
+  } catch (error) {
+    notesStatus.textContent = error.message;
+  }
+}
+
+async function archiveNote(noteId) {
+  notesStatus.textContent = 'Arquivando observação...';
+  try {
+    const response = await fetch(`${aguadaAPI.BASE}/api/report/notes/${noteId}/archive`, { method: 'POST' });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.detail || 'Falha ao arquivar observação');
+    notesStatus.textContent = 'Observação arquivada.';
+    await loadNotes(dateInput.value || aguadaAPI.today());
+  } catch (error) {
+    notesStatus.textContent = error.message;
+  }
+}
+
+async function loadTables() {
+  const date = dateInput.value || aguadaAPI.today();
+  const isToday = date === aguadaAPI.today();
+  const dayStart = startOfDayTs(date);
+  const fromTs = dayStart - DAY_S;
+  const untilTs = dayStart + DAY_S + 60;
+  statusText.textContent = 'Carregando checkpoints e hidrômetros...';
+  selectedDateLabel.textContent = formatDateLabel(date);
+  updatePrintHeader(date);
+
+  try {
+    const aliases = [...new Set(RESERVOIR_GROUPS.flatMap((group) => group.aliases))];
+    const historiesList = await Promise.all(
+      aliases.map((alias) => aguadaAPI.getHistory(alias, '24h', { since_ts: fromTs, until_ts: untilTs }).catch(() => []))
+    );
+    const histories = Object.fromEntries(aliases.map((alias, index) => [alias, historiesList[index]]));
+    renderVolumeTable(buildVolumeRows(histories, dayStart, isToday));
+
+    const hydrometerPayload = await fetch(`${aguadaAPI.BASE}/api/manual/hydrometers?limit=1000`).then((response) => response.json()).catch(() => ({ items: [] }));
+    renderHydrometerTable(summarizeHydrometers(hydrometerPayload.items || [], date));
+
+    const equipmentPayload = await fetch(`${aguadaAPI.BASE}/api/report/equipment-states?date=${date}`).then((response) => response.json()).catch(() => ({ pumps: [], valves: [] }));
+    renderStateTable('pumpTable', equipmentPayload.pumps || [], 'pump', 'pump_name');
+    renderStateTable('valveTable', equipmentPayload.valves || [], 'valve', 'valve_name');
+
+    await loadNotes(date);
+    statusText.textContent = 'Tabelas carregadas.';
+  } catch (error) {
+    console.error(error);
+    statusText.textContent = `Erro ao carregar tabelas: ${error.message}`;
+  }
+}
+
+dateInput.value = aguadaAPI.today();
+document.getElementById('loadBtn').addEventListener('click', loadTables);
+dateInput.addEventListener('change', loadTables);
+document.getElementById('addNoteBtn').addEventListener('click', addNote);
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+document.getElementById('notesList').addEventListener('click', (event) => {
+  const button = event.target.closest('.archive-note-btn');
+  if (!button) return;
+  archiveNote(button.dataset.noteId);
+});
+loadTables();
+</script>
+</body>
+</html>

@@ -26,8 +26,14 @@ const aguadaAPI = (() => {
     /** GET /api/reservoirs → [{alias, name, pct, volume_l, level_cm, ts, online, ...}] */
     getReservoirs() { return _get('/api/reservoirs'); },
 
-    /** GET /api/history/{alias}?period=24h|7d|30d → [{ts, level_cm, volume_l, pct, rssi}] */
-    getHistory(alias, period = '24h') { return _get(`/api/history/${alias}?period=${period}`); },
+    /** GET /api/history/{alias}?period=24h|7d|30d&since_ts=&until_ts= → [{ts, level_cm, volume_l, pct, rssi}] */
+    getHistory(alias, period = '24h', options = {}) {
+      const params = new URLSearchParams();
+      if (options.since_ts != null) params.set('since_ts', String(options.since_ts));
+      if (options.until_ts != null) params.set('until_ts', String(options.until_ts));
+      if (!params.has('since_ts')) params.set('period', period);
+      return _get(`/api/history/${alias}?${params.toString()}`);
+    },
 
     /** GET /api/consumption?alias=X&date=YYYY-MM-DD → {summary, events} */
     getConsumption(alias, date) { return _get(`/api/consumption?alias=${alias}&date=${date}`); },
@@ -129,6 +135,7 @@ const aguadaAPI = (() => {
         ['scada.html',    'SCADA'],
         ['dados.html',    'Dados'],
         ['report.html',   'Relatório'],
+        ['relatorio_tabelas.html', 'Tabelas'],
         ['alerts.html',   'Alertas'],
         ['manutencao.html','Manutenção'],
         ['qualidade.html','Qualidade'],

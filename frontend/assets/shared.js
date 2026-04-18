@@ -188,7 +188,7 @@ function reservoirModalMixin() {
         if (isNaN(val) || val < 0) throw new Error('Valor inválido');
         const body = { alias: this.modal.alias };
         if (this.modal.manualMode === 'pct') body.pct = val;
-        else body.volume_l = val;
+        else body.volume_l = val * 1000;
         const res = await fetch(aguadaAPI.BASE + '/api/readings/manual', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -203,7 +203,7 @@ function reservoirModalMixin() {
         else reservoirs.push(updated);
         this.reservoirs = reservoirs;
         this._fillModal(updated);
-        this.modal.feedback = `Salvo: ${json.pct}% · ${Math.round(json.volume_l)} L`;
+        this.modal.feedback = `Salvo: ${json.pct}% · ${(json.volume_l / 1000).toFixed(1)} m³`;
         this.modal.feedbackOk = true;
         this.modal.manualValue = '';
       } catch (e) {

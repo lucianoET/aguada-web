@@ -8,22 +8,17 @@
   <title>Aguada — Relatório</title>
   <link rel="stylesheet" href="assets/aguada.css?v=2" />
   <link rel="stylesheet" href="assets/style.css" />
-  <style>
-    .layout { height: calc(100vh - 46px) !important; overflow: hidden !important; }
-    .main   { overflow: hidden !important; }
-  </style>
+
   <style>[x-cloak]{display:none}</style>
 </head>
-<body>
+<body class="admin-page">
 <div id="topbar" class="admin-header"></div>
-<div class="layout" x-data="reportApp()" x-init="init()" x-cloak style="flex-direction:column;">
+<div class="admin-main" x-data="reportApp()" x-init="init()" x-cloak>
 
-  <div class="main">
-    <div class="content">
-
-      <div style="display:flex;gap:2px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:0">
+      <div class="tab-bar">
         <button @click="activeTab = 'resumo'" class="tab-btn" :class="activeTab === 'resumo' ? 'active' : ''">Resumo Operacional</button>
         <button @click="activeTab = 'balanco'" class="tab-btn" :class="activeTab === 'balanco' ? 'active' : ''">Balanço Hídrico Diário</button>
+        <a href="relatorio_tabelas.html" class="tab-btn" style="text-decoration:none;display:inline-flex;align-items:center">Tabelas Simples</a>
         <a href="documentacao.html" class="tab-btn" style="text-decoration:none;display:inline-flex;align-items:center">📚 Documentação</a>
       </div>
 
@@ -79,7 +74,7 @@
                     <span style="font-weight:500" x-text="alert.alias"></span>:
                     <span x-text="alert.name"></span> —
                     <span style="font-weight:700" x-text="alert.pct + '%'"></span>
-                    <span x-show="alert.volume_l !== null && alert.volume_l !== undefined" x-text="' (' + Math.round(alert.volume_l) + ' L)'"></span>
+                    <span x-show="alert.volume_l !== null && alert.volume_l !== undefined" x-text="' (' + (alert.volume_l / 1000).toFixed(1) + ' m³)'"></span>
                   </li>
                 </template>
               </ul>
@@ -106,7 +101,7 @@
                 <th style="padding:10px 16px;text-align:left">Alias</th>
                 <th style="padding:10px 16px;text-align:left">Nome</th>
                 <th style="padding:10px 16px;text-align:right">Nível %</th>
-                <th style="padding:10px 16px;text-align:right">Volume (L)</th>
+                <th style="padding:10px 16px;text-align:right">Volume (m³)</th>
                 <th style="padding:10px 16px;text-align:right">Leituras</th>
                 <th style="padding:10px 16px;text-align:center">Status</th>
               </tr>
@@ -126,7 +121,7 @@
                       x-text="row.pct !== null && row.pct !== undefined ? row.pct + '%' : '—'">
                     </span>
                   </td>
-                  <td style="padding:10px 16px;text-align:right;font-family:monospace" x-text="row.volume_l !== null && row.volume_l !== undefined ? Math.round(row.volume_l).toLocaleString('pt-BR') : '—'"></td>
+                  <td style="padding:10px 16px;text-align:right;font-family:monospace" x-text="row.volume_l !== null && row.volume_l !== undefined ? (row.volume_l / 1000).toFixed(1).replace('.', ',') : '—'"></td>
                   <td style="padding:10px 16px;text-align:right;color:var(--text3)" x-text="row.readings_count !== null && row.readings_count !== undefined ? row.readings_count : '—'"></td>
                   <td style="padding:10px 16px;text-align:center">
                     <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500"
@@ -206,9 +201,7 @@
         </div>
       </div>
 
-    </div>
-  </div>
-</div>
+</div><!-- /admin-main -->
 <script src="assets/api.js"></script>
 <script src="assets/shared.js"></script>
 <script defer src="assets/vendor/alpine.min.js"></script>

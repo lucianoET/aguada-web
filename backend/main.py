@@ -50,6 +50,11 @@ from .db import (
     get_latest_pump_states,
     get_latest_valve_states,
     get_latest_hydrometer_readings,
+    get_pump_states_for_date,
+    get_valve_states_for_date,
+    insert_report_note,
+    get_report_notes,
+    archive_report_note,
     get_all_nodes,
     get_node,
     patch_node,
@@ -187,15 +192,23 @@ async def get_reservoirs():
 
 
 @app.get("/api/history/{alias}")
-async def get_history_route(alias: str, period: str = "24h"):
+async def get_history_route(
+    alias: str,
+    period: str = "24h",
+    since_ts: Optional[int] = Query(None),
+    until_ts: Optional[int] = Query(None),
+):
     periods = {"24h": 86400, "7d": 7 * 86400, "30d": 30 * 86400}
-    seconds = periods.get(period)
-    if seconds is None:
-        raise HTTPException(400, "period deve ser 24h, 7d ou 30d")
-    since = int(time.time()) - seconds
+    if since_ts is None:
+        seconds = periods.get(period)
+        if seconds is None:
+            raise HTTPException(400, "period deve ser 24h, 7d ou 30d")
+        since_ts = int(time.time()) - seconds
+    if until_ts is not None and until_ts <= since_ts:
+        raise HTTPException(400, "until_ts deve ser maior que since_ts")
     async with aiosqlite.connect(DB_PATH) as conn:
         conn.row_factory = aiosqlite.Row
-        rows = await get_history(conn, alias=alias.upper(), since_ts=since)
+        rows = await get_history(conn, alias=alias.upper(), since_ts=since_ts, until_ts=until_ts)
     return decimate_readings(rows, max_points=500)
 
 
@@ -239,6 +252,23 @@ async def get_report_data(date: str = Query(...)):
             events = calc_consumption_events(readings, date=date) if readings else []
             report_data.append({**s, "events": events, "readings_count": len(readings)})
     return {"date": date, "reservoirs": report_data}
+
+
+@app.get("/api/report/equipment-states")
+async def get_report_equipment_states(date: str = Query(...)):
+    async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        pumps = await get_pump_states_for_date(conn, date)
+        valves = await get_valve_states_for_date(conn, date)
+    return {"date": date, "pumps": pumps, "valves": valves}
+
+
+@app.get("/api/report/notes")
+async def get_report_notes_route(date: str = Query(...), active_only: bool = Query(True)):
+    async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        items = await get_report_notes(conn, date, active_only=active_only)
+    return {"date": date, "items": items}
 
 
 @app.get("/api/report/daily.pdf")
@@ -292,6 +322,11 @@ class ManualReservoirRequest(BaseModel):
     pct: Optional[float] = None
     ts: Optional[int] = None
     note: Optional[str] = None
+
+
+class ReportNoteRequest(BaseModel):
+    date: str
+    note: str
 
 
 # Build alias → params index from RESERVOIR_INDEX for manual readings
@@ -457,6 +492,33 @@ async def get_manual_reservoirs(limit: int = Query(200, ge=1, le=1000)):
         conn.row_factory = aiosqlite.Row
         rows = await get_manual_reservoir_logs(conn, limit=limit)
     return {"items": rows}
+
+
+@app.post("/api/report/notes")
+async def post_report_note(body: ReportNoteRequest):
+    note = body.note.strip()
+    if not note:
+        raise HTTPException(400, "note é obrigatório")
+    item = {
+        "date": body.date,
+        "note": note,
+        "created_ts": int(time.time()),
+    }
+    async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        note_id = await insert_report_note(conn, item)
+        items = await get_report_notes(conn, body.date, active_only=True)
+    created = next((entry for entry in items if entry["id"] == note_id), None)
+    return {"ok": True, "item": created}
+
+
+@app.post("/api/report/notes/{note_id}/archive")
+async def archive_report_note_route(note_id: int):
+    async with aiosqlite.connect(DB_PATH) as conn:
+        ok = await archive_report_note(conn, note_id, int(time.time()))
+    if not ok:
+        raise HTTPException(404, "Observação não encontrada ou já arquivada")
+    return {"ok": True, "id": note_id}
 
 
 @app.get("/api/equip/current")

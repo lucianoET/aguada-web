@@ -4,408 +4,819 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" href="data:,">
-  <title>Aguada — Painel Geral</title>
+  <title>Aguada — Painel Hidráulico</title>
   <link rel="stylesheet" href="assets/aguada.css?v=2"/>
   <link rel="stylesheet" href="assets/style.css"/>
   <link rel="stylesheet" href="assets/vendor/leaflet.min.css"/>
   <style>
     [x-cloak]{display:none}
 
-    /* ── grade principal ─────────────────────────────────── */
-    .pg-grid {
-      flex: 1; display: grid; align-items: start;
-      grid-template-columns: minmax(360px, 400px) 1fr 1fr;
-      grid-auto-rows: auto;
-      gap: 20px; padding: 20px;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    /* ── Hero KPI Strip ── */
+    .hero-strip {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      position: relative; overflow: hidden; height: 46px;
     }
-
-    /* ── células da grade ────────────────────────────────── */
-    .pg-cell {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; display: flex; flex-direction: column;
-      position: relative; overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-      transition: box-shadow 0.3s ease;
+    .hero-strip::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(37,99,235,0.03) 0%, rgba(6,182,212,0.03) 100%);
+      pointer-events: none;
     }
-    .pg-cell:hover { box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); }
-    
-    .pg-cell-header {
+    .hero-kpi {
+      padding: 0 14px; position: relative;
+      border-right: 1px solid var(--border);
+      transition: background 0.2s;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 20px; border-bottom: 1px solid var(--border);
-      flex-shrink: 0; background: var(--bg2);
     }
-    .pg-cell-title {
-      font-size: 14px; letter-spacing: 0.2px; text-transform: none;
-      color: var(--text); font-weight: 600;
+    .hero-kpi:last-child { border-right: none; }
+    .hero-kpi:hover { background: var(--bg3); }
+    .hero-kpi-info { display: flex; flex-direction: column; justify-content: center; }
+    .hero-kpi-lbl {
+      font-size: 10px; color: var(--text3); text-transform: uppercase;
+      letter-spacing: 0.5px; font-weight: 600; margin-bottom: 2px;
     }
-    .pg-cell-actions { display: flex; gap: 8px; }
-    .pg-cell-body { padding-bottom: 8px; }
-
-    /* Mapa ocupa linha 1-4 col 1 e fica preso ao scroll da página (sticky) */
-    .cell-map  { grid-column:1; grid-row:1/6; height: calc(100vh - 86px); position: sticky; top: 66px; }
-    /* Reservatórios ocupa linha 1 col 2-3 */
-    .cell-res  { grid-column:2/4; grid-row:1; }
-    /* Linha 2 – hidrômetros e esgoto */
-    .cell-hid  { grid-column:2; grid-row:2; }
-    .cell-esg  { grid-column:3; grid-row:2; }
-    /* Linha 3 – equipamentos e manutenção */
-    .cell-equip{ grid-column:2; grid-row:3; }
-    .cell-man  { grid-column:3; grid-row:3; }
-
-    /* ── botão ícone ──────────────────────────────────────── */
-    .icon-btn {
-      width: 28px; height: 28px; display: flex; align-items: center;
-      justify-content: center; border-radius: 6px; color: var(--text3);
-      background: var(--bg3); border: 1px solid transparent; cursor: pointer;
-      transition: all 0.2s;
+    .hero-kpi-val {
+      font-family: var(--mono); font-size: 16px; font-weight: 700;
+      line-height: 1; color: var(--text);
     }
-    .icon-btn:hover { background: var(--blue-dim); color: var(--blue); border-color: rgba(59,130,246,0.3); }
+    .hero-kpi-side {
+      font-size: 10px; display: flex; align-items: center; gap: 6px; font-weight: 600;
+    }
+    .hero-kpi-side .spark { color: var(--text2); background: var(--border); padding: 2px 6px; border-radius: 4px; }
 
-    /* ── mapa embutido ───────────────────────────────────── */
+    /* ── Dashboard Grid ── */
+    .dash-grid {
+      display: grid; gap: 10px; padding: 10px 12px 12px;
+      grid-template-columns: 1fr 1fr 340px;
+      grid-template-rows: minmax(0, 1.04fr) minmax(0, 0.88fr) minmax(0, 0.78fr);
+      height: calc(100vh - 46px - 46px);
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    /* ── Cells ── */
+    .cell {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+      transition: box-shadow 0.3s, transform 0.2s;
+    }
+    .cell:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.06); }
+    .cell-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .cell-title {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .cell-title svg { color: var(--blue); }
+    .cell-badge {
+      font-size: 10px; font-weight: 600; padding: 3px 10px;
+      border-radius: 20px; background: var(--bg3); color: var(--text3);
+    }
+    .cell-body { padding: 12px; }
+
+    .cell-tanks   { grid-column: 1 / 3; grid-row: 1; }
+    .cell-map     { grid-column: 3; grid-row: 1 / 3; min-height: 400px; }
+    .cell-valves  { grid-column: 1; grid-row: 2; }
+    .cell-pumps   { grid-column: 2; grid-row: 2; }
+    .cell-hydro   { grid-column: 1; grid-row: 3; }
+    .cell-esg     { grid-column: 2; grid-row: 3; }
+    .cell-map     { grid-column: 3; grid-row: 1 / 4; min-height: 400px; }
+
+    .cell-valves .cell-body,
+    .cell-pumps .cell-body,
+    .cell-hydro .cell-body,
+    .cell-esg .cell-body {
+      overflow: auto;
+    }
+
+    .cell-hydro .cell-hdr {
+      padding: 10px 12px;
+    }
+
+    .cell-hydro .cell-body {
+      padding: 0;
+    }
+
+    .cell-hydro .cell-title,
+    .cell-hydro .cell-badge {
+      margin-left: 0;
+    }
+
+    .cell-hydro table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .cell-hydro th,
+    .cell-hydro td {
+      text-align: left;
+      padding-left: 12px;
+      padding-right: 12px;
+      white-space: nowrap;
+    }
+
+    .cell-hydro th {
+      position: sticky;
+      top: 0;
+      background: var(--bg2);
+      z-index: 1;
+    }
+
+    /* ── Tanks Visual ── */
+    .tanks-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 8px;
+    }
+    .tank-card {
+      text-align: center; cursor: pointer; padding: 6px 4px 8px;
+      border-radius: 10px; border: 1px solid transparent;
+      transition: all 0.25s;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 4px;
+    }
+    .tank-card:hover { background: var(--bg3); border-color: var(--border); transform: translateY(-2px); }
+    .tank-name {
+      font-size: 10px; color: var(--text2); line-height: 1.25;
+      max-width: 104px; min-height: 22px; margin: 0 auto;
+      display: flex; align-items: flex-end; justify-content: center;
+      text-align: center;
+    }
+    .tank-visual {
+      position: relative; width: 74px; height: 108px; margin: 0 auto;
+      border: 2px solid var(--border2); border-radius: 6px;
+      overflow: hidden; background: var(--bg3);
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .tank-water {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 0;
+    }
+    .tank-water::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: rgba(59, 148, 244, 0.92);
+      box-shadow: 0 0 3px rgba(59, 148, 244, 0.45);
+    }
+    @keyframes wave {
+      0%   { transform: translateX(0) translateY(0); }
+      50%  { transform: translateX(-4px) translateY(-1px); }
+      100% { transform: translateX(0) translateY(0); }
+    }
+    .tank-water.online::after { animation: wave 3s ease-in-out infinite; }
+    .tank-overlay {
+      position: absolute; inset: 0; z-index: 2;
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 7px 7px 8px;
+    }
+    .tank-status-corner {
+      position: absolute; top: 7px; right: 7px;
+      display: inline-flex; align-items: center; justify-content: center;
+      z-index: 3;
+    }
+    .tank-alias-row {
+      display: flex; align-items: center; justify-content: center;
+      max-width: 100%;
+    }
+    .tank-alias {
+      font-family: var(--mono); font-size: 13px; font-weight: 800;
+      color: #1c2430; line-height: 1;
+      white-space: nowrap;
+    }
+    .tank-datetime {
+      font-size: 9px; color: rgba(28, 36, 48, 0.72); line-height: 1.1;
+      font-family: var(--mono);
+      white-space: nowrap;
+    }
+    .tank-values {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 5px;
+      color: #1c2430;
+      text-align: center;
+    }
+    .tank-pct-line,
+    .tank-volume-line {
+      display: flex; align-items: baseline; justify-content: center; gap: 3px;
+      line-height: 1;
+      color: inherit;
+    }
+    .tank-pct-value,
+    .tank-volume-value {
+      font-size: 19px; font-weight: 800; line-height: 1;
+      font-family: Arial, sans-serif;
+      color: inherit;
+    }
+    .tank-pct-unit,
+    .tank-volume-unit {
+      font-size: 10px; color: rgba(28, 36, 48, 0.72); line-height: 1;
+    }
+    .tank-status-dot {
+      width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+      flex-shrink: 0;
+    }
+
+    /* ── Equipment buttons ── */
+    .eq-btn {
+      border: 1px solid transparent; border-radius: 6px;
+      padding: 6px 6px; display: flex; align-items: center; justify-content: center;
+      transition: 0.2s; cursor: pointer; overflow: hidden;
+      min-height: 30px;
+    }
+    .eq-btn:hover { filter: brightness(0.98); }
+    .eq-btn.active {
+      background: var(--blue-dim);
+      border-color: var(--blue);
+    }
+    .eq-btn.state-blue {
+      background: linear-gradient(180deg, rgba(153, 211, 255, 0.28) 0%, rgba(95, 177, 255, 0.34) 100%);
+      border-color: rgba(77, 163, 255, 0.28);
+    }
+    .eq-btn.state-red {
+      background: rgba(239, 68, 68, 0.16);
+      border-color: rgba(239, 68, 68, 0.24);
+    }
+    .eq-btn.state-yellow {
+      background: rgba(245, 158, 11, 0.17);
+      border-color: rgba(245, 158, 11, 0.26);
+    }
+    .eq-btn.state-neutral {
+      background: rgba(148, 163, 184, 0.12);
+      border-color: rgba(148, 163, 184, 0.18);
+    }
+    .eq-label {
+      font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      width: 100%; text-align: center;
+    }
+
+    /* ── Map ── */
     #mini-map { width: 100%; height: 100%; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
-    .map-wrap-mini { flex: 1; min-height: 0; position: relative; }
+    .map-container { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; height: 100%; }
+    .cell-map { display: flex; flex-direction: column; }
+    .cell-map .cell-body { flex: 1; padding: 0; min-height: 0; }
 
-    /* ── tabelas ──────────────────────────────────────────── */
-    .dt { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
-    .dt th { 
-        position: sticky; top: 0; background: var(--bg2); color: var(--text3);
-        font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
-        padding: 12px 16px; border-bottom: 2px solid var(--border); font-weight: 600; text-align: left; 
+    /* ── Sanitation mini ── */
+    .san-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 11px;
     }
-    .dt td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text); white-space: nowrap; }
-    .dt tr:last-child td { border-bottom: none; }
-    .dt tr:hover td { background: var(--bg3); }
-    .mono { font-family: var(--mono); font-size: 13px; }
+    .san-row:last-child { border-bottom: none; }
 
-    /* Barra inline */
-    .bar-wrap { width: 70px; height: 8px; background: var(--bg3); border-radius: 6px; overflow: hidden; display: inline-block; vertical-align: middle; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
-    .bar-fill  { height: 100%; border-radius: 6px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 
-    /* ── Modal fullscreen ─────────────────────────────────── */
+
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .modal-subtitle {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 4px;
+    }
+    .modal-close {
+      border: none;
+      background: transparent;
+      color: var(--text2);
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+    }
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .modal-kpi {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .modal-kpi-label {
+      font-size: 10px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .modal-kpi-value {
+      font-family: var(--mono);
+      font-size: 16px;
+      color: var(--text);
+    }
+    .modal-section-title {
+      font-size: 11px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 14px 0 8px;
+    }
+    .form-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .field-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 140px;
+    }
+    .field-stack label {
+      font-size: 11px;
+      color: var(--text3);
+    }
+    .feedback {
+      font-size: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-top: 8px;
+    }
+    .feedback.ok {
+      background: var(--green-dim);
+      color: var(--green);
+    }
+    .feedback.error {
+      background: var(--red-dim);
+      color: var(--red);
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .secondary-btn {
+      background: var(--bg3);
+      color: var(--text2);
+      border: 1px solid var(--border2);
+    }
+
+    /* ── Fullscreen map ── */
     .fullscreen-modal {
       position:fixed; inset:0; top:46px; z-index:2000;
       background:var(--bg); display:flex; flex-direction:column;
     }
-    .fullscreen-modal-bar {
+    .fs-bar {
       height:40px; background:var(--bg2); border-bottom:1px solid var(--border);
       display:flex; align-items:center; justify-content:space-between;
       padding:0 16px; flex-shrink:0;
     }
-    .fullscreen-modal-title { font-size:12px; color:var(--text2); }
-    .fullscreen-modal-body { flex:1; min-height:0; position:relative; }
+    .fs-title { font-size:12px; color:var(--text2); }
     #full-map { width:100%; height:100%; }
 
-    /* ── Balança / balanço strip ──────────────────────────── */
-    .balance-strip {
-      display: flex; gap: 16px; padding: 12px 20px; flex-shrink: 0;
-      border-bottom: 1px solid var(--border); background: var(--bg2);
-      flex-wrap: wrap;
+    @media (max-width:1200px) {
+      .hero-strip { grid-template-columns: repeat(3, 1fr); height: auto; }
+      .hero-kpi { padding: 10px 14px; border-bottom: 1px solid var(--border); border-right: none; }
+      .hero-kpi:nth-child(odd) { border-right: 1px solid var(--border); }
+      .dash-grid { grid-template-columns: 1fr 1fr; height: auto; overflow: visible; grid-template-rows: auto; }
+      .cell-tanks { grid-column: 1 / 3; }
+      .cell-map   { grid-column: 1 / 3; grid-row: auto; min-height: 300px; }
+      .cell-valves{ grid-column: 1; grid-row: auto; }
+      .cell-pumps { grid-column: 2; grid-row: auto; }
+      .cell-hydro { grid-column: 1; grid-row: auto; }
+      .cell-esg   { grid-column: 2; grid-row: auto; }
     }
-    .balance-kpi { text-align: left; flex: 1; min-width: 80px; padding: 4px; border-left: 3px solid var(--blue); padding-left: 12px; border-radius: 2px; }
-    .balance-kpi-val { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--text); }
-    .balance-kpi-lbl { font-size: 10px; text-transform: uppercase; color: var(--text3); letter-spacing: 1px; margin-top: 2px; }
-
-    /* ── Delta badges ─────────────────────────────────────── */
-    .delta-pos { color: var(--green); background: var(--green-dim); padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 11px; }
-    .delta-neg { color: var(--red); background: var(--red-dim); padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 11px; }
-
-    @media (max-width:1100px) {
-      .pg-grid {
-        grid-template-columns:1fr 1fr;
-        grid-template-rows:none;
-        grid-auto-rows: auto;
-      }
-      .cell-map  { grid-column:1/3; grid-row:1; min-height:300px; }
-      .cell-res  { grid-column:1/3; grid-row:2; }
-      .cell-hid  { grid-column:1; grid-row:3; }
-      .cell-esg  { grid-column:2; grid-row:3; }
-      .cell-equip{ grid-column:1; grid-row:4; }
-      .cell-man  { grid-column:2; grid-row:4; }
-    }
-    @media (max-width:700px) {
-      .pg-grid { grid-template-columns:1fr; grid-template-rows:none; }
-      .cell-map,.cell-res,.cell-equip,.cell-hid,.cell-esg,.cell-man { grid-column:1; grid-row:auto; min-height:240px; }
+    @media (max-width:768px) {
+      .hero-strip { grid-template-columns: repeat(2, 1fr); }
+      .dash-grid { grid-template-columns: 1fr; }
+      .cell-tanks, .cell-map, .cell-pumps, .cell-valves, .cell-hydro,
+      .cell-esg { grid-column: 1; grid-row: auto; }
+      .modal-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body class="admin-page">
 <div id="topbar" class="admin-header"></div>
-<div class="admin-main" x-data="painelApp()" x-init="init()" x-cloak>
+<script>
+const locationNotesKey = 'aguada-painel-location-notes';
+</script>
 
-    <!-- Grade -->
-    <div class="pg-grid">
+<div x-data="painelApp()" x-init="init()" x-cloak>
 
-      <!-- ── MAPA ──────────────────────────────────────────── -->
-      <div class="pg-cell cell-map">
-        <div class="pg-cell-header">
-          <span class="pg-cell-title">Mapa</span>
-          <div class="pg-cell-actions">
-            <button class="icon-btn" title="Expandir mapa" @click="openFullMap()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-            </button>
-          </div>
-        </div>
-        <div class="map-wrap-mini">
-          <div id="mini-map"></div>
+  <!-- ══════════ HERO KPI STRIP ══════════ -->
+  <div class="hero-strip">
+    <div class="hero-kpi">
+      <div class="hero-kpi-info">
+        <div class="hero-kpi-lbl">Volume Total / Vol Max</div>
+        <div class="hero-kpi-val"><span x-text="volumeTotal">0</span> / <span x-text="volumeMax">0</span> m³</div>
+      </div>
+      <div class="hero-kpi-side" style="color:var(--text3)">
+        <span class="spark" x-text="reservoirCount + ' res'"></span>
+      </div>
+    </div>
+    <div class="hero-kpi">
+      <div class="hero-kpi-info">
+        <div class="hero-kpi-lbl">Aporte</div>
+        <div class="hero-kpi-val" style="color:var(--blue)"><span x-text="aporte">0</span> m³</div>
+      </div>
+      <div class="hero-kpi-side" style="color:var(--text3)">
+        Entrada
+      </div>
+    </div>
+    <div class="hero-kpi">
+      <div class="hero-kpi-info">
+        <div class="hero-kpi-lbl">Consumo</div>
+        <div class="hero-kpi-val" style="color:var(--red)"><span x-text="consumo">0</span> m³</div>
+      </div>
+      <div class="hero-kpi-side" style="color:var(--text3)">
+        Saída
+      </div>
+    </div>
+    <div class="hero-kpi">
+      <div class="hero-kpi-info">
+        <div class="hero-kpi-lbl">Retenção</div>
+        <div class="hero-kpi-val" :style="retencao>=0?'color:var(--green)':'color:var(--red)'">
+          <span x-text="retencao>=0?'+':''"></span><span x-text="retencao">0</span> m³
         </div>
       </div>
-
-      <!-- ── RESERVATÓRIOS ──────────────────────────────────── -->
-      <div class="pg-cell cell-res">
-        <div class="pg-cell-header">
-          <span class="pg-cell-title">Reservatórios</span>
-          <div class="pg-cell-actions">
-            <span style="font-size:12px;font-weight:600;color:var(--text3);background:var(--bg3);padding:4px 10px;border-radius:6px" x-text="'Média Setor: ' + avgPct + '%'"></span>
-          </div>
-        </div>
-        <!-- Balanço strip -->
-        <div class="balance-strip">
-          <div class="balance-kpi" style="border-left-color: var(--cyan)">
-            <div class="balance-kpi-val" x-text="(reservoirs||[]).length"></div>
-            <div class="balance-kpi-lbl">Recursos</div>
-          </div>
-          <div class="balance-kpi" style="border-left-color: var(--blue)">
-            <div class="balance-kpi-val" style="color:var(--blue)" x-text="avgPct+'%'"></div>
-            <div class="balance-kpi-lbl">Vol. médio</div>
-          </div>
-          <div class="balance-kpi" style="border-left-color: var(--red)">
-            <div class="balance-kpi-val" :style="critical>0?'color:var(--red)':'color:var(--text)'" x-text="critical"></div>
-            <div class="balance-kpi-lbl">Críticos</div>
-          </div>
-          <div class="balance-kpi" style="border-left-color: var(--green)">
-            <div class="balance-kpi-val" x-text="onlineCount+'/'+(reservoirs||[]).length"></div>
-            <div class="balance-kpi-lbl">Online</div>
-          </div>
-        </div>
-        <div class="pg-cell-body">
-          <table class="dt">
-            <thead><tr>
-              <th>Alias</th><th>Vol. Atual (m³)</th><th>Vol. Máx (m³)</th><th>%</th><th>Balanço (Dia)</th><th>Status</th><th>Atualização</th>
-            </tr></thead>
-            <tbody>
-              <template x-for="r in sortedReservoirs" :key="r.alias">
-                <tr style="cursor:pointer" @click="openResModal(r.alias)">
-                  <td class="mono" x-text="r.alias"></td>
-                  <td class="mono" x-text="r.volume_l!=null?Math.round(r.volume_l/1000).toLocaleString('pt-BR')+' m³':'—'"></td>
-                  <td class="mono" x-text="r.volume_max_l!=null?Math.round(r.volume_max_l/1000).toLocaleString('pt-BR')+' m³':'—'"></td>
-                  <td>
-                    <span class="bar-wrap"><span class="bar-fill" :style="`width:${r.pct||0}%;background:${statusColor(r.pct,r.online)}`"></span></span>
-                    <span class="mono" style="margin-left:4px" x-text="r.pct!=null?Math.round(r.pct)+'%':'—'"></span>
-                  </td>
-                  <td class="mono" style="color:var(--text3)">---</td>
-                  <td>
-                    <span class="badge"
-                      :class="!r.online?'badge-gray':r.pct<=20?'badge-red':r.pct<=35?'badge-yellow':'badge-green'"
-                      x-text="!r.online?'Offline':r.pct<=20?'Crítico':r.pct<=35?'Atenção':'Normal'"></span>
-                  </td>
-                  <td style="color:var(--text3);font-size:10px" x-text="timeAgo(r.ts)"></td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
+      <div class="hero-kpi-side" :style="retencao>=0?'color:var(--green)':'color:var(--red)'">
+        Balanço
+      </div>
+    </div>
+    <div class="hero-kpi">
+      <div class="hero-kpi-info">
+        <div class="hero-kpi-lbl">Alertas</div>
+        <div class="hero-kpi-val" :style="critical>0?'color:var(--red)':(warning>0?'color:var(--yellow)':'color:var(--green)')">
+          <span x-text="critical + warning">0</span> <span style="font-size:12px;font-weight:600">ativos</span>
         </div>
       </div>
+      <div class="hero-kpi-side">
+        <span x-show="critical>0" style="color:var(--red)" x-text="critical+' crítico'"></span>
+        <span x-show="critical===0 && warning>0" style="color:var(--yellow)" x-text="warning+' atenção'"></span>
+        <span x-show="critical===0 && warning===0" style="color:var(--green)">Tudo Normal</span>
+      </div>
+    </div>
+  </div>
 
-      <!-- ── BOMBAS & VÁLVULAS ──────────────────────────────── -->
-      <div class="pg-cell cell-equip">
-        <div class="pg-cell-header">
-          <span class="pg-cell-title">Equipamentos</span>
-          <div class="pg-cell-actions">
-            <a href="manutencao.html" class="icon-btn" title="Abrir Dispositivos">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </div>
-        <div class="pg-cell-body">
-          <!-- Bombas -->
-          <div style="padding:4px 8px 2px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);border-bottom:1px solid var(--border)">Bombas</div>
-          <table class="dt">
-            <thead><tr><th>Bomba</th><th>Estado</th></tr></thead>
-            <tbody>
-              <template x-for="p in pumps" :key="p.id">
-                <tr>
-                  <td class="mono" x-text="p.pump_name"></td>
-                  <td>
-                    <span class="badge"
-                      :class="p.state==='ligada'?'badge-green':p.state==='falha'?'badge-red':p.state==='manutencao'?'badge-yellow':'badge-gray'"
-                      x-text="p.state"></span>
-                  </td>
-                </tr>
-              </template>
-              <tr x-show="!pumps.length"><td colspan="2" style="color:var(--text3);text-align:center;padding:12px">Sem registros</td></tr>
-            </tbody>
-          </table>
-          <!-- Válvulas -->
-          <div style="padding:4px 8px 2px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);border-bottom:1px solid var(--border);border-top:1px solid var(--border)">Válvulas</div>
-          <table class="dt">
-            <thead><tr><th>Válvula</th><th>Estado</th></tr></thead>
-            <tbody>
-              <template x-for="v in valves" :key="v.id">
-                <tr>
-                  <td class="mono" x-text="v.valve_name"></td>
-                  <td>
-                    <span class="badge"
-                      :class="v.state==='aberta'?'badge-green':v.state==='fechada'?'badge-red':v.state==='parcial'?'badge-yellow':'badge-gray'"
-                      x-text="v.state"></span>
-                  </td>
-                </tr>
-              </template>
-              <tr x-show="!valves.length"><td colspan="2" style="color:var(--text3);text-align:center;padding:12px">Sem registros</td></tr>
-            </tbody>
-          </table>
+  <!-- ══════════ DASHBOARD GRID ══════════ -->
+  <div class="dash-grid">
+
+    <!-- ── RESERVATÓRIOS (visual tanks) ── -->
+    <div class="cell cell-tanks">
+      <div class="cell-hdr">
+        <span class="cell-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+          Reservatórios
+        </span>
+        <span class="cell-badge" x-text="'Média: '+avgPct+'%'"></span>
+      </div>
+      <div class="cell-body">
+        <div class="tanks-grid">
+          <template x-for="r in sortedReservoirs" :key="r.alias">
+            <div class="tank-card" @click="openResModal(r.alias)">
+              <div class="tank-name" x-text="r.name || '—'"></div>
+              <div class="tank-visual">
+                <div class="tank-water"
+                  :class="r.online ? 'online' : ''"
+                  :style="tankWaterStyle(r)">
+                </div>
+                <div class="tank-overlay">
+                  <span class="tank-status-corner">
+                    <span class="tank-status-dot"
+                      :style="`background:${r.online?'var(--green)':'var(--red)'}`"></span>
+                  </span>
+                  <div class="tank-values">
+                    <div class="tank-alias-row">
+                      <span class="tank-alias" x-text="r.alias"></span>
+                    </div>
+                    <div class="tank-pct-line">
+                      <span class="tank-pct-value" x-text="r.pct!=null?Math.round(r.pct):'—'"></span>
+                      <span class="tank-pct-unit" x-show="r.pct!=null">%</span>
+                    </div>
+                    <div class="tank-volume-line" x-show="r.volume_l != null">
+                      <span class="tank-volume-value" x-text="Math.round(r.volume_l / 1000)"></span>
+                      <span class="tank-volume-unit">m³</span>
+                    </div>
+                    <div class="tank-datetime" x-text="tankDateTime(r.ts)"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
+    </div>
 
-      <!-- ── HIDRÔMETROS ─────────────────────────────────────── -->
-      <div class="pg-cell cell-hid">
-        <div class="pg-cell-header">
-          <span class="pg-cell-title">Hidrômetros</span>
-          <div class="pg-cell-actions">
-            <a href="dados.html" class="icon-btn" title="Abrir Análise">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
+    <!-- ── MAPA ── -->
+    <div class="cell cell-map">
+      <div class="cell-hdr">
+        <span class="cell-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          Mapa da Rede
+        </span>
+        <button class="icon-btn" title="Expandir mapa" @click="openFullMap()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        </button>
+      </div>
+      <div class="cell-body">
+        <div id="mini-map"></div>
+      </div>
+    </div>
+
+    <!-- ── BOMBAS ── -->
+    <div class="cell cell-pumps">
+      <div class="cell-hdr">
+        <span class="cell-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zM12 18a6 6 0 110-12 6 6 0 010 12z"/></svg>
+          Bombas
+        </span>
+      </div>
+      <div class="cell-body">
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+          <template x-for="grp in pumpGroups" :key="grp[0]">
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600;text-align:center" x-text="grp[0]"></div>
+              <template x-for="p in grp[1]" :key="p.id">
+                <button type="button" class="eq-btn" :class="eqStateClass(p.state)" :title="p.pump_name" @click="openEquipment('pump', canonicalPumpName(p.pump_name))">
+                  <div class="eq-label" x-text="p.pump_name"></div>
+                </button>
+              </template>
+              <div x-show="!grp[1].length" style="color:var(--text3);font-size:10px;text-align:center;padding:4px">Nenhuma</div>
+            </div>
+          </template>
         </div>
-        <div class="pg-cell-body">
-          <table class="dt">
-            <thead><tr>
-              <th>Medidor</th><th>Leitura Atual (m³)</th><th>Data/Hora</th><th>Δ Diário (m³)</th><th>Situação</th>
-            </tr></thead>
-            <tbody>
-              <template x-for="h in hydrometerRows" :key="h.name">
-                <tr>
-                  <td class="mono" x-text="h.name"></td>
-                  <td class="mono" style="font-weight:600" x-text="h.curr!=null?h.curr.toFixed(3):'—'"></td>
-                  <td style="color:var(--text3);font-size:10px" x-text="formatTs(h.currTs)"></td>
-                  <td class="mono"
+      </div>
+    </div>
+
+    <!-- ── VÁLVULAS ── -->
+    <div class="cell cell-valves">
+      <div class="cell-hdr">
+        <span class="cell-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Válvulas
+        </span>
+      </div>
+      <div class="cell-body" style="max-height: 280px; overflow-y: auto;">
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items:start;">
+          <template x-for="grp in valveGroups" :key="grp[0]">
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:0;font-weight:600;text-align:center" x-text="grp[0]"></div>
+              <div style="display:flex; flex-direction:column; gap: 6px;">
+                <template x-for="v in grp[1]" :key="v.id">
+                  <button type="button" class="eq-btn" :class="eqStateClass(v.state)" :title="v.valve_name" @click="openEquipment('valve', canonicalValveName(v.valve_name))">
+                    <div class="eq-label" x-text="v.valve_name.replace('V-','')"></div>
+                  </button>
+                </template>
+                <div x-show="!grp[1].length" style="color:var(--text3);font-size:10px;text-align:center;padding:4px">Nenhuma</div>
+              </div>
+            </div>
+          </template>
+        </div>
+        <div x-show="!valveGroups.length" style="color:var(--text3);text-align:center;padding:12px;font-size:12px">Sem registros</div>
+      </div>
+    </div>
+
+    <!-- ── HIDRÔMETROS ── -->
+    <div class="cell cell-hydro">
+      <div class="cell-hdr">
+        <span class="cell-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Hidrômetros
+        </span>
+        <a href="dados.html" class="cell-badge" style="text-decoration:none;cursor:pointer">Análise →</a>
+      </div>
+      <div class="cell-body">
+        <table class="dt" style="width:100%">
+          <thead><tr>
+            <th>Medidor</th><th>Leitura (m³)</th><th>Δ Dia</th><th>Atualização</th>
+          </tr></thead>
+          <tbody>
+            <template x-for="h in hydrometerRows" :key="h.name">
+              <tr style="cursor:pointer" @click="openEquipment('hydrometer', canonicalHydrometerName(h.name))">
+                <td style="font-family:var(--mono);font-weight:600" x-text="h.name"></td>
+                <td style="font-family:var(--mono)" x-text="h.curr!=null?h.curr.toFixed(3):'—'"></td>
+                <td>
+                  <span style="font-family:var(--mono);font-size:11px"
                     :class="h.delta!=null?(h.delta>=0?'delta-pos':'delta-neg'):''"
-                    x-text="h.delta!=null?(h.delta>=0?'+':'')+h.delta.toFixed(3):'—'"></td>
-                  <td><span class="badge badge-green">Operando</span></td>
-                </tr>
-              </template>
-              <tr x-show="!hydrometerRows.length"><td colspan="5" style="color:var(--text3);text-align:center;padding:12px">Sem leituras registradas</td></tr>
-            </tbody>
-          </table>
+                    x-text="h.delta!=null?(h.delta>=0?'+':'')+h.delta.toFixed(3):'—'"></span>
+                </td>
+                <td style="color:var(--text3);font-size:10px" x-text="formatTs(h.currTs)"></td>
+              </tr>
+            </template>
+            <tr x-show="!hydrometerRows.length"><td colspan="4" style="color:var(--text3);text-align:center;padding:16px;font-size:12px">Sem leituras registradas</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── SANEAMENTO ── -->
+    <div class="cell cell-esg">
+      <div class="cell-hdr">
+        <span class="cell-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg>
+          Saneamento
+        </span>
+        <a href="ete.html" class="cell-badge" style="text-decoration:none;cursor:pointer">ETE →</a>
+      </div>
+      <div class="cell-body">
+        <div class="san-row" style="cursor:pointer" @click="openLocationModal('ete')">
+          <div><div style="font-weight:600;font-size:12px;color:var(--text)">ETE Principal</div><div style="font-size:10px;color:var(--text3)">Tratamento de efluentes</div></div>
+          <span class="badge badge-green">Normal</span>
+        </div>
+        <div class="san-row">
+          <div style="font-size:12px;color:var(--text2)">Nível Equalização</div>
+          <span style="font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:600">45%</span>
+        </div>
+        <div class="san-row">
+          <div style="font-size:12px;color:var(--text2)">Odor Biogás</div>
+          <span class="badge badge-green">Baixo</span>
+        </div>
+        <div class="san-row">
+          <div style="font-size:12px;color:var(--text2)">Inspeção Fossas</div>
+          <span class="badge badge-gray">Sem alertas</span>
         </div>
       </div>
+    </div>
 
-      <!-- ── ESGOTO ─────────────────────────────────────── -->
-      <div class="pg-cell cell-esg">
-        <div class="pg-cell-header">
-           <span class="pg-cell-title">Saneamento (Esgoto)</span>
+  </div><!-- /dash-grid -->
+
+  <div class="modal-overlay" x-show="modal.open" x-transition.opacity @click.self="closeModal()">
+    <div class="modal-box" style="max-width:720px;width:min(92vw,720px)">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" x-text="modal.alias + ' - ' + modal.name"></div>
+          <div class="modal-subtitle">Reservatorio - entrada manual por percentual ou volume</div>
         </div>
-        <div class="pg-cell-body" style="padding:12px; display:flex; flex-direction:column; gap:8px;">
-           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px">
-             <span style="font-weight:600;font-size:12px;color:var(--text)">ETE Principal</span>
-             <span class="badge badge-green">Normal</span>
-           </div>
-           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px">
-             <span style="font-size:12px;color:var(--text2)">Nível Tanque Equalização</span>
-             <span style="font-family:var(--mono);font-size:12px;color:var(--blue)">45%</span>
-           </div>
-           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px">
-             <span style="font-size:12px;color:var(--text2)">Odor Reator (Biogás)</span>
-             <span style="font-family:var(--mono);font-size:12px">Baixo</span>
-           </div>
-           <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:6px">
-             <span style="font-size:12px;color:var(--text2)">Alertas Inspeção (Fossas)</span>
-             <span class="badge badge-gray">Sem alertas</span>
-           </div>
-        </div>
+        <button class="modal-close" @click="closeModal()">&times;</button>
       </div>
 
-      <!-- ── MANUTENÇÃO & BALANÇO ─────────────────────────────────────── -->
-      <div class="pg-cell cell-man">
-        <div class="pg-cell-header">
-           <span class="pg-cell-title">Operação & Manutenção</span>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="modal-grid">
+          <div class="modal-kpi">
+            <div class="modal-kpi-label">Percentual</div>
+            <div class="modal-kpi-value" x-text="(modal.pct ?? 0).toFixed(1) + '%' "></div>
+          </div>
+          <div class="modal-kpi">
+            <div class="modal-kpi-label">Volume</div>
+            <div class="modal-kpi-value" x-text="modal.volume_l != null ? (modal.volume_l / 1000).toFixed(1) + ' m³' : '—'"></div>
+          </div>
+          <div class="modal-kpi">
+            <div class="modal-kpi-label">Nivel</div>
+            <div class="modal-kpi-value" x-text="modal.level_cm != null ? Number(modal.level_cm).toFixed(1) + ' cm' : '—'"></div>
+          </div>
+          <div class="modal-kpi">
+            <div class="modal-kpi-label">Atualizacao</div>
+            <div class="modal-kpi-value" x-text="formatTs(modal.ts)"></div>
+          </div>
         </div>
-        <div class="pg-cell-body" style="padding:12px">
-           <div style="font-size:10px;text-transform:uppercase;font-weight:600;color:var(--text3);margin-bottom:8px;letter-spacing:1px">Balanço Hídrico Global (24h)</div>
-           <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg3);border-radius:6px;padding:8px">
-             <div style="flex:1;text-align:center">
-                <div style="font-family:var(--mono);font-size:14px;font-weight:bold;color:var(--blue)">342 m³</div>
-                <div style="font-size:10px;color:var(--text3)">Aporte</div>
-             </div>
-             <div style="flex:1;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border)">
-                <div style="font-family:var(--mono);font-size:14px;font-weight:bold;color:var(--red)">315 m³</div>
-                <div style="font-size:10px;color:var(--text3)">Consumo</div>
-             </div>
-             <div style="flex:1;text-align:center">
-                <div style="font-family:var(--mono);font-size:14px;font-weight:bold;color:var(--green)">+27 m³</div>
-                <div style="font-size:10px;color:var(--text3)">Retenção</div>
-             </div>
-           </div>
-           
-           <div style="font-size:10px;text-transform:uppercase;font-weight:600;color:var(--text3);margin-bottom:8px;letter-spacing:1px">Agenda de Intervenções</div>
-           <ul style="margin:0;padding-left:16px;font-size:11px;color:var(--text);line-height:1.6">
-             <li><b>18/Abr:</b> Desobstrução na rede da Ala Sul (CG-01)</li>
-             <li><b>22/Abr:</b> Manutenção Preventiva - Bomba B-01</li>
-             <li><b>30/Abr:</b> Calibração semestral de Hidrômetros</li>
-           </ul>
+
+        <div class="modal-section-title">Entrada manual</div>
+        <div class="form-row">
+          <button type="button" class="eq-btn" :class="{active: modal.manualMode === 'pct'}" @click="modal.manualMode='pct'">Percentual</button>
+          <button type="button" class="eq-btn" :class="{active: modal.manualMode === 'volume_l'}" @click="modal.manualMode='volume_l'">Volume</button>
+        </div>
+        <div class="field-stack">
+          <label x-text="modal.manualMode === 'pct' ? 'Percentual (%)' : 'Volume interno (m³)'"></label>
+          <input class="form-input" type="number" step="0.1" x-model="modal.manualValue" placeholder="Informe o valor" @keyup.enter="submitManual()"/>
+        </div>
+
+        <template x-if="modal.feedback">
+          <div class="feedback" :class="modal.feedbackOk ? 'ok' : 'error'" x-text="modal.feedback"></div>
+        </template>
+
+        <div class="modal-actions">
+          <button class="eq-btn secondary-btn" @click="closeModal()">Fechar</button>
+          <button class="eq-btn btn-primary" @click="submitManual()" :disabled="modal.saving" x-text="modal.saving ? 'Salvando...' : 'Salvar leitura'"></button>
         </div>
       </div>
+    </div>
+  </div>
 
-    </div><!-- /pg-grid -->
-  </div><!-- /admin-main -->
-
-  <!-- ── Modal reservatório ──────────────────────────────────── -->
-  <div class="modal-side" :class="{open:modal.open}" id="modal-side">
-    <div class="modal-header">
-      <div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-family:var(--mono);font-size:16px;font-weight:600" x-text="modal.alias"></span>
-          <span class="badge" :class="modal.online?'badge-green':'badge-gray'" x-text="modal.online?'Online':'Offline'"></span>
+  <div class="modal-overlay" x-show="equipmentModal.open" x-transition.opacity @click.self="closeEquipmentModal()">
+    <div class="modal-box" style="max-width:760px;width:min(92vw,760px)">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" x-text="equipmentModal.name"></div>
+          <div class="modal-subtitle" x-text="equipmentModal.kindLabel"></div>
         </div>
-        <div style="font-size:11px;color:var(--text2);margin-top:2px" x-text="modal.name"></div>
+        <button class="modal-close" @click="closeEquipmentModal()">&times;</button>
       </div>
-      <button class="theme-btn" @click="closeModal()">
+
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="modal-grid">
+          <div class="modal-kpi">
+            <div class="modal-kpi-label">Estado / leitura</div>
+            <div class="modal-kpi-value" x-text="equipmentModal.currentLabel"></div>
+          </div>
+          <div class="modal-kpi">
+            <div class="modal-kpi-label">Atualizacao</div>
+            <div class="modal-kpi-value" x-text="equipmentModal.ts ? formatTs(equipmentModal.ts) : '—'"></div>
+          </div>
+        </div>
+
+        <div class="modal-section-title">Entrada operacional</div>
+
+        <template x-if="equipmentModal.kind === 'pump'">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="form-row">
+              <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'ligada'}" @click="equipmentModal.state='ligada'">Ligada</button>
+              <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'desligada'}" @click="equipmentModal.state='desligada'">Desligada</button>
+              <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'falha'}" @click="equipmentModal.state='falha'">Falha</button>
+              <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'manutencao'}" @click="equipmentModal.state='manutencao'">Manutencao</button>
+            </div>
+            <div class="field-stack">
+              <label>Modo</label>
+              <input class="form-input" type="text" x-model="equipmentModal.mode" placeholder="manual"/>
+            </div>
+          </div>
+        </template>
+
+        <template x-if="equipmentModal.kind === 'valve'">
+          <div class="form-row">
+            <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'aberta'}" @click="equipmentModal.state='aberta'">Aberta</button>
+            <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'fechada'}" @click="equipmentModal.state='fechada'">Fechada</button>
+            <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'parcial'}" @click="equipmentModal.state='parcial'">Parcial</button>
+            <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'falha'}" @click="equipmentModal.state='falha'">Falha</button>
+          </div>
+        </template>
+
+        <template x-if="equipmentModal.kind === 'hydrometer'">
+          <div class="form-row">
+            <div class="field-stack">
+              <label>Leitura</label>
+              <input class="form-input" type="number" step="0.01" x-model="equipmentModal.reading" placeholder="0.00"/>
+            </div>
+            <div class="field-stack" style="max-width:140px;">
+              <label>Unidade</label>
+              <input class="form-input" type="text" x-model="equipmentModal.unit" placeholder="m3"/>
+            </div>
+          </div>
+        </template>
+
+        <div class="field-stack">
+          <label>Observacao</label>
+          <textarea class="form-input" rows="3" x-model="equipmentModal.note" placeholder="Observacao operacional"></textarea>
+        </div>
+
+        <template x-if="equipmentModal.feedback">
+          <div class="feedback" :class="equipmentModal.feedbackOk ? 'ok' : 'error'" x-text="equipmentModal.feedback"></div>
+        </template>
+
+        <div class="modal-actions">
+          <button class="eq-btn secondary-btn" @click="closeEquipmentModal()">Fechar</button>
+          <button class="eq-btn btn-primary" @click="saveEquipment()" :disabled="equipmentModal.saving" x-text="equipmentModal.saving ? 'Salvando...' : 'Salvar'"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" x-show="locationModal.open" x-transition.opacity @click.self="closeLocationModal()">
+    <div class="modal-box" style="max-width:680px;width:min(92vw,680px)">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" x-text="locationModal.title"></div>
+          <div class="modal-subtitle">Detalhes do local e anotacao operacional</div>
+        </div>
+        <button class="modal-close" @click="closeLocationModal()">&times;</button>
+      </div>
+
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="modal-kpi">
+          <div class="modal-kpi-label">Resumo</div>
+          <div class="modal-kpi-value" style="font-size:14px;font-family:inherit;line-height:1.6;" x-text="locationModal.summary"></div>
+        </div>
+
+        <div class="field-stack">
+          <label>Anotacao local</label>
+          <textarea class="form-input" rows="5" x-model="locationModal.note" placeholder="Registrar observacao do container/local"></textarea>
+        </div>
+
+        <template x-if="locationModal.feedback">
+          <div class="feedback ok" x-text="locationModal.feedback"></div>
+        </template>
+
+        <div class="modal-actions">
+          <button class="eq-btn secondary-btn" @click="closeLocationModal()">Fechar</button>
+          <button class="eq-btn btn-primary" @click="saveLocationNote()">Salvar anotacao</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ FULLSCREEN MAP ══════════ -->
+  <div class="fullscreen-modal" :style="fullMap ? 'display:flex' : 'display:none'" style="display:none;" x-cloak>
+    <div class="fs-bar">
+      <span class="fs-title">Mapa — Visão ampliada</span>
+      <button class="icon-btn" @click="closeFullMap()" title="Fechar">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="modal-body">
-      <div class="tank-wrap" style="height:90px;margin-bottom:12px">
-        <div class="tank-fill" :style="`height:${modal.pct}%;background:${statusColor(modal.pct,modal.online)}`"></div>
-        <div class="tank-label" :style="modal.pct>40?'color:white':'color:var(--text)'" x-text="modal.pct+'%'"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-        <div class="card" style="padding:10px"><div style="font-size:10px;color:var(--text3)">Volume</div><div style="font-family:var(--mono);font-size:15px;margin-top:2px" x-text="modal.volume_l!=null?Math.round(modal.volume_l/1000)+' m³':'—'"></div></div>
-        <div class="card" style="padding:10px"><div style="font-size:10px;color:var(--text3)">Nível</div><div style="font-family:var(--mono);font-size:15px;margin-top:2px" x-text="modal.level_cm!=null?modal.level_cm+' cm':'—'"></div></div>
-        <div class="card" style="padding:10px"><div style="font-size:10px;color:var(--text3)">RSSI</div><div style="font-family:var(--mono);font-size:15px;margin-top:2px" :style="`color:${rssiColor(modal.rssi)}`" x-text="modal.rssi!=null?modal.rssi+' dBm':'—'"></div></div>
-        <div class="card" style="padding:10px"><div style="font-size:10px;color:var(--text3)">Atualizado</div><div style="font-size:11px;margin-top:2px;color:var(--text2)" x-text="timeAgo(modal.ts)"></div></div>
-      </div>
-      <div class="section-title">Leitura Manual</div>
-      <div style="display:flex;gap:6px;margin-bottom:8px">
-        <button class="eq-btn" :class="{active:modal.manualMode==='pct'}" @click="modal.manualMode='pct'">%</button>
-        <button class="eq-btn" :class="{active:modal.manualMode==='volume_l'}" @click="modal.manualMode='volume_l'">Litros</button>
-      </div>
-      <div style="display:flex;gap:8px">
-        <input class="form-input" type="number" min="0" :max="modal.manualMode==='pct'?100:modal.volume_max_l" :placeholder="modal.manualMode==='pct'?'0–100 %':'Litros'" x-model="modal.manualValue" @keyup.enter="submitManual()"/>
-        <button class="btn btn-primary" @click="submitManual()" :disabled="modal.saving" x-text="modal.saving?'...':'Salvar'"></button>
-      </div>
-      <div x-show="modal.feedback" x-text="modal.feedback" style="font-size:11px;margin-top:6px" :style="modal.feedbackOk?'color:var(--green)':'color:var(--red)'"></div>
-    </div>
-  </div>
-  <div x-show="modal.open" @click="closeModal()" style="position:fixed;inset:0;z-index:1400;background:rgba(0,0,0,0.4)" x-cloak></div>
-
-  <!-- ── Modal fullscreen mapa ──────────────────────────────── -->
-  <div class="fullscreen-modal" :style="fullMap ? 'display:flex' : 'display:none'" style="display:none;" x-cloak>
-    <div class="fullscreen-modal-bar">
-      <span class="fullscreen-modal-title">Mapa — Visão ampliada</span>
-      <div style="display:flex;gap:8px">
-        <button class="icon-btn" @click="closeFullMap()" title="Fechar">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-    </div>
-    <div class="fullscreen-modal-body">
+    <div style="flex:1;min-height:0;position:relative">
       <div id="full-map"></div>
     </div>
   </div>
 
-
-
-</div><!-- /layout -->
+</div>
 
 <script src="assets/api.js"></script>
 <script src="assets/shared.js"></script>
@@ -418,22 +829,114 @@ function painelApp() {
     pumps: [],
     valves: [],
     hydrometers: [],
-    gwStatus: 'off',
-    gwLabel: 'GW offline',
+    hydrometerHistory: [],
+    gwOnline: false,
+    gwLabel: 'Verificando...',
+    gwPort: null,
+    gwFw: null,
+    gwMac: null,
+    gwLastSeen: null,
     fullMap: false,
     _miniMap: null,
     _fullMapObj: null,
     _miniMarkers: {},
     _fullMarkers: {},
     _initialized: false,
+    locationNotes: {},
+    sites: [
+      {
+        id: 'ete',
+        title: 'ETE Principal',
+        summary: 'Estacao de tratamento de efluentes com monitoramento operacional do nivel de equalizacao, odor de biogas e inspecao local.',
+      },
+    ],
+    locationModal: {
+      open: false,
+      siteId: '',
+      title: '',
+      summary: '',
+      note: '',
+      feedback: '',
+    },
+    equipmentModal: {
+      open: false,
+      kind: 'pump',
+      kindLabel: '',
+      name: '',
+      state: '',
+      mode: 'manual',
+      reading: '',
+      unit: 'm3',
+      note: '',
+      ts: null,
+      saving: false,
+      currentLabel: '—',
+      feedback: '',
+      feedbackOk: true,
+    },
 
+    get volumeTotal() {
+      const volL = (this.reservoirs||[]).reduce((sum, reservoir) => {
+        const value = Number(reservoir?.volume_l);
+        return sum + (Number.isFinite(value) ? value : 0);
+      }, 0);
+      return Math.round(volL / 1000);
+    },
+    get volumeMax() {
+      const maxL = (this.reservoirs||[]).reduce((sum, reservoir) => {
+        const value = Number(reservoir?.volume_max_l ?? reservoir?.capacity_l);
+        return sum + (Number.isFinite(value) ? value : 0);
+      }, 0);
+      return Math.round(maxL / 1000);
+    },
+    get reservoirCount() { return (this.reservoirs || []).length; },
+    get aporte() { return 342; },
+    get consumo() { return 315; },
+    get retencao() { return this.aporte - this.consumo; },
     get avgPct() {
       const r = (this.reservoirs||[]).filter(x=>x.online);
-      if (!r.length) return 0;
-      return Math.round(r.reduce((s,x)=>s+(x.pct||0),0)/r.length);
+      return r.length ? Math.round(r.reduce((s,x)=>s+(x.pct||0),0)/r.length) : 0;
     },
     get critical() { return (this.reservoirs||[]).filter(r=>r.online&&r.pct<=20).length; },
+    get warning() { return (this.reservoirs||[]).filter(r=>r.online&&r.pct>20&&r.pct<=35).length; },
     get onlineCount() { return (this.reservoirs||[]).filter(r=>r.online).length; },
+    get activePumps() { return this.pumps.filter(p=>p.state==='ligada').length; },
+
+    tankDateTime(ts) {
+      if (!ts) return '—';
+      const date = typeof ts === 'number' ? new Date(ts * 1000) : new Date(ts);
+      if (Number.isNaN(date.getTime())) return '—';
+      const now = new Date();
+      const sameDay = date.toDateString() === now.toDateString();
+      const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      if (sameDay) return time;
+      const shortDate = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      return `${shortDate} ${time}`;
+    },
+
+    tankWaterStyle(r) {
+      const pct = Math.max(0, Number(r?.pct) || 0);
+      const minVisible = pct > 0 ? Math.max(pct, 2) : 0;
+      const opacity = r?.online ? 1 : 0.58;
+      return `height:${minVisible}%;opacity:${opacity};background:linear-gradient(180deg, rgba(153, 211, 255, 0.45) 0%, rgba(95, 177, 255, 0.62) 35%, rgba(77, 163, 255, 0.78) 68%, rgba(42, 125, 214, 0.88) 100%);box-shadow:inset 0 2px 0 rgba(255,255,255,0.45),inset 0 -1px 0 rgba(29,78,137,0.22);`;
+    },
+
+    eqStateClass(state) {
+      switch ((state || '').toLowerCase()) {
+        case 'ligada':
+        case 'aberta':
+          return 'state-blue';
+        case 'desligada':
+        case 'fechada':
+        case 'falha':
+          return 'state-red';
+        case 'manutencao':
+        case 'parcial':
+          return 'state-yellow';
+        default:
+          return 'state-neutral';
+      }
+    },
 
     get sortedReservoirs() {
       const order = ['CON', 'CAV', 'CIE', 'CB3', 'CBIF'];
@@ -445,8 +948,38 @@ function painelApp() {
       return [...(this.reservoirs||[])].sort((a,b) => rank(a.alias) - rank(b.alias));
     },
 
+    get pumpGroups() {
+      const groups = { 'CB3': [], 'CB2': [], 'CBIF': [] };
+      this.pumps.forEach(p => {
+        let n = (p.pump_name || '').toUpperCase();
+        if (n.includes('CB3') || n.includes('03')) groups['CB3'].push(p);
+        else if (n.includes('CB2') || n.includes('02')) groups['CB2'].push(p);
+        else if (n.includes('CBIF') || n.includes('IF')) groups['CBIF'].push(p);
+        else groups['CB3'].push(p);
+      });
+      return [['CB3', groups['CB3']], ['CB2', groups['CB2']], ['CBIF', groups['CBIF']]];
+    },
+    get valveGroups() {
+      const groups = {};
+      this.valves.filter(v => v.valve_name !== 'VALV-IE-INTERLIG').forEach(v => {
+        let n = (v.valve_name || '').toUpperCase();
+        let local = 'GERAL';
+        const pts = n.split('-');
+        if (pts.length >= 3 && pts[1].length > 1) {
+          local = pts[1];
+        } else {
+          if (n.includes('CON')) local = 'CON';
+          else if (n.includes('CAV')) local = 'CAV';
+          else if (n.includes('CIE')) local = 'CIE';
+          else if (n.includes('CB3')) local = 'CB3';
+        }
+        if (!groups[local]) groups[local] = [];
+        groups[local].push(v);
+      });
+      return Object.entries(groups).sort((a,b)=>a[0].localeCompare(b[0]));
+    },
+
     get hydrometerRows() {
-      // Agrupar por meter_name, retornar curr+prev+delta
       const groups = {};
       for (const h of this.hydrometers) {
         if (!groups[h.meter_name]) groups[h.meter_name] = [];
@@ -463,31 +996,64 @@ function painelApp() {
       });
     },
 
+    loadLocationNotes() {
+      try {
+        this.locationNotes = JSON.parse(localStorage.getItem(locationNotesKey) || '{}');
+      } catch (_) {
+        this.locationNotes = {};
+      }
+    },
+
     ...wsMixin(),
     ...reservoirModalMixin(),
 
     async init() {
       if (this._initialized) return;
       this._initialized = true;
+      this.loadLocationNotes();
 
-      // Dados
-      const [resData, equipData, gwData, hidData] = await Promise.all([
+      const [resData, equipData, gwData, hidData, infra] = await Promise.all([
         aguadaAPI.getReservoirs().catch(()=>[]),
         aguadaAPI.getEquipCurrent().catch(()=>({pumps:[],valves:[],hydrometers:[]})),
         aguadaAPI.getGateway().catch(()=>null),
         aguadaAPI.getManualHydrometers(200).catch(()=>({items:[]})),
+        fetch('assets/infra.json').then(r=>r.json()).catch(()=>null)
       ]);
 
       this.reservoirs = Array.isArray(resData) ? resData : [];
-      this.pumps = equipData.pumps || [];
-      this.valves = equipData.valves || [];
-      this.hydrometers = hidData.items || [];
+      
+      const fallbackPumps = infra?.pumps?.length ? infra.pumps.map(p=>({id:p.id, pump_name:p.name, state:'ligada'})) : [
+        { id: 'f1', pump_name: 'B-01 CB3', state: 'ligada' }, { id: 'f2', pump_name: 'B-02 CB3', state: 'ligada' },
+        { id: 'f3', pump_name: 'B-01 CB2', state: 'ligada' }, { id: 'f4', pump_name: 'B-02 CB2', state: 'falha' },
+        { id: 'f5', pump_name: 'B-01 CBIF', state: 'ligada' }, { id: 'f6', pump_name: 'B-02 CBIF', state: 'desligada' }
+      ];
+      
+      const fallbackValves = infra?.valves?.length ? infra.valves.filter(v=> v.name.startsWith('V-')).map(v=>({id:v.id, valve_name:v.name, state:'aberta'})) : [
+        { id: 'v1', valve_name: 'V-CON-IN', state: 'aberta' }, { id: 'v2', valve_name: 'V-CON-AV', state: 'aberta' }, { id: 'v3', valve_name: 'V-CON-AZ', state: 'fechada' }, { id: 'v4', valve_name: 'V-CON-OUT', state: 'aberta' }, { id: 'v5', valve_name: 'V-CON-AVAZ', state: 'aberta' },
+        { id: 'v6', valve_name: 'V-CAV-IN', state: 'aberta' }, { id: 'v7', valve_name: 'V-CAV-AV', state: 'fechada' }, { id: 'v8', valve_name: 'V-CAV-AZ', state: 'aberta' }, { id: 'v9', valve_name: 'V-CAV-OUT', state: 'aberta' },
+        { id: 'v10', valve_name: 'V-CIE-IN', state: 'aberta' }, { id: 'v11', valve_name: 'V-CIE-OUT', state: 'aberta' },
+        { id: 'v12', valve_name: 'V-CB03-IN', state: 'aberta' }, { id: 'v13', valve_name: 'V-CB03-OUT', state: 'aberta' },
+        { id: 'v14', valve_name: 'V-IE-IN', state: 'aberta' }
+      ];
+      
+      const fallbackHydros = [
+        { meter_name: 'HID-AVAZ', reading: 201.2, ts: Date.now()/1000 },
+        { meter_name: 'HID-AV', reading: 99.4, ts: Date.now()/1000 },
+        { meter_name: 'HID-AZ', reading: 101.8, ts: Date.now()/1000 },
+        { meter_name: 'HID-CONC', reading: 1250.4, ts: Date.now()/1000 },
+        { meter_name: 'HID-IF', reading: 840.2, ts: Date.now()/1000 },
+        { meter_name: 'HID-PRAIA', reading: 331.0, ts: Date.now()/1000 }
+      ];
+
+      this.pumps = equipData.pumps && equipData.pumps.length > 0 ? equipData.pumps : fallbackPumps;
+      this.valves = equipData.valves && equipData.valves.length > 0 ? equipData.valves : fallbackValves;
+      this.hydrometers = hidData.items && hidData.items.length > 0 ? hidData.items : fallbackHydros;
+      this.hydrometerHistory = hidData.items && hidData.items.length > 0 ? hidData.items : fallbackHydros;
       this._updateGw(gwData);
 
       await this._initMiniMap();
       this._updateMiniMarkers();
 
-      // WebSocket
       this.wsConnect(data => {
         const msg = normalizeWsMessage(data);
         if (msg.type==='snapshot') {
@@ -510,9 +1076,13 @@ function painelApp() {
 
     _updateGw(gw) {
       if (!gw) return;
-      if (gw.sim_mode)  { this.gwStatus='sim'; this.gwLabel='Simulação'; }
-      else if (gw.connected) { this.gwStatus='on';  this.gwLabel='GW online'; }
-      else               { this.gwStatus='off'; this.gwLabel='GW offline'; }
+      this.gwPort = gw.port || null;
+      this.gwFw = gw.fw || null;
+      this.gwMac = gw.mac || null;
+      this.gwLastSeen = gw.last_seen ? formatTs(gw.last_seen) : null;
+      if (gw.sim_mode) { this.gwOnline = true; this.gwLabel = 'Modo Simulação'; }
+      else if (gw.connected) { this.gwOnline = true; this.gwLabel = 'Conectado'; }
+      else { this.gwOnline = false; this.gwLabel = 'Desconectado'; }
     },
 
     async _initMiniMap() {
@@ -532,37 +1102,21 @@ function painelApp() {
         layers:[osmLayer],
       }).setView([-22.8382228,-43.1080717],17);
       L.control.layers({'Mapa':osmLayer,'Satélite':satLayer},{},{position:'topright',collapsed:true}).addTo(this._miniMap);
-      // infra leve (apenas tubulações e bombas)
       try {
         const infra = await fetch('assets/infra.json').then(r=>r.json());
         const canvasRenderer = L.canvas({padding:0.5});
         const lg = L.layerGroup().addTo(this._miniMap);
         (infra.pipelines||[]).forEach(p=>{
           const pts = p.coords.map(c=>[c[0],c[1]]);
-          // Border (White shadow) to cleanly separate pipelines
-          L.polyline(pts,{
-            renderer:canvasRenderer, color:'#ffffff', weight:6, opacity:0.7, lineCap:'round', lineJoin:'round'
-          }).addTo(lg);
-          // Core pipeline
-          L.polyline(pts,{
-            renderer:canvasRenderer,
-            color:p.submarine?'#06b6d4':'#3b82f6',
-            weight:3, opacity:0.8,
-            dashArray:p.submarine?'8 4':null,
-            lineCap:'round', lineJoin:'round'
-          }).addTo(lg);
+          L.polyline(pts,{renderer:canvasRenderer, color:'#ffffff', weight:6, opacity:0.7, lineCap:'round', lineJoin:'round'}).addTo(lg);
+          L.polyline(pts,{renderer:canvasRenderer, color:p.submarine?'#06b6d4':'#3b82f6', weight:3, opacity:0.8, dashArray:p.submarine?'8 4':null, lineCap:'round', lineJoin:'round'}).addTo(lg);
         });
       } catch(e){/**/}
       setTimeout(()=>this._miniMap.invalidateSize(),200);
     },
 
-    _updateMiniMarkers() {
-      this._syncMarkers(this._miniMap, this._miniMarkers);
-    },
-
-    _updateFullMarkers() {
-      if (this.fullMap) this._syncMarkers(this._fullMapObj, this._fullMarkers);
-    },
+    _updateMiniMarkers() { this._syncMarkers(this._miniMap, this._miniMarkers); },
+    _updateFullMarkers() { if (this.fullMap) this._syncMarkers(this._fullMapObj, this._fullMarkers); },
 
     _syncMarkers(mapInst, markersDict) {
       if (!mapInst) return;
@@ -572,7 +1126,6 @@ function painelApp() {
         { alias:'FS-01', name:'Fossa Séptica', type:'fossa', lat:-22.8423, lng:-43.1051 },
         { alias:'CG-01', name:'Caixa de Gordura', type:'gordura', lat:-22.8398, lng:-43.1102 }
       ];
-
       elements.forEach(r => {
         const savedPos = localStorage.getItem('coord_' + r.alias);
         if (savedPos) {
@@ -580,32 +1133,185 @@ function painelApp() {
           r.lat = parseFloat(parts[0]);
           r.lng = parseFloat(parts[1]);
         } else if (!r.lat || !r.lng) return;
-
         const isRes = r.type === 'res';
         const color = isRes ? statusColor(r.pct, r.online) : (r.type === 'ete' ? '#8b5cf6' : '#d97706');
         const pctText = isRes ? (r.pct!=null?Math.round(r.pct)+'%':'?') : (r.type === 'ete' ? 'ETE' : 'ESG');
-        
         const icon = L.divIcon({
           className:'aguada-marker',
-          html:`<div style="background:${color};border:2px solid rgba(0,0,0,0.4);border-radius:50%;width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:move;box-shadow:0 3px 8px rgba(0,0,0,0.5)">
+          html:`<div style="background:${color};border:2px solid rgba(0,0,0,0.4);border-radius:50%;width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,0.5)">
                   <div style="font-size:7px;font-weight:700;color:white;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,0.8)">${r.alias}</div>
                   <div style="font-size:8px;font-weight:700;color:white;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,0.8)">${pctText}</div>
                 </div>`,
           iconSize:[32,32], iconAnchor:[16,16],
         });
-        
         if (markersDict[r.alias]) {
           markersDict[r.alias].setLatLng([r.lat,r.lng]);
           markersDict[r.alias].setIcon(icon);
         } else {
-          // Em Painel normal, não tem draggable para os usuários. 
           const m = L.marker([r.lat,r.lng], {icon, draggable:false}).addTo(mapInst);
           if (isRes) m.on('click', () => this.openResModal(r.alias));
+          else if (r.type === 'ete') m.on('click', () => this.openLocationModal('ete'));
           else m.bindTooltip(`<b>${r.alias}</b><br>${r.name}`);
-          
           markersDict[r.alias]=m;
         }
       });
+    },
+
+    canonicalPumpName(name) {
+      return String(name || '').toUpperCase();
+    },
+
+    canonicalValveName(name) {
+      return String(name || '').toUpperCase();
+    },
+
+    canonicalHydrometerName(name) {
+      return String(name || '').toUpperCase();
+    },
+
+    equipmentKindLabel(kind) {
+      if (kind === 'pump') return 'Bomba';
+      if (kind === 'valve') return 'Valvula';
+      return 'Hidrometro';
+    },
+
+    equipmentPrimaryLabel(item) {
+      if (item.kind === 'hydrometer') {
+        return Number.isFinite(Number(item.reading)) ? `${Number(item.reading).toFixed(2)} ${item.unit || 'm3'}` : 'Sem leitura';
+      }
+      return item.state || '—';
+    },
+
+    findEquipment(kind, name) {
+      if (kind === 'pump') {
+        return this.pumps.find((item) => this.canonicalPumpName(item.pump_name) === name) || null;
+      }
+      if (kind === 'valve') {
+        return this.valves.find((item) => this.canonicalValveName(item.valve_name) === name) || null;
+      }
+      return this.hydrometers.find((item) => this.canonicalHydrometerName(item.meter_name) === name) || null;
+    },
+
+    openLocationModal(siteId) {
+      const site = this.sites.find((item) => item.id === siteId);
+      if (!site) return;
+      this.locationModal.siteId = site.id;
+      this.locationModal.title = site.title;
+      this.locationModal.summary = site.summary;
+      this.locationModal.note = this.locationNotes[site.id] || '';
+      this.locationModal.feedback = '';
+      this.locationModal.open = true;
+    },
+
+    closeLocationModal() {
+      this.locationModal.open = false;
+    },
+
+    saveLocationNote() {
+      this.locationNotes[this.locationModal.siteId] = this.locationModal.note || '';
+      localStorage.setItem(locationNotesKey, JSON.stringify(this.locationNotes));
+      this.locationModal.feedback = 'Anotacao salva neste navegador.';
+    },
+
+    openEquipment(kind, name) {
+      const current = this.findEquipment(kind, name);
+      const item = current || { kind, name };
+
+      this.equipmentModal.kind = kind;
+      this.equipmentModal.kindLabel = this.equipmentKindLabel(kind);
+      this.equipmentModal.name = name;
+      this.equipmentModal.feedback = '';
+      this.equipmentModal.feedbackOk = true;
+      this.equipmentModal.saving = false;
+      this.equipmentModal.ts = item.ts || null;
+      this.equipmentModal.note = item.note || '';
+      this.equipmentModal.mode = item.mode || 'manual';
+      this.equipmentModal.state = item.state || (kind === 'valve' ? 'fechada' : 'desligada');
+      this.equipmentModal.reading = item.reading ?? '';
+      this.equipmentModal.unit = item.unit || 'm3';
+      this.equipmentModal.currentLabel = this.equipmentPrimaryLabel({ ...item, kind });
+      this.equipmentModal.open = true;
+    },
+
+    closeEquipmentModal() {
+      this.equipmentModal.open = false;
+    },
+
+    async saveEquipment() {
+      this.equipmentModal.saving = true;
+      this.equipmentModal.feedback = '';
+      try {
+        let url = '';
+        let body = {};
+
+        if (this.equipmentModal.kind === 'pump') {
+          url = aguadaAPI.BASE + '/api/manual/pumps';
+          body = {
+            pump_name: this.equipmentModal.name,
+            state: this.equipmentModal.state,
+            mode: this.equipmentModal.mode || 'manual',
+            note: this.equipmentModal.note || null,
+          };
+        } else if (this.equipmentModal.kind === 'valve') {
+          url = aguadaAPI.BASE + '/api/manual/valves';
+          body = {
+            valve_name: this.equipmentModal.name,
+            state: this.equipmentModal.state,
+            note: this.equipmentModal.note || null,
+          };
+        } else {
+          const reading = parseFloat(this.equipmentModal.reading);
+          if (Number.isNaN(reading)) throw new Error('Leitura invalida');
+          url = aguadaAPI.BASE + '/api/manual/hydrometers';
+          body = {
+            meter_name: this.equipmentModal.name,
+            reading,
+            unit: this.equipmentModal.unit || 'm3',
+            note: this.equipmentModal.note || null,
+          };
+        }
+
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.detail || 'Erro ao salvar');
+
+        if (this.equipmentModal.kind === 'pump') {
+          const next = [...this.pumps];
+          const idx = next.findIndex((item) => item.pump_name === json.pump_name);
+          if (idx >= 0) next[idx] = json;
+          else next.push(json);
+          this.pumps = next;
+        } else if (this.equipmentModal.kind === 'valve') {
+          const next = [...this.valves];
+          const idx = next.findIndex((item) => item.valve_name === json.valve_name);
+          if (idx >= 0) next[idx] = json;
+          else next.push(json);
+          this.valves = next;
+        } else {
+          const next = [...this.hydrometers];
+          const idx = next.findIndex((item) => item.meter_name === json.meter_name);
+          if (idx >= 0) next[idx] = json;
+          else next.push(json);
+          this.hydrometers = next;
+          this.hydrometerHistory = [json, ...this.hydrometerHistory.filter((item) => !(item.meter_name === json.meter_name && item.ts === json.ts))];
+        }
+
+        this.equipmentModal.ts = json.ts || Math.floor(Date.now() / 1000);
+        this.equipmentModal.currentLabel = this.equipmentModal.kind === 'hydrometer'
+          ? `${Number(json.reading).toFixed(2)} ${json.unit || 'm3'}`
+          : json.state;
+        this.equipmentModal.feedback = 'Entrada operacional salva.';
+        this.equipmentModal.feedbackOk = true;
+      } catch (error) {
+        this.equipmentModal.feedback = error.message || 'Erro ao salvar';
+        this.equipmentModal.feedbackOk = false;
+      } finally {
+        this.equipmentModal.saving = false;
+      }
     },
 
     openResModal(alias) { this.openModal(alias); },
@@ -613,25 +1319,19 @@ function painelApp() {
     openFullMap() {
       this.fullMap = true;
       this.$nextTick(()=>{
-        if (this._fullMapObj) {
-          this._fullMapObj.invalidateSize();
-          return;
-        }
+        if (this._fullMapObj) { this._fullMapObj.invalidateSize(); return; }
         const osmLayer = L.tileLayer('assets/leaflet-tiles/{z}/{x}/{y}.png',{minZoom:13,maxZoom:19,maxNativeZoom:17,attribution:'© OSM'});
         const satLayer = L.tileLayer('assets/leaflet-tiles-sat/{z}/{x}/{y}.jpg',{minZoom:13,maxZoom:19,maxNativeZoom:17,attribution:'© Esri'});
         const bounds = L.latLngBounds([-22.856,-43.120],[-22.830,-43.088]);
         this._fullMapObj = L.map('full-map',{
           minZoom:13,maxZoom:19,maxBounds:bounds,maxBoundsViscosity:0.8,layers:[osmLayer], zoomControl:true, scrollWheelZoom:false
         }).setView([-22.8381,-43.1086],17);
-        // Ocultar controles padrões para não quebrar sem ícones
-        // L.control.layers({'Mapa':osmLayer,'Satélite':satLayer},{},{position:'topright',collapsed:false}).addTo(this._fullMapObj);
         this._updateFullMarkers();
         setTimeout(()=>this._fullMapObj.invalidateSize(),250);
       });
     },
 
     closeFullMap() { this.fullMap=false; },
-
   };
 }
 </script>

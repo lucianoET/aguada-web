@@ -33,6 +33,8 @@ def test_consumption_events_classifies_consumption():
     assert len(events) == 1
     assert events[0]["type"] == "consumption"
     assert events[0]["delta_l"] == pytest.approx(-2000)
+    assert events[0]["ts_start"] == 3600
+    assert events[0]["ts_end"] == 7100
 
 def test_consumption_events_classifies_supply():
     readings = [
@@ -49,6 +51,23 @@ def test_consumption_events_classifies_stable():
     ]
     events = calc_consumption_events(readings, date="2026-03-23")
     assert events[0]["type"] == "stable"
+
+
+def test_consumption_events_detects_cross_hour_recovery_with_hourly_medians():
+    readings = [
+        {"ts": 23 * 3600 + 10 * 60, "volume_l": 10000},
+        {"ts": 23 * 3600 + 20 * 60, "volume_l": 7000},
+        {"ts": 23 * 3600 + 30 * 60, "volume_l": 10000},
+        {"ts": 24 * 3600 + 5 * 60, "volume_l": 7000},
+        {"ts": 24 * 3600 + 15 * 60, "volume_l": 10000},
+        {"ts": 24 * 3600 + 25 * 60, "volume_l": 10000},
+    ]
+
+    events = calc_consumption_events(readings, date="2026-03-23")
+
+    assert len(events) == 1
+    assert events[0]["type"] == "stable"
+    assert events[0]["delta_l"] == pytest.approx(0)
 
 def test_decimate_passthrough_if_under_limit():
     readings = [{"ts": i, "volume_l": i * 10, "level_cm": float(i), "pct": i * 0.1}

@@ -9,54 +9,53 @@
 <link rel="stylesheet" href="assets/style.css">
 <style>
   /* ── Atual ── */
-  .tbl-wrap { background:white; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; }
-  .tbl-bar { display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid var(--border-color); }
-  .tbl-bar h2 { font-size:var(--font-lg); color:#1e3a5f; font-weight:600; margin:0; }
+  .tbl-wrap { background:var(--card, white); border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; }
+  .tbl-bar { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid var(--border-color, var(--border)); }
+  .tbl-bar h2 { font-size:var(--font-lg); color:var(--text, #1e3a5f); font-weight:600; margin:0; }
   .tbl-info { font-size:var(--font-xs); color:var(--text-muted); display:flex; align-items:center; gap:6px; }
-  .refresh-dot { width:7px; height:7px; border-radius:50%; background:var(--success-green); animation:pulse 2s infinite; display:inline-block; }
-  .badge-online  { background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:8px; font-size:var(--font-xxs); font-weight:600; }
-  .badge-offline { background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:8px; font-size:var(--font-xxs); font-weight:600; }
-  .pct-bar { width:72px; height:7px; background:#e5e7eb; border-radius:4px; overflow:hidden; display:inline-block; vertical-align:middle; margin-right:5px; }
-  .pct-bar-fill { height:100%; border-radius:4px; }
-  td { font-size:var(--font-sm); padding:10px; border-bottom:1px solid var(--border-color); }
-  th { font-size:var(--font-xxs); padding:10px; text-align:left; border-bottom:1px solid var(--border-color); }
-  table { width:100%; border-collapse:collapse; }
+  .refresh-dot { width:7px; height:7px; border-radius:50%; background:var(--success-green); animation:pulse-dot 2s infinite; display:inline-block; }
 
-  /* ── Componentes Compartilhados (Filtros) ── */
-  .top-bar { background:white; border-radius:10px; padding:14px 20px; box-shadow:0 2px 8px rgba(0,0,0,.08); margin-bottom:16px; display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap; }
-  .top-bar label { font-size:var(--font-xs); font-weight:600; color:var(--text-muted); margin-bottom:3px; display:block; }
-  .alias-selector { display:flex; gap:6px; flex-wrap:wrap; }
-  .alias-btn { padding:5px 12px; border-radius:20px; border:1px solid var(--border-color); cursor:pointer; font-size:var(--font-xs); background:white; font-weight:500; }
-  .alias-btn.active { background:var(--accent-purple); color:white; border-color:var(--accent-purple); }
-  select, input[type="date"] { padding:7px 10px; border:1px solid var(--border-color); border-radius:6px; font-size:var(--font-sm); }
+  /* ── Filtros ── */
+  .top-bar { background:var(--card, white); border-radius:10px; padding:10px 14px; box-shadow:0 2px 8px rgba(0,0,0,.08); margin-bottom:10px; display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; }
+  .top-bar label { font-size:var(--font-xs); font-weight:600; color:var(--text-muted); margin-bottom:2px; display:block; }
+  .alias-selector { display:flex; gap:5px; flex-wrap:wrap; }
+  .alias-btn { padding:4px 10px; border-radius:20px; border:1px solid var(--border-color, var(--border)); cursor:pointer; font-size:var(--font-xs); background:var(--card, white); font-weight:500; color:var(--text-dark, var(--text)); transition:background .15s, color .15s, border-color .15s; }
+  .alias-btn.active { background:var(--accent-purple, var(--blue)); color:white; border-color:var(--accent-purple, var(--blue)); }
+  select, input[type="date"] { padding:5px 8px; border:1px solid var(--border-color, var(--border)); border-radius:6px; font-size:var(--font-sm); background:var(--bg2, white); color:var(--text-dark, var(--text)); }
+  .date-filter { position:relative; min-width:148px; }
+  .date-picker-btn { width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:5px 10px; border:1px solid var(--border-color, var(--border)); border-radius:8px; background:var(--bg2, white); color:var(--text-dark, var(--text)); font-size:var(--font-sm); font-weight:500; }
+  .date-picker-native { position:absolute; inset:20px 0 0 0; width:100%; height:calc(100% - 20px); opacity:0; cursor:pointer; }
+
+  .tab-bar { margin-bottom:10px; padding:4px; }
+  .tab-bar .tab-btn { padding:6px 12px; }
 
   /* ── Histórico ── */
-  .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:16px; }
-  .stat-mini { background:white; border-radius:8px; padding:12px 14px; box-shadow:0 2px 6px rgba(0,0,0,.07); text-align:center; }
+  .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(108px,1fr)); gap:8px; margin-bottom:10px; }
+  .stat-mini { background:var(--card, white); border-radius:8px; padding:8px 10px; box-shadow:0 2px 6px rgba(0,0,0,.07); text-align:center; }
   .stat-mini .slbl { font-size:var(--font-xxs); color:var(--text-muted); text-transform:uppercase; font-weight:600; }
-  .stat-mini .sval { font-size:20px; font-weight:700; color:#1e3a5f; margin-top:4px; }
-  .chart-wrap { background:white; border-radius:10px; padding:18px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
-  .chart-wrap h3 { color:#1e3a5f; font-size:var(--font-base); font-weight:600; margin-bottom:14px; }
+  .stat-mini .sval { font-size:17px; font-weight:700; color:var(--text, #1e3a5f); margin-top:2px; }
+  .chart-wrap { background:var(--card, white); border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+  .chart-wrap h3 { color:var(--text, #1e3a5f); font-size:var(--font-base); font-weight:600; margin-bottom:8px; }
 
   /* ── Balanço Geral ── */
-  .supply-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
-  .supply-card { background:white; border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
-  .supply-card-header { padding:11px 16px; color:white; font-size:var(--font-sm); font-weight:600; }
-  .supply-card-body { padding:14px; }
-  .supply-kpi { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; }
-  .kpi { background:#f9fafb; border-radius:6px; padding:9px; text-align:center; }
+  .supply-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+  .supply-card { background:var(--card, white); border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+  .supply-card-header { padding:8px 12px; color:white; font-size:var(--font-sm); font-weight:600; }
+  .supply-card-body { padding:10px; }
+  .supply-kpi { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:10px; }
+  .kpi { background:var(--bg3, #f9fafb); border-radius:6px; padding:7px; text-align:center; }
   .kpi .k-lbl { font-size:var(--font-xxs); color:var(--text-muted); text-transform:uppercase; font-weight:600; letter-spacing:.4px; }
-  .kpi .k-val { font-size:16px; font-weight:700; color:#1e3a5f; margin-top:3px; }
+  .kpi .k-val { font-size:14px; font-weight:700; color:var(--text, #1e3a5f); margin-top:2px; }
   .no-data { color:var(--text-muted); text-align:center; padding:16px; font-size:var(--font-sm); }
 
   /* ── Balanço Detalhe ── */
-  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
-  .stat-card { background:white; border-radius:10px; padding:16px 18px; box-shadow:0 2px 8px rgba(0,0,0,.08); text-align:center; }
+  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-bottom:10px; }
+  .stat-card { background:var(--card, white); border-radius:10px; padding:10px 12px; box-shadow:0 2px 8px rgba(0,0,0,.08); text-align:center; }
   .stat-card .lbl { color:var(--text-muted); font-size:var(--font-xxs); text-transform:uppercase; font-weight:600; letter-spacing:.5px; }
-  .stat-card .val { font-size:26px; font-weight:700; color:var(--primary-blue); margin:6px 0 2px; }
-  .chart-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(440px,1fr)); gap:16px; }
-  .chart-card { background:white; border-radius:10px; padding:18px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
-  .chart-card h3 { color:#1e3a5f; font-size:var(--font-base); font-weight:600; margin-bottom:14px; }
+  .stat-card .val { font-size:20px; font-weight:700; color:var(--blue, var(--primary-blue)); margin:4px 0 0; }
+  .chart-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:10px; }
+  .chart-card { background:var(--card, white); border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+  .chart-card h3 { color:var(--text, #1e3a5f); font-size:var(--font-base); font-weight:600; margin-bottom:8px; }
 </style>
 </head>
 <body class="admin-page">
@@ -85,26 +84,33 @@
   <div id="viewHist" style="display:none">
     <div class="top-bar">
       <div>
-        <label>Reservatório</label>
-        <div class="alias-selector" id="aliasSelHist"></div>
+        <label>Variável</label>
+        <select id="varSel" onchange="loadHist()">
+          <option value="pct">Nível %</option>
+          <option value="volume_l">Volume (m³)</option>
+          <option value="level_cm">Nível cm</option>
+        </select>
       </div>
       <div>
         <label>Período</label>
-        <select id="period">
-          <option value="24h">Últimas 24h</option>
+        <select id="period" onchange="loadHist()">
+          <option value="24h">Dia selecionado (00h-24h)</option>
           <option value="7d">7 dias</option>
           <option value="30d">30 dias</option>
         </select>
       </div>
-      <div>
-        <label>Variável</label>
-        <select id="varSel">
-          <option value="pct">Nível %</option>
-          <option value="volume_l">Volume (L)</option>
-          <option value="level_cm">Nível cm</option>
-        </select>
+      <div class="date-filter">
+        <label>Data</label>
+        <button type="button" class="date-picker-btn">
+          <span>Calendário</span>
+          <span id="histDateLabel">—</span>
+        </button>
+        <input type="date" id="dateHist" class="date-picker-native" onchange="syncHistDateLabel(); loadHist()">
       </div>
-      <button class="btn-primary" onclick="loadHist()">Carregar Histórico</button>
+      <div>
+        <label>Reservatório</label>
+        <div class="alias-selector" id="aliasSelHist"></div>
+      </div>
     </div>
     <div class="stats-row">
       <div class="stat-mini"><div class="slbl">Mínimo</div><div class="sval" id="hMin">—</div></div>
@@ -122,7 +128,7 @@
   <!-- ── BALANÇO: VISÃO GERAL ── -->
   <div id="viewGeral" style="display:none">
     <div class="top-bar">
-      <div><label>Data de Referência</label><input type="date" id="dateGeral"></div>
+      <div><label>Data de Referência</label><input type="date" id="dateGeral" onchange="loadGeral()"></div>
       <button class="btn-primary" onclick="loadGeral()">Carregar Balanço Total</button>
       <span style="font-size:var(--font-xs);color:var(--text-muted);margin-bottom:6px" id="geralInfo"></span>
     </div>
@@ -134,24 +140,23 @@
   <!-- ── BALANÇO: DETALHE ── -->
   <div id="viewDetalhe" style="display:none">
     <div class="top-bar">
-      <div><label>Data</label><input type="date" id="dateDetalhe"></div>
+      <div><label>Data</label><input type="date" id="dateDetalhe" onchange="loadDetalhe()"></div>
       <div>
         <label>Reservatório</label>
         <div class="alias-selector" id="aliasSelDet"></div>
       </div>
-      <button class="btn-primary" onclick="loadDetalhe()">Analisar Específico</button>
     </div>
 
     <div class="stats-grid">
-      <div class="stat-card"><div class="lbl">Consumido</div><div class="val" id="stConsumed">— L</div></div>
-      <div class="stat-card"><div class="lbl">Abastecido</div><div class="val" id="stSupplied">— L</div></div>
-      <div class="stat-card"><div class="lbl">Balanço (Net)</div><div class="val" id="stBalance">— L</div></div>
+      <div class="stat-card"><div class="lbl">Consumido</div><div class="val" id="stConsumed">— m³</div></div>
+      <div class="stat-card"><div class="lbl">Abastecido</div><div class="val" id="stSupplied">— m³</div></div>
+      <div class="stat-card"><div class="lbl">Balanço (Net)</div><div class="val" id="stBalance">— m³</div></div>
       <div class="stat-card"><div class="lbl">Eventos Encontrados</div><div class="val" id="stEvents">—</div></div>
     </div>
 
     <div class="chart-grid">
       <div class="chart-card">
-        <h3>📉 Curva de Volume (24h Selecionadas)</h3>
+        <h3>📉 Curva de Volume (m³, 24h Selecionadas)</h3>
         <canvas id="volChart" height="120"></canvas>
       </div>
       <div class="chart-card">
@@ -168,14 +173,24 @@
 document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('dados.html');
 
 let globalReservoirs = [];
+const ALL_ALIAS = 'ALL';
+const DEFAULT_ALIAS = 'CON';
+const LITERS_PER_M3 = 1000;
 
 function switchTab(tab) {
   ['Atual','Hist','Geral','Detalhe'].forEach(t => {
     document.getElementById('view'+t).style.display = t.toLowerCase() === tab ? '' : 'none';
     document.getElementById('tab'+t).classList.toggle('active', t.toLowerCase() === tab);
   });
-  if (tab === 'hist' && !selAliasHist) initSels();
-  if (tab === 'detalhe' && !selAliasDet) initSels();
+  if ((tab === 'hist' || tab === 'detalhe') && !globalReservoirs.length) return;
+  if (tab === 'hist') {
+    initSels();
+    loadHist();
+  }
+  if (tab === 'detalhe') {
+    initSels();
+    loadDetalhe();
+  }
 }
 
 function setStatus(online) {
@@ -191,6 +206,38 @@ function fmtTs(ts) {
   return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
 }
 
+function litersToCubicMeters(value) {
+  return value == null ? null : value / LITERS_PER_M3;
+}
+
+function metricUnit(metric) {
+  if (metric === 'volume_l') return 'm³';
+  if (metric === 'level_cm') return 'cm';
+  return '%';
+}
+
+function metricLabel(metric) {
+  if (metric === 'volume_l') return 'Volume (m³)';
+  if (metric === 'level_cm') return 'Nível (cm)';
+  return 'Nível %';
+}
+
+function metricValue(metric, value) {
+  if (value == null) return null;
+  return metric === 'volume_l' ? litersToCubicMeters(value) : value;
+}
+
+function formatMetric(metric, value, digits = 1) {
+  const displayValue = metricValue(metric, value);
+  if (displayValue == null) return '—';
+  if (metric === 'pct') return `${displayValue.toFixed(digits)}%`;
+  return `${displayValue.toFixed(digits)} ${metricUnit(metric)}`;
+}
+
+function formatVolumeM3(value, digits = 1) {
+  return formatMetric('volume_l', value, digits);
+}
+
 // ── INIT SECONDS ──
 async function preloadData() {
   try {
@@ -200,6 +247,8 @@ async function preloadData() {
     setStatus(raw.some(r => r.online));
     initSels();
     loadGeral();
+    if (document.getElementById('viewHist').style.display !== 'none') loadHist();
+    if (document.getElementById('viewDetalhe').style.display !== 'none') loadDetalhe();
   } catch(e) { /* ignore here, will be caught by individual loaders */ }
 }
 
@@ -215,8 +264,8 @@ function renderAtual(data) {
   if (!data.length) { c.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">Nenhum reservatório.</div>'; return; }
   const rows = data.map(r => {
     const pct = r.pct ?? 0, col = gc(pct);
-    const vol = r.volume_l != null ? (r.volume_l/1000).toFixed(3)+' m³' : '—';
-    const cap = r.volume_max_l != null ? (r.volume_max_l/1000).toFixed(1)+' m³' : (r.capacity_l != null ? (r.capacity_l/1000).toFixed(1)+' m³' : '—');
+    const vol = formatVolumeM3(r.volume_l, 3);
+    const cap = r.volume_max_l != null ? formatVolumeM3(r.volume_max_l, 1) : (r.capacity_l != null ? formatVolumeM3(r.capacity_l, 1) : '—');
     const badge = r.online ? '<span class="badge-online">● Online</span>' : '<span class="badge-offline">● Offline</span>';
     return `<tr>
       <td><strong style="color:#1e3a5f;font-size:var(--font-base)">${r.alias}</strong></td>
@@ -252,23 +301,114 @@ aguadaAPI.connectWS(msg => {
 
 // ── SELECTORS (HIST & DETALHE) ──
 let selAliasHist = null, selAliasDet = null;
+const DAY_S = 86400;
+
+function getDefaultAlias() {
+  const con = globalReservoirs.find(r => r.alias === DEFAULT_ALIAS);
+  return con ? con.alias : (globalReservoirs[0]?.alias || null);
+}
 
 function initSels() {
   if (!globalReservoirs.length) return;
-  const genBtns = (currAlias, prefix) => globalReservoirs.map((r,i) => 
-    `<button class="alias-btn${(currAlias||globalReservoirs[0].alias)===r.alias?' active':''}" onclick="setSelAlias('${prefix}','${r.alias}',this)">${r.alias}</button>`
+  const defaultAlias = getDefaultAlias();
+  const aliases = [{ alias: ALL_ALIAS, label: 'Todos' }, ...globalReservoirs.map(r => ({ alias: r.alias, label: r.alias }))];
+  const genBtns = (currAlias, prefix) => aliases.map(item => 
+    `<button class="alias-btn${(currAlias||defaultAlias)===item.alias?' active':''}" onclick="setSelAlias('${prefix}','${item.alias}',this)">${item.label}</button>`
   ).join('');
 
   document.getElementById('aliasSelHist').innerHTML = genBtns(selAliasHist, 'Hist');
   document.getElementById('aliasSelDet').innerHTML = genBtns(selAliasDet, 'Det');
-  if(!selAliasHist) selAliasHist = globalReservoirs[0].alias;
-  if(!selAliasDet) selAliasDet = globalReservoirs[0].alias;
+  if(!selAliasHist) selAliasHist = defaultAlias;
+  if(!selAliasDet) selAliasDet = defaultAlias;
 }
 function setSelAlias(prefix, alias, btn) {
   if(prefix==='Hist') selAliasHist = alias;
   if(prefix==='Det') selAliasDet = alias;
   btn.parentElement.querySelectorAll('.alias-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  if (prefix === 'Hist') loadHist();
+  if (prefix === 'Det') loadDetalhe();
+}
+
+function startOfDayTs(dateStr) {
+  return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000);
+}
+
+function formatDateLabel(dateStr) {
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+}
+
+function syncHistDateLabel() {
+  const date = document.getElementById('dateHist').value || aguadaAPI.today();
+  document.getElementById('histDateLabel').textContent = formatDateLabel(date);
+}
+
+function getHistoryRange(period, dateStr) {
+  const dayStart = startOfDayTs(dateStr);
+  const dayEnd = dayStart + DAY_S;
+  if (period === '24h') return { since_ts: dayStart, until_ts: dayEnd };
+  if (period === '7d') return { since_ts: dayEnd - (7 * DAY_S), until_ts: dayEnd };
+  return { since_ts: dayEnd - (30 * DAY_S), until_ts: dayEnd };
+}
+
+function buildHistoryLabel(ts, period) {
+  const d = new Date(ts * 1000);
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  if (period === '24h') return [`${hh}:${mi}`, `${dd}/${mm}`];
+  const weekDay = d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+  return [weekDay, `${dd}/${mm}`];
+}
+
+function collapseHistoryRows(rows, period) {
+  if (period === '24h') return rows;
+  const byDay = new Map();
+  rows.forEach(row => {
+    const dayKey = new Date(row.ts * 1000).toISOString().slice(0, 10);
+    const current = byDay.get(dayKey);
+    if (!current || row.ts > current.ts) byDay.set(dayKey, row);
+  });
+  return Array.from(byDay.values()).sort((a, b) => a.ts - b.ts);
+}
+
+function periodLabel(period) {
+  if (period === '24h') return '00h-24h';
+  if (period === '7d') return '7 dias';
+  return '30 dias';
+}
+
+function labelKey(label) {
+  return Array.isArray(label) ? label.join(' | ') : String(label);
+}
+
+function buildCategoryChartData(seriesList) {
+  const labelMap = new Map();
+  seriesList.forEach(series => {
+    series.points.forEach(point => {
+      const key = labelKey(point.label);
+      const existing = labelMap.get(key);
+      if (!existing || point.ts < existing.ts) labelMap.set(key, { label: point.label, ts: point.ts });
+    });
+  });
+
+  const orderedLabels = Array.from(labelMap.values())
+    .sort((left, right) => left.ts - right.ts)
+    .map(item => item.label);
+  const labelIndex = new Map(orderedLabels.map((label, index) => [labelKey(label), index]));
+
+  const datasets = seriesList.map(series => {
+    const data = new Array(orderedLabels.length).fill(null);
+    series.points.forEach(point => {
+      const index = labelIndex.get(labelKey(point.label));
+      if (index != null) data[index] = point.value;
+    });
+    return { ...series.dataset, data };
+  }).filter(dataset => dataset.data.some(value => value != null));
+
+  return { labels: orderedLabels, datasets };
 }
 
 // ── HISTÓRICO ──
@@ -276,25 +416,51 @@ let histChart = null;
 async function loadHist() {
   if (!selAliasHist) return;
   const period = document.getElementById('period').value;
+  const date = document.getElementById('dateHist').value || aguadaAPI.today();
   const varKey = document.getElementById('varSel').value;
-  const units  = { pct:'%', volume_l:'L', level_cm:'cm' };
-  const labels = { pct:'Nível %', volume_l:'Volume (L)', level_cm:'Nível (cm)' };
+  const range = getHistoryRange(period, date);
   try {
-    const history = await aguadaAPI.getHistory(selAliasHist, period);
-    const vals = history.map(r => r[varKey]).filter(v => v != null);
-    document.getElementById('hMin').textContent = vals.length ? Math.min(...vals).toFixed(1)+units[varKey] : '—';
-    document.getElementById('hMax').textContent = vals.length ? Math.max(...vals).toFixed(1)+units[varKey] : '—';
-    document.getElementById('hAvg').textContent = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)+units[varKey] : '—';
-    document.getElementById('hCur').textContent = vals.length ? vals[vals.length-1].toFixed(1)+units[varKey] : '—';
-    document.getElementById('hCnt').textContent = history.length;
-    document.getElementById('chartTitleHist').textContent = `📈 ${labels[varKey]} — ${selAliasHist} (${period})`;
+    const targets = selAliasHist === ALL_ALIAS ? globalReservoirs : globalReservoirs.filter(r => r.alias === selAliasHist);
+    const histories = await Promise.all(targets.map(r => aguadaAPI.getHistory(r.alias, period, range).catch(() => [])));
+    const merged = histories.flat().sort((a, b) => (a.ts || 0) - (b.ts || 0));
+    const vals = merged.map(r => metricValue(varKey, r[varKey])).filter(v => v != null);
+    document.getElementById('hMin').textContent = vals.length ? formatMetric(varKey, Math.min(...vals) * (varKey === 'volume_l' ? LITERS_PER_M3 : 1), 1) : '—';
+    document.getElementById('hMax').textContent = vals.length ? formatMetric(varKey, Math.max(...vals) * (varKey === 'volume_l' ? LITERS_PER_M3 : 1), 1) : '—';
+    document.getElementById('hAvg').textContent = vals.length ? formatMetric(varKey, (vals.reduce((a,b)=>a+b,0)/vals.length) * (varKey === 'volume_l' ? LITERS_PER_M3 : 1), 1) : '—';
+    document.getElementById('hCur').textContent = vals.length ? formatMetric(varKey, vals[vals.length-1] * (varKey === 'volume_l' ? LITERS_PER_M3 : 1), 1) : '—';
+    document.getElementById('hCnt').textContent = merged.length;
+    document.getElementById('chartTitleHist').textContent = `📈 ${metricLabel(varKey)} — ${selAliasHist === ALL_ALIAS ? 'Todos os reservatórios' : selAliasHist} (${periodLabel(period)} em ${formatDateLabel(date)})`;
     if (histChart) histChart.destroy();
-    const step = Math.max(1, Math.floor(history.length/300));
-    const pts  = history.filter((_,i)=>i%step===0);
+    const chartData = buildCategoryChartData(targets.map((reservoir, index) => {
+      const history = collapseHistoryRows(histories[index] || [], period);
+      const step = Math.max(1, Math.floor(history.length/300));
+      const pts  = history.filter((_,i)=>i%step===0);
+      const hue = (index * 47) % 360;
+      return {
+        dataset: {
+          label: reservoir.alias,
+          borderColor: `hsl(${hue} 72% 48%)`,
+          backgroundColor: `hsl(${hue} 72% 48% / 0.08)`,
+          borderWidth: 2,
+          pointRadius: selAliasHist === ALL_ALIAS ? 0 : (pts.length>300?0:2),
+          tension: 0.3,
+          fill: false,
+          spanGaps: true,
+        },
+        points: pts.map(r => ({ ts: r.ts, label: buildHistoryLabel(r.ts, period), value: metricValue(varKey, r[varKey]) })),
+      };
+    }));
     histChart = new Chart(document.getElementById('histChart'), {
       type:'line',
-      data:{ labels: pts.map(r=>fmtTs(r.ts)), datasets:[{ label:labels[varKey], data:pts.map(r=>r[varKey]), borderColor:'#667eea', backgroundColor:'rgba(102,126,234,.08)', borderWidth:2, pointRadius:pts.length>300?0:2, tension:0.3, fill:true, spanGaps:true }] },
-      options:{ responsive:true, plugins:{legend:{display:false}}, scales:{x:{ticks:{maxTicksLimit:12,font:{size:10}},grid:{display:false}}} }
+      data: chartData,
+      options:{
+        responsive:true,
+        plugins:{legend:{display:selAliasHist === ALL_ALIAS, position:'bottom'}},
+        scales:{
+          x:{type:'category', ticks:{maxTicksLimit:12,font:{size:10}}, grid:{display:false}},
+          y:{beginAtZero:true, min:0}
+        }
+      }
     });
   } catch(e) { console.error(e); }
 }
@@ -306,15 +472,15 @@ function bCardHTML(r, consumption, idx) {
   const consumed = s.consumed_l ?? 0;
   const supplied = s.supplied_l ?? 0;
   const balance  = s.balance_l  ?? 0;
-  const evtRows  = events.slice(0,6).map(e => `<tr><td>${fmtHM(e.ts_start)}</td><td style="color:#065f46;font-weight:600">+${e.delta_l.toFixed(0)} L</td><td style="color:var(--text-muted)">${e.duration_min ? e.duration_min.toFixed(0)+'m' : '—'}</td></tr>`).join('');
+  const evtRows  = events.slice(0,6).map(e => `<tr><td>${fmtHM(e.ts_start)}</td><td style="color:#065f46;font-weight:600">+${formatVolumeM3(e.delta_l, 1)}</td><td style="color:var(--text-muted)">${e.duration_min ? e.duration_min.toFixed(0)+'m' : '—'}</td></tr>`).join('');
   return `
     <div class="supply-card">
       <div class="supply-card-header rc-${idx%8}">💧 ${r.alias}${r.name ? ' — '+r.name : ''}</div>
       <div class="supply-card-body">
         <div class="supply-kpi">
-          <div class="kpi"><div class="k-lbl">Consumido</div><div class="k-val" style="color:#ef4444">${consumed.toFixed(0)} L</div></div>
-          <div class="kpi"><div class="k-lbl">Abastecido</div><div class="k-val" style="color:#10b981">${supplied.toFixed(0)} L</div></div>
-          <div class="kpi"><div class="k-lbl">Balanço</div><div class="k-val" style="color:${balance>=0?'#10b981':'#ef4444'}">${balance>=0?'+':''}${balance.toFixed(0)} L</div></div>
+          <div class="kpi"><div class="k-lbl">Consumido</div><div class="k-val" style="color:#ef4444">${formatVolumeM3(consumed, 1)}</div></div>
+          <div class="kpi"><div class="k-lbl">Abastecido</div><div class="k-val" style="color:#10b981">${formatVolumeM3(supplied, 1)}</div></div>
+          <div class="kpi"><div class="k-lbl">Balanço</div><div class="k-val" style="color:${balance>=0?'#10b981':'#ef4444'}">${balance>=0?'+':''}${formatVolumeM3(Math.abs(balance), 1)}</div></div>
         </div>
         <div>
           ${events.length
@@ -349,42 +515,79 @@ async function loadDetalhe() {
   const date = document.getElementById('dateDetalhe').value;
   if (!selAliasDet || !date) return;
   try {
-    const res = await aguadaAPI.getConsumption(selAliasDet, date);
-    const s   = res.summary || {};
-    document.getElementById('stConsumed').textContent = s.consumed_l != null ? s.consumed_l.toFixed(0)+' L' : '— L';
-    document.getElementById('stSupplied').textContent = s.supplied_l != null ? s.supplied_l.toFixed(0)+' L' : '— L';
-    const bal = s.balance_l ?? 0;
+    const todayTs = startOfDayTs(date);
+    const targets = selAliasDet === ALL_ALIAS ? globalReservoirs : globalReservoirs.filter(r => r.alias === selAliasDet);
+    const [results, histories] = await Promise.all([
+      Promise.all(targets.map(r => aguadaAPI.getConsumption(r.alias, date).catch(()=>({summary:{},events:[]})))),
+      Promise.all(targets.map(r => aguadaAPI.getHistory(r.alias, '24h', { since_ts: todayTs, until_ts: todayTs + DAY_S }).catch(()=>[])))
+    ]);
+    const consumed = results.reduce((sum, res) => sum + (res.summary?.consumed_l ?? 0), 0);
+    const supplied = results.reduce((sum, res) => sum + (res.summary?.supplied_l ?? 0), 0);
+    const bal = results.reduce((sum, res) => sum + (res.summary?.balance_l ?? 0), 0);
+    const eventCount = results.reduce((sum, res) => sum + ((res.events||[]).filter(event => event.type !== 'stable').length), 0);
+    document.getElementById('stConsumed').textContent = formatVolumeM3(consumed, 1);
+    document.getElementById('stSupplied').textContent = formatVolumeM3(supplied, 1);
     const balEl = document.getElementById('stBalance');
-    balEl.textContent = (bal>=0?'+':'')+bal.toFixed(0)+' L';
+    balEl.textContent = (bal>=0?'+':'') + formatVolumeM3(Math.abs(bal), 1);
     balEl.style.color = bal >= 0 ? '#10b981' : '#ef4444';
-    document.getElementById('stEvents').textContent = (res.events||[]).length;
-
-    const history   = await aguadaAPI.getHistory(selAliasDet, '24h');
-    const todayTs   = new Date(date+'T00:00:00').getTime()/1000;
-    const todayRows = history.filter(r => r.ts >= todayTs && r.ts < todayTs+86400);
+    document.getElementById('stEvents').textContent = eventCount;
 
     if (volChart) volChart.destroy();
-    if (todayRows.length) {
+    const volChartData = buildCategoryChartData(targets.map((reservoir, index) => {
+      const todayRows = (histories[index] || []).filter(r => r.volume_l != null);
+      const hue = (index * 47) % 360;
+      return {
+        dataset: {
+          label: reservoir.alias,
+          borderColor: `hsl(${hue} 72% 48%)`,
+          backgroundColor: `hsl(${hue} 72% 48% / 0.10)`,
+          borderWidth: 2,
+          pointRadius: selAliasDet === ALL_ALIAS ? 0 : (todayRows.length>200?0:2),
+          tension: 0.3,
+          fill: false,
+          spanGaps: true,
+        },
+        points: todayRows.map(r => ({ ts: r.ts, label: fmtHM(r.ts), value: litersToCubicMeters(r.volume_l) })),
+      };
+    }));
+    if (volChartData.datasets.length) {
       volChart = new Chart(document.getElementById('volChart'), {
-        type:'line', data:{ labels: todayRows.map(r => fmtHM(r.ts)), datasets:[{ label:'Volume (L)', data:todayRows.map(r=>r.volume_l), borderColor:'#667eea', backgroundColor:'rgba(102,126,234,.1)', borderWidth:2, pointRadius:todayRows.length>200?0:2, tension:0.3, fill:true, spanGaps:true }] },
-        options:{responsive:true, plugins:{legend:{display:false}}, scales:{x:{ticks:{maxTicksLimit:10,font:{size:10}},grid:{display:false}}}}
+        type:'line',
+        data: volChartData,
+        options:{responsive:true, plugins:{legend:{display:selAliasDet === ALL_ALIAS, position:'bottom'}}, scales:{x:{type:'category', ticks:{maxTicksLimit:10,font:{size:10}},grid:{display:false}}, y:{beginAtZero:true, min:0}}}
       });
     }
 
-    const events = (res.events||[]).filter(e=>e.type==='consumption'||e.type==='supply');
     if (evtChart) evtChart.destroy();
-    if (events.length) {
+    if (selAliasDet === ALL_ALIAS) {
+      const labels = targets.map(r => r.alias);
+      const suppliedBars = results.map(res => res.summary?.supplied_l ?? 0);
+      const consumedBars = results.map(res => res.summary?.consumed_l ?? 0);
       evtChart = new Chart(document.getElementById('evtChart'), {
-        type:'bar', data:{ labels: events.map(e=>fmtHM(e.ts_start)), datasets:[{ label:'Volume (L)', data:events.map(e=>e.delta_l), backgroundColor: events.map(e=>e.type==='supply'?'rgba(16,185,129,.7)':'rgba(239,68,68,.7)') }] },
-        options:{responsive:true, plugins:{legend:{display:false}}, scales:{x:{ticks:{maxTicksLimit:10,font:{size:10}},grid:{display:false}}}}
+        type:'bar',
+        data:{ labels, datasets:[
+          { label:'Abastecido (m³)', data:suppliedBars.map(litersToCubicMeters), backgroundColor:'rgba(16,185,129,.7)' },
+          { label:'Consumido (m³)', data:consumedBars.map(litersToCubicMeters), backgroundColor:'rgba(239,68,68,.7)' }
+        ] },
+        options:{responsive:true, plugins:{legend:{display:true, position:'bottom'}}, scales:{x:{ticks:{maxTicksLimit:10,font:{size:10}},grid:{display:false}}, y:{beginAtZero:true, min:0}}}
       });
+    } else {
+      const events = (results[0]?.events||[]).filter(e=>e.type==='consumption'||e.type==='supply');
+      if (events.length) {
+        evtChart = new Chart(document.getElementById('evtChart'), {
+          type:'bar', data:{ labels: events.map(e=>fmtHM(e.ts_start)), datasets:[{ label:'Volume (m³)', data:events.map(e=>litersToCubicMeters(Math.abs(e.delta_l))), backgroundColor: events.map(e=>e.type==='supply'?'rgba(16,185,129,.7)':'rgba(239,68,68,.7)') }] },
+          options:{responsive:true, plugins:{legend:{display:false}}, scales:{x:{ticks:{maxTicksLimit:10,font:{size:10}},grid:{display:false}}, y:{beginAtZero:true, min:0}}}
+        });
+      }
     }
   } catch(e) { console.error(e); }
 }
 
 const today = aguadaAPI.today();
+document.getElementById('dateHist').value    = today;
 document.getElementById('dateGeral').value   = today;
 document.getElementById('dateDetalhe').value = today;
+syncHistDateLabel();
 
 preloadData();
 setInterval(() => { if (!document.getElementById('viewAtual').style.display) preloadData(); }, 30000);

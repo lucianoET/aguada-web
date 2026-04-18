@@ -10,10 +10,6 @@
 <style>
   .alerts-layout { display:grid; grid-template-columns:1fr 300px; gap:16px; }
   @media(max-width:900px){ .alerts-layout{grid-template-columns:1fr} }
-  .box { background:white; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; }
-  .box-header { padding:13px 18px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; }
-  .box-header h2 { font-size:var(--font-lg); font-weight:600; color:#1e3a5f; margin:0; }
-  .box-body { padding:16px; }
   .alert-item { padding:11px 14px; border-radius:8px; margin-bottom:10px; font-size:var(--font-sm); border-left:4px solid; }
   .alert-crit { background:#fef2f2; border-color:#ef4444; color:#991b1b; }
   .alert-warn { background:#fef3c7; border-color:#f59e0b; color:#92400e; }
@@ -21,13 +17,13 @@
   .alert-ok   { background:#f0fdf4; border-color:#10b981; color:#065f46; }
   .alert-item strong { display:block; margin-bottom:3px; font-size:var(--font-base); }
   .alert-meta { font-size:var(--font-xxs); opacity:.7; margin-top:4px; }
-  .sum-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border-color); font-size:var(--font-sm); }
+  .sum-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border-color, var(--border)); font-size:var(--font-sm); }
   .sum-row:last-child { border-bottom:none; }
-  .badge { padding:3px 10px; border-radius:8px; font-size:var(--font-xxs); font-weight:600; }
-  .badge-crit { background:#fee2e2; color:#991b1b; }
-  .badge-warn { background:#fef3c7; color:#92400e; }
-  .badge-ok   { background:#d1fae5; color:#065f46; }
-  .badge-info { background:#eff6ff; color:#1e40af; }
+  .abadge { padding:3px 10px; border-radius:8px; font-size:var(--font-xxs); font-weight:600; display:inline-block; }
+  .abadge-crit { background:#fee2e2; color:#991b1b; }
+  .abadge-warn { background:#fef3c7; color:#92400e; }
+  .abadge-ok   { background:#d1fae5; color:#065f46; }
+  .abadge-info { background:#eff6ff; color:#1e40af; }
 </style>
 </head>
 <body class="admin-page">
@@ -38,7 +34,7 @@
     <div class="box">
       <div class="box-header">
         <h2>🚨 Alertas Ativos</h2>
-        <span id="alertCount" class="badge badge-info">—</span>
+        <span id="alertCount" class="abadge abadge-info">—</span>
       </div>
       <div class="box-body" id="alertsList"><div class="loader"></div></div>
     </div>
@@ -102,7 +98,7 @@ function render(raw) {
 
   const cntEl = document.getElementById('alertCount');
   cntEl.textContent = active;
-  cntEl.className   = `badge ${crits>0?'badge-crit':warns>0?'badge-warn':'badge-ok'}`;
+  cntEl.className   = `abadge ${crits>0?'abadge-crit':warns>0?'abadge-warn':'abadge-ok'}`;
 
   document.getElementById('alertsList').innerHTML = alerts.map(a => `
     <div class="alert-item alert-${a.level}">
@@ -112,10 +108,10 @@ function render(raw) {
     </div>`).join('');
 
   document.getElementById('summary').innerHTML = `
-    <div class="sum-row"><span>🔴 Críticos</span><span class="badge badge-crit">${crits}</span></div>
-    <div class="sum-row"><span>🟡 Avisos</span><span class="badge badge-warn">${warns}</span></div>
-    <div class="sum-row"><span>✅ Normais</span><span class="badge badge-ok">${reservoirs.filter(r=>r.online&&(r.pct??0)>THRESH.warn).length}</span></div>
-    <div class="sum-row"><span>📡 Online</span><span class="badge badge-info">${reservoirs.filter(r=>r.online).length}/${reservoirs.length}</span></div>
+    <div class="sum-row"><span>🔴 Críticos</span><span class="abadge abadge-crit">${crits}</span></div>
+    <div class="sum-row"><span>🟡 Avisos</span><span class="abadge abadge-warn">${warns}</span></div>
+    <div class="sum-row"><span>✅ Normais</span><span class="abadge abadge-ok">${reservoirs.filter(r=>r.online&&(r.pct??0)>THRESH.warn).length}</span></div>
+    <div class="sum-row"><span>📡 Online</span><span class="abadge abadge-info">${reservoirs.filter(r=>r.online).length}/${reservoirs.length}</span></div>
     <div class="sum-row"><span style="font-size:var(--font-xs);color:var(--text-muted)">Última verificação: ${new Date().toLocaleTimeString('pt-BR')}</span></div>`;
 }
 

@@ -3,7 +3,7 @@ import time
 import pytest
 import aiosqlite
 from httpx import AsyncClient, ASGITransport
-from backend.db import init_db, insert_reading, upsert_state
+from backend.db import init_db, insert_reading, upsert_state, insert_manual_pump_log, insert_manual_valve_log
 
 
 @pytest.fixture(autouse=True)
@@ -114,3 +114,117 @@ async def test_history_returns_raw_fields_for_data_page(set_test_db):
     assert data[0]["rssi"] == -62
     assert data[0]["vbat"] == 3.3
     assert data[0]["seq"] == 7
+
+
+@pytest.mark.asyncio
+async def test_history_accepts_explicit_range(set_test_db):
+    import backend.main as m
+    now = int(time.time())
+    earlier = now - 7200
+    async with aiosqlite.connect(m.DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        await init_db(conn)
+        await insert_reading(conn, {
+            "ts": earlier, "node_id": "0x7758", "sensor_id": 1, "alias": "CON",
+            "distance_cm": 220, "level_cm": 250, "volume_l": 44000, "pct": 55.0,
+            "rssi": -63, "vbat": 3.2, "seq": 6
+        })
+        await insert_reading(conn, {
+            "ts": now, "node_id": "0x7758", "sensor_id": 1, "alias": "CON",
+            "distance_cm": 215, "level_cm": 255, "volume_l": 45333, "pct": 56.7,
+            "rssi": -62, "vbat": 3.3, "seq": 7
+        })
+    async with AsyncClient(transport=ASGITransport(app=m.app), base_url="http://test") as client:
+        r = await client.get(f"/api/history/CON?since_ts={now - 300}&until_ts={now + 300}")
+    assert r.status_code == 200
+    data = r.json()
+    assert len(data) == 1
+    assert data[0]["seq"] == 7
+
+
+@pytest.mark.asyncio
+async def test_consumption_counts_cross_hour_recovery_in_balance(set_test_db):
+    import backend.main as m
+    day_start = int(time.time() // 86400 * 86400)
+    readings = [
+        (day_start + 10 * 60, 10000),
+        (day_start + 20 * 60, 7000),
+        (day_start + 30 * 60, 10000),
+        (day_start + 65 * 60, 7000),
+        (day_start + 75 * 60, 10000),
+        (day_start + 85 * 60, 10000),
+    ]
+    target_date = time.strftime("%Y-%m-%d", time.localtime(day_start))
+
+    async with aiosqlite.connect(m.DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        await init_db(conn)
+        for seq, (ts, volume_l) in enumerate(readings, start=1):
+            await insert_reading(conn, {
+                "ts": ts,
+                "node_id": "0x7758",
+                "sensor_id": 1,
+                "alias": "CIE1",
+                "distance_cm": 0,
+                "level_cm": 0,
+                "volume_l": volume_l,
+                "pct": 0,
+                "rssi": -62,
+                "vbat": 3.3,
+                "seq": seq,
+            })
+
+    async with AsyncClient(transport=ASGITransport(app=m.app), base_url="http://test") as client:
+        r = await client.get(f"/api/consumption?alias=CIE1&date={target_date}")
+
+    assert r.status_code == 200
+    payload = r.json()
+    assert payload["summary"]["consumed_l"] == pytest.approx(0)
+    assert payload["summary"]["supplied_l"] == pytest.approx(0)
+    assert payload["summary"]["balance_l"] == pytest.approx(0)
+
+
+@pytest.mark.asyncio
+async def test_report_equipment_states_returns_last_state_for_date(set_test_db):
+    import backend.main as m
+    now = int(time.time())
+    async with aiosqlite.connect(m.DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        await init_db(conn)
+        await insert_manual_pump_log(conn, {"ts": now - 100, "pump_name": "Bomba A", "state": "ligada", "mode": "manual", "note": None})
+        await insert_manual_valve_log(conn, {"ts": now - 50, "valve_name": "Valvula X", "state": "aberta", "note": None})
+
+    date = time.strftime("%Y-%m-%d", time.localtime(now))
+    async with AsyncClient(transport=ASGITransport(app=m.app), base_url="http://test") as client:
+        r = await client.get(f"/api/report/equipment-states?date={date}")
+
+    assert r.status_code == 200
+    payload = r.json()
+    assert payload["pumps"][0]["pump_name"] == "Bomba A"
+    assert payload["pumps"][0]["state"] == "ligada"
+    assert payload["valves"][0]["valve_name"] == "Valvula X"
+    assert payload["valves"][0]["state"] == "aberta"
+
+
+@pytest.mark.asyncio
+async def test_report_notes_can_be_created_and_archived(set_test_db):
+    import backend.main as m
+    async with aiosqlite.connect(m.DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        await init_db(conn)
+
+    date = time.strftime("%Y-%m-%d", time.localtime(time.time()))
+    async with AsyncClient(transport=ASGITransport(app=m.app), base_url="http://test") as client:
+        created = await client.post("/api/report/notes", json={"date": date, "note": "Primeira observação"})
+        assert created.status_code == 200
+        item = created.json()["item"]
+        listed = await client.get(f"/api/report/notes?date={date}")
+        assert listed.status_code == 200
+        assert len(listed.json()["items"]) == 1
+
+        archived = await client.post(f"/api/report/notes/{item['id']}/archive")
+        assert archived.status_code == 200
+
+        listed_after = await client.get(f"/api/report/notes?date={date}")
+        assert listed_after.status_code == 200
+        assert listed_after.json()["items"] == []
