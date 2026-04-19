@@ -58,6 +58,7 @@ from .db import (
     get_all_nodes,
     get_node,
     patch_node,
+    is_supported_valve_name,
 )
 from .calc import calc_consumption_events, decimate_readings
 from .report import generate_daily_report_pdf
@@ -302,6 +303,7 @@ class ManualHydrometerRequest(BaseModel):
 class ManualPumpRequest(BaseModel):
     pump_name: str
     state: str  # ligada | desligada | falha | manutencao
+    operational_status: Optional[str] = None  # OP | INOP | OR | MNT
     mode: str = "manual"
     ts: Optional[int] = None
     note: Optional[str] = None
@@ -420,10 +422,14 @@ async def post_manual_pump(body: ManualPumpRequest):
     state = body.state.strip().lower()
     if state not in {"ligada", "desligada", "falha", "manutencao"}:
         raise HTTPException(400, "state inválido")
+    operational_status = (body.operational_status or "").strip().upper() or None
+    if operational_status is not None and operational_status not in {"OP", "INOP", "OR", "MNT"}:
+        raise HTTPException(400, "operational_status inválido")
     item = {
         "ts": int(body.ts or time.time()),
         "pump_name": pump_name,
         "state": state,
+        "operational_status": operational_status,
         "mode": (body.mode or "manual").strip() or "manual",
         "note": body.note,
     }
@@ -445,6 +451,8 @@ async def post_manual_valve(body: ManualValveRequest):
     valve_name = body.valve_name.strip()
     if not valve_name:
         raise HTTPException(400, "valve_name é obrigatório")
+    if not is_supported_valve_name(valve_name):
+        raise HTTPException(400, "valve_name inválido")
     state = body.state.strip().lower()
     if state not in {"aberta", "fechada", "parcial", "falha"}:
         raise HTTPException(400, "state inválido")

@@ -1712,6 +1712,15 @@
               <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'manutencao'}" @click="equipmentModal.state='manutencao'">Manutencao</button>
             </div>
             <div class="field-stack">
+              <label>Status operacional</label>
+              <div class="form-row">
+                <button type="button" class="eq-btn" :class="{active: equipmentModal.operationalStatus === 'OP'}" @click="equipmentModal.operationalStatus='OP'">OP</button>
+                <button type="button" class="eq-btn" :class="{active: equipmentModal.operationalStatus === 'INOP'}" @click="equipmentModal.operationalStatus='INOP'">INOP</button>
+                <button type="button" class="eq-btn" :class="{active: equipmentModal.operationalStatus === 'OR'}" @click="equipmentModal.operationalStatus='OR'">OR</button>
+                <button type="button" class="eq-btn" :class="{active: equipmentModal.operationalStatus === 'MNT'}" @click="equipmentModal.operationalStatus='MNT'">MNT</button>
+              </div>
+            </div>
+            <div class="field-stack">
               <label>Modo</label>
               <input class="form-input" type="text" x-model="equipmentModal.mode" placeholder="manual"/>
             </div>
@@ -2582,6 +2591,7 @@
         this.equipmentModal.ts = item.ts || null;
         this.equipmentModal.note = item.note || '';
         this.equipmentModal.mode = item.mode || 'manual';
+        this.equipmentModal.operationalStatus = item.operational_status || '';
         this.equipmentModal.state = item.state || (kind === 'valve' ? 'fechada' : 'desligada');
         this.equipmentModal.reading = item.reading ?? '';
         this.equipmentModal.unit = item.unit || 'm3';
@@ -2605,6 +2615,7 @@
             body = {
               pump_name: this.equipmentModal.name,
               state: this.equipmentModal.state,
+              operational_status: this.equipmentModal.operationalStatus || null,
               mode: this.equipmentModal.mode || 'manual',
               note: this.equipmentModal.note || null,
             };

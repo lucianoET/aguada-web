@@ -4,55 +4,218 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="data:,">
-  <title>AGUADA — Relatório Tabular</title>
+  <title>AGUADA — Relatório</title>
   <link rel="stylesheet" href="assets/aguada.css?v=2">
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    .simple-stack { display:flex; flex-direction:column; gap:16px; }
+    .admin-main.simple-stack { max-width:1600px; margin:0 auto; }
+    .simple-stack { display:flex; flex-direction:column; gap:12px; }
+    .report-grid { display:grid; gap:12px; }
+    .content-row { display:grid; gap:12px; }
+    .main-stack { display:grid; gap:12px; align-content:start; }
+    .side-stack { display:grid; gap:12px; align-content:start; }
     .simple-card { background:var(--card, white); border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; }
-    .simple-card header { padding:14px 16px; border-bottom:1px solid var(--border-color, var(--border)); display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
-    .simple-card h2 { margin:0; font-size:var(--font-lg); color:var(--text, #1e3a5f); }
-    .simple-card p { margin:0; color:var(--text-muted); font-size:var(--font-sm); }
-    .filter-bar { display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+    .editable-card { cursor:pointer; }
+    .simple-card header { padding:10px 12px; border-bottom:1px solid var(--border-color, var(--border)); display:flex; justify-content:space-between; align-items:flex-end; gap:10px; flex-wrap:wrap; }
+    .simple-card h2 { margin:0; font-size:15px; line-height:1.2; color:var(--text, #1e3a5f); }
+    .simple-card p { margin:2px 0 0; color:var(--text-muted); font-size:12px; line-height:1.35; }
+    .filter-bar { display:flex; align-items:flex-end; gap:8px 10px; flex-wrap:wrap; margin-bottom:4px; padding:10px 12px; background:var(--card, white); border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
     .filter-bar label { display:block; font-size:var(--font-xs); font-weight:600; color:var(--text-muted); margin-bottom:4px; }
     .table-wrap { overflow-x:auto; }
-    .simple-table { width:100%; border-collapse:collapse; min-width:700px; table-layout:fixed; }
-    .simple-table th, .simple-table td { padding:8px 9px; border-bottom:1px solid var(--border-color, var(--border)); text-align:right; vertical-align:middle; font-variant-numeric:tabular-nums; }
-    .simple-table th:first-child, .simple-table td:first-child { text-align:left; width:108px; }
-    .simple-table th:not(:first-child), .simple-table td:not(:first-child) { white-space:nowrap; }
-    .simple-table th { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); background:rgba(148,163,184,.08); }
-    .simple-table td { font-size:13px; color:var(--text, #1e3a5f); }
+    .simple-table { width:100%; border-collapse:separate; border-spacing:0; min-width:0; table-layout:auto; }
+    .simple-table th, .simple-table td { padding:6px 9px; border-bottom:1px solid var(--border-color, var(--border)); vertical-align:middle; font-variant-numeric:tabular-nums; }
+    .simple-table th { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); background:rgba(148,163,184,.08); line-height:1.2; white-space:nowrap; }
+    .simple-table td { font-size:12px; line-height:1.25; color:var(--text, #1e3a5f); }
     .simple-table tbody tr:last-child td { border-bottom:none; }
     .simple-table tbody tr:hover td { background:rgba(148,163,184,.06); }
+    .simple-table .col-label, .simple-table .cell-label { text-align:left; }
+    .simple-table .col-label { width:92px; }
+    .simple-table .col-num, .simple-table .cell-num { text-align:right; white-space:nowrap; }
+    .simple-table .cell-label { font-weight:600; color:#334155; white-space:nowrap; }
+    .simple-table .cell-dim { color:var(--text-muted); }
+    .reading-cell { display:inline-flex; align-items:baseline; justify-content:flex-end; gap:4px; min-width:0; }
+    .reading-value { font-weight:600; }
+    .reading-unit { font-size:11px; color:var(--text-muted); }
     .muted { color:var(--text-muted); }
     .metric-row td { font-weight:700; background:rgba(14,165,233,.06); }
     .neg { color:#b91c1c; }
     .empty { padding:24px 16px; color:var(--text-muted); }
-    .state-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
-    .state-badge { display:inline-flex; align-items:center; justify-content:center; min-width:96px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+    .state-badge { display:inline-flex; align-items:center; justify-content:center; min-width:82px; padding:4px 8px; border-radius:999px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
     .state-ok { background:rgba(22,163,74,.12); color:#166534; }
     .state-warn { background:rgba(217,119,6,.12); color:#92400e; }
     .state-off { background:rgba(100,116,139,.14); color:#475569; }
     .state-fail { background:rgba(220,38,38,.12); color:#991b1b; }
-    .notes-toolbar { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
-    .notes-toolbar textarea { width:100%; min-height:112px; resize:vertical; }
-    .notes-list { display:flex; flex-direction:column; gap:12px; }
-    .note-item { border:1px solid var(--border-color, var(--border)); border-radius:10px; padding:14px; background:rgba(148,163,184,.05); }
+    .matrix-table { min-width:0; table-layout:fixed; }
+    .matrix-table th, .matrix-table td { text-align:center; padding:5px 7px; }
+    .matrix-table .matrix-label { text-align:left; width:72px; }
+    .matrix-code { display:inline-flex; align-items:center; justify-content:center; min-width:46px; padding:3px 7px; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.04em; }
+    .code-op { background:rgba(22,163,74,.14); color:#166534; }
+    .code-inop { background:rgba(220,38,38,.14); color:#991b1b; }
+    .code-or { background:rgba(217,119,6,.14); color:#92400e; }
+    .code-mnt { background:rgba(59,130,246,.14); color:#1d4ed8; }
+    .code-empty { background:rgba(100,116,139,.12); color:#64748b; }
+    .notes-toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+    .notes-toolbar textarea { width:100%; min-height:72px; resize:vertical; }
+    .notes-list { display:flex; flex-direction:column; gap:10px; }
+    .note-item { border:1px solid var(--border-color, var(--border)); border-radius:10px; padding:10px 12px; background:rgba(148,163,184,.05); }
     .note-item p { margin:0 0 10px 0; white-space:pre-wrap; }
     .note-meta { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; color:var(--text-muted); font-size:12px; }
     .print-only { display:none; }
 
-    #pumpTable th:last-child,
-    #pumpTable td:last-child,
-    #valveTable th:last-child,
-    #valveTable td:last-child {
+    #pumpTable .col-state,
+    #pumpTable .cell-state,
+    #valveTable .col-state,
+    #valveTable .cell-state {
       text-align:center;
-      width:128px;
+      width:110px;
     }
 
-    #hydrometerTable th:first-child,
-    #hydrometerTable td:first-child {
-      width:210px;
+    #hydrometerTable .col-label,
+    #hydrometerTable .cell-label {
+      width:172px;
+    }
+
+    #volumeTable .col-label,
+    #volumeTable .cell-label {
+      width:88px;
+    }
+
+    #volumeTable .col-num,
+    #volumeTable .cell-num {
+      min-width:88px;
+    }
+
+    #hydrometerTable .col-num,
+    #hydrometerTable .cell-num {
+      min-width:112px;
+    }
+
+    #pumpTable,
+    #valveTable {
+      min-width:0;
+    }
+
+    .notes-card {
+      display:flex;
+      flex-direction:column;
+    }
+
+    .notes-card-body {
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      height:100%;
+    }
+
+    .table-edit-modal[hidden] { display:none; }
+    .table-edit-modal {
+      position:fixed;
+      inset:0;
+      z-index:1200;
+      background:rgba(15,23,42,.42);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .table-edit-dialog {
+      width:min(1080px, 100%);
+      max-height:min(88vh, 920px);
+      background:var(--card, white);
+      border-radius:16px;
+      box-shadow:0 24px 80px rgba(15,23,42,.24);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+
+    .table-edit-header,
+    .table-edit-footer {
+      padding:14px 16px;
+      border-bottom:1px solid var(--border-color, var(--border));
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .table-edit-footer {
+      border-bottom:none;
+      border-top:1px solid var(--border-color, var(--border));
+      justify-content:flex-end;
+    }
+
+    .table-edit-body {
+      padding:16px;
+      overflow:auto;
+      background:rgba(148,163,184,.05);
+    }
+
+    .edit-grid {
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      background:var(--card, white);
+      border:1px solid var(--border-color, var(--border));
+      border-radius:12px;
+      overflow:hidden;
+    }
+
+    .edit-grid th,
+    .edit-grid td {
+      padding:8px 10px;
+      border-bottom:1px solid var(--border-color, var(--border));
+      vertical-align:middle;
+    }
+
+    .edit-grid tr:last-child td { border-bottom:none; }
+    .edit-grid th {
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:var(--text-muted);
+      background:rgba(148,163,184,.08);
+      white-space:nowrap;
+    }
+
+    .edit-grid input,
+    .edit-grid select {
+      width:100%;
+      min-width:0;
+      padding:7px 9px;
+      border:1px solid var(--border-color, var(--border));
+      border-radius:8px;
+      background:var(--card, white);
+      color:var(--text, #1e3a5f);
+      font:inherit;
+    }
+
+    .edit-grid .readonly-cell {
+      font-weight:600;
+      text-align:right;
+      white-space:nowrap;
+    }
+
+    @media (min-width: 720px) {
+      .content-row {
+        grid-template-columns: minmax(0, 1.9fr) minmax(260px, 0.96fr);
+        align-items:start;
+      }
+      .filter-bar {
+        display:grid;
+        grid-template-columns:auto auto auto minmax(180px, 1fr);
+        align-items:end;
+      }
+    }
+
+    @media (max-width: 719px) {
+      .filter-bar { padding:10px 12px; gap:8px; }
+      .simple-card header { padding:10px 12px; }
+      .simple-table { min-width:560px; }
+      .simple-table th, .simple-table td { padding:6px 8px; }
+      .matrix-table { min-width:0; }
     }
 
     @page {
@@ -138,26 +301,42 @@
         font-size:8px;
       }
 
-      .simple-table th:first-child,
-      .simple-table td:first-child {
+      .simple-table .col-label,
+      .simple-table .cell-label {
         width:78px;
       }
 
-      #hydrometerTable th:first-child,
-      #hydrometerTable td:first-child {
-        width:150px;
+      #hydrometerTable .col-label,
+      #hydrometerTable .cell-label {
+        width:132px;
       }
 
-      #pumpTable th:last-child,
-      #pumpTable td:last-child,
-      #valveTable th:last-child,
-      #valveTable td:last-child {
+      #pumpTable .col-state,
+      #pumpTable .cell-state,
+      #valveTable .col-state,
+      #valveTable .cell-state {
         width:88px;
       }
 
-      .state-grid {
-        grid-template-columns:repeat(2, minmax(0, 1fr));
-        gap:6px;
+      .report-grid,
+      .content-row,
+      .main-stack,
+      .side-stack {
+        display:block;
+      }
+
+      .report-grid > *,
+      .content-row > *,
+      .main-stack > *,
+      .side-stack > * {
+        margin-bottom:6px;
+      }
+
+      .report-grid > *:last-child,
+      .content-row > *:last-child,
+      .main-stack > *:last-child,
+      .side-stack > *:last-child {
+        margin-bottom:0;
       }
 
       .state-badge {
@@ -183,129 +362,150 @@
 <div id="topbar" class="admin-header"></div>
 
 <div class="admin-main simple-stack">
-  <div class="print-only muted" id="printHeader" style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Relatório Tabular</div>
+  <div class="print-only muted" id="printHeader" style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Relatório</div>
   <div class="filter-bar">
     <div>
       <label>Data</label>
       <input id="dateInput" class="form-input" type="date">
     </div>
-    <button id="loadBtn" class="btn btn-primary">Carregar Tabelas</button>
+    <button id="loadBtn" class="btn btn-primary">Carregar Relatório</button>
     <button id="printBtn" class="btn btn-secondary">Gerar PDF</button>
-    <div class="muted" id="statusText">Preparando dados do dia...</div>
+    <div class="muted" id="reportStatusText">Preparando dados do dia...</div>
   </div>
 
-  <section class="simple-card">
-    <header>
-      <div>
-        <h2>Volumes dos Reservatórios</h2>
-        <p>Modelo simples do relatório operacional com checkpoints fixos do dia.</p>
-      </div>
-      <div class="muted" id="selectedDateLabel">—</div>
-    </header>
-    <div class="table-wrap">
-      <table class="simple-table" id="volumeTable">
-        <thead>
-          <tr>
-            <th>Hora</th>
-            <th>CON (m³)</th>
-            <th>CAV (m³)</th>
-            <th>CB3 (m³)</th>
-            <th>CIE1 (m³)</th>
-            <th>CIE2 (m³)</th>
-            <th>CBIF (m³)</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
+  <div class="report-grid">
+    <div class="content-row">
+      <div class="main-stack">
+        <section class="simple-card editable-card" data-editable-section="volume">
+          <header>
+            <div>
+              <h2>Reservatórios</h2>
+              <p>Volumes, hidrômetros, estados e observações para a operação do dia.</p>
+            </div>
+            <div class="muted" id="selectedDateLabel">—</div>
+          </header>
+          <div class="table-wrap">
+            <table class="simple-table" id="volumeTable">
+              <thead>
+                <tr>
+                  <th class="col-label">Hora</th>
+                  <th class="col-num">CON (m³)</th>
+                  <th class="col-num">CAV (m³)</th>
+                  <th class="col-num">CB3 (m³)</th>
+                  <th class="col-num">CIE1 (m³)</th>
+                  <th class="col-num">CIE2 (m³)</th>
+                  <th class="col-num">CBIF (m³)</th>
+                  <th class="col-num">Total</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
 
-  <section class="simple-card">
-    <header>
-      <div>
-        <h2>Hidrômetros</h2>
-        <p>Leitura anterior, leitura atual e diferença acumulada até o fim do dia selecionado.</p>
+        <section class="simple-card editable-card" data-editable-section="hydrometer">
+          <header>
+            <div>
+              <h2>Hidrômetros</h2>
+              <p>Leitura anterior, leitura atual e diferença acumulada até o fim do dia selecionado.</p>
+            </div>
+          </header>
+          <div class="table-wrap">
+            <table class="simple-table" id="hydrometerTable">
+              <thead>
+                <tr>
+                  <th class="col-label">Hidrômetro</th>
+                  <th class="col-num">Leitura anterior</th>
+                  <th class="col-num">Leitura atual</th>
+                  <th class="col-num">Diferença</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
       </div>
-    </header>
-    <div class="table-wrap">
-      <table class="simple-table" id="hydrometerTable">
-        <thead>
-          <tr>
-            <th>Hidrômetro</th>
-            <th>Leitura anterior</th>
-            <th>Leitura atual</th>
-            <th>Diferença</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
 
-  <section class="state-grid">
-    <div class="simple-card">
-      <header>
-        <div>
-          <h2>Bombas</h2>
-          <p>Apenas o estado final registrado até a data selecionada.</p>
-        </div>
-      </header>
-      <div class="table-wrap">
-        <table class="simple-table" id="pumpTable">
-          <thead>
-            <tr>
-              <th>Bomba</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
+      <div class="side-stack">
+        <section class="simple-card editable-card" data-editable-section="pump">
+          <header>
+            <div>
+              <h2>Bombas</h2>
+            </div>
+          </header>
+          <div class="table-wrap">
+            <table class="simple-table matrix-table" id="pumpTable">
+              <thead>
+                <tr>
+                  <th class="matrix-label">Conjunto</th>
+                  <th>ELE</th>
+                  <th>DIE</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
 
-    <div class="simple-card">
-      <header>
-        <div>
-          <h2>Válvulas</h2>
-          <p>Apenas o estado final registrado até a data selecionada.</p>
-        </div>
-      </header>
-      <div class="table-wrap">
-        <table class="simple-table" id="valveTable">
-          <thead>
-            <tr>
-              <th>Válvula</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+        <section class="simple-card editable-card" data-editable-section="valve">
+          <header>
+            <div>
+              <h2>Válvulas</h2>
+            </div>
+          </header>
+          <div class="table-wrap">
+            <table class="simple-table matrix-table" id="valveTable">
+              <thead>
+                <tr>
+                  <th class="matrix-label">Linha</th>
+                  <th>CON</th>
+                  <th>CAV</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
 
-  <section class="simple-card">
-    <header>
-      <div>
-        <h2>Observações</h2>
-        <p>Observações persistentes por data. Ao arquivar, a observação sai da página.</p>
+        <section class="simple-card notes-card">
+          <header>
+            <div>
+              <h2>Observações</h2>
+              <p>Observações persistentes por data. Ao arquivar, a observação sai da página.</p>
+            </div>
+          </header>
+          <div class="notes-card-body">
+            <div id="notesList" class="notes-list"></div>
+            <div id="notesStatus" class="muted"></div>
+            <div class="notes-toolbar">
+              <div style="flex:1 1 220px;">
+                <label for="noteInput">Nova observação</label>
+                <textarea id="noteInput" class="form-input" placeholder="Escreva a observação desta data..."></textarea>
+              </div>
+              <button id="addNoteBtn" class="btn btn-primary">Adicionar</button>
+            </div>
+          </div>
+        </section>
       </div>
-    </header>
-    <div style="padding:16px; display:flex; flex-direction:column; gap:16px;">
-      <div class="notes-toolbar">
-        <div style="flex:1 1 420px;">
-          <label for="noteInput">Nova observação</label>
-          <textarea id="noteInput" class="form-input" placeholder="Escreva a observação desta data..."></textarea>
-        </div>
-        <button id="addNoteBtn" class="btn btn-primary">Adicionar</button>
-      </div>
-      <div id="notesStatus" class="muted"></div>
-      <div id="notesList" class="notes-list"></div>
     </div>
-  </section>
+  </div>
 </div>
 
-<script src="assets/api.js"></script>
+<div id="tableEditModal" class="table-edit-modal" hidden>
+  <div class="table-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="tableEditTitle">
+    <div class="table-edit-header">
+      <strong id="tableEditTitle">Editar tabela</strong>
+      <button id="closeTableEditBtn" class="btn btn-secondary" type="button">Fechar</button>
+    </div>
+    <div id="tableEditBody" class="table-edit-body"></div>
+    <div class="table-edit-footer">
+      <button id="cancelTableEditBtn" class="btn btn-secondary" type="button">Cancelar</button>
+      <button id="saveTableEditBtn" class="btn btn-primary" type="button">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/api.js?v=20260419b"></script>
 <script>
 document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('relatorio_tabelas.html');
 
@@ -331,12 +531,62 @@ const RESERVOIR_GROUPS = [
   { key: 'CBIF', aliases: ['CBIF1', 'CBIF2'] },
 ];
 
+const PUMP_MATRIX_ROWS = ['CB3', 'CB2', 'CB1'];
+const PUMP_MATRIX_COLS = ['ELE', 'DIE'];
+const VALVE_MATRIX_ROWS = ['AZ', 'AV', 'AP'];
+const VALVE_MATRIX_COLS = ['CON', 'CAV'];
+
 const dateInput = document.getElementById('dateInput');
-const statusText = document.getElementById('statusText');
+const statusText = document.getElementById('reportStatusText');
 const selectedDateLabel = document.getElementById('selectedDateLabel');
 const noteInput = document.getElementById('noteInput');
 const notesStatus = document.getElementById('notesStatus');
 const printHeader = document.getElementById('printHeader');
+const tableEditModal = document.getElementById('tableEditModal');
+const tableEditTitle = document.getElementById('tableEditTitle');
+const tableEditBody = document.getElementById('tableEditBody');
+const queryDate = new URLSearchParams(window.location.search).get('date');
+
+const reportState = {
+  volumeRows: [],
+  hydrometerRows: [],
+  pumpRows: [],
+  valveRows: [],
+};
+
+let activeEditSection = null;
+let activeEditDraft = null;
+
+const EDITABLE_SECTIONS = {
+  volume: { title: 'Reservatórios', storageKey: 'volumeRows' },
+  hydrometer: { title: 'Hidrômetros', storageKey: 'hydrometerRows' },
+  pump: { title: 'Bombas', storageKey: 'pumpRows' },
+  valve: { title: 'Válvulas', storageKey: 'valveRows' },
+};
+
+const PUMP_STATUS_OPTIONS = ['—', 'OP', 'INOP', 'OR', 'MNT'];
+const VALVE_STATE_OPTIONS = ['—', 'Aberta', 'Fechada', 'Parcial', 'Falha'];
+
+function cloneData(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function editStorageKey(section, date) {
+  return `aguada-report-edit:${section}:${date}`;
+}
+
+function loadStoredSection(section, date) {
+  try {
+    const stored = localStorage.getItem(editStorageKey(section, date));
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveStoredSection(section, date, data) {
+  localStorage.setItem(editStorageKey(section, date), JSON.stringify(data));
+}
 
 function startOfDayTs(dateStr) {
   return Math.floor(new Date(`${dateStr}T00:00:00`).getTime() / 1000);
@@ -352,7 +602,7 @@ function formatDateLabel(dateStr) {
 }
 
 function updatePrintHeader(dateStr) {
-  printHeader.textContent = `Relatório Tabular • ${formatDateLabel(dateStr)}`;
+  printHeader.textContent = `Relatório • ${formatDateLabel(dateStr)}`;
 }
 
 function formatVolume(value) {
@@ -363,6 +613,11 @@ function formatVolume(value) {
 function formatReading(value) {
   if (value == null) return '—';
   return value.toFixed(2).replace('.', ',');
+}
+
+function formatInputNumber(value, decimals) {
+  if (value == null || value === '') return '';
+  return Number(value).toFixed(decimals);
 }
 
 function latestValueAt(rows, ts) {
@@ -381,15 +636,16 @@ function sumAvailable(values) {
 }
 
 function buildVolumeRows(histories, dayStart, isToday) {
+  const nowTs = Math.floor(Date.now() / 1000);
   const rows = CHECKPOINTS.map((checkpoint) => {
-    if (isToday && checkpoint.offsetMinutes > 0) {
+    const checkpointTs = dayStart + checkpoint.offsetMinutes * 60;
+    if (isToday && checkpointTs > nowTs) {
       const emptyValues = {};
       RESERVOIR_GROUPS.forEach((group) => {
         emptyValues[group.key] = null;
       });
       return { label: checkpoint.label, values: emptyValues };
     }
-    const checkpointTs = dayStart + checkpoint.offsetMinutes * 60;
     const values = {};
     RESERVOIR_GROUPS.forEach((group) => {
       values[group.key] = sumAvailable(group.aliases.map((alias) => latestValueAt(histories[alias] || [], checkpointTs)));
@@ -417,16 +673,44 @@ function renderVolumeTable(rows) {
   const tbody = document.querySelector('#volumeTable tbody');
   tbody.innerHTML = rows.map((row) => {
     const rowClass = row.isMetric ? ' class="metric-row"' : '';
+    const total = sumAvailable([
+      row.values.CON,
+      row.values.CAV,
+      row.values.CB3,
+      row.values.CIE1,
+      row.values.CIE2,
+      row.values.CBIF,
+    ]);
     return `<tr${rowClass}>
-      <td>${row.label}</td>
-      <td>${formatVolume(row.values.CON)}</td>
-      <td>${formatVolume(row.values.CAV)}</td>
-      <td>${formatVolume(row.values.CB3)}</td>
-      <td>${formatVolume(row.values.CIE1)}</td>
-      <td>${formatVolume(row.values.CIE2)}</td>
-      <td>${formatVolume(row.values.CBIF)}</td>
+      <td class="cell-label">${row.label}</td>
+      <td class="cell-num">${formatVolume(row.values.CON)}</td>
+      <td class="cell-num">${formatVolume(row.values.CAV)}</td>
+      <td class="cell-num">${formatVolume(row.values.CB3)}</td>
+      <td class="cell-num">${formatVolume(row.values.CIE1)}</td>
+      <td class="cell-num">${formatVolume(row.values.CIE2)}</td>
+      <td class="cell-num">${formatVolume(row.values.CBIF)}</td>
+      <td class="cell-num">${formatVolume(total)}</td>
     </tr>`;
   }).join('');
+}
+
+function normalizeHydrometerRows(rows) {
+  return rows.map((row) => {
+    const previous = row.previous == null || row.previous === '' ? null : Number(row.previous);
+    const current = row.current == null || row.current === '' ? null : Number(row.current);
+    return {
+      meterName: row.meterName,
+      unit: row.unit || 'm3',
+      previous,
+      current,
+      diff: previous != null && current != null ? current - previous : null,
+    };
+  });
+}
+
+function renderReadingCell(value, unit, negative = false) {
+  const cellClass = negative ? 'reading-cell neg' : 'reading-cell';
+  return `<span class="${cellClass}"><span class="reading-value">${formatReading(value)}</span><span class="reading-unit">${unit || 'm3'}</span></span>`;
 }
 
 function summarizeHydrometers(items, dateStr) {
@@ -469,12 +753,12 @@ function renderHydrometerTable(rows) {
     tbody.innerHTML = '<tr><td colspan="4" class="empty">Sem leituras manuais para montar o resumo.</td></tr>';
     return;
   }
-  tbody.innerHTML = rows.map((row) => `
+  tbody.innerHTML = normalizeHydrometerRows(rows).map((row) => `
     <tr>
-      <td>${row.meterName}</td>
-      <td>${formatReading(row.previous)} ${row.unit || 'm3'}</td>
-      <td>${formatReading(row.current)} ${row.unit || 'm3'}</td>
-      <td class="${row.diff != null && row.diff < 0 ? 'neg' : ''}">${formatReading(row.diff)} ${row.unit || 'm3'}</td>
+      <td class="cell-label">${row.meterName}</td>
+      <td class="cell-num">${renderReadingCell(row.previous, row.unit)}</td>
+      <td class="cell-num">${renderReadingCell(row.current, row.unit)}</td>
+      <td class="cell-num">${renderReadingCell(row.diff, row.unit, row.diff != null && row.diff < 0)}</td>
     </tr>
   `).join('');
 }
@@ -495,18 +779,278 @@ function stateClass(value) {
   return 'state-badge state-off';
 }
 
-function renderStateTable(tableId, rows, kind, nameKey) {
-  const tbody = document.querySelector(`#${tableId} tbody`);
-  if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="2" class="empty">Sem estado registrado para esta data.</td></tr>';
+function operationalCodeClass(code) {
+  if (code === 'OP') return 'matrix-code code-op';
+  if (code === 'INOP') return 'matrix-code code-inop';
+  if (code === 'OR') return 'matrix-code code-or';
+  if (code === 'MNT') return 'matrix-code code-mnt';
+  return 'matrix-code code-empty';
+}
+
+function fallbackOperationalStatus(state) {
+  if (state === 'manutencao') return 'MNT';
+  if (state === 'falha') return 'INOP';
+  return null;
+}
+
+function normalizePumpBucket(name) {
+  const upper = String(name || '').toUpperCase();
+  if (upper.includes('CB3') || upper.includes('B03')) return 'CB3';
+  if (upper.includes('CB2') || upper.includes('B02')) return 'CB2';
+  if (upper.includes('CB1') || upper.includes('B01') || upper.includes('CBIF') || upper.includes('BIF') || upper.includes('IF')) return 'CB1';
+  return null;
+}
+
+function normalizePumpDrive(name) {
+  const upper = String(name || '').toUpperCase();
+  if (upper.includes('-E') || upper.includes('ELE')) return 'ELE';
+  return 'DIE';
+}
+
+function buildPumpMatrixData(rows) {
+  const matrix = Object.fromEntries(PUMP_MATRIX_ROWS.map((bucket) => [bucket, Object.fromEntries(PUMP_MATRIX_COLS.map((drive) => [drive, '—']))]));
+
+  rows.forEach((row) => {
+    const bucket = normalizePumpBucket(row.pump_name);
+    const drive = normalizePumpDrive(row.pump_name);
+    if (!bucket || !drive) return;
+    matrix[bucket][drive] = row?.operational_status || fallbackOperationalStatus(row?.state) || '—';
+  });
+
+  return PUMP_MATRIX_ROWS.map((bucket) => ({
+    label: bucket,
+    ELE: matrix[bucket].ELE || '—',
+    DIE: matrix[bucket].DIE || '—',
+  }));
+}
+
+function renderPumpMatrix(rows) {
+  const tbody = document.querySelector('#pumpTable tbody');
+  tbody.innerHTML = rows.map((bucketRow) => {
+    const cells = PUMP_MATRIX_COLS.map((drive) => {
+      const code = bucketRow[drive] || '—';
+      return `<td><span class="${operationalCodeClass(code)}">${code}</span></td>`;
+    }).join('');
+    return `<tr><td class="cell-label matrix-label">${bucketRow.label}</td>${cells}</tr>`;
+  }).join('');
+}
+
+function normalizeValveGroup(name) {
+  const upper = String(name || '').toUpperCase();
+  if (upper.includes('CON')) return 'CON';
+  if (upper.includes('CAV')) return 'CAV';
+  return null;
+}
+
+function normalizeValveColumn(name) {
+  const upper = String(name || '').toUpperCase();
+  if (upper.includes('AVAZ') || upper.endsWith('-BA') || upper.includes('-AP')) return 'AP';
+  if (upper.includes('-AV')) return 'AV';
+  if (upper.includes('-AZ')) return 'AZ';
+  return null;
+}
+
+function buildValveMatrixData(rows) {
+  const matrix = Object.fromEntries(VALVE_MATRIX_ROWS.map((bucket) => [bucket, Object.fromEntries(VALVE_MATRIX_COLS.map((group) => [group, '—']))]));
+
+  rows.forEach((row) => {
+    const group = normalizeValveGroup(row.valve_name);
+    const bucket = normalizeValveColumn(row.valve_name);
+    if (!group || !bucket) return;
+    matrix[bucket][group] = stateLabel('valve', row.state);
+  });
+
+  return VALVE_MATRIX_ROWS.map((bucket) => ({
+    label: bucket,
+    CON: matrix[bucket].CON || '—',
+    CAV: matrix[bucket].CAV || '—',
+  }));
+}
+
+function valveStateClassFromLabel(label) {
+  const value = String(label || '').trim().toLowerCase();
+  if (value === 'aberta') return stateClass('aberta');
+  if (value === 'fechada') return stateClass('fechada');
+  if (value === 'parcial') return stateClass('parcial');
+  if (value === 'falha') return stateClass('falha');
+  return 'matrix-code code-empty';
+}
+
+function renderValveMatrix(rows) {
+  const tbody = document.querySelector('#valveTable tbody');
+  tbody.innerHTML = rows.map((bucketRow) => {
+    const cells = VALVE_MATRIX_COLS.map((group) => {
+      const label = bucketRow[group] || '—';
+      if (label === '—') return '<td><span class="matrix-code code-empty">—</span></td>';
+      return `<td><span class="${valveStateClassFromLabel(label)}">${label}</span></td>`;
+    }).join('');
+    return `<tr><td class="cell-label matrix-label">${bucketRow.label}</td>${cells}</tr>`;
+  }).join('');
+}
+
+function renderSection(section) {
+  if (section === 'volume') renderVolumeTable(reportState.volumeRows);
+  if (section === 'hydrometer') renderHydrometerTable(reportState.hydrometerRows);
+  if (section === 'pump') renderPumpMatrix(reportState.pumpRows);
+  if (section === 'valve') renderValveMatrix(reportState.valveRows);
+}
+
+function renderEditTable() {
+  const section = activeEditSection;
+  if (!section || !activeEditDraft) return;
+
+  if (section === 'volume') {
+    tableEditBody.innerHTML = `
+      <table class="edit-grid">
+        <thead>
+          <tr>
+            <th>Hora</th>
+            <th>CON</th>
+            <th>CAV</th>
+            <th>CB3</th>
+            <th>CIE1</th>
+            <th>CIE2</th>
+            <th>CBIF</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${activeEditDraft.map((row, index) => {
+            const total = sumAvailable([row.values.CON, row.values.CAV, row.values.CB3, row.values.CIE1, row.values.CIE2, row.values.CBIF]);
+            return `<tr>
+              <td><input data-row-index="${index}" data-field="label" type="text" value="${row.label}"></td>
+              <td><input data-row-index="${index}" data-group="values" data-field="CON" type="number" step="0.1" value="${formatInputNumber(row.values.CON, 1)}"></td>
+              <td><input data-row-index="${index}" data-group="values" data-field="CAV" type="number" step="0.1" value="${formatInputNumber(row.values.CAV, 1)}"></td>
+              <td><input data-row-index="${index}" data-group="values" data-field="CB3" type="number" step="0.1" value="${formatInputNumber(row.values.CB3, 1)}"></td>
+              <td><input data-row-index="${index}" data-group="values" data-field="CIE1" type="number" step="0.1" value="${formatInputNumber(row.values.CIE1, 1)}"></td>
+              <td><input data-row-index="${index}" data-group="values" data-field="CIE2" type="number" step="0.1" value="${formatInputNumber(row.values.CIE2, 1)}"></td>
+              <td><input data-row-index="${index}" data-group="values" data-field="CBIF" type="number" step="0.1" value="${formatInputNumber(row.values.CBIF, 1)}"></td>
+              <td class="readonly-cell">${formatVolume(total)}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
     return;
   }
-  tbody.innerHTML = rows.map((row) => `
-    <tr>
-      <td>${row[nameKey]}</td>
-      <td><span class="${stateClass(row.state)}">${stateLabel(kind, row.state)}</span></td>
-    </tr>
-  `).join('');
+
+  if (section === 'hydrometer') {
+    tableEditBody.innerHTML = `
+      <table class="edit-grid">
+        <thead>
+          <tr>
+            <th>Hidrômetro</th>
+            <th>Anterior</th>
+            <th>Atual</th>
+            <th>Diferença</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${normalizeHydrometerRows(activeEditDraft).map((row, index) => `
+            <tr>
+              <td><input data-row-index="${index}" data-field="meterName" type="text" value="${row.meterName}"></td>
+              <td><input data-row-index="${index}" data-field="previous" type="number" step="0.01" value="${formatInputNumber(row.previous, 2)}"></td>
+              <td><input data-row-index="${index}" data-field="current" type="number" step="0.01" value="${formatInputNumber(row.current, 2)}"></td>
+              <td class="readonly-cell">${formatReading(row.diff)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+    return;
+  }
+
+  if (section === 'pump') {
+    tableEditBody.innerHTML = `
+      <table class="edit-grid">
+        <thead>
+          <tr>
+            <th>Conjunto</th>
+            <th>ELE</th>
+            <th>DIE</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${activeEditDraft.map((row, index) => `
+            <tr>
+              <td class="readonly-cell" style="text-align:left;">${row.label}</td>
+              ${PUMP_MATRIX_COLS.map((field) => `
+                <td>
+                  <select data-row-index="${index}" data-field="${field}">
+                    ${PUMP_STATUS_OPTIONS.map((option) => `<option value="${option}"${option === row[field] ? ' selected' : ''}>${option}</option>`).join('')}
+                  </select>
+                </td>`).join('')}
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+    return;
+  }
+
+  tableEditBody.innerHTML = `
+    <table class="edit-grid">
+      <thead>
+        <tr>
+          <th>Linha</th>
+          <th>CON</th>
+          <th>CAV</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${activeEditDraft.map((row, index) => `
+          <tr>
+            <td class="readonly-cell" style="text-align:left;">${row.label}</td>
+            ${VALVE_MATRIX_COLS.map((field) => `
+              <td>
+                <select data-row-index="${index}" data-field="${field}">
+                  ${VALVE_STATE_OPTIONS.map((option) => `<option value="${option}"${option === row[field] ? ' selected' : ''}>${option}</option>`).join('')}
+                </select>
+              </td>`).join('')}
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function openEditModal(section) {
+  activeEditSection = section;
+  activeEditDraft = cloneData(reportState[EDITABLE_SECTIONS[section].storageKey]);
+  tableEditTitle.textContent = `Editar ${EDITABLE_SECTIONS[section].title}`;
+  renderEditTable();
+  tableEditModal.hidden = false;
+}
+
+function closeEditModal() {
+  activeEditSection = null;
+  activeEditDraft = null;
+  tableEditModal.hidden = true;
+}
+
+function updateDraftValue(target) {
+  if (!activeEditDraft) return;
+  const rowIndex = Number(target.dataset.rowIndex);
+  const field = target.dataset.field;
+  const group = target.dataset.group;
+  const row = activeEditDraft[rowIndex];
+  if (!row) return;
+
+  if (group === 'values') {
+    row.values[field] = target.value === '' ? null : Number(target.value);
+  } else if (activeEditSection === 'hydrometer' && (field === 'previous' || field === 'current')) {
+    row[field] = target.value === '' ? null : Number(target.value);
+  } else {
+    row[field] = target.value;
+  }
+
+  renderEditTable();
+}
+
+function saveEditModal() {
+  if (!activeEditSection || !activeEditDraft) return;
+  const date = dateInput.value || aguadaAPI.today();
+  if (activeEditSection === 'hydrometer') {
+    reportState.hydrometerRows = normalizeHydrometerRows(activeEditDraft);
+  } else {
+    reportState[EDITABLE_SECTIONS[activeEditSection].storageKey] = cloneData(activeEditDraft);
+  }
+  saveStoredSection(activeEditSection, date, reportState[EDITABLE_SECTIONS[activeEditSection].storageKey]);
+  renderSection(activeEditSection);
+  closeEditModal();
 }
 
 function formatNoteTime(ts) {
@@ -589,28 +1133,54 @@ async function loadTables() {
       aliases.map((alias) => aguadaAPI.getHistory(alias, '24h', { since_ts: fromTs, until_ts: untilTs }).catch(() => []))
     );
     const histories = Object.fromEntries(aliases.map((alias, index) => [alias, historiesList[index]]));
-    renderVolumeTable(buildVolumeRows(histories, dayStart, isToday));
+    reportState.volumeRows = loadStoredSection('volume', date) || buildVolumeRows(histories, dayStart, isToday);
+    renderVolumeTable(reportState.volumeRows);
 
     const hydrometerPayload = await fetch(`${aguadaAPI.BASE}/api/manual/hydrometers?limit=1000`).then((response) => response.json()).catch(() => ({ items: [] }));
-    renderHydrometerTable(summarizeHydrometers(hydrometerPayload.items || [], date));
+    reportState.hydrometerRows = normalizeHydrometerRows(loadStoredSection('hydrometer', date) || summarizeHydrometers(hydrometerPayload.items || [], date));
+    renderHydrometerTable(reportState.hydrometerRows);
 
     const equipmentPayload = await fetch(`${aguadaAPI.BASE}/api/report/equipment-states?date=${date}`).then((response) => response.json()).catch(() => ({ pumps: [], valves: [] }));
-    renderStateTable('pumpTable', equipmentPayload.pumps || [], 'pump', 'pump_name');
-    renderStateTable('valveTable', equipmentPayload.valves || [], 'valve', 'valve_name');
+    reportState.pumpRows = loadStoredSection('pump', date) || buildPumpMatrixData(equipmentPayload.pumps || []);
+    reportState.valveRows = loadStoredSection('valve', date) || buildValveMatrixData(equipmentPayload.valves || []);
+    renderPumpMatrix(reportState.pumpRows);
+    renderValveMatrix(reportState.valveRows);
 
     await loadNotes(date);
-    statusText.textContent = 'Tabelas carregadas.';
+    statusText.textContent = 'Relatório carregado.';
   } catch (error) {
     console.error(error);
-    statusText.textContent = `Erro ao carregar tabelas: ${error.message}`;
+    statusText.textContent = `Erro ao carregar relatório: ${error.message}`;
   }
 }
 
-dateInput.value = aguadaAPI.today();
+dateInput.value = queryDate || aguadaAPI.today();
 document.getElementById('loadBtn').addEventListener('click', loadTables);
 dateInput.addEventListener('change', loadTables);
 document.getElementById('addNoteBtn').addEventListener('click', addNote);
 document.getElementById('printBtn').addEventListener('click', () => window.print());
+document.querySelectorAll('[data-editable-section]').forEach((card) => {
+  card.addEventListener('click', (event) => {
+    if (event.target.closest('button, input, textarea, select, a')) return;
+    openEditModal(card.dataset.editableSection);
+  });
+});
+document.getElementById('closeTableEditBtn').addEventListener('click', closeEditModal);
+document.getElementById('cancelTableEditBtn').addEventListener('click', closeEditModal);
+document.getElementById('saveTableEditBtn').addEventListener('click', saveEditModal);
+tableEditModal.addEventListener('click', (event) => {
+  if (event.target === tableEditModal) closeEditModal();
+});
+tableEditBody.addEventListener('input', (event) => {
+  const target = event.target.closest('[data-field]');
+  if (!target) return;
+  updateDraftValue(target);
+});
+tableEditBody.addEventListener('change', (event) => {
+  const target = event.target.closest('[data-field]');
+  if (!target) return;
+  updateDraftValue(target);
+});
 document.getElementById('notesList').addEventListener('click', (event) => {
   const button = event.target.closest('.archive-note-btn');
   if (!button) return;

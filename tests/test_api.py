@@ -191,7 +191,7 @@ async def test_report_equipment_states_returns_last_state_for_date(set_test_db):
     async with aiosqlite.connect(m.DB_PATH) as conn:
         conn.row_factory = aiosqlite.Row
         await init_db(conn)
-        await insert_manual_pump_log(conn, {"ts": now - 100, "pump_name": "Bomba A", "state": "ligada", "mode": "manual", "note": None})
+        await insert_manual_pump_log(conn, {"ts": now - 100, "pump_name": "Bomba A", "state": "ligada", "operational_status": "OR", "mode": "manual", "note": None})
         await insert_manual_valve_log(conn, {"ts": now - 50, "valve_name": "Valvula X", "state": "aberta", "note": None})
 
     date = time.strftime("%Y-%m-%d", time.localtime(now))
@@ -202,8 +202,30 @@ async def test_report_equipment_states_returns_last_state_for_date(set_test_db):
     payload = r.json()
     assert payload["pumps"][0]["pump_name"] == "Bomba A"
     assert payload["pumps"][0]["state"] == "ligada"
+    assert payload["pumps"][0]["operational_status"] == "OR"
     assert payload["valves"][0]["valve_name"] == "Valvula X"
     assert payload["valves"][0]["state"] == "aberta"
+
+
+@pytest.mark.asyncio
+async def test_post_manual_pump_accepts_operational_status(set_test_db):
+    import backend.main as m
+    async with aiosqlite.connect(m.DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        await init_db(conn)
+
+    async with AsyncClient(transport=ASGITransport(app=m.app), base_url="http://test") as client:
+        r = await client.post("/api/manual/pumps", json={
+            "pump_name": "B03-E",
+            "state": "ligada",
+            "operational_status": "OP",
+            "mode": "manual"
+        })
+
+    assert r.status_code == 200
+    payload = r.json()
+    assert payload["pump_name"] == "B03-E"
+    assert payload["operational_status"] == "OP"
 
 
 @pytest.mark.asyncio

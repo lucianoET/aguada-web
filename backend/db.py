@@ -6,6 +6,8 @@ import aiosqlite
 
 logger = logging.getLogger("db")
 
+INVALID_VALVE_PREFIXES = ("VALV-IE-INTERLI",)
+
 # Nó considerado ONLINE se o último pacote chegou há menos de X segundos.
 # Intervalo padrão dos nós = 120s; 5 intervalos perdidos = offline.
 ONLINE_TIMEOUT_S = 600
@@ -60,6 +62,7 @@ CREATE TABLE IF NOT EXISTS manual_pump_logs (
     ts           INTEGER NOT NULL,
     pump_name    TEXT    NOT NULL,
     state        TEXT    NOT NULL,
+    operational_status TEXT,
     mode         TEXT    NOT NULL DEFAULT 'manual',
     note         TEXT
 );
@@ -109,12 +112,29 @@ CREATE TABLE IF NOT EXISTS report_notes (
 CREATE INDEX IF NOT EXISTS idx_report_notes_date_archived ON report_notes(date, archived_ts, created_ts DESC);
 """
 
+
+def is_supported_valve_name(name: str | None) -> bool:
+    normalized = (name or "").strip().upper()
+    if not normalized:
+        return False
+    return not any(normalized.startswith(prefix) for prefix in INVALID_VALVE_PREFIXES)
+
+
+def _filter_supported_valve_rows(rows: list[dict]) -> list[dict]:
+    return [row for row in rows if is_supported_valve_name(row.get("valve_name"))]
+
 async def init_db(conn: aiosqlite.Connection) -> None:
     await conn.executescript(SCHEMA)
     # Migration: add out_of_range column if missing (existing databases without it)
     try:
         await conn.execute(
             "ALTER TABLE reservoir_state ADD COLUMN out_of_range INTEGER DEFAULT 0"
+        )
+    except Exception:
+        pass  # column already exists
+    try:
+        await conn.execute(
+            "ALTER TABLE manual_pump_logs ADD COLUMN operational_status TEXT"
         )
     except Exception:
         pass  # column already exists
@@ -298,8 +318,8 @@ async def insert_manual_hydrometer_reading(conn: aiosqlite.Connection, item: dic
 
 async def insert_manual_pump_log(conn: aiosqlite.Connection, item: dict) -> None:
     await conn.execute(
-        """INSERT INTO manual_pump_logs (ts, pump_name, state, mode, note)
-           VALUES (:ts, :pump_name, :state, :mode, :note)""",
+        """INSERT INTO manual_pump_logs (ts, pump_name, state, operational_status, mode, note)
+           VALUES (:ts, :pump_name, :state, :operational_status, :mode, :note)""",
         item,
     )
     await conn.commit()
@@ -348,7 +368,7 @@ async def get_manual_hydrometer_history(conn: aiosqlite.Connection, meter_name: 
 
 async def get_manual_pump_logs(conn: aiosqlite.Connection, limit: int = 200) -> list[dict]:
     async with conn.execute(
-        """SELECT ts, pump_name, state, mode, note
+        """SELECT ts, pump_name, state, operational_status, mode, note
            FROM manual_pump_logs
            ORDER BY ts DESC
            LIMIT ?""",
@@ -367,7 +387,7 @@ async def get_manual_valve_logs(conn: aiosqlite.Connection, limit: int = 200) ->
         (limit,),
     ) as cur:
         rows = await cur.fetchall()
-    return [dict(r) for r in rows]
+    return _filter_supported_valve_rows([dict(r) for r in rows])
 
 
 async def get_manual_reservoir_logs(conn: aiosqlite.Connection, limit: int = 200) -> list[dict]:
@@ -385,7 +405,7 @@ async def get_manual_reservoir_logs(conn: aiosqlite.Connection, limit: int = 200
 async def get_latest_pump_states(conn: aiosqlite.Connection) -> list[dict]:
     """Retorna o estado mais recente de cada bomba (uma linha por bomba)."""
     async with conn.execute(
-        """SELECT p.id, p.ts, p.pump_name, p.state, p.mode, p.note
+        """SELECT p.id, p.ts, p.pump_name, p.state, p.operational_status, p.mode, p.note
            FROM manual_pump_logs p
            INNER JOIN (
                SELECT pump_name, MAX(id) AS max_id
@@ -411,7 +431,7 @@ async def get_latest_valve_states(conn: aiosqlite.Connection) -> list[dict]:
            ORDER BY v.valve_name"""
     ) as cur:
         rows = await cur.fetchall()
-    return [dict(r) for r in rows]
+    return _filter_supported_valve_rows([dict(r) for r in rows])
 
 
 async def get_latest_hydrometer_readings(conn: aiosqlite.Connection) -> list[dict]:
@@ -442,7 +462,7 @@ async def get_pump_states_for_date(conn: aiosqlite.Connection, date_str: str) ->
     out: list[dict] = []
     for name in names:
         async with conn.execute(
-            """SELECT ts, pump_name, state, mode, note FROM manual_pump_logs
+            """SELECT ts, pump_name, state, operational_status, mode, note FROM manual_pump_logs
                WHERE pump_name=? AND ts<=? ORDER BY ts DESC LIMIT 1""",
             (name, ts_end),
         ) as cur:
@@ -460,7 +480,7 @@ async def get_valve_states_for_date(conn: aiosqlite.Connection, date_str: str) -
     async with conn.execute(
         "SELECT DISTINCT valve_name FROM manual_valve_logs ORDER BY valve_name"
     ) as cur:
-        names = [r[0] for r in await cur.fetchall()]
+        names = [r[0] for r in await cur.fetchall() if is_supported_valve_name(r[0])]
     out: list[dict] = []
     for name in names:
         async with conn.execute(

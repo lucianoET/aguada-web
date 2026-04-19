@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
-<title>AGUADA — Dados e Balanço</title>
+<title>AGUADA — Dados</title>
 <link rel="stylesheet" href="assets/aguada.css?v=2">
 <link rel="stylesheet" href="assets/style.css">
 <style>
@@ -37,25 +37,6 @@
   .chart-wrap { background:var(--card, white); border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
   .chart-wrap h3 { color:var(--text, #1e3a5f); font-size:var(--font-base); font-weight:600; margin-bottom:8px; }
 
-  /* ── Balanço Geral ── */
-  .supply-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
-  .supply-card { background:var(--card, white); border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
-  .supply-card-header { padding:8px 12px; color:white; font-size:var(--font-sm); font-weight:600; }
-  .supply-card-body { padding:10px; }
-  .supply-kpi { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:10px; }
-  .kpi { background:var(--bg3, #f9fafb); border-radius:6px; padding:7px; text-align:center; }
-  .kpi .k-lbl { font-size:var(--font-xxs); color:var(--text-muted); text-transform:uppercase; font-weight:600; letter-spacing:.4px; }
-  .kpi .k-val { font-size:14px; font-weight:700; color:var(--text, #1e3a5f); margin-top:2px; }
-  .no-data { color:var(--text-muted); text-align:center; padding:16px; font-size:var(--font-sm); }
-
-  /* ── Balanço Detalhe ── */
-  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-bottom:10px; }
-  .stat-card { background:var(--card, white); border-radius:10px; padding:10px 12px; box-shadow:0 2px 8px rgba(0,0,0,.08); text-align:center; }
-  .stat-card .lbl { color:var(--text-muted); font-size:var(--font-xxs); text-transform:uppercase; font-weight:600; letter-spacing:.5px; }
-  .stat-card .val { font-size:20px; font-weight:700; color:var(--blue, var(--primary-blue)); margin:4px 0 0; }
-  .chart-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:10px; }
-  .chart-card { background:var(--card, white); border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
-  .chart-card h3 { color:var(--text, #1e3a5f); font-size:var(--font-base); font-weight:600; margin-bottom:8px; }
 </style>
 </head>
 <body class="admin-page">
@@ -65,8 +46,6 @@
   <div class="tab-bar">
     <button class="tab-btn active" id="tabAtual" onclick="switchTab('atual')">Leituras Atuais</button>
     <button class="tab-btn" id="tabHist" onclick="switchTab('hist')">Histórico Contínuo</button>
-    <button class="tab-btn" id="tabGeral" onclick="switchTab('geral')">Balanço Diário (Geral)</button>
-    <button class="tab-btn" id="tabDetalhe" onclick="switchTab('detalhe')">Balanço (Detalhe)</button>
   </div>
 
   <!-- ── ATUAL ── -->
@@ -125,50 +104,10 @@
     </div>
   </div>
 
-  <!-- ── BALANÇO: VISÃO GERAL ── -->
-  <div id="viewGeral" style="display:none">
-    <div class="top-bar">
-      <div><label>Data de Referência</label><input type="date" id="dateGeral" onchange="loadGeral()"></div>
-      <button class="btn-primary" onclick="loadGeral()">Carregar Balanço Total</button>
-      <span style="font-size:var(--font-xs);color:var(--text-muted);margin-bottom:6px" id="geralInfo"></span>
-    </div>
-    <div class="supply-grid" id="geralGrid">
-      <div style="color:var(--text-muted);padding:40px;font-size:var(--font-base)">⏳ Carregando...</div>
-    </div>
-  </div>
-
-  <!-- ── BALANÇO: DETALHE ── -->
-  <div id="viewDetalhe" style="display:none">
-    <div class="top-bar">
-      <div><label>Data</label><input type="date" id="dateDetalhe" onchange="loadDetalhe()"></div>
-      <div>
-        <label>Reservatório</label>
-        <div class="alias-selector" id="aliasSelDet"></div>
-      </div>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-card"><div class="lbl">Consumido</div><div class="val" id="stConsumed">— m³</div></div>
-      <div class="stat-card"><div class="lbl">Abastecido</div><div class="val" id="stSupplied">— m³</div></div>
-      <div class="stat-card"><div class="lbl">Balanço (Net)</div><div class="val" id="stBalance">— m³</div></div>
-      <div class="stat-card"><div class="lbl">Eventos Encontrados</div><div class="val" id="stEvents">—</div></div>
-    </div>
-
-    <div class="chart-grid">
-      <div class="chart-card">
-        <h3>📉 Curva de Volume (m³, 24h Selecionadas)</h3>
-        <canvas id="volChart" height="120"></canvas>
-      </div>
-      <div class="chart-card">
-        <h3>📊 Detalhamento de Eventos (Abastecimento x Consumo)</h3>
-        <canvas id="evtChart" height="120"></canvas>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script src="assets/vendor/chart.min.js"></script>
-<script src="assets/api.js"></script>
+<script src="assets/api.js?v=20260419"></script>
 <script>
 document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('dados.html');
 
@@ -178,18 +117,14 @@ const DEFAULT_ALIAS = 'CON';
 const LITERS_PER_M3 = 1000;
 
 function switchTab(tab) {
-  ['Atual','Hist','Geral','Detalhe'].forEach(t => {
+  ['Atual','Hist'].forEach(t => {
     document.getElementById('view'+t).style.display = t.toLowerCase() === tab ? '' : 'none';
     document.getElementById('tab'+t).classList.toggle('active', t.toLowerCase() === tab);
   });
-  if ((tab === 'hist' || tab === 'detalhe') && !globalReservoirs.length) return;
+  if (tab === 'hist' && !globalReservoirs.length) return;
   if (tab === 'hist') {
     initSels();
     loadHist();
-  }
-  if (tab === 'detalhe') {
-    initSels();
-    loadDetalhe();
   }
 }
 
@@ -246,9 +181,7 @@ async function preloadData() {
     renderAtual(globalReservoirs);
     setStatus(raw.some(r => r.online));
     initSels();
-    loadGeral();
     if (document.getElementById('viewHist').style.display !== 'none') loadHist();
-    if (document.getElementById('viewDetalhe').style.display !== 'none') loadDetalhe();
   } catch(e) { /* ignore here, will be caught by individual loaders */ }
 }
 
@@ -275,6 +208,7 @@ function renderAtual(data) {
         <div class="pct-bar"><div class="pct-bar-fill" style="width:${pct}%;background:${col}"></div></div>
         <span style="font-weight:600;color:${col}">${pct.toFixed(1)}%</span>
       </div></td>
+      <td style="text-align:center;"><span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500;${resumoStatusStyle(r.pct)}">${resumoStatusLabel(r.pct)}</span></td>
       <td>${vol}</td><td style="color:var(--text-muted)">${cap}</td>
       <td>${r.level_cm != null ? r.level_cm.toFixed(1)+' cm' : '—'}</td>
       <td>${r.rssi != null ? r.rssi+' dBm' : '—'}</td>
@@ -282,7 +216,7 @@ function renderAtual(data) {
     </tr>`;
   }).join('');
   c.innerHTML = `<table><thead><tr>
-    <th>Alias</th><th>Nome</th><th>Status</th><th>Nível %</th>
+    <th>Alias</th><th>Nome</th><th>Status</th><th>Nível %</th><th>Situação</th>
     <th>Volume</th><th>Capacidade</th><th>Nível cm</th><th>RSSI</th><th>Atualização</th>
   </tr></thead><tbody>${rows}</tbody></table>`;
   document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('pt-BR');
@@ -299,8 +233,8 @@ aguadaAPI.connectWS(msg => {
   }
 });
 
-// ── SELECTORS (HIST & DETALHE) ──
-let selAliasHist = null, selAliasDet = null;
+// ── SELECTORS (HIST) ──
+let selAliasHist = null;
 const DAY_S = 86400;
 
 function getDefaultAlias() {
@@ -317,17 +251,13 @@ function initSels() {
   ).join('');
 
   document.getElementById('aliasSelHist').innerHTML = genBtns(selAliasHist, 'Hist');
-  document.getElementById('aliasSelDet').innerHTML = genBtns(selAliasDet, 'Det');
   if(!selAliasHist) selAliasHist = defaultAlias;
-  if(!selAliasDet) selAliasDet = defaultAlias;
 }
 function setSelAlias(prefix, alias, btn) {
   if(prefix==='Hist') selAliasHist = alias;
-  if(prefix==='Det') selAliasDet = alias;
   btn.parentElement.querySelectorAll('.alias-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   if (prefix === 'Hist') loadHist();
-  if (prefix === 'Det') loadDetalhe();
 }
 
 function startOfDayTs(dateStr) {
@@ -465,128 +395,24 @@ async function loadHist() {
   } catch(e) { console.error(e); }
 }
 
-// ── BALANÇO GERAL ──
-function bCardHTML(r, consumption, idx) {
-  const s       = consumption?.summary || {};
-  const events  = (consumption?.events||[]).filter(e => e.type==='supply');
-  const consumed = s.consumed_l ?? 0;
-  const supplied = s.supplied_l ?? 0;
-  const balance  = s.balance_l  ?? 0;
-  const evtRows  = events.slice(0,6).map(e => `<tr><td>${fmtHM(e.ts_start)}</td><td style="color:#065f46;font-weight:600">+${formatVolumeM3(e.delta_l, 1)}</td><td style="color:var(--text-muted)">${e.duration_min ? e.duration_min.toFixed(0)+'m' : '—'}</td></tr>`).join('');
-  return `
-    <div class="supply-card">
-      <div class="supply-card-header rc-${idx%8}">💧 ${r.alias}${r.name ? ' — '+r.name : ''}</div>
-      <div class="supply-card-body">
-        <div class="supply-kpi">
-          <div class="kpi"><div class="k-lbl">Consumido</div><div class="k-val" style="color:#ef4444">${formatVolumeM3(consumed, 1)}</div></div>
-          <div class="kpi"><div class="k-lbl">Abastecido</div><div class="k-val" style="color:#10b981">${formatVolumeM3(supplied, 1)}</div></div>
-          <div class="kpi"><div class="k-lbl">Balanço</div><div class="k-val" style="color:${balance>=0?'#10b981':'#ef4444'}">${balance>=0?'+':''}${formatVolumeM3(Math.abs(balance), 1)}</div></div>
-        </div>
-        <div>
-          ${events.length
-            ? `<table><thead><tr><th>Início</th><th>Entrada.</th><th>Duração</th></tr></thead><tbody>${evtRows}</tbody></table>
-               ${events.length>6?`<div style="font-size:var(--font-xxs);color:var(--text-muted);margin-top:5px">+${events.length-6} outros eventos...</div>`:''}`
-            : '<div class="no-data">Nenhum abastecimento detectado nesta data</div>'}
-        </div>
-      </div>
-    </div>`;
+function resumoStatusLabel(pct) {
+  if (pct == null) return 'Sem dados';
+  if (pct < 20) return 'Crítico';
+  if (pct < 50) return 'Baixo';
+  if (pct < 80) return 'Normal';
+  return 'Cheio';
 }
 
-async function loadGeral() {
-  const date = document.getElementById('dateGeral').value;
-  if (!date || !globalReservoirs.length) return;
-  document.getElementById('geralInfo').textContent = 'Analisando balanço diário...';
-  document.getElementById('geralGrid').innerHTML = '<div style="color:var(--text-muted);padding:20px;font-size:16px;">⏳ Coletando deltas de fornecimento e consumo...</div>';
-  try {
-    const results = await Promise.all(
-      globalReservoirs.map(r => aguadaAPI.getConsumption(r.alias, date).catch(()=>null))
-    );
-    document.getElementById('geralGrid').innerHTML = globalReservoirs.map((r,i) => bCardHTML(r, results[i], i)).join('') || '<div style="color:var(--text-muted);padding:40px">Sem dados de balanço</div>';
-    document.getElementById('geralInfo').textContent = `${globalReservoirs.length} unidades processadas com sucesso.`;
-  } catch(e) {
-    document.getElementById('geralGrid').innerHTML = `<div class="alert">Erro na agregação de balanço: ${e.message}</div>`;
-  }
-}
-
-// ── BALANÇO DETALHE ──
-let volChart = null, evtChart = null;
-
-async function loadDetalhe() {
-  const date = document.getElementById('dateDetalhe').value;
-  if (!selAliasDet || !date) return;
-  try {
-    const todayTs = startOfDayTs(date);
-    const targets = selAliasDet === ALL_ALIAS ? globalReservoirs : globalReservoirs.filter(r => r.alias === selAliasDet);
-    const [results, histories] = await Promise.all([
-      Promise.all(targets.map(r => aguadaAPI.getConsumption(r.alias, date).catch(()=>({summary:{},events:[]})))),
-      Promise.all(targets.map(r => aguadaAPI.getHistory(r.alias, '24h', { since_ts: todayTs, until_ts: todayTs + DAY_S }).catch(()=>[])))
-    ]);
-    const consumed = results.reduce((sum, res) => sum + (res.summary?.consumed_l ?? 0), 0);
-    const supplied = results.reduce((sum, res) => sum + (res.summary?.supplied_l ?? 0), 0);
-    const bal = results.reduce((sum, res) => sum + (res.summary?.balance_l ?? 0), 0);
-    const eventCount = results.reduce((sum, res) => sum + ((res.events||[]).filter(event => event.type !== 'stable').length), 0);
-    document.getElementById('stConsumed').textContent = formatVolumeM3(consumed, 1);
-    document.getElementById('stSupplied').textContent = formatVolumeM3(supplied, 1);
-    const balEl = document.getElementById('stBalance');
-    balEl.textContent = (bal>=0?'+':'') + formatVolumeM3(Math.abs(bal), 1);
-    balEl.style.color = bal >= 0 ? '#10b981' : '#ef4444';
-    document.getElementById('stEvents').textContent = eventCount;
-
-    if (volChart) volChart.destroy();
-    const volChartData = buildCategoryChartData(targets.map((reservoir, index) => {
-      const todayRows = (histories[index] || []).filter(r => r.volume_l != null);
-      const hue = (index * 47) % 360;
-      return {
-        dataset: {
-          label: reservoir.alias,
-          borderColor: `hsl(${hue} 72% 48%)`,
-          backgroundColor: `hsl(${hue} 72% 48% / 0.10)`,
-          borderWidth: 2,
-          pointRadius: selAliasDet === ALL_ALIAS ? 0 : (todayRows.length>200?0:2),
-          tension: 0.3,
-          fill: false,
-          spanGaps: true,
-        },
-        points: todayRows.map(r => ({ ts: r.ts, label: fmtHM(r.ts), value: litersToCubicMeters(r.volume_l) })),
-      };
-    }));
-    if (volChartData.datasets.length) {
-      volChart = new Chart(document.getElementById('volChart'), {
-        type:'line',
-        data: volChartData,
-        options:{responsive:true, plugins:{legend:{display:selAliasDet === ALL_ALIAS, position:'bottom'}}, scales:{x:{type:'category', ticks:{maxTicksLimit:10,font:{size:10}},grid:{display:false}}, y:{beginAtZero:true, min:0}}}
-      });
-    }
-
-    if (evtChart) evtChart.destroy();
-    if (selAliasDet === ALL_ALIAS) {
-      const labels = targets.map(r => r.alias);
-      const suppliedBars = results.map(res => res.summary?.supplied_l ?? 0);
-      const consumedBars = results.map(res => res.summary?.consumed_l ?? 0);
-      evtChart = new Chart(document.getElementById('evtChart'), {
-        type:'bar',
-        data:{ labels, datasets:[
-          { label:'Abastecido (m³)', data:suppliedBars.map(litersToCubicMeters), backgroundColor:'rgba(16,185,129,.7)' },
-          { label:'Consumido (m³)', data:consumedBars.map(litersToCubicMeters), backgroundColor:'rgba(239,68,68,.7)' }
-        ] },
-        options:{responsive:true, plugins:{legend:{display:true, position:'bottom'}}, scales:{x:{ticks:{maxTicksLimit:10,font:{size:10}},grid:{display:false}}, y:{beginAtZero:true, min:0}}}
-      });
-    } else {
-      const events = (results[0]?.events||[]).filter(e=>e.type==='consumption'||e.type==='supply');
-      if (events.length) {
-        evtChart = new Chart(document.getElementById('evtChart'), {
-          type:'bar', data:{ labels: events.map(e=>fmtHM(e.ts_start)), datasets:[{ label:'Volume (m³)', data:events.map(e=>litersToCubicMeters(Math.abs(e.delta_l))), backgroundColor: events.map(e=>e.type==='supply'?'rgba(16,185,129,.7)':'rgba(239,68,68,.7)') }] },
-          options:{responsive:true, plugins:{legend:{display:false}}, scales:{x:{ticks:{maxTicksLimit:10,font:{size:10}},grid:{display:false}}, y:{beginAtZero:true, min:0}}}
-        });
-      }
-    }
-  } catch(e) { console.error(e); }
+function resumoStatusStyle(pct) {
+  if (pct == null) return 'background:var(--bg3);color:var(--text3);';
+  if (pct < 20) return 'background:var(--red-dim);color:var(--red);';
+  if (pct < 50) return 'background:var(--yellow-dim);color:var(--yellow);';
+  if (pct < 80) return 'background:var(--blue-dim);color:var(--blue);';
+  return 'background:rgba(34,197,94,0.15);color:var(--green);';
 }
 
 const today = aguadaAPI.today();
 document.getElementById('dateHist').value    = today;
-document.getElementById('dateGeral').value   = today;
-document.getElementById('dateDetalhe').value = today;
 syncHistDateLabel();
 
 preloadData();
