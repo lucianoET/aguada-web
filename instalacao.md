@@ -51,7 +51,7 @@ HTTP_PORT=80
 # MQTT_PASS=
 ```
 
-> O `docker-compose.wifi.yml` já define `GATEWAY_TRANSPORT=wifi` e os endereços MQTT internos. Não é necessário configurar esses valores manualmente.
+> O `docker-compose.yml` já sobe a stack WiFi completa por padrão. O arquivo `docker-compose.wifi.yml` foi mantido para compatibilidade operacional.
 
 ---
 
@@ -63,7 +63,8 @@ HTTP_PORT=80
 
 | Arquivo | Descrição |
 |---------|-----------|
-| `docker-compose.wifi.yml` | Stack completa: app + mqtt + nginx |
+| `docker-compose.yml` | Stack padrão de release: app + mqtt + nginx |
+| `docker-compose.wifi.yml` | Variante equivalente para compatibilidade operacional |
 | `nginx.docker.conf` | nginx com proxy interno para `app:8000` |
 | `tools/mosquitto.conf` | Configuração do broker Mosquitto |
 | `frontend/` | Página estática servida pelo nginx |
@@ -80,11 +81,11 @@ cd aguada-web
 echo "HTTP_PORT=80" > .env
 
 # 3. Subir a stack
-docker compose -f docker-compose.wifi.yml up -d
+docker compose up -d
 
 # 4. Verificar
-docker compose -f docker-compose.wifi.yml ps
-docker compose -f docker-compose.wifi.yml logs -f app
+docker compose ps
+docker compose logs -f app
 ```
 
 O broker MQTT ficará acessível na LAN na porta `1883`. Configure o firmware do gateway ESP32 com o IP do host e porta `1883`.
@@ -95,11 +96,11 @@ O frontend estará em `http://<ip-do-host>/`.
 
 ```bash
 # Parar
-docker compose -f docker-compose.wifi.yml down
+docker compose down
 
 # Atualizar após git pull
-docker compose -f docker-compose.wifi.yml build --no-cache
-docker compose -f docker-compose.wifi.yml up -d
+docker compose build --no-cache
+docker compose up -d
 ```
 
 ### Dados persistentes
@@ -125,7 +126,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # Subir só o broker MQTT
-docker compose -f docker-compose.wifi.yml up -d mqtt
+docker compose up -d mqtt
 
 # Iniciar backend local apontando para o broker
 GATEWAY_TRANSPORT=wifi GW_MQTT_HOST=localhost ./tools/start_backend.sh
@@ -136,7 +137,7 @@ O backend ficará em `http://127.0.0.1:8001`.
 ### Frontend via nginx (Docker)
 
 ```bash
-docker compose -f docker-compose.wifi.yml up -d nginx
+docker compose up -d nginx
 ```
 
 ---
@@ -201,8 +202,12 @@ data/
 ```bash
 git clone https://github.com/luctronics-ET/aguada-web.git
 cd aguada-web
-docker compose -f docker-compose.wifi.yml up -d
+docker compose up -d
 ```
 
-Frontend: `http://<ip-do-host>/`  
+Frontend: `http://<ip-do-host>/`
 MQTT (para o firmware do gateway): `<ip-do-host>:1883`
+
+## Observação de release
+
+Esta versão final do repositório não inclui páginas antigas, documentação histórica de planejamento nem arquivos de backup que não participam do build atual.

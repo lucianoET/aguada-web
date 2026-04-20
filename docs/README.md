@@ -1,14 +1,22 @@
 # Documentação Aguada Web
 
-Esta pasta organiza a documentação do projeto `aguada-web` em dois domínios:
+Esta pasta concentra apenas a documentação vigente da release ativa.
 
-- `aguada-web/` — documentação funcional, arquitetura web, APIs e operação da aplicação.
-- `sistemas-hidricos/` — normas técnicas, regras hidráulicas e materiais de referência operacional.
+## Domínios atuais
 
-## Estrutura
+- `aguada-web/` — operação da aplicação, uso diário e comportamento do relatório
+- `formularios/` — modelos de registro operacional e manutenção
+- `sistemas-hidricos/` — normas e material de apoio técnico
+
+## Arquivos ativos principais
 
 - `aguada-web/README.md`
-- `aguada-web/relatorio_diario_balanco.md`
+- `aguada-web/manual_operacao_aguada_web.md`
+- `aguada-web/relatorio_operacional_diario.md`
+- `formularios/README.md`
 - `sistemas-hidricos/README.md`
-- `sistemas-hidricos/Normas_Tecnicas.md`
+
+## Escopo desta pasta
+
+Esta pasta contém apenas a documentação vigente da release ativa. Materiais históricos de planejamento e transição não fazem mais parte desta versão final do repositório.
 

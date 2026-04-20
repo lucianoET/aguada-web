@@ -1,2 +1,24 @@
 node_modules/
 npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Tooling artifacts
+.playwright-mcp/
+.frontmatter/
+.vscode/
+
+# Runtime data and generated reports
+data/*.db
+data/*.db-*
+data/reports/*.pdf

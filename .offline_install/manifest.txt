@@ -1,0 +1,16 @@
+Bundle offline Aguada Web
+
+Arquivos de imagens Docker:
+- .offline_install/images/aguada-web-app-offline.tar
+- .offline_install/images/nginx-alpine.tar
+- .offline_install/images/eclipse-mosquitto-2.tar
+
+Backup de dados:
+- .offline_install/backups/data-current.tar.gz
+
+Arquivos auxiliares:
+- .offline_install/docker-compose.offline.yml
+- .offline_install/install_offline_host.sh
+- .offline_install/prepare_offline_bundle.sh
+- .offline_install/cmasm.env.example
+- .offline_install/wheels/
