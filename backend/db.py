@@ -1,5 +1,6 @@
 # backend/db.py
 """Acesso ao SQLite — schema, inserts, queries. Sem lógica de negócio."""
+import json
 import logging
 import time
 import aiosqlite
@@ -110,6 +111,17 @@ CREATE TABLE IF NOT EXISTS report_notes (
     archived_ts  INTEGER
 );
 CREATE INDEX IF NOT EXISTS idx_report_notes_date_archived ON report_notes(date, archived_ts, created_ts DESC);
+
+CREATE TABLE IF NOT EXISTS report_daily_data (
+    date                TEXT PRIMARY KEY,
+    electrician         TEXT,
+    ose                 TEXT,
+    volume_rows_json    TEXT,
+    hydrometer_rows_json TEXT,
+    pump_rows_json      TEXT,
+    valve_rows_json     TEXT,
+    updated_ts          INTEGER NOT NULL
+);
 """
 
 
@@ -568,3 +580,68 @@ async def archive_report_note(conn: aiosqlite.Connection, note_id: int, archived
     )
     await conn.commit()
     return cur.rowcount > 0
+
+
+def _decode_json_field(raw_value: str | None, fallback):
+    if not raw_value:
+        return fallback
+    try:
+        return json.loads(raw_value)
+    except Exception:
+        return fallback
+
+
+async def get_report_daily_data(conn: aiosqlite.Connection, date_str: str) -> dict | None:
+    async with conn.execute(
+        """SELECT date, electrician, ose, volume_rows_json, hydrometer_rows_json,
+                  pump_rows_json, valve_rows_json, updated_ts
+           FROM report_daily_data
+           WHERE date=?""",
+        (date_str,),
+    ) as cur:
+        row = await cur.fetchone()
+    if row is None:
+        return None
+    data = dict(row)
+    return {
+        "date": data["date"],
+        "electrician": data.get("electrician") or "",
+        "ose": data.get("ose") or "",
+        "volume_rows": _decode_json_field(data.get("volume_rows_json"), []),
+        "hydrometer_rows": _decode_json_field(data.get("hydrometer_rows_json"), []),
+        "pump_rows": _decode_json_field(data.get("pump_rows_json"), []),
+        "valve_rows": _decode_json_field(data.get("valve_rows_json"), []),
+        "updated_ts": data["updated_ts"],
+    }
+
+
+async def upsert_report_daily_data(conn: aiosqlite.Connection, item: dict) -> None:
+    payload = {
+        "date": item["date"],
+        "electrician": (item.get("electrician") or "").strip(),
+        "ose": (item.get("ose") or "").strip(),
+        "volume_rows_json": json.dumps(item.get("volume_rows") or [], ensure_ascii=False),
+        "hydrometer_rows_json": json.dumps(item.get("hydrometer_rows") or [], ensure_ascii=False),
+        "pump_rows_json": json.dumps(item.get("pump_rows") or [], ensure_ascii=False),
+        "valve_rows_json": json.dumps(item.get("valve_rows") or [], ensure_ascii=False),
+        "updated_ts": int(item.get("updated_ts") or time.time()),
+    }
+    await conn.execute(
+        """INSERT INTO report_daily_data (
+               date, electrician, ose, volume_rows_json, hydrometer_rows_json,
+               pump_rows_json, valve_rows_json, updated_ts
+           ) VALUES (
+               :date, :electrician, :ose, :volume_rows_json, :hydrometer_rows_json,
+               :pump_rows_json, :valve_rows_json, :updated_ts
+           )
+           ON CONFLICT(date) DO UPDATE SET
+               electrician=excluded.electrician,
+               ose=excluded.ose,
+               volume_rows_json=excluded.volume_rows_json,
+               hydrometer_rows_json=excluded.hydrometer_rows_json,
+               pump_rows_json=excluded.pump_rows_json,
+               valve_rows_json=excluded.valve_rows_json,
+               updated_ts=excluded.updated_ts""",
+        payload,
+    )
+    await conn.commit()

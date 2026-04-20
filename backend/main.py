@@ -12,7 +12,7 @@ import aiosqlite
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 try:
     from dotenv import dotenv_values
@@ -55,6 +55,8 @@ from .db import (
     insert_report_note,
     get_report_notes,
     archive_report_note,
+    get_report_daily_data,
+    upsert_report_daily_data,
     get_all_nodes,
     get_node,
     patch_node,
@@ -165,7 +167,26 @@ async def _daily_report_job():
     logger.info("Relatório diário gerado: %s", out_path)
 
 
+def _invalidate_report_pdf(date_str: str) -> None:
+    out_path = REPORTS_DIR / f"{date_str}.pdf"
+    try:
+        out_path.unlink(missing_ok=True)
+    except TypeError:
+        if out_path.exists():
+            out_path.unlink()
+
+
 app = FastAPI(title="Aguada Web", lifespan=lifespan)
+
+
+class ReportDailyDataRequest(BaseModel):
+    date: str
+    electrician: Optional[str] = ""
+    ose: Optional[str] = ""
+    volume_rows: list[dict] = Field(default_factory=list)
+    hydrometer_rows: list[dict] = Field(default_factory=list)
+    pump_rows: list[dict] = Field(default_factory=list)
+    valve_rows: list[dict] = Field(default_factory=list)
 
 
 @app.get("/api/reservoirs")
@@ -264,6 +285,35 @@ async def get_report_equipment_states(date: str = Query(...)):
     return {"date": date, "pumps": pumps, "valves": valves}
 
 
+@app.get("/api/report/data")
+async def get_report_data_route(date: str = Query(...)):
+    async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        item = await get_report_daily_data(conn, date)
+    return {
+        "date": date,
+        "electrician": item.get("electrician", "") if item else "",
+        "ose": item.get("ose", "") if item else "",
+        "volume_rows": item.get("volume_rows", []) if item else [],
+        "hydrometer_rows": item.get("hydrometer_rows", []) if item else [],
+        "pump_rows": item.get("pump_rows", []) if item else [],
+        "valve_rows": item.get("valve_rows", []) if item else [],
+        "updated_ts": item.get("updated_ts") if item else None,
+    }
+
+
+@app.put("/api/report/data")
+async def put_report_data_route(body: ReportDailyDataRequest):
+    payload = body.model_dump() if hasattr(body, "model_dump") else body.dict()
+    payload["updated_ts"] = int(time.time())
+    async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        await upsert_report_daily_data(conn, payload)
+        item = await get_report_daily_data(conn, body.date)
+    _invalidate_report_pdf(body.date)
+    return {"ok": True, "item": item}
+
+
 @app.get("/api/report/notes")
 async def get_report_notes_route(date: str = Query(...), active_only: bool = Query(True)):
     async with aiosqlite.connect(DB_PATH) as conn:
@@ -275,14 +325,21 @@ async def get_report_notes_route(date: str = Query(...), active_only: bool = Que
 @app.get("/api/report/daily.pdf")
 async def get_report_pdf(date: str = Query(...)):
     out_path = REPORTS_DIR / f"{date}.pdf"
-    if not out_path.exists():
-        async with aiosqlite.connect(DB_PATH) as conn:
-            conn.row_factory = aiosqlite.Row
-            await generate_daily_report_pdf(conn, date, str(out_path))
+    async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        await generate_daily_report_pdf(conn, date, str(out_path))
     if not out_path.exists():
         raise HTTPException(404, "Relatório não disponível para esta data")
-    return FileResponse(str(out_path), media_type="application/pdf",
-                        filename=f"aguada-{date}.pdf")
+    return FileResponse(
+        str(out_path),
+        media_type="application/pdf",
+        filename=f"aguada-{date}.pdf",
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
+    )
 
 
 class ManualReadingRequest(BaseModel):
@@ -517,15 +574,21 @@ async def post_report_note(body: ReportNoteRequest):
         note_id = await insert_report_note(conn, item)
         items = await get_report_notes(conn, body.date, active_only=True)
     created = next((entry for entry in items if entry["id"] == note_id), None)
+    _invalidate_report_pdf(body.date)
     return {"ok": True, "item": created}
 
 
 @app.post("/api/report/notes/{note_id}/archive")
 async def archive_report_note_route(note_id: int):
     async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        async with conn.execute("SELECT date FROM report_notes WHERE id=?", (note_id,)) as cur:
+            row = await cur.fetchone()
         ok = await archive_report_note(conn, note_id, int(time.time()))
     if not ok:
         raise HTTPException(404, "Observação não encontrada ou já arquivada")
+    if row and row["date"]:
+        _invalidate_report_pdf(row["date"])
     return {"ok": True, "id": note_id}
 
 

@@ -250,3 +250,96 @@ async def test_report_notes_can_be_created_and_archived(set_test_db):
         listed_after = await client.get(f"/api/report/notes?date={date}")
         assert listed_after.status_code == 200
         assert listed_after.json()["items"] == []
+
+
+@pytest.mark.asyncio
+async def test_report_data_round_trip_persists_by_date(set_test_db):
+    import backend.main as m
+    async with aiosqlite.connect(m.DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        await init_db(conn)
+
+    payload = {
+        "date": "2026-04-08",
+        "electrician": "Joao Silva",
+        "ose": "Equipe Norte",
+        "volume_rows": [
+            {"label": "07h", "values": {"CON": 1.2, "CAV": 2.3, "CB3": None, "CIE1": 3.4, "CIE2": 4.5, "CBIF": 5.6}},
+        ],
+        "hydrometer_rows": [
+            {"meterName": "H1", "previous": 10.0, "current": 11.5, "diff": 1.5},
+        ],
+        "pump_rows": [
+            {"label": "CB1", "ELE": "OP", "DIE": "OR"},
+        ],
+        "valve_rows": [
+            {"label": "AZ", "CON": "AB", "CAV": "FC"},
+        ],
+    }
+
+    async with AsyncClient(transport=ASGITransport(app=m.app), base_url="http://test") as client:
+        saved = await client.put("/api/report/data", json=payload)
+        assert saved.status_code == 200
+
+        loaded = await client.get(f"/api/report/data?date={payload['date']}")
+        assert loaded.status_code == 200
+        item = loaded.json()
+
+    assert item["date"] == payload["date"]
+    assert item["electrician"] == "Joao Silva"
+    assert item["ose"] == "Equipe Norte"
+    assert item["volume_rows"] == payload["volume_rows"]
+    assert item["hydrometer_rows"] == payload["hydrometer_rows"]
+    assert item["pump_rows"] == payload["pump_rows"]
+    assert item["valve_rows"] == payload["valve_rows"]
+    assert isinstance(item["updated_ts"], int)
+
+
+@pytest.mark.asyncio
+async def test_report_data_save_invalidates_cached_pdf(set_test_db):
+    import backend.main as m
+    async with aiosqlite.connect(m.DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        await init_db(conn)
+
+    date = "2026-04-09"
+    cached_pdf = m.REPORTS_DIR / f"{date}.pdf"
+    cached_pdf.write_bytes(b"stale-pdf")
+
+    async with AsyncClient(transport=ASGITransport(app=m.app), base_url="http://test") as client:
+        response = await client.put("/api/report/data", json={
+            "date": date,
+            "electrician": "",
+            "ose": "",
+            "volume_rows": [],
+            "hydrometer_rows": [],
+            "pump_rows": [],
+            "valve_rows": [],
+        })
+
+    assert response.status_code == 200
+    assert not cached_pdf.exists()
+
+
+@pytest.mark.asyncio
+async def test_report_notes_invalidate_cached_pdf(set_test_db):
+    import backend.main as m
+    async with aiosqlite.connect(m.DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        await init_db(conn)
+
+    date = "2026-04-10"
+    cached_pdf = m.REPORTS_DIR / f"{date}.pdf"
+    cached_pdf.write_bytes(b"stale-pdf")
+
+    async with AsyncClient(transport=ASGITransport(app=m.app), base_url="http://test") as client:
+        created = await client.post("/api/report/notes", json={"date": date, "note": "Atualizar relatorio"})
+        assert created.status_code == 200
+        assert not cached_pdf.exists()
+
+        cached_pdf.write_bytes(b"stale-pdf-again")
+        note_id = created.json()["item"]["id"]
+        archived = await client.post(f"/api/report/notes/{note_id}/archive")
+
+    assert archived.status_code == 200
+    assert not cached_pdf.exists()

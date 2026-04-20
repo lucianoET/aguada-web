@@ -11,9 +11,13 @@
     .admin-main.simple-stack { max-width:1600px; margin:0 auto; }
     .simple-stack { display:flex; flex-direction:column; gap:12px; }
     .report-grid { display:grid; gap:12px; }
+    .report-page-header { background:var(--card, white); border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:16px 18px; text-align:center; }
+    .report-page-header h1 { margin:0; font-size:24px; line-height:1.15; color:var(--text, #1e3a5f); text-transform:uppercase; }
+    .report-page-header p { margin:6px 0 0; font-size:13px; color:var(--text-muted); font-weight:600; }
     .content-row { display:grid; gap:12px; }
     .main-stack { display:grid; gap:12px; align-content:start; }
     .side-stack { display:grid; gap:12px; align-content:start; }
+    .equipment-grid { display:grid; gap:12px; }
     .simple-card { background:var(--card, white); border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; }
     .editable-card { cursor:pointer; }
     .simple-card header { padding:10px 12px; border-bottom:1px solid var(--border-color, var(--border)); display:flex; justify-content:space-between; align-items:flex-end; gap:10px; flex-wrap:wrap; }
@@ -106,6 +110,82 @@
       flex-direction:column;
       gap:12px;
       height:100%;
+    }
+
+    .report-meta-fields {
+      display:grid;
+      gap:8px;
+      min-width:220px;
+    }
+
+    .signature-card-body {
+      padding:16px;
+      display:grid;
+      gap:16px;
+    }
+
+    .signature-grid {
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:18px;
+    }
+
+    .signature-field {
+      display:grid;
+      gap:6px;
+      text-align:center;
+    }
+
+    .signature-field label {
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:var(--text-muted);
+      font-weight:700;
+    }
+
+    .signature-field input {
+      width:100%;
+      padding:7px 9px;
+      border:1px solid var(--border-color, var(--border));
+      border-radius:8px;
+      background:var(--card, white);
+      color:var(--text, #1e3a5f);
+      font:inherit;
+      text-align:center;
+    }
+
+    .signature-line {
+      border-top:1px solid #334155;
+      height:18px;
+      margin-top:8px;
+    }
+
+    .signature-role {
+      font-size:12px;
+      color:var(--text-muted);
+    }
+
+    .report-meta-group {
+      display:grid;
+      gap:4px;
+    }
+
+    .report-meta-group label {
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:var(--text-muted);
+    }
+
+    .report-meta-group input {
+      width:100%;
+      padding:7px 9px;
+      border:1px solid var(--border-color, var(--border));
+      border-radius:8px;
+      background:var(--card, white);
+      color:var(--text, #1e3a5f);
+      font:inherit;
     }
 
     .table-edit-modal[hidden] { display:none; }
@@ -202,6 +282,9 @@
       .content-row {
         grid-template-columns: minmax(0, 1.9fr) minmax(260px, 0.96fr);
         align-items:start;
+      }
+      .equipment-grid {
+        grid-template-columns:repeat(2, minmax(0, 1fr));
       }
       .filter-bar {
         display:grid;
@@ -301,6 +384,21 @@
         font-size:8px;
       }
 
+      .report-page-header {
+        border:1px solid #111827;
+        box-shadow:none;
+        border-radius:6px;
+        padding:8px 10px;
+      }
+
+      .report-page-header h1 {
+        font-size:16px;
+      }
+
+      .report-page-header p {
+        font-size:10px;
+      }
+
       .simple-table .col-label,
       .simple-table .cell-label {
         width:78px;
@@ -355,6 +453,10 @@
         font-size:9px;
         line-height:1.2;
       }
+
+      .signature-grid {
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+      }
     }
   </style>
 </head>
@@ -374,6 +476,11 @@
   </div>
 
   <div class="report-grid">
+    <section class="report-page-header">
+      <h1>Relatorio Aguada</h1>
+      <p id="reportPageSubtitle">CMASM, —</p>
+    </section>
+
     <div class="content-row">
       <div class="main-stack">
         <section class="simple-card editable-card" data-editable-section="volume">
@@ -382,7 +489,9 @@
               <h2>Reservatórios</h2>
               <p>Volumes, hidrômetros, estados e observações para a operação do dia.</p>
             </div>
-            <div class="muted" id="selectedDateLabel">—</div>
+            <div class="report-meta-fields">
+              <div class="muted" id="selectedDateLabel">—</div>
+            </div>
           </header>
           <div class="table-wrap">
             <table class="simple-table" id="volumeTable">
@@ -427,45 +536,47 @@
       </div>
 
       <div class="side-stack">
-        <section class="simple-card editable-card" data-editable-section="pump">
-          <header>
-            <div>
-              <h2>Bombas</h2>
+        <div class="equipment-grid">
+          <section class="simple-card editable-card" data-editable-section="valve">
+            <header>
+              <div>
+                <h2>Válvulas</h2>
+              </div>
+            </header>
+            <div class="table-wrap">
+              <table class="simple-table matrix-table" id="valveTable">
+                <thead>
+                  <tr>
+                    <th class="matrix-label">Linha</th>
+                    <th>CON</th>
+                    <th>CAV</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
-          </header>
-          <div class="table-wrap">
-            <table class="simple-table matrix-table" id="pumpTable">
-              <thead>
-                <tr>
-                  <th class="matrix-label">Conjunto</th>
-                  <th>ELE</th>
-                  <th>DIE</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </section>
+          </section>
 
-        <section class="simple-card editable-card" data-editable-section="valve">
-          <header>
-            <div>
-              <h2>Válvulas</h2>
+          <section class="simple-card editable-card" data-editable-section="pump">
+            <header>
+              <div>
+                <h2>Bombas</h2>
+              </div>
+            </header>
+            <div class="table-wrap">
+              <table class="simple-table matrix-table" id="pumpTable">
+                <thead>
+                  <tr>
+                    <th class="matrix-label">Conjunto</th>
+                    <th>ELE</th>
+                    <th>DIE</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
-          </header>
-          <div class="table-wrap">
-            <table class="simple-table matrix-table" id="valveTable">
-              <thead>
-                <tr>
-                  <th class="matrix-label">Linha</th>
-                  <th>CON</th>
-                  <th>CAV</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </section>
+          </section>
+        </div>
 
         <section class="simple-card notes-card">
           <header>
@@ -483,6 +594,30 @@
                 <textarea id="noteInput" class="form-input" placeholder="Escreva a observação desta data..."></textarea>
               </div>
               <button id="addNoteBtn" class="btn btn-primary">Adicionar</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="simple-card">
+          <header>
+            <div>
+              <h2>Assinaturas</h2>
+            </div>
+          </header>
+          <div class="signature-card-body">
+            <div class="signature-grid">
+              <div class="signature-field">
+                <label for="electricianInput">Eletricista</label>
+                <input id="electricianInput" type="text" placeholder="Nome do eletricista">
+                <div class="signature-line"></div>
+                <div class="signature-role">Eletricista</div>
+              </div>
+              <div class="signature-field">
+                <label for="oseInput">OSE</label>
+                <input id="oseInput" type="text" placeholder="Nome da OSE">
+                <div class="signature-line"></div>
+                <div class="signature-role">OSE</div>
+              </div>
             </div>
           </div>
         </section>
@@ -539,15 +674,20 @@ const VALVE_MATRIX_COLS = ['CON', 'CAV'];
 const dateInput = document.getElementById('dateInput');
 const statusText = document.getElementById('reportStatusText');
 const selectedDateLabel = document.getElementById('selectedDateLabel');
+const electricianInput = document.getElementById('electricianInput');
+const oseInput = document.getElementById('oseInput');
 const noteInput = document.getElementById('noteInput');
 const notesStatus = document.getElementById('notesStatus');
 const printHeader = document.getElementById('printHeader');
+const reportPageSubtitle = document.getElementById('reportPageSubtitle');
 const tableEditModal = document.getElementById('tableEditModal');
 const tableEditTitle = document.getElementById('tableEditTitle');
 const tableEditBody = document.getElementById('tableEditBody');
 const queryDate = new URLSearchParams(window.location.search).get('date');
 
 const reportState = {
+  electrician: '',
+  ose: '',
   volumeRows: [],
   hydrometerRows: [],
   pumpRows: [],
@@ -571,21 +711,39 @@ function cloneData(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-function editStorageKey(section, date) {
-  return `aguada-report-edit:${section}:${date}`;
+function applyReportMetadata() {
+  electricianInput.value = reportState.electrician || '';
+  oseInput.value = reportState.ose || '';
 }
 
-function loadStoredSection(section, date) {
-  try {
-    const stored = localStorage.getItem(editStorageKey(section, date));
-    return stored ? JSON.parse(stored) : null;
-  } catch {
-    return null;
-  }
+async function loadReportData(date) {
+  const response = await fetch(`${aguadaAPI.BASE}/api/report/data?date=${date}`, {
+    cache: 'no-store',
+    headers: { Accept: 'application/json' },
+  });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.detail || 'Falha ao carregar relatório salvo');
+  return payload;
 }
 
-function saveStoredSection(section, date, data) {
-  localStorage.setItem(editStorageKey(section, date), JSON.stringify(data));
+async function saveReportData() {
+  const date = dateInput.value || aguadaAPI.today();
+  const response = await fetch(`${aguadaAPI.BASE}/api/report/data`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      date,
+      electrician: reportState.electrician || '',
+      ose: reportState.ose || '',
+      volume_rows: reportState.volumeRows,
+      hydrometer_rows: reportState.hydrometerRows,
+      pump_rows: reportState.pumpRows,
+      valve_rows: reportState.valveRows,
+    }),
+  });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.detail || 'Falha ao salvar relatório');
+  return payload.item;
 }
 
 function startOfDayTs(dateStr) {
@@ -601,8 +759,17 @@ function formatDateLabel(dateStr) {
   });
 }
 
+function formatDateShort(dateStr) {
+  return new Date(`${dateStr}T12:00:00`).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
 function updatePrintHeader(dateStr) {
   printHeader.textContent = `Relatório • ${formatDateLabel(dateStr)}`;
+  reportPageSubtitle.textContent = `CMASM, ${formatDateShort(dateStr)}`;
 }
 
 function formatVolume(value) {
@@ -1040,17 +1207,22 @@ function updateDraftValue(target) {
   renderEditTable();
 }
 
-function saveEditModal() {
+async function saveEditModal() {
   if (!activeEditSection || !activeEditDraft) return;
-  const date = dateInput.value || aguadaAPI.today();
   if (activeEditSection === 'hydrometer') {
     reportState.hydrometerRows = normalizeHydrometerRows(activeEditDraft);
   } else {
     reportState[EDITABLE_SECTIONS[activeEditSection].storageKey] = cloneData(activeEditDraft);
   }
-  saveStoredSection(activeEditSection, date, reportState[EDITABLE_SECTIONS[activeEditSection].storageKey]);
-  renderSection(activeEditSection);
-  closeEditModal();
+  try {
+    statusText.textContent = 'Salvando relatório...';
+    await saveReportData();
+    renderSection(activeEditSection);
+    closeEditModal();
+    statusText.textContent = 'Relatório carregado.';
+  } catch (error) {
+    statusText.textContent = error.message;
+  }
 }
 
 function formatNoteTime(ts) {
@@ -1129,20 +1301,35 @@ async function loadTables() {
 
   try {
     const aliases = [...new Set(RESERVOIR_GROUPS.flatMap((group) => group.aliases))];
-    const historiesList = await Promise.all(
-      aliases.map((alias) => aguadaAPI.getHistory(alias, '24h', { since_ts: fromTs, until_ts: untilTs }).catch(() => []))
-    );
+    const [historiesList, hydrometerPayload, equipmentPayload, savedReport] = await Promise.all([
+      Promise.all(aliases.map((alias) => aguadaAPI.getHistory(alias, '24h', { since_ts: fromTs, until_ts: untilTs }).catch(() => []))),
+      fetch(`${aguadaAPI.BASE}/api/manual/hydrometers?limit=1000`).then((response) => response.json()).catch(() => ({ items: [] })),
+      fetch(`${aguadaAPI.BASE}/api/report/equipment-states?date=${date}`).then((response) => response.json()).catch(() => ({ pumps: [], valves: [] })),
+      loadReportData(date).catch(() => ({ electrician: '', ose: '', volume_rows: [], hydrometer_rows: [], pump_rows: [], valve_rows: [] })),
+    ]);
     const histories = Object.fromEntries(aliases.map((alias, index) => [alias, historiesList[index]]));
-    reportState.volumeRows = loadStoredSection('volume', date) || buildVolumeRows(histories, dayStart, isToday);
+    reportState.electrician = savedReport.electrician || '';
+    reportState.ose = savedReport.ose || '';
+    applyReportMetadata();
+
+    reportState.volumeRows = (savedReport.volume_rows && savedReport.volume_rows.length)
+      ? savedReport.volume_rows
+      : buildVolumeRows(histories, dayStart, isToday);
     renderVolumeTable(reportState.volumeRows);
 
-    const hydrometerPayload = await fetch(`${aguadaAPI.BASE}/api/manual/hydrometers?limit=1000`).then((response) => response.json()).catch(() => ({ items: [] }));
-    reportState.hydrometerRows = normalizeHydrometerRows(loadStoredSection('hydrometer', date) || summarizeHydrometers(hydrometerPayload.items || [], date));
+    reportState.hydrometerRows = normalizeHydrometerRows(
+      (savedReport.hydrometer_rows && savedReport.hydrometer_rows.length)
+        ? savedReport.hydrometer_rows
+        : summarizeHydrometers(hydrometerPayload.items || [], date)
+    );
     renderHydrometerTable(reportState.hydrometerRows);
 
-    const equipmentPayload = await fetch(`${aguadaAPI.BASE}/api/report/equipment-states?date=${date}`).then((response) => response.json()).catch(() => ({ pumps: [], valves: [] }));
-    reportState.pumpRows = loadStoredSection('pump', date) || buildPumpMatrixData(equipmentPayload.pumps || []);
-    reportState.valveRows = loadStoredSection('valve', date) || buildValveMatrixData(equipmentPayload.valves || []);
+    reportState.pumpRows = (savedReport.pump_rows && savedReport.pump_rows.length)
+      ? savedReport.pump_rows
+      : buildPumpMatrixData(equipmentPayload.pumps || []);
+    reportState.valveRows = (savedReport.valve_rows && savedReport.valve_rows.length)
+      ? savedReport.valve_rows
+      : buildValveMatrixData(equipmentPayload.valves || []);
     renderPumpMatrix(reportState.pumpRows);
     renderValveMatrix(reportState.valveRows);
 
@@ -1158,7 +1345,38 @@ dateInput.value = queryDate || aguadaAPI.today();
 document.getElementById('loadBtn').addEventListener('click', loadTables);
 dateInput.addEventListener('change', loadTables);
 document.getElementById('addNoteBtn').addEventListener('click', addNote);
-document.getElementById('printBtn').addEventListener('click', () => window.print());
+document.getElementById('printBtn').addEventListener('click', async () => {
+  const date = dateInput.value || aguadaAPI.today();
+  try {
+    statusText.textContent = 'Preparando PDF...';
+    await saveReportData();
+    const cacheBust = `ts=${Date.now()}`;
+    window.open(`${aguadaAPI.BASE}/api/report/daily.pdf?date=${encodeURIComponent(date)}&${cacheBust}`, '_blank', 'noopener');
+    statusText.textContent = 'PDF pronto.';
+  } catch (error) {
+    statusText.textContent = error.message;
+  }
+});
+electricianInput.addEventListener('change', async () => {
+  reportState.electrician = electricianInput.value.trim();
+  try {
+    statusText.textContent = 'Salvando relatório...';
+    await saveReportData();
+    statusText.textContent = 'Relatório carregado.';
+  } catch (error) {
+    statusText.textContent = error.message;
+  }
+});
+oseInput.addEventListener('change', async () => {
+  reportState.ose = oseInput.value.trim();
+  try {
+    statusText.textContent = 'Salvando relatório...';
+    await saveReportData();
+    statusText.textContent = 'Relatório carregado.';
+  } catch (error) {
+    statusText.textContent = error.message;
+  }
+});
 document.querySelectorAll('[data-editable-section]').forEach((card) => {
   card.addEventListener('click', (event) => {
     if (event.target.closest('button, input, textarea, select, a')) return;

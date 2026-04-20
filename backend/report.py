@@ -2,6 +2,7 @@
 """Geração de relatório HTML + PDF com WeasyPrint."""
 from __future__ import annotations
 import datetime
+from html import escape
 import aiosqlite
 from .db import (
     get_all_states,
@@ -9,6 +10,8 @@ from .db import (
     get_manual_hydrometer_summary_for_date,
     get_pump_states_for_date,
     get_valve_states_for_date,
+    get_report_daily_data,
+    get_report_notes,
 )
 from .calc import calc_consumption_events
 
@@ -30,43 +33,309 @@ def _fmt_signed(v: float | int) -> str:
     return str(n)
 
 
+def _fmt_decimal(v: float | int | None, decimals: int = 1) -> str:
+    if v is None:
+        return "—"
+    return f"{float(v):.{decimals}f}".replace('.', ',')
+
+
+def _saved_volume_total(values: dict | None) -> float | None:
+    values = values or {}
+    keys = ("CON", "CAV", "CB3", "CIE1", "CIE2", "CBIF")
+    numeric_values = [values.get(key) for key in keys if values.get(key) is not None]
+    if not numeric_values:
+        return None
+    return sum(numeric_values)
+
+
+def _fmt_date_br(date_str: str) -> str:
+    try:
+        return datetime.date.fromisoformat(date_str).strftime("%d/%m/%Y")
+    except ValueError:
+        return date_str
+
+
+def _signature_block_html(electrician: str, ose: str) -> str:
+    electrician_value = escape((electrician or "").strip())
+    ose_value = escape((ose or "").strip())
+    return f"""
+    <section class='section signature-section'>
+      <table class='signature-grid'>
+        <tr>
+          <td>
+            <div class='signature-line'></div>
+            <div class='signature-name'>{electrician_value or '&nbsp;'}</div>
+            <div class='signature-role'>Eletricista</div>
+          </td>
+          <td>
+            <div class='signature-line'></div>
+            <div class='signature-name'>{ose_value or '&nbsp;'}</div>
+            <div class='signature-role'>OSE</div>
+          </td>
+        </tr>
+      </table>
+    </section>
+    """
+
+
+def _two_column_section(left_title: str, left_table: str, right_title: str, right_table: str) -> str:
+    return f"""
+    <section class='section'>
+      <table class='dual-grid'>
+        <tr>
+          <td>
+            <h2>{left_title}</h2>
+            {left_table}
+          </td>
+          <td>
+            <h2>{right_title}</h2>
+            {right_table}
+          </td>
+        </tr>
+      </table>
+    </section>
+    """
+
+
+def _pdf_styles() -> str:
+    return """
+    @page { size: A4 portrait; margin: 15mm; }
+    html { font-size: 11px; }
+    body {
+      margin: 0;
+      color: #111827;
+      font-family: Calibri, Arial, sans-serif;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    .report-shell {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #111827;
+      padding: 10mm 8mm 9mm;
+    }
+    .report-header {
+      text-align: center;
+      margin-bottom: 18px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #111827;
+    }
+    h1 {
+      font-size: 20px;
+      line-height: 1.15;
+      margin: 0 0 6px 0;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .subtitle {
+      margin: 0;
+      color: #374151;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .section {
+      margin-top: 12px;
+      page-break-inside: avoid;
+    }
+    h2 {
+      font-size: 12px;
+      margin: 0 0 6px 0;
+      page-break-after: avoid;
+      text-transform: uppercase;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      margin-top: 4px;
+    }
+    thead { display: table-header-group; }
+    tr { page-break-inside: avoid; }
+    th, td {
+      border: 1px solid #d1d5db;
+      padding: 5px 7px;
+      vertical-align: middle;
+      word-wrap: break-word;
+    }
+    th {
+      background: #f3f4f6;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    td.num, th.num {
+      text-align: right;
+      white-space: nowrap;
+    }
+    td.center, th.center {
+      text-align: center;
+    }
+    .muted-empty {
+      text-align: center;
+      color: #6b7280;
+    }
+    .dual-grid {
+      border-collapse: separate;
+      border-spacing: 8px 0;
+      margin-top: 0;
+    }
+    .dual-grid td {
+      width: 50%;
+      border: none;
+      padding: 0;
+      vertical-align: top;
+    }
+    ul.notes {
+      margin: 6px 0 0 18px;
+      padding: 0;
+    }
+    ul.notes li {
+      margin: 3px 0;
+    }
+    .signature-section {
+      margin-top: 24px;
+    }
+    .signature-section::before {
+      content: "Eletricista        OSE";
+      display: block;
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #111827;
+    }
+    .signature-grid {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 24px 0;
+      table-layout: fixed;
+    }
+    .signature-grid td {
+      border: none;
+      padding: 0;
+      text-align: center;
+      vertical-align: top;
+    }
+    .signature-line {
+      border-top: 1px solid #111827;
+      height: 20px;
+      margin-top: 10px;
+    }
+    .signature-name {
+      min-height: 16px;
+      font-weight: 600;
+    }
+    .signature-role {
+      color: #4b5563;
+    }
+    """
+
+
+def _build_saved_report_html(date: str, report_data: dict, notes: list[dict]) -> str:
+    volume_rows = report_data.get("volume_rows") or []
+    hydrometer_rows = report_data.get("hydrometer_rows") or []
+    pump_rows = report_data.get("pump_rows") or []
+    valve_rows = report_data.get("valve_rows") or []
+    electrician = (report_data.get("electrician") or "").strip() or "—"
+    ose = (report_data.get("ose") or "").strip() or "—"
+
+    volume_rows_html = "".join(
+        f"<tr><td>{row.get('label', '—')}</td>"
+        f"<td class='num'>{_fmt_decimal((row.get('values') or {}).get('CON'))}</td>"
+        f"<td class='num'>{_fmt_decimal((row.get('values') or {}).get('CAV'))}</td>"
+        f"<td class='num'>{_fmt_decimal((row.get('values') or {}).get('CB3'))}</td>"
+        f"<td class='num'>{_fmt_decimal((row.get('values') or {}).get('CIE1'))}</td>"
+        f"<td class='num'>{_fmt_decimal((row.get('values') or {}).get('CIE2'))}</td>"
+        f"<td class='num'>{_fmt_decimal((row.get('values') or {}).get('CBIF'))}</td>"
+        f"<td class='num'>{_fmt_decimal(_saved_volume_total(row.get('values')))}</td></tr>"
+        for row in volume_rows
+    ) or "<tr><td colspan='8' class='muted-empty'>Sem dados salvos.</td></tr>"
+
+    hydrometer_rows_html = "".join(
+        f"<tr><td>{row.get('meterName', '—')}</td>"
+        f"<td class='num'>{_fmt_decimal(row.get('previous'), 2)}</td>"
+        f"<td class='num'>{_fmt_decimal(row.get('current'), 2)}</td>"
+        f"<td class='num'>{_fmt_decimal(row.get('diff'), 2)}</td></tr>"
+        for row in hydrometer_rows
+    ) or "<tr><td colspan='4' class='muted-empty'>Sem dados salvos.</td></tr>"
+
+    pump_rows_html = "".join(
+        f"<tr><td>{row.get('label', '—')}</td><td>{row.get('ELE', '—')}</td><td>{row.get('DIE', '—')}</td></tr>"
+        for row in pump_rows
+    ) or "<tr><td colspan='3' class='muted-empty'>Sem dados salvos.</td></tr>"
+
+    valve_rows_html = "".join(
+        f"<tr><td>{row.get('label', '—')}</td><td>{row.get('CON', '—')}</td><td>{row.get('CAV', '—')}</td></tr>"
+        for row in valve_rows
+    ) or "<tr><td colspan='3' class='muted-empty'>Sem dados salvos.</td></tr>"
+
+    notes_html = "".join(
+        f"<li>{escape(item.get('note', ''))}</li>"
+        for item in notes
+    ) or "<li>Sem observações ativas.</li>"
+
+    valves_table = f"""
+    <table>
+      <thead><tr><th>Linha</th><th>CON</th><th>CAV</th></tr></thead>
+      <tbody>{valve_rows_html}</tbody>
+    </table>
+    """
+    pumps_table = f"""
+    <table>
+      <thead><tr><th>Conjunto</th><th class='center'>ELE</th><th class='center'>DIE</th></tr></thead>
+      <tbody>{pump_rows_html}</tbody>
+    </table>
+    """
+
+    return f"""<!DOCTYPE html>
+<html lang='pt-BR'>
+<head>
+  <meta charset='UTF-8'>
+  <style>
+    {_pdf_styles()}
+  </style>
+</head>
+<body>
+  <div class='report-shell'>
+    <div class='report-header'>
+      <h1>Relatorio Aguada</h1>
+      <p class='subtitle'>CMASM, {_fmt_date_br(date)}</p>
+    </div>
+
+    <section class='section'>
+      <h2>Reservatórios</h2>
+      <table>
+        <thead><tr><th>Hora</th><th class='num'>CON</th><th class='num'>CAV</th><th class='num'>CB3</th><th class='num'>CIE1</th><th class='num'>CIE2</th><th class='num'>CBIF</th><th class='num'>Total</th></tr></thead>
+        <tbody>{volume_rows_html}</tbody>
+      </table>
+    </section>
+
+    <section class='section'>
+      <h2>Hidrômetros</h2>
+      <table>
+        <thead><tr><th>Hidrômetro</th><th class='num'>Anterior</th><th class='num'>Atual</th><th class='num'>Diferença</th></tr></thead>
+        <tbody>{hydrometer_rows_html}</tbody>
+      </table>
+    </section>
+
+    {_two_column_section('Válvulas', valves_table, 'Bombas', pumps_table)}
+
+    <section class='section'>
+      <h2>Observações</h2>
+      <ul class='notes'>{notes_html}</ul>
+    </section>
+
+    {_signature_block_html(electrician if electrician != '—' else '', ose if ose != '—' else '')}
+  </div>
+</body>
+</html>"""
+
+
 def _build_html(date: str, reservoirs: list[dict], hydrom_summary: list[dict] | None = None,
-                pump_states: list[dict] | None = None, valve_states: list[dict] | None = None) -> str:
+                pump_states: list[dict] | None = None, valve_states: list[dict] | None = None,
+                notes: list[dict] | None = None) -> str:
     by_alias = {r.get("alias"): r for r in reservoirs}
 
-    # 1) Consumo estimado por delta volume (foco no CON, conforme modelo anexado)
-    con = by_alias.get("CON", {})
-    con_events = con.get("events", []) or []
-    consumo_rows_html = ""
-    ton_points: list[float] = []
-
-    for e in con_events:
-        hour = e.get("hour", "--:--")
-        ton = _to_tons(e.get("vol_end"))
-        ton_points.append(ton)
-        delta = 0 if len(ton_points) == 1 else ton_points[-1] - ton_points[-2]
-        consumo_rows_html += f"""
-        <tr>
-          <td>Castelo de Consumo | {hour}</td>
-          <td class="num">{_fmt_ton(ton)}</td>
-          <td class="num">{_fmt_signed(delta)}</td>
-        </tr>
-        """
-
-    if not consumo_rows_html:
-        consumo_rows_html = """
-        <tr>
-          <td>Castelo de Consumo | --:--</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-        </tr>
-        """
-
-    abastecimento_t = sum(max(0.0, ton_points[i] - ton_points[i - 1]) for i in range(1, len(ton_points)))
-    consumo_t = sum(min(0.0, ton_points[i] - ton_points[i - 1]) for i in range(1, len(ton_points)))
-    balanco_t = abastecimento_t + consumo_t
-
-    # 2) Quadro Local | anterior | atual | diferença
+    # 1) Quadro Local | anterior | atual | diferença
     def _first_last_ton(alias: str) -> tuple[float, float]:
         events = (by_alias.get(alias) or {}).get("events", []) or []
         if not events:
@@ -104,7 +373,7 @@ def _build_html(date: str, reservoirs: list[dict], hydrom_summary: list[dict] | 
         </tr>
         """
 
-    # 3) Hidrômetros (dados manuais)
+    # 2) Hidrômetros (dados manuais)
     hydrom_rows_html = ""
     if hydrom_summary:
         for h in hydrom_summary:
@@ -122,10 +391,10 @@ def _build_html(date: str, reservoirs: list[dict], hydrom_summary: list[dict] | 
             """
     else:
         hydrom_rows_html = """
-          <tr><td colspan='4' style='text-align:center;color:#6b7280'>Sem lançamentos manuais de hidrômetros para o período.</td></tr>
+          <tr><td colspan='4' class='muted-empty'>Sem lançamentos manuais de hidrômetros para o período.</td></tr>
         """
 
-    # 4) Bombas
+    # 3) Bombas
     _PUMP_LABELS = {"ligada": "LIGADA", "desligada": "DESLIGADA", "falha": "FALHA", "manutencao": "MANUTENÇÃO"}
     _PUMP_COLORS = {"ligada": "#16a34a", "desligada": "#6b7280", "falha": "#dc2626", "manutencao": "#d97706"}
     pump_rows_html = ""
@@ -136,17 +405,17 @@ def _build_html(date: str, reservoirs: list[dict], hydrom_summary: list[dict] | 
             color = _PUMP_COLORS.get(st, "#6b7280")
             ts_str = datetime.datetime.fromtimestamp(p["ts"]).strftime("%H:%M") if p.get("ts") else "—"
             mode = p.get("mode") or "manual"
-            note = p.get("note") or "—"
+            note = escape(p.get("note") or "—")
             pump_rows_html += (
-                f"<tr><td>{p['pump_name']}</td>"
+                f"<tr><td>{escape(p['pump_name'])}</td>"
                 f"<td style='color:{color};font-weight:600'>{label}</td>"
                 f"<td>{mode}</td><td class='num'>{ts_str}</td>"
                 f"<td>{note}</td></tr>"
             )
     else:
-        pump_rows_html = "<tr><td colspan='5' style='text-align:center;color:#6b7280'>Sem registros de bombas.</td></tr>"
+        pump_rows_html = "<tr><td colspan='5' class='muted-empty'>Sem registros de bombas.</td></tr>"
 
-    # 5) Válvulas
+    # 4) Válvulas
     _VALVE_LABELS = {"aberta": "ABERTA", "fechada": "FECHADA", "parcial": "PARCIAL", "falha": "FALHA"}
     _VALVE_COLORS = {"aberta": "#16a34a", "fechada": "#6b7280", "parcial": "#d97706", "falha": "#dc2626"}
     valve_rows_html = ""
@@ -156,130 +425,111 @@ def _build_html(date: str, reservoirs: list[dict], hydrom_summary: list[dict] | 
             label = _VALVE_LABELS.get(st, st or "—")
             color = _VALVE_COLORS.get(st, "#6b7280")
             ts_str = datetime.datetime.fromtimestamp(v["ts"]).strftime("%H:%M") if v.get("ts") else "—"
-            note = v.get("note") or "—"
+            note = escape(v.get("note") or "—")
             valve_rows_html += (
-                f"<tr><td>{v['valve_name']}</td>"
+                f"<tr><td>{escape(v['valve_name'])}</td>"
                 f"<td style='color:{color};font-weight:600'>{label}</td>"
                 f"<td class='num'>{ts_str}</td>"
                 f"<td>{note}</td></tr>"
             )
     else:
-        valve_rows_html = "<tr><td colspan='4' style='text-align:center;color:#6b7280'>Sem registros de válvulas.</td></tr>"
+        valve_rows_html = "<tr><td colspan='4' class='muted-empty'>Sem registros de válvulas.</td></tr>"
+
+    notes_html = "".join(
+        f"<li>{escape(item.get('note', ''))}</li>"
+        for item in (notes or [])
+    ) or "<li>Sem observações ativas.</li>"
+
+    valves_table = f"""
+    <table>
+      <thead>
+        <tr>
+          <th>Válvula</th>
+          <th>Estado</th>
+          <th class="num">Hora</th>
+          <th>Nota</th>
+        </tr>
+      </thead>
+      <tbody>
+        {valve_rows_html}
+      </tbody>
+    </table>
+    """
+    pumps_table = f"""
+    <table>
+      <thead>
+        <tr>
+          <th>Bomba</th>
+          <th>Estado</th>
+          <th>Modo</th>
+          <th class="num">Hora</th>
+          <th>Nota</th>
+        </tr>
+      </thead>
+      <tbody>
+        {pump_rows_html}
+      </tbody>
+    </table>
+    """
 
     return f"""<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <style>
-    body {{ font-family: Arial, sans-serif; margin: 24px; color: #111827; font-size: 12px; }}
-    h1 {{ font-size: 18px; margin: 0 0 6px 0; }}
-    .subtitle {{ color: #4b5563; margin-bottom: 12px; }}
-    h2 {{ font-size: 14px; margin: 16px 0 8px 0; }}
-    table {{ width: 100%; border-collapse: collapse; margin-top: 4px; }}
-    th, td {{ border: 1px solid #d1d5db; padding: 6px 8px; }}
-    th {{ background: #f3f4f6; text-align: left; }}
-    td.num, th.num {{ text-align: right; font-family: 'Courier New', monospace; }}
-    .sep {{ border-top: 2px solid #9ca3af; margin: 12px 0; }}
-    .mini-summary {{ margin-top: 6px; width: 320px; }}
-    .mini-summary td {{ border: none; border-bottom: 1px dashed #d1d5db; padding: 3px 0; }}
-    .footer {{ margin-top: 24px; font-size: 10px; color: #6b7280; }}
+    {_pdf_styles()}
   </style>
 </head>
 <body>
-  <h1>Relatório Diário de Serviço</h1>
-  <div class="subtitle">Data de referência: <strong>{date}</strong></div>
+  <div class="report-shell">
+    <div class="report-header">
+      <h1>Relatorio Aguada</h1>
+      <p class="subtitle">CMASM, {_fmt_date_br(date)}</p>
+    </div>
 
-  <h2>Consumo (estimado por delta volume)</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Local / Hora</th>
-        <th class="num">Ton</th>
-        <th class="num">Delta</th>
-      </tr>
-    </thead>
-    <tbody>
-      {consumo_rows_html}
-    </tbody>
-  </table>
+    <section class="section">
+      <h2>Reservatórios</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Local</th>
+            <th class="num">Anterior (T)</th>
+            <th class="num">Atual (T)</th>
+            <th class="num">Diferença (T)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {table2_rows_html}
+        </tbody>
+      </table>
+    </section>
 
-  <table class="mini-summary">
-    <tbody>
-      <tr><td>Abastecimento estimado</td><td class="num">{_fmt_signed(abastecimento_t)}</td></tr>
-      <tr><td>Consumo estimado</td><td class="num">{_fmt_signed(consumo_t)}</td></tr>
-      <tr><td>Balanço estimado</td><td class="num">{_fmt_signed(balanco_t)}</td></tr>
-    </tbody>
-  </table>
+    <section class="section">
+      <h2>Hidrômetros</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Hidrômetro</th>
+            <th class="num">Anterior</th>
+            <th class="num">Atual</th>
+            <th class="num">Diferença</th>
+          </tr>
+        </thead>
+        <tbody>
+          {hydrom_rows_html}
+        </tbody>
+      </table>
+    </section>
 
-  <div class="sep"></div>
+    {_two_column_section('Válvulas', valves_table, 'Bombas', pumps_table)}
 
-  <table>
-    <thead>
-      <tr>
-        <th>Local</th>
-        <th class="num">Anterior (T)</th>
-        <th class="num">Atual (T)</th>
-        <th class="num">Diferença (T)</th>
-      </tr>
-    </thead>
-    <tbody>
-      {table2_rows_html}
-    </tbody>
-  </table>
+    <section class="section">
+      <h2>Observações</h2>
+      <ul class="notes">{notes_html}</ul>
+    </section>
 
-  <div class="sep"></div>
-
-  <h2>Hidrômetros</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Hidrômetro</th>
-        <th class="num">Anterior</th>
-        <th class="num">Atual</th>
-        <th class="num">Diferença</th>
-      </tr>
-    </thead>
-    <tbody>
-      {hydrom_rows_html}
-    </tbody>
-  </table>
-
-  <div class="sep"></div>
-
-  <h2>Bombas (estado final do dia)</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Bomba</th>
-        <th>Estado</th>
-        <th>Modo</th>
-        <th class="num">Hora</th>
-        <th>Nota</th>
-      </tr>
-    </thead>
-    <tbody>
-      {pump_rows_html}
-    </tbody>
-  </table>
-
-  <div class="sep"></div>
-
-  <h2>Válvulas (estado final do dia)</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Válvula</th>
-        <th>Estado</th>
-        <th class="num">Hora</th>
-        <th>Nota</th>
-      </tr>
-    </thead>
-    <tbody>
-      {valve_rows_html}
-    </tbody>
-  </table>
-
-  <div class="footer">Gerado automaticamente por Aguada Web — formato tabular operacional.</div>
+    {_signature_block_html('', '')}
+  </div>
 </body>
 </html>"""
 
@@ -288,6 +538,14 @@ async def generate_daily_report_pdf(
     conn: aiosqlite.Connection, date: str, out_path: str
 ) -> None:
     from weasyprint import HTML
+
+    saved_report = await get_report_daily_data(conn, date)
+    active_notes = await get_report_notes(conn, date, active_only=True)
+    if saved_report:
+        html = _build_saved_report_html(date, saved_report, active_notes)
+        HTML(string=html).write_pdf(out_path)
+        return
+
     states = await get_all_states(conn)
     enriched = []
     for s in states:
@@ -299,5 +557,6 @@ async def generate_daily_report_pdf(
     pump_states = await get_pump_states_for_date(conn, date)
     valve_states = await get_valve_states_for_date(conn, date)
     html = _build_html(date, enriched, hydrom_summary=hydrom_summary,
-                       pump_states=pump_states, valve_states=valve_states)
+               pump_states=pump_states, valve_states=valve_states,
+               notes=active_notes)
     HTML(string=html).write_pdf(out_path)
