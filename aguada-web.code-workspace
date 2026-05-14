@@ -1,0 +1,49 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../cmasm.erp-main"
+		},
+		{
+			"path": "../dsgov-latest (1)"
+		},
+		{
+			"path": "../espnow-ha"
+		},
+		{
+			"path": "../lici"
+		},
+		{
+			"path": "../SKILLS"
+		},
+		{
+			"path": "../Tractian"
+		},
+		{
+			"path": "../xCalibracao"
+		},
+		{
+			"path": "../xCFTV"
+		},
+		{
+			"path": "../xcftv-webapp"
+		},
+		{
+			"path": "../xCMASM"
+		},
+		{
+			"path": "../xFonoclama"
+		},
+		{
+			"path": "../xPaiol"
+		},
+		{
+			"path": "../xPredial"
+		},
+		{
+			"path": "../xSeguranca"
+		}
+	]
+}

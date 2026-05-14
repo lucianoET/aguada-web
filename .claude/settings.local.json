@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod +x /home/luc/Dev/aguada-web/tools/open_browser.sh)",
+      "Bash(bash /home/luc/Dev/aguada-web/tools/install_autostart_user_service.sh)",
+      "Bash(systemctl --user status aguada-web-backend.service --no-pager)",
+      "Bash(curl -s http://127.0.0.1:8001/api/states)",
+      "Bash(fuser -k 8001/tcp)",
+      "Bash(awk '/^  <style>/,/^  <\\\\/style>/' /home/luc/Dev/aguada-web/frontend/scada.html)",
+      "Bash(grep -E \"#[0-9a-fA-F]{3,6}\")",
+      "Bash(git:*)",
+      "Bash(grep:*)",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "mcp__plugin_playwright_playwright__browser_close"
+    ]
+  }
+}
