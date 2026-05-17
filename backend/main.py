@@ -670,6 +670,11 @@ async def websocket_endpoint(ws: WebSocket):
         ws_manager.disconnect(ws)
 
 
+@app.get("/health")
+async def health():
+    return {"status": "ok", "service": "xAguada"}
+
+
 # Serve o frontend estático (SPA). Deve ficar após todas as rotas /api e /ws.
 _FRONTEND_DIR = PROJECT_ROOT / "frontend"
 if _FRONTEND_DIR.is_dir():
