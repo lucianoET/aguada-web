@@ -831,6 +831,16 @@
 <script>
 document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('painel.html');
 
+function todayDateStr() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+function hoursElapsedToday() {
+  const now = new Date();
+  return Math.max(1, now.getHours() + now.getMinutes() / 60);
+}
+
 function painelApp() {
   return {
     reservoirs: [],
@@ -1089,7 +1099,26 @@ function painelApp() {
 
       this.infra = infra || null;
       this.reservoirs = Array.isArray(resData) ? resData : [];
-      
+
+      // Fetch consumption data for each reservoir
+      const today = todayDateStr();
+      const consumptionResults = await Promise.allSettled(
+        this.reservoirs.map(r =>
+          fetch(`/api/consumption?alias=${r.alias}&date=${today}`)
+            .then(res => res.json())
+            .catch(() => null)
+        )
+      );
+
+      const hoursElapsed = hoursElapsedToday();
+      this.reservoirs = this.reservoirs.map((r, i) => {
+        const result = consumptionResults[i];
+        if (result.status !== 'fulfilled' || !result.value?.summary) return r;
+        const consumed_l = result.value.summary.consumed_l ?? 0;
+        const rate_lh = Math.round(consumed_l / hoursElapsed);
+        return { ...r, consumed_l, rate_lh };
+      });
+
       const fallbackPumps = infra?.pumps?.length ? infra.pumps.map(p=>({id:p.id, pump_name:p.name, state:'ligada'})) : [
         { id: 'f1', pump_name: 'B-01 CB3', state: 'ligada' }, { id: 'f2', pump_name: 'B-02 CB3', state: 'ligada' },
         { id: 'f3', pump_name: 'B-01 CB2', state: 'ligada' }, { id: 'f4', pump_name: 'B-02 CB2', state: 'falha' },
