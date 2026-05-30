@@ -89,36 +89,7 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
 
 .admin-main { max-width: 1800px; margin: 0 auto; padding: 20px 24px; }
 
-/* ============================================================
-   RESERVOIR CARDS (admin pages)
-   ============================================================ */
-.res-cards-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 16px; }
-
-.res-card { background: var(--card, white); border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); overflow: hidden; transition: all .3s; }
-.res-card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,.12); }
-.res-card-header { padding: 12px 16px; color: white; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; }
-.res-card-status { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: rgba(255,255,255,.25); font-weight: 500; }
-.res-card-body { padding: 16px; }
-.res-vol-pct { font-size: 36px; font-weight: 700; line-height: 1; margin-bottom: 4px; letter-spacing: -1px; }
-.res-vol-l { font-size: 13px; color: var(--text-muted); font-weight: 500; }
-.res-gauge { width: 100%; height: 10px; background: #e5e7eb; border-radius: 5px; overflow: hidden; margin: 10px 0; }
-.res-gauge-fill { height: 100%; border-radius: 5px; transition: width .6s ease, background .6s ease; }
-.res-data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-.res-data-cell { background: var(--bg3, #f9fafb); padding: 8px 10px; border-radius: 6px; border-left: 3px solid #667eea; }
-.res-data-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: .5px; margin-bottom: 3px; }
-.res-data-value { font-size: 13px; font-weight: 600; color: var(--text, #1e3a5f); }
-
-/* Color palette for reservoir cards (cycles by index) */
-.rc-0 { background: linear-gradient(135deg,#667eea,#764ba2); }
-.rc-1 { background: linear-gradient(135deg,#f093fb,#f5576c); }
-.rc-2 { background: linear-gradient(135deg,#4facfe,#00f2fe); }
-.rc-3 { background: linear-gradient(135deg,#43e97b,#38f9d7); }
-.rc-4 { background: linear-gradient(135deg,#fa709a,#fee140); }
-.rc-5 { background: linear-gradient(135deg,#a18cd1,#fbc2eb); }
-.rc-6 { background: linear-gradient(135deg,#f7971e,#ffd200); }
-.rc-7 { background: linear-gradient(135deg,#56ccf2,#2f80ed); }
-
-/* Gauge color helpers */
+/* Gauge color helpers (used dynamically) */
 .gauge-ok   { background: #10b981; }
 .gauge-warn { background: #f59e0b; }
 .gauge-crit { background: #ef4444; }
@@ -152,21 +123,6 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
 .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
 .btn-primary:active { transform: translateY(0); }
 
-/* ── Shared page-level components ── */
-.page-box {
-    background: var(--card, white); border-radius: 12px; padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08); margin-bottom: 20px;
-}
-.page-title {
-    color: var(--text, #1e3a5f); margin-bottom: 15px; font-size: 1.25rem;
-    font-weight: 600; display: flex; justify-content: space-between;
-    align-items: center;
-}
-.page-subtitle {
-    color: var(--text-muted); font-size: var(--font-sm);
-    margin-top: -10px; margin-bottom: 20px; display: block;
-}
-
 /* ── Shared table styling (admin pages without aguada .table class) ── */
 .admin-main table { width: 100%; border-collapse: collapse; }
 .admin-main th {
@@ -183,35 +139,6 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
 }
 .admin-main tr:hover td { background: var(--bg3, #f9f9f9); }
 
-/* ── Shared box component (alerts, manutencao etc.) ── */
-.box {
-    background: var(--card, white); border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08); overflow: hidden;
-}
-.box-header {
-    padding: 13px 18px; border-bottom: 1px solid var(--border-color, var(--border));
-    display: flex; justify-content: space-between; align-items: center;
-}
-.box-header h2 {
-    font-size: var(--font-lg); font-weight: 600;
-    color: var(--text, #1e3a5f); margin: 0;
-}
-.box-body { padding: 16px; }
-
-/* ── Param cards (ete, qualidade) ── */
-.param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px; }
-.param-card {
-    border: 1px solid var(--border-color, var(--border)); border-radius: 10px;
-    padding: 16px; background: var(--bg2, #fafafa);
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    transition: all 0.2s;
-}
-.param-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); transform: translateY(-1px); }
-.param-card .lbl { font-size: var(--font-xs); color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
-.param-card .val { font-size: 24px; font-weight: 700; color: var(--blue, var(--primary-blue)); margin-top: 6px; }
-.param-card .sub { font-size: var(--font-xs); color: var(--text-muted); margin-top: 4px; }
-.param-card .norma { font-size: var(--font-xxs); color: var(--success-green); margin-top: 6px; font-weight: 500; }
-
 /* ── Diagram placeholder ── */
 .diagram-ph {
     background: var(--bg3, #f0f4f8); border: 1px dashed var(--border2, #b0c4df);
@@ -223,49 +150,21 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
 .badge-online  { background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 8px; font-size: var(--font-xxs); font-weight: 600; }
 .badge-offline { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 8px; font-size: var(--font-xxs); font-weight: 600; }
 
-/* ── Alert-level badges (in-table) ── */
-.badge-warn   { background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-.badge-danger { background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-.badge-ok     { background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-
 /* ── Pct bar (dados, inline) ── */
 .pct-bar { width: 72px; height: 7px; background: var(--bg3, #e5e7eb); border-radius: 4px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 5px; }
 .pct-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
-
-/* ── Upload button ── */
-.btn-upload {
-    background: var(--accent-purple, var(--blue)); color: white; border: none;
-    padding: 6px 12px; border-radius: 6px; cursor: pointer;
-    font-size: var(--font-xs); font-weight: 600; transition: all 0.2s;
-}
-.btn-upload:hover { opacity: 0.9; }
 
 /* ── Dark Mode — style.css extensions ── */
 [data-theme="dark"] body.admin-page { background: var(--bg); color: var(--text); }
 [data-theme="dark"] .admin-status { color: var(--text2); border-left-color: var(--border); }
 
 /* Dark mode: boxes/cards/tables */
-[data-theme="dark"] .box,
-[data-theme="dark"] .page-box,
-[data-theme="dark"] .tbl-wrap,
-[data-theme="dark"] .stat-card,
-[data-theme="dark"] .kpi,
-[data-theme="dark"] .chart-wrap,
-[data-theme="dark"] .chart-card,
-[data-theme="dark"] .supply-card,
-[data-theme="dark"] .stat-mini,
 [data-theme="dark"] .top-bar,
-[data-theme="dark"] .tab-bar,
-[data-theme="dark"] .res-card,
-[data-theme="dark"] .stat-box { background: var(--card); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+[data-theme="dark"] .tab-bar { background: var(--card); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,.3); }
 
 [data-theme="dark"] .tab-bar .tab-btn { color: var(--text2); }
 [data-theme="dark"] .tab-bar .tab-btn.active { background: var(--blue); color: white; }
-[data-theme="dark"] .tbl-bar { border-bottom-color: var(--border); }
-[data-theme="dark"] .tbl-bar h2 { color: var(--text); }
 [data-theme="dark"] .tbl-info { color: var(--text3); }
-[data-theme="dark"] .box-header { border-bottom-color: var(--border); }
-[data-theme="dark"] .box-header h2 { color: var(--text); }
 
 /* Dark mode: inputs/selects */
 [data-theme="dark"] .admin-main select,
@@ -273,29 +172,11 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
 [data-theme="dark"] .admin-main input[type="text"],
 [data-theme="dark"] .admin-main input[type="number"] { background: var(--bg3); border-color: var(--border2); color: var(--text); }
 
-/* Dark mode: param cards, page elements */
-[data-theme="dark"] .page-title { color: var(--text); }
-[data-theme="dark"] .page-subtitle { color: var(--text3); }
-[data-theme="dark"] .param-card { background: var(--bg2); border-color: var(--border); }
-[data-theme="dark"] .param-card .lbl { color: var(--text3); }
-[data-theme="dark"] .param-card .val { color: var(--blue); }
+/* Dark mode: diagram placeholder */
 [data-theme="dark"] .diagram-ph { background: var(--bg3); border-color: var(--border2); color: var(--text3); }
-[data-theme="dark"] .res-data-cell { background: var(--bg3); }
 
 /* Dark mode: manutencao specific */
 [data-theme="dark"] .maint-item { border-color: var(--border); }
 [data-theme="dark"] .maint-item:hover { border-color: var(--blue); background: var(--bg3); }
 [data-theme="dark"] .maint-title { color: var(--text); }
 [data-theme="dark"] .maint-details { color: var(--text3); }
-[data-theme="dark"] .checklist li { border-bottom-color: var(--border); color: var(--text); }
-[data-theme="dark"] .sys-card { background: var(--card); }
-[data-theme="dark"] .sys-card-body { color: var(--text); }
-[data-theme="dark"] .frow { border-bottom-color: var(--border); }
-[data-theme="dark"] .frow .fval { color: var(--text); }
-[data-theme="dark"] .frow .flbl { color: var(--text3); }
-
-/* Dark mode: alerts page */
-[data-theme="dark"] .alert-crit { background: var(--red-dim); color: var(--red); border-color: var(--red); }
-[data-theme="dark"] .alert-warn { background: var(--yellow-dim); color: var(--yellow); border-color: var(--yellow); }
-[data-theme="dark"] .alert-info { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
-[data-theme="dark"] .alert-ok   { background: var(--green-dim); color: var(--green); border-color: var(--green); }
