@@ -37,7 +37,8 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      min-height: 72px;
+      min-height: 76px;
+      box-shadow: var(--card-shadow);
     }
     .hero-kpi-info {
       min-width: 0;
@@ -49,27 +50,33 @@
       color: var(--text3);
       font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.09em;
       font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      font-family: var(--sans);
     }
     .hero-kpi-val {
       color: var(--text);
       font-family: var(--mono);
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
       line-height: 1.05;
       white-space: nowrap;
     }
     .hero-kpi-side {
-      color: var(--text3);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
-      text-align: right;
+      font-family: var(--sans);
+      color: var(--text3);
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 999px;
+      padding: 3px 8px;
       white-space: nowrap;
       flex-shrink: 0;
+      text-align: center;
     }
     .hero-kpi--blue .hero-kpi-val { color: var(--blue); }
     .hero-kpi--red .hero-kpi-val { color: var(--red); }
