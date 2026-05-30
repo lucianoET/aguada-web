@@ -16,7 +16,7 @@
     .scada-main {
       display: flex;
       flex-direction: column;
-      background: #d9dde3;
+      background: var(--scada-content-bg);
       --scada-site-hdr-bg: #dce8f5;
       --scada-site-hdr-border: #89a6c7;
       --scada-site-red-hdr-bg: #f5dfdf;
@@ -45,7 +45,7 @@
     }
 
     html[data-theme="dark"] .scada-main {
-      background: #0f1218;
+      background: var(--scada-content-bg);
       --scada-site-hdr-bg: #1c2330;
       --scada-site-hdr-border: #324357;
       --scada-site-red-hdr-bg: #301f1f;
@@ -80,7 +80,7 @@
       gap: 12px;
       padding: 10px 14px;
       border-bottom: 1px solid var(--border);
-      background: #eceff3;
+      background: var(--scada-eq-bg);
       backdrop-filter: none;
     }
 
@@ -99,14 +99,14 @@
       padding: 6px 10px;
       border: 1px solid var(--border2);
       border-radius: 999px;
-      background: #f7f8fa;
-      color: #4b5563;
+      background: var(--bg2);
+      color: var(--scada-text-secondary);
       font-size: 11px;
       line-height: 1;
     }
 
     .scada-chip strong {
-      color: #111827;
+      color: var(--scada-text-primary);
       font-weight: 600;
     }
 
@@ -130,7 +130,7 @@
       height: 1370px;
       transform-origin: top left;
       font-size: 14px;
-      background-color: #d9dde3;
+      background-color: var(--scada-content-bg);
       border: 1px solid var(--border2);
       border-radius: 8px;
       overflow: hidden;
@@ -919,10 +919,10 @@
       color: rgba(17,24,39,0.75);
       line-height: 1;
     }
-    .mini-res-level[data-lbl="70%"] { background: #b8e6c0; }
-    .mini-res-level[data-lbl="50%"] { background: #f7de8a; }
-    .mini-res-level[data-lbl="30%"] { background: #efb1b1; }
-    .mini-res-level[data-lbl="10%"] { background: #111111; }
+    .mini-res-level[data-lbl="70%"] { background: var(--green-dim); }
+    .mini-res-level[data-lbl="50%"] { background: var(--yellow-dim); }
+    .mini-res-level[data-lbl="30%"] { background: var(--red-dim); }
+    .mini-res-level[data-lbl="10%"] { background: var(--red); }
     /* Overlaid values */
     .mini-res-overlay {
       position: absolute;
