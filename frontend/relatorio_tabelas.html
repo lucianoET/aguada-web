@@ -11,59 +11,54 @@
     .admin-main.simple-stack { max-width:1600px; margin:0 auto; }
     .simple-stack { display:flex; flex-direction:column; gap:12px; }
     .report-grid { display:grid; gap:12px; }
-    .report-page-header { background:var(--card, white); border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:16px 18px; text-align:center; }
-    .report-page-header h1 { margin:0; font-size:24px; line-height:1.15; color:var(--text, #1e3a5f); text-transform:uppercase; }
-    .report-page-header p { margin:6px 0 0; font-size:13px; color:var(--text-muted); font-weight:600; }
+    .report-page-header { padding:16px 18px; text-align:center; }
+    .report-page-header h1 { margin:0; font-size:24px; line-height:1.15; color:var(--text); text-transform:uppercase; }
+    .report-page-header p { margin:6px 0 0; font-size:13px; color:var(--text3); font-weight:600; }
     .content-row { display:grid; gap:12px; }
     .main-stack { display:grid; gap:12px; align-content:start; }
     .side-stack { display:grid; gap:12px; align-content:start; }
     .equipment-grid { display:grid; gap:12px; }
-    .simple-card { background:var(--card, white); border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; }
     .editable-card { cursor:pointer; }
-    .simple-card header { padding:10px 12px; border-bottom:1px solid var(--border-color, var(--border)); display:flex; justify-content:space-between; align-items:flex-end; gap:10px; flex-wrap:wrap; }
-    .simple-card h2 { margin:0; font-size:15px; line-height:1.2; color:var(--text, #1e3a5f); }
-    .simple-card p { margin:2px 0 0; color:var(--text-muted); font-size:12px; line-height:1.35; }
-    .filter-bar { display:flex; align-items:flex-end; gap:8px 10px; flex-wrap:wrap; margin-bottom:4px; padding:10px 12px; background:var(--card, white); border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
-    .filter-bar label { display:block; font-size:var(--font-xs); font-weight:600; color:var(--text-muted); margin-bottom:4px; }
+    .filter-bar { display:flex; align-items:flex-end; gap:8px 10px; flex-wrap:wrap; margin-bottom:4px; padding:10px 12px; background:var(--card); border-radius:12px; box-shadow:var(--card-shadow); }
+    .filter-bar label { display:block; font-size:var(--font-xs); font-weight:600; color:var(--text3); margin-bottom:4px; }
     .table-wrap { overflow-x:auto; }
-    .simple-table { width:100%; border-collapse:separate; border-spacing:0; min-width:0; table-layout:auto; }
-    .simple-table th, .simple-table td { padding:6px 9px; border-bottom:1px solid var(--border-color, var(--border)); vertical-align:middle; font-variant-numeric:tabular-nums; }
-    .simple-table th { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); background:rgba(148,163,184,.08); line-height:1.2; white-space:nowrap; }
-    .simple-table td { font-size:12px; line-height:1.25; color:var(--text, #1e3a5f); }
-    .simple-table tbody tr:last-child td { border-bottom:none; }
-    .simple-table tbody tr:hover td { background:rgba(148,163,184,.06); }
-    .simple-table .col-label, .simple-table .cell-label { text-align:left; }
-    .simple-table .col-label { width:92px; }
-    .simple-table .col-num, .simple-table .cell-num { text-align:right; white-space:nowrap; }
-    .simple-table .cell-label { font-weight:600; color:#334155; white-space:nowrap; }
-    .simple-table .cell-dim { color:var(--text-muted); }
+    /* dense report table — overrides .table defaults for compact rows */
+    .table { table-layout:auto; }
+    .table th, .table td { padding:6px 9px; font-variant-numeric:tabular-nums; }
+    .table th { font-size:10px; white-space:nowrap; }
+    .table td { font-size:12px; line-height:1.25; }
+    .table .col-label, .table .cell-label { text-align:left; }
+    .table .col-label { width:92px; }
+    .table .col-num, .table .cell-num { text-align:right; white-space:nowrap; }
+    .table .cell-label { font-weight:600; color:var(--text2); white-space:nowrap; }
+    .table .cell-dim { color:var(--text3); }
     .reading-cell { display:inline-flex; align-items:baseline; justify-content:flex-end; gap:4px; min-width:0; }
     .reading-value { font-weight:600; }
-    .reading-unit { font-size:11px; color:var(--text-muted); }
-    .muted { color:var(--text-muted); }
+    .reading-unit { font-size:11px; color:var(--text3); }
+    .muted { color:var(--text3); }
     .metric-row td { font-weight:700; background:rgba(14,165,233,.06); }
-    .neg { color:#b91c1c; }
-    .empty { padding:24px 16px; color:var(--text-muted); }
+    .neg { color:var(--red); }
+    .empty { padding:24px 16px; color:var(--text3); }
     .state-badge { display:inline-flex; align-items:center; justify-content:center; min-width:82px; padding:4px 8px; border-radius:999px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
-    .state-ok { background:rgba(22,163,74,.12); color:#166534; }
-    .state-warn { background:rgba(217,119,6,.12); color:#92400e; }
-    .state-off { background:rgba(100,116,139,.14); color:#475569; }
-    .state-fail { background:rgba(220,38,38,.12); color:#991b1b; }
+    .state-ok   { background:var(--green-dim); color:var(--green); }
+    .state-warn { background:var(--yellow-dim); color:var(--yellow); }
+    .state-off  { background:var(--bg3, rgba(100,116,139,.14)); color:var(--text3); }
+    .state-fail { background:var(--red-dim); color:var(--red); }
     .matrix-table { min-width:0; table-layout:fixed; }
     .matrix-table th, .matrix-table td { text-align:center; padding:5px 7px; }
     .matrix-table .matrix-label { text-align:left; width:72px; }
     .matrix-code { display:inline-flex; align-items:center; justify-content:center; min-width:46px; padding:3px 7px; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.04em; }
-    .code-op { background:rgba(22,163,74,.14); color:#166534; }
-    .code-inop { background:rgba(220,38,38,.14); color:#991b1b; }
-    .code-or { background:rgba(217,119,6,.14); color:#92400e; }
-    .code-mnt { background:rgba(59,130,246,.14); color:#1d4ed8; }
-    .code-empty { background:rgba(100,116,139,.12); color:#64748b; }
+    .code-op    { background:var(--green-dim);  color:var(--green); }
+    .code-inop  { background:var(--red-dim);    color:var(--red); }
+    .code-or    { background:var(--yellow-dim); color:var(--yellow); }
+    .code-mnt   { background:var(--blue-dim);   color:var(--blue); }
+    .code-empty { background:var(--bg3, rgba(100,116,139,.12)); color:var(--text3); }
     .notes-toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
     .notes-toolbar textarea { width:100%; min-height:72px; resize:vertical; }
     .notes-list { display:flex; flex-direction:column; gap:10px; }
-    .note-item { border:1px solid var(--border-color, var(--border)); border-radius:10px; padding:10px 12px; background:rgba(148,163,184,.05); }
+    .note-item { border:1px solid var(--border); border-radius:10px; padding:10px 12px; background:rgba(148,163,184,.05); }
     .note-item p { margin:0 0 10px 0; white-space:pre-wrap; }
-    .note-meta { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; color:var(--text-muted); font-size:12px; }
+    .note-meta { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; color:var(--text3); font-size:12px; }
     .print-only { display:none; }
 
     #pumpTable .col-state,
@@ -140,30 +135,30 @@
       font-size:10px;
       text-transform:uppercase;
       letter-spacing:.06em;
-      color:var(--text-muted);
+      color:var(--text3);
       font-weight:700;
     }
 
     .signature-field input {
       width:100%;
       padding:7px 9px;
-      border:1px solid var(--border-color, var(--border));
+      border:1px solid var(--border);
       border-radius:8px;
-      background:var(--card, white);
-      color:var(--text, #1e3a5f);
+      background:var(--card);
+      color:var(--text);
       font:inherit;
       text-align:center;
     }
 
     .signature-line {
-      border-top:1px solid #334155;
+      border-top:1px solid var(--text2);
       height:18px;
       margin-top:8px;
     }
 
     .signature-role {
       font-size:12px;
-      color:var(--text-muted);
+      color:var(--text3);
     }
 
     .report-meta-group {
@@ -175,16 +170,16 @@
       font-size:10px;
       text-transform:uppercase;
       letter-spacing:.06em;
-      color:var(--text-muted);
+      color:var(--text3);
     }
 
     .report-meta-group input {
       width:100%;
       padding:7px 9px;
-      border:1px solid var(--border-color, var(--border));
+      border:1px solid var(--border);
       border-radius:8px;
-      background:var(--card, white);
-      color:var(--text, #1e3a5f);
+      background:var(--card);
+      color:var(--text);
       font:inherit;
     }
 
@@ -203,7 +198,7 @@
     .table-edit-dialog {
       width:min(1080px, 100%);
       max-height:min(88vh, 920px);
-      background:var(--card, white);
+      background:var(--card);
       border-radius:16px;
       box-shadow:0 24px 80px rgba(15,23,42,.24);
       display:flex;
@@ -214,7 +209,7 @@
     .table-edit-header,
     .table-edit-footer {
       padding:14px 16px;
-      border-bottom:1px solid var(--border-color, var(--border));
+      border-bottom:1px solid var(--border);
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -223,7 +218,7 @@
 
     .table-edit-footer {
       border-bottom:none;
-      border-top:1px solid var(--border-color, var(--border));
+      border-top:1px solid var(--border);
       justify-content:flex-end;
     }
 
@@ -237,8 +232,8 @@
       width:100%;
       border-collapse:separate;
       border-spacing:0;
-      background:var(--card, white);
-      border:1px solid var(--border-color, var(--border));
+      background:var(--card);
+      border:1px solid var(--border);
       border-radius:12px;
       overflow:hidden;
     }
@@ -246,7 +241,7 @@
     .edit-grid th,
     .edit-grid td {
       padding:8px 10px;
-      border-bottom:1px solid var(--border-color, var(--border));
+      border-bottom:1px solid var(--border);
       vertical-align:middle;
     }
 
@@ -255,7 +250,7 @@
       font-size:10px;
       text-transform:uppercase;
       letter-spacing:.06em;
-      color:var(--text-muted);
+      color:var(--text3);
       background:rgba(148,163,184,.08);
       white-space:nowrap;
     }
@@ -265,10 +260,10 @@
       width:100%;
       min-width:0;
       padding:7px 9px;
-      border:1px solid var(--border-color, var(--border));
+      border:1px solid var(--border);
       border-radius:8px;
-      background:var(--card, white);
-      color:var(--text, #1e3a5f);
+      background:var(--card);
+      color:var(--text);
       font:inherit;
     }
 
@@ -295,9 +290,9 @@
 
     @media (max-width: 719px) {
       .filter-bar { padding:10px 12px; gap:8px; }
-      .simple-card header { padding:10px 12px; }
-      .simple-table { min-width:560px; }
-      .simple-table th, .simple-table td { padding:6px 8px; }
+      .ha-card-header { padding:10px 12px; }
+      .table { min-width:560px; }
+      .table th, .table td { padding:6px 8px; }
       .matrix-table { min-width:0; }
     }
 
@@ -342,7 +337,7 @@
         gap:6px;
       }
 
-      .simple-card {
+      .ha-card {
         box-shadow:none;
         border:1px solid #d1d5db;
         border-radius:6px;
@@ -350,15 +345,15 @@
         page-break-inside:avoid;
       }
 
-      .simple-card header {
+      .ha-card-header {
         padding:5px 7px;
       }
 
-      .simple-card h2 {
+      .ha-card-title {
         font-size:12px;
       }
 
-      .simple-card p,
+      .ha-card-header p,
       .muted,
       .note-meta {
         font-size:9px;
@@ -369,18 +364,18 @@
         overflow:visible;
       }
 
-      .simple-table {
+      .table {
         min-width:0;
       }
 
-      .simple-table th,
-      .simple-table td {
+      .table th,
+      .table td {
         padding:3px 4px;
         font-size:9px;
         line-height:1.15;
       }
 
-      .simple-table th {
+      .table th {
         font-size:8px;
       }
 
@@ -399,8 +394,8 @@
         font-size:10px;
       }
 
-      .simple-table .col-label,
-      .simple-table .cell-label {
+      .table .col-label,
+      .table .cell-label {
         width:78px;
       }
 
@@ -476,25 +471,25 @@
   </div>
 
   <div class="report-grid">
-    <section class="report-page-header">
+    <section class="ha-card report-page-header">
       <h1>Relatorio Aguada</h1>
       <p id="reportPageSubtitle">CMASM, —</p>
     </section>
 
     <div class="content-row">
       <div class="main-stack">
-        <section class="simple-card editable-card" data-editable-section="volume">
-          <header>
+        <section class="ha-card editable-card" data-editable-section="volume">
+          <div class="ha-card-header">
             <div>
-              <h2>Reservatórios</h2>
+              <span class="ha-card-title">Reservatórios</span>
               <p>Volumes, hidrômetros, estados e observações para a operação do dia.</p>
             </div>
             <div class="report-meta-fields">
               <div class="muted" id="selectedDateLabel">—</div>
             </div>
-          </header>
+          </div>
           <div class="table-wrap">
-            <table class="simple-table" id="volumeTable">
+            <table class="table" id="volumeTable">
               <thead>
                 <tr>
                   <th class="col-label">Hora</th>
@@ -512,15 +507,15 @@
           </div>
         </section>
 
-        <section class="simple-card editable-card" data-editable-section="hydrometer">
-          <header>
+        <section class="ha-card editable-card" data-editable-section="hydrometer">
+          <div class="ha-card-header">
             <div>
-              <h2>Hidrômetros</h2>
+              <span class="ha-card-title">Hidrômetros</span>
               <p>Leitura anterior, leitura atual e diferença acumulada até o fim do dia selecionado.</p>
             </div>
-          </header>
+          </div>
           <div class="table-wrap">
-            <table class="simple-table" id="hydrometerTable">
+            <table class="table" id="hydrometerTable">
               <thead>
                 <tr>
                   <th class="col-label">Hidrômetro</th>
@@ -537,14 +532,12 @@
 
       <div class="side-stack">
         <div class="equipment-grid">
-          <section class="simple-card editable-card" data-editable-section="valve">
-            <header>
-              <div>
-                <h2>Válvulas</h2>
-              </div>
-            </header>
+          <section class="ha-card editable-card" data-editable-section="valve">
+            <div class="ha-card-header">
+              <span class="ha-card-title">Válvulas</span>
+            </div>
             <div class="table-wrap">
-              <table class="simple-table matrix-table" id="valveTable">
+              <table class="table matrix-table" id="valveTable">
                 <thead>
                   <tr>
                     <th class="matrix-label">Linha</th>
@@ -557,14 +550,12 @@
             </div>
           </section>
 
-          <section class="simple-card editable-card" data-editable-section="pump">
-            <header>
-              <div>
-                <h2>Bombas</h2>
-              </div>
-            </header>
+          <section class="ha-card editable-card" data-editable-section="pump">
+            <div class="ha-card-header">
+              <span class="ha-card-title">Bombas</span>
+            </div>
             <div class="table-wrap">
-              <table class="simple-table matrix-table" id="pumpTable">
+              <table class="table matrix-table" id="pumpTable">
                 <thead>
                   <tr>
                     <th class="matrix-label">Conjunto</th>
@@ -578,13 +569,13 @@
           </section>
         </div>
 
-        <section class="simple-card notes-card">
-          <header>
+        <section class="ha-card notes-card">
+          <div class="ha-card-header">
             <div>
-              <h2>Observações</h2>
+              <span class="ha-card-title">Observações</span>
               <p>Observações persistentes por data. Ao arquivar, a observação sai da página.</p>
             </div>
-          </header>
+          </div>
           <div class="notes-card-body">
             <div id="notesList" class="notes-list"></div>
             <div id="notesStatus" class="muted"></div>
@@ -598,12 +589,10 @@
           </div>
         </section>
 
-        <section class="simple-card">
-          <header>
-            <div>
-              <h2>Assinaturas</h2>
-            </div>
-          </header>
+        <section class="ha-card">
+          <div class="ha-card-header">
+            <span class="ha-card-title">Assinaturas</span>
+          </div>
           <div class="signature-card-body">
             <div class="signature-grid">
               <div class="signature-field">
