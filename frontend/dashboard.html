@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="data:,">
+  <title>Aguada — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/aguada.css?v=3"/>
+  <link rel="stylesheet" href="assets/style.css"/>
+  <style>
+    [x-cloak]{display:none}
+    .dash2 { max-width: 1400px; margin: 0 auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+    .dash2-hero {
+      display: grid;
+      grid-template-columns: auto repeat(3, minmax(150px, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+    .dash2-gauge-card {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; padding: 14px 18px; min-width: 170px;
+    }
+    .dash2-gauge-card .ha-gauge-name { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+    .dash2-res-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .res2 { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; }
+    .res2-hdr { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .res2-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.2; }
+    .res2-alias { font-family: var(--mono); font-size: 9px; font-weight: 600; color: var(--text3); letter-spacing: .1em; margin-top: 2px; }
+    .res2-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+    .res2-pct { font-family: var(--mono); font-size: 34px; font-weight: 700; line-height: 1; letter-spacing: -.03em; }
+    .res2-vol { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text3); }
+    .dash2-foot { font-size: 11px; color: var(--text3); text-align: right; }
+    @media (max-width: 720px) {
+      .dash2-hero { grid-template-columns: 1fr 1fr; }
+      .dash2-gauge-card { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body class="admin-page">
+
+  <div id="topbar" class="admin-header"></div>
+
+  <div x-data="dashApp()" x-init="init()" x-cloak class="dash2">
+
+    <!-- Banner de alerta crítico -->
+    <template x-if="critical > 0">
+      <div class="ha-alert ha-alert-crit">
+        <strong x-text="critical + ' reservatório(s) em estado crítico'"></strong>
+        Nível ≤ 20% ou sem comunicação. Verifique a aba Alertas.
+      </div>
+    </template>
+
+    <!-- Faixa hero -->
+    <div class="dash2-hero">
+      <div class="ha-card dash2-gauge-card">
+        <div class="ha-gauge" id="sysGauge"></div>
+        <div class="ha-gauge-name">Sistema</div>
+      </div>
+      <div class="ha-stat">
+        <span class="ha-stat-label">Volume Total / Máx</span>
+        <span class="ha-stat-value"><span x-text="volumeTotal">0</span> / <span x-text="volumeMax">0</span> <span class="ha-stat-unit">m³</span></span>
+        <span class="ha-stat-delta" x-text="reservoirCount + ' reservatórios'"></span>
+      </div>
+      <div class="ha-stat">
+        <span class="ha-stat-label">Online</span>
+        <span class="ha-stat-value" :style="onlineCount === reservoirCount ? 'color:var(--green)' : 'color:var(--yellow)'">
+          <span x-text="onlineCount">0</span><span class="ha-stat-unit">/<span x-text="reservoirCount">0</span></span>
+        </span>
+        <span class="ha-stat-delta" x-text="(reservoirCount - onlineCount) + ' offline'"></span>
+      </div>
+      <div class="ha-stat">
+        <span class="ha-stat-label">Alertas Ativos</span>
+        <span class="ha-stat-value" :style="critical > 0 ? 'color:var(--red)' : (warning > 0 ? 'color:var(--yellow)' : 'color:var(--green)')" x-text="critical + warning">0</span>
+        <span class="ha-stat-delta" :class="critical > 0 ? 'down' : 'up'"
+              x-text="critical > 0 ? (critical + ' crítico') : (warning > 0 ? (warning + ' atenção') : 'Tudo normal')"></span>
+      </div>
+    </div>
+
+    <!-- Grid de reservatórios -->
+    <div class="ha-section">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+      Reservatórios
+    </div>
+    <div class="dash2-res-grid">
+      <template x-for="r in sortedReservoirs" :key="r.alias">
+        <div class="ha-card res2">
+          <div class="res2-hdr">
+            <div>
+              <div class="res2-name" x-text="r.name || '—'"></div>
+              <div class="res2-alias" x-text="r.alias"></div>
+            </div>
+            <span class="res2-dot" :style="`background:${r.online ? 'var(--green)' : 'var(--red)'}`"></span>
+          </div>
+          <div class="res2-pct" :style="pctColor(r)" x-text="r.pct != null ? Math.round(r.pct) + '%' : '—'"></div>
+          <div class="res2-vol">
+            <span x-text="r.volume_l != null ? (r.volume_l / 1000).toFixed(1) : '—'"></span> m³
+            <span x-show="r.capacity_l" style="opacity:.6"> / <span x-text="r.capacity_l ? (r.capacity_l / 1000).toFixed(0) : ''"></span></span>
+          </div>
+        </div>
+      </template>
+      <template x-if="!reservoirCount">
+        <div class="ha-card res2" style="grid-column:1/-1;color:var(--text3);text-align:center">Sem reservatórios</div>
+      </template>
+    </div>
+
+    <div class="dash2-foot">
+      Última atualização: <span x-text="lastUpdate ? formatTs(lastUpdate) : '—'"></span>
+    </div>
+
+  </div>
+
+<script src="assets/api.js"></script>
+<script src="assets/shared.js"></script>
+<script src="assets/ha-ui.js"></script>
+<script defer src="assets/vendor/alpine.min.js"></script>
+<script>
+document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('dashboard.html');
+
+function dashApp() {
+  return {
+    reservoirs: [],
+    _initialized: false,
+    ...wsMixin(),
+
+    get reservoirCount() { return (this.reservoirs || []).length; },
+    get onlineCount() { return (this.reservoirs || []).filter(r => r.online).length; },
+    get volumeTotal() {
+      const l = (this.reservoirs || []).reduce((s, r) => s + (Number(r?.volume_l) || 0), 0);
+      return Math.round(l / 1000);
+    },
+    get volumeMax() {
+      const l = (this.reservoirs || []).reduce((s, r) => s + (Number(r?.volume_max_l ?? r?.capacity_l) || 0), 0);
+      return Math.round(l / 1000);
+    },
+    get avgPct() {
+      const r = (this.reservoirs || []).filter(x => x.online);
+      return r.length ? Math.round(r.reduce((s, x) => s + (x.pct || 0), 0) / r.length) : 0;
+    },
+    get critical() { return (this.reservoirs || []).filter(r => !r.online || (r.pct != null && r.pct <= 20)).length; },
+    get warning() { return (this.reservoirs || []).filter(r => r.online && r.pct != null && r.pct > 20 && r.pct <= 35).length; },
+    get sortedReservoirs() {
+      const order = ['CON', 'CAV', 'CIE', 'CB3', 'CBIF'];
+      const rank = a => { const u = (a || '').toUpperCase(); for (let i = 0; i < order.length; i++) if (u.startsWith(order[i])) return i; return 99; };
+      return [...(this.reservoirs || [])].sort((a, b) => rank(a.alias) - rank(b.alias));
+    },
+
+    pctColor(r) {
+      if (!r?.online) return 'color:var(--text3)';
+      const pct = Number(r?.pct) || 0;
+      if (pct <= 20) return 'color:var(--red)';
+      if (pct <= 35) return 'color:var(--yellow)';
+      return 'color:var(--blue)';
+    },
+
+    _renderGauge() {
+      const el = document.getElementById('sysGauge');
+      if (el && window.renderGauge) {
+        renderGauge(el, { value: this.avgPct, min: 0, max: 100, unit: '%', severity: { green: 40, yellow: 20, red: 10 }, size: 130 });
+      }
+    },
+
+    async init() {
+      if (this._initialized) return;
+      this._initialized = true;
+
+      const data = await aguadaAPI.getReservoirs().catch(() => []);
+      this.reservoirs = Array.isArray(data) && data.length ? data : [
+        { alias: 'CON',  name: 'Castelo de Consumo',  pct: 85, volume_l: 68000,  volume_max_l: 80000,  capacity_l: 80000,  online: true },
+        { alias: 'CAV',  name: 'Castelo de Incêndio', pct: 81, volume_l: 65000,  volume_max_l: 80000,  capacity_l: 80000,  online: true },
+        { alias: 'CIE1', name: 'Cisterna IE-1',       pct: 80, volume_l: 196000, volume_max_l: 245000, capacity_l: 245000, online: true },
+        { alias: 'CIE2', name: 'Cisterna IE-2',       pct: 66, volume_l: 161000, volume_max_l: 245000, capacity_l: 245000, online: true },
+        { alias: 'CB31', name: 'Casa de Bombas Nº3-1',pct: 73, volume_l: 29000,  volume_max_l: 40000,  capacity_l: 40000,  online: true },
+        { alias: 'CB32', name: 'Casa de Bombas Nº3-2',pct: 95, volume_l: 38000,  volume_max_l: 40000,  capacity_l: 40000,  online: true },
+        { alias: 'CBIF1',name: 'Casa de Bombas IF-1', pct: 70, volume_l: 28000,  volume_max_l: 40000,  capacity_l: 40000,  online: false },
+        { alias: 'CBIF2',name: 'Casa de Bombas IF-2', pct: 40, volume_l: 16000,  volume_max_l: 40000,  capacity_l: 40000,  online: false }
+      ];
+      this._renderGauge();
+
+      this.wsConnect(data => {
+        const msg = normalizeWsMessage(data);
+        if (msg.type === 'snapshot' && msg.reservoirs) {
+          this.reservoirs = msg.reservoirs;
+        } else if (msg.type === 'reading' && msg.reading) {
+          const idx = this.reservoirs.findIndex(r => r.alias === msg.reading.alias);
+          if (idx >= 0) this.reservoirs[idx] = { ...this.reservoirs[idx], ...msg.reading };
+          else this.reservoirs.push(msg.reading);
+          this.reservoirs = [...this.reservoirs];
+        }
+        this._renderGauge();
+      });
+    },
+  };
+}
+</script>
+</body>
+</html>

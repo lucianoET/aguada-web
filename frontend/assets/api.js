@@ -131,6 +131,7 @@ const aguadaAPI = (() => {
      */
     navHTML(active) {
       const links = [
+        ['dashboard.html','Dashboard'],
         ['painel.html',   'Painel'],
         ['scada.html',    'SCADA'],
         ['dados.html',    'Dados'],
