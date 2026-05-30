@@ -8,35 +8,23 @@
 <link rel="stylesheet" href="assets/aguada.css?v=2">
 <link rel="stylesheet" href="assets/style.css">
 <style>
-  /* ── Atual ── */
-  .tbl-wrap { background:var(--card, white); border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; }
-  .tbl-bar { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid var(--border-color, var(--border)); }
-  .tbl-bar h2 { font-size:var(--font-lg); color:var(--text, #1e3a5f); font-weight:600; margin:0; }
-  .tbl-info { font-size:var(--font-xs); color:var(--text-muted); display:flex; align-items:center; gap:6px; }
-  .refresh-dot { width:7px; height:7px; border-radius:50%; background:var(--success-green); animation:pulse-dot 2s infinite; display:inline-block; }
-
   /* ── Filtros ── */
-  .top-bar { background:var(--card, white); border-radius:10px; padding:10px 14px; box-shadow:0 2px 8px rgba(0,0,0,.08); margin-bottom:10px; display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; }
-  .top-bar label { font-size:var(--font-xs); font-weight:600; color:var(--text-muted); margin-bottom:2px; display:block; }
+  .top-bar { background:var(--card); border-radius:10px; padding:10px 14px; box-shadow:var(--card-shadow); margin-bottom:10px; display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; border:1px solid var(--border); }
+  .top-bar label { font-size:var(--font-xs); font-weight:600; color:var(--text3); margin-bottom:2px; display:block; }
   .alias-selector { display:flex; gap:5px; flex-wrap:wrap; }
-  .alias-btn { padding:4px 10px; border-radius:20px; border:1px solid var(--border-color, var(--border)); cursor:pointer; font-size:var(--font-xs); background:var(--card, white); font-weight:500; color:var(--text-dark, var(--text)); transition:background .15s, color .15s, border-color .15s; }
-  .alias-btn.active { background:var(--accent-purple, var(--blue)); color:white; border-color:var(--accent-purple, var(--blue)); }
-  select, input[type="date"] { padding:5px 8px; border:1px solid var(--border-color, var(--border)); border-radius:6px; font-size:var(--font-sm); background:var(--bg2, white); color:var(--text-dark, var(--text)); }
+  .alias-btn { padding:4px 10px; border-radius:20px; border:1px solid var(--border); cursor:pointer; font-size:var(--font-xs); background:var(--card); font-weight:500; color:var(--text); transition:background .15s, color .15s, border-color .15s; }
+  .alias-btn.active { background:var(--blue); color:white; border-color:var(--blue); }
+  select, input[type="date"] { padding:5px 8px; border:1px solid var(--border); border-radius:6px; font-size:var(--font-sm); background:var(--bg2); color:var(--text); }
   .date-filter { position:relative; min-width:148px; }
-  .date-picker-btn { width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:5px 10px; border:1px solid var(--border-color, var(--border)); border-radius:8px; background:var(--bg2, white); color:var(--text-dark, var(--text)); font-size:var(--font-sm); font-weight:500; }
+  .date-picker-btn { width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:5px 10px; border:1px solid var(--border); border-radius:8px; background:var(--bg2); color:var(--text); font-size:var(--font-sm); font-weight:500; }
   .date-picker-native { position:absolute; inset:20px 0 0 0; width:100%; height:calc(100% - 20px); opacity:0; cursor:pointer; }
 
   .tab-bar { margin-bottom:10px; padding:4px; }
   .tab-bar .tab-btn { padding:6px 12px; }
 
-  /* ── Histórico ── */
-  .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(108px,1fr)); gap:8px; margin-bottom:10px; }
-  .stat-mini { background:var(--card, white); border-radius:8px; padding:8px 10px; box-shadow:0 2px 6px rgba(0,0,0,.07); text-align:center; }
-  .stat-mini .slbl { font-size:var(--font-xxs); color:var(--text-muted); text-transform:uppercase; font-weight:600; }
-  .stat-mini .sval { font-size:17px; font-weight:700; color:var(--text, #1e3a5f); margin-top:2px; }
-  .chart-wrap { background:var(--card, white); border-radius:10px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
-  .chart-wrap h3 { color:var(--text, #1e3a5f); font-size:var(--font-base); font-weight:600; margin-bottom:8px; }
-
+  /* ── Leituras Atuais info bar ── */
+  .tbl-info { font-size:var(--font-xs); color:var(--text3); display:flex; align-items:center; gap:6px; }
+  .refresh-dot { width:7px; height:7px; border-radius:50%; background:var(--green); animation:pulse-dot 2s infinite; display:inline-block; }
 </style>
 </head>
 <body class="admin-page">
@@ -50,12 +38,17 @@
 
   <!-- ── ATUAL ── -->
   <div id="viewAtual">
-    <div class="tbl-wrap">
-      <div class="tbl-bar">
-        <h2>📋 Leituras Atuais</h2>
+    <div class="ha-card">
+      <div class="ha-card-header">
+        <span class="ha-card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Leituras Atuais
+        </span>
         <div class="tbl-info"><span class="refresh-dot"></span>Atualiza 30s &nbsp;|&nbsp; <span id="lastUpdate">—</span></div>
       </div>
-      <div id="tableContainer" style="padding:20px; overflow-x:auto;"><div class="loader"></div></div>
+      <div class="ha-card-body" style="padding:0">
+        <div id="tableContainer" style="padding:20px; overflow-x:auto;"><div class="loader"></div></div>
+      </div>
     </div>
   </div>
 
@@ -91,16 +84,40 @@
         <div class="alias-selector" id="aliasSelHist"></div>
       </div>
     </div>
-    <div class="stats-row">
-      <div class="stat-mini"><div class="slbl">Mínimo</div><div class="sval" id="hMin">—</div></div>
-      <div class="stat-mini"><div class="slbl">Máximo</div><div class="sval" id="hMax">—</div></div>
-      <div class="stat-mini"><div class="slbl">Média</div><div class="sval" id="hAvg">—</div></div>
-      <div class="stat-mini"><div class="slbl">Atual</div><div class="sval" id="hCur">—</div></div>
-      <div class="stat-mini"><div class="slbl">Leituras</div><div class="sval" id="hCnt">—</div></div>
+
+    <div class="ha-stat-grid" style="margin-bottom:10px">
+      <div class="ha-stat">
+        <span class="ha-stat-label">Mínimo</span>
+        <span class="ha-stat-value" id="hMin">—</span>
+      </div>
+      <div class="ha-stat">
+        <span class="ha-stat-label">Máximo</span>
+        <span class="ha-stat-value" id="hMax">—</span>
+      </div>
+      <div class="ha-stat">
+        <span class="ha-stat-label">Média</span>
+        <span class="ha-stat-value" id="hAvg">—</span>
+      </div>
+      <div class="ha-stat">
+        <span class="ha-stat-label">Atual</span>
+        <span class="ha-stat-value" id="hCur">—</span>
+      </div>
+      <div class="ha-stat">
+        <span class="ha-stat-label">Leituras</span>
+        <span class="ha-stat-value" id="hCnt">—</span>
+      </div>
     </div>
-    <div class="chart-wrap">
-      <h3 id="chartTitleHist">📈 Histórico Contínuo</h3>
-      <canvas id="histChart" height="100"></canvas>
+
+    <div class="ha-card">
+      <div class="ha-card-header">
+        <span class="ha-card-title" id="chartTitleHist">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Histórico Contínuo
+        </span>
+      </div>
+      <div class="ha-card-body">
+        <canvas id="histChart" height="100"></canvas>
+      </div>
     </div>
   </div>
 
@@ -194,28 +211,28 @@ function gc(pct) {
 
 function renderAtual(data) {
   const c = document.getElementById('tableContainer');
-  if (!data.length) { c.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">Nenhum reservatório.</div>'; return; }
+  if (!data.length) { c.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)">Nenhum reservatório.</div>'; return; }
   const rows = data.map(r => {
     const pct = r.pct ?? 0, col = gc(pct);
     const vol = formatVolumeM3(r.volume_l, 3);
     const cap = r.volume_max_l != null ? formatVolumeM3(r.volume_max_l, 1) : (r.capacity_l != null ? formatVolumeM3(r.capacity_l, 1) : '—');
     const badge = r.online ? '<span class="badge-online">● Online</span>' : '<span class="badge-offline">● Offline</span>';
     return `<tr>
-      <td><strong style="color:#1e3a5f;font-size:var(--font-base)">${r.alias}</strong></td>
-      <td style="color:var(--text-muted)">${r.name || '—'}</td>
+      <td><strong style="color:var(--text);font-size:var(--font-base)">${r.alias}</strong></td>
+      <td style="color:var(--text3)">${r.name || '—'}</td>
       <td>${badge}</td>
       <td><div style="display:flex;align-items:center">
         <div class="pct-bar"><div class="pct-bar-fill" style="width:${pct}%;background:${col}"></div></div>
         <span style="font-weight:600;color:${col}">${pct.toFixed(1)}%</span>
       </div></td>
       <td style="text-align:center;"><span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500;${resumoStatusStyle(r.pct)}">${resumoStatusLabel(r.pct)}</span></td>
-      <td>${vol}</td><td style="color:var(--text-muted)">${cap}</td>
+      <td>${vol}</td><td style="color:var(--text3)">${cap}</td>
       <td>${r.level_cm != null ? r.level_cm.toFixed(1)+' cm' : '—'}</td>
       <td>${r.rssi != null ? r.rssi+' dBm' : '—'}</td>
-      <td style="color:var(--text-muted)">${aguadaAPI.fmtTs(r.ts)}</td>
+      <td style="color:var(--text3)">${aguadaAPI.fmtTs(r.ts)}</td>
     </tr>`;
   }).join('');
-  c.innerHTML = `<table><thead><tr>
+  c.innerHTML = `<table class="table"><thead><tr>
     <th>Alias</th><th>Nome</th><th>Status</th><th>Nível %</th><th>Situação</th>
     <th>Volume</th><th>Capacidade</th><th>Nível cm</th><th>RSSI</th><th>Atualização</th>
   </tr></thead><tbody>${rows}</tbody></table>`;
@@ -246,7 +263,7 @@ function initSels() {
   if (!globalReservoirs.length) return;
   const defaultAlias = getDefaultAlias();
   const aliases = [{ alias: ALL_ALIAS, label: 'Todos' }, ...globalReservoirs.map(r => ({ alias: r.alias, label: r.alias }))];
-  const genBtns = (currAlias, prefix) => aliases.map(item => 
+  const genBtns = (currAlias, prefix) => aliases.map(item =>
     `<button class="alias-btn${(currAlias||defaultAlias)===item.alias?' active':''}" onclick="setSelAlias('${prefix}','${item.alias}',this)">${item.label}</button>`
   ).join('');
 
@@ -359,7 +376,8 @@ async function loadHist() {
     document.getElementById('hAvg').textContent = vals.length ? formatMetric(varKey, (vals.reduce((a,b)=>a+b,0)/vals.length) * (varKey === 'volume_l' ? LITERS_PER_M3 : 1), 1) : '—';
     document.getElementById('hCur').textContent = vals.length ? formatMetric(varKey, vals[vals.length-1] * (varKey === 'volume_l' ? LITERS_PER_M3 : 1), 1) : '—';
     document.getElementById('hCnt').textContent = merged.length;
-    document.getElementById('chartTitleHist').textContent = `📈 ${metricLabel(varKey)} — ${selAliasHist === ALL_ALIAS ? 'Todos os reservatórios' : selAliasHist} (${periodLabel(period)} em ${formatDateLabel(date)})`;
+    const titleEl = document.getElementById('chartTitleHist');
+    titleEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> ${metricLabel(varKey)} — ${selAliasHist === ALL_ALIAS ? 'Todos os reservatórios' : selAliasHist} (${periodLabel(period)} em ${formatDateLabel(date)})`;
     if (histChart) histChart.destroy();
     const chartData = buildCategoryChartData(targets.map((reservoir, index) => {
       const history = collapseHistoryRows(histories[index] || [], period);
@@ -408,7 +426,7 @@ function resumoStatusStyle(pct) {
   if (pct < 20) return 'background:var(--red-dim);color:var(--red);';
   if (pct < 50) return 'background:var(--yellow-dim);color:var(--yellow);';
   if (pct < 80) return 'background:var(--blue-dim);color:var(--blue);';
-  return 'background:rgba(34,197,94,0.15);color:var(--green);';
+  return 'background:var(--green-dim);color:var(--green);';
 }
 
 const today = aguadaAPI.today();
