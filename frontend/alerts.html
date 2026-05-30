@@ -10,20 +10,6 @@
 <style>
   .alerts-layout { display:grid; grid-template-columns:1fr 300px; gap:16px; }
   @media(max-width:900px){ .alerts-layout{grid-template-columns:1fr} }
-  .alert-item { padding:11px 14px; border-radius:8px; margin-bottom:10px; font-size:var(--font-sm); border-left:4px solid; }
-  .alert-crit { background:#fef2f2; border-color:#ef4444; color:#991b1b; }
-  .alert-warn { background:#fef3c7; border-color:#f59e0b; color:#92400e; }
-  .alert-info { background:#eff6ff; border-color:#667eea; color:#1e40af; }
-  .alert-ok   { background:#f0fdf4; border-color:#10b981; color:#065f46; }
-  .alert-item strong { display:block; margin-bottom:3px; font-size:var(--font-base); }
-  .alert-meta { font-size:var(--font-xxs); opacity:.7; margin-top:4px; }
-  .sum-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border-color, var(--border)); font-size:var(--font-sm); }
-  .sum-row:last-child { border-bottom:none; }
-  .abadge { padding:3px 10px; border-radius:8px; font-size:var(--font-xxs); font-weight:600; display:inline-block; }
-  .abadge-crit { background:#fee2e2; color:#991b1b; }
-  .abadge-warn { background:#fef3c7; color:#92400e; }
-  .abadge-ok   { background:#d1fae5; color:#065f46; }
-  .abadge-info { background:#eff6ff; color:#1e40af; }
 </style>
 </head>
 <body class="admin-page">
@@ -31,16 +17,28 @@
 
 <div class="admin-main">
   <div class="alerts-layout">
-    <div class="box">
-      <div class="box-header">
-        <h2>🚨 Alertas Ativos</h2>
-        <span id="alertCount" class="abadge abadge-info">—</span>
+    <div class="ha-card">
+      <div class="ha-card-header">
+        <span class="ha-card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          Alertas Ativos
+        </span>
+        <span id="alertCount" class="badge badge-blue">—</span>
       </div>
-      <div class="box-body" id="alertsList"><div class="loader"></div></div>
+      <div class="ha-card-body" id="alertsList"><div class="loader"></div></div>
     </div>
-    <div class="box">
-      <div class="box-header"><h2>📊 Resumo</h2></div>
-      <div class="box-body" id="summary"><div class="loader"></div></div>
+    <div class="ha-card">
+      <div class="ha-card-header">
+        <span class="ha-card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="18" y="3" width="4" height="18"/><rect x="10" y="8" width="4" height="13"/><rect x="2" y="13" width="4" height="8"/>
+          </svg>
+          Resumo
+        </span>
+      </div>
+      <div class="ha-card-body" id="summary"><div class="loader"></div></div>
     </div>
   </div>
 </div>
@@ -65,26 +63,26 @@ function generateAlerts(reservoirs) {
     if (!r.online) {
       const minsAgo = r.ts ? Math.round((now-r.ts)/60) : '?';
       alerts.push({ level:'crit',
-        title:`🔴 CRÍTICO — ${name} sem comunicação`,
+        title:`CRÍTICO — ${name} sem comunicação`,
         body:`Último dado há ${minsAgo} minutos. Verifique o sensor e a alimentação.` });
     } else if (pct <= THRESH.crit) {
       alerts.push({ level:'crit',
-        title:`🔴 CRÍTICO — ${name} com nível baixo`,
+        title:`CRÍTICO — ${name} com nível baixo`,
         body:`Nível: ${pct.toFixed(1)}% (limite crítico: ${THRESH.crit}%). Volume: ${r.volume_l!=null?(r.volume_l/1000).toFixed(2)+' m³':'—'}.` });
     } else if (pct <= THRESH.warn) {
       alerts.push({ level:'warn',
-        title:`🟡 AVISO — ${name} com nível reduzido`,
+        title:`AVISO — ${name} com nível reduzido`,
         body:`Nível: ${pct.toFixed(1)}% (limite: ${THRESH.warn}%). Considere acionar abastecimento.` });
     }
     if (r.out_of_range) {
       alerts.push({ level:'warn',
-        title:`🟡 AVISO — ${name} com leitura fora do alcance`,
+        title:`AVISO — ${name} com leitura fora do alcance`,
         body:`Sensor reportou distância inválida. Verifique obstrução ou posicionamento.` });
     }
   });
   if (!alerts.length)
     alerts.push({ level:'ok',
-      title:'✅ Todos os reservatórios em condições normais',
+      title:'Todos os reservatórios em condições normais',
       body:`${reservoirs.filter(r=>r.online).length} de ${reservoirs.length} sensores online. Níveis dentro dos limites.` });
   return alerts;
 }
@@ -98,21 +96,23 @@ function render(raw) {
 
   const cntEl = document.getElementById('alertCount');
   cntEl.textContent = active;
-  cntEl.className   = `abadge ${crits>0?'abadge-crit':warns>0?'abadge-warn':'abadge-ok'}`;
+  cntEl.className   = `badge ${crits>0?'badge-red':warns>0?'badge-yellow':'badge-green'}`;
 
   document.getElementById('alertsList').innerHTML = alerts.map(a => `
-    <div class="alert-item alert-${a.level}">
+    <div class="ha-alert ha-alert-${a.level}">
       <strong>${a.title}</strong>
       ${a.body}
-      <div class="alert-meta">Verificado: ${new Date().toLocaleString('pt-BR')}</div>
+      <div class="ha-alert-meta">Verificado: ${new Date().toLocaleString('pt-BR')}</div>
     </div>`).join('');
 
   document.getElementById('summary').innerHTML = `
-    <div class="sum-row"><span>🔴 Críticos</span><span class="abadge abadge-crit">${crits}</span></div>
-    <div class="sum-row"><span>🟡 Avisos</span><span class="abadge abadge-warn">${warns}</span></div>
-    <div class="sum-row"><span>✅ Normais</span><span class="abadge abadge-ok">${reservoirs.filter(r=>r.online&&(r.pct??0)>THRESH.warn).length}</span></div>
-    <div class="sum-row"><span>📡 Online</span><span class="abadge abadge-info">${reservoirs.filter(r=>r.online).length}/${reservoirs.length}</span></div>
-    <div class="sum-row"><span style="font-size:var(--font-xs);color:var(--text-muted)">Última verificação: ${new Date().toLocaleTimeString('pt-BR')}</span></div>`;
+    <div class="ha-entities">
+      <div class="ha-entity-row"><span class="ha-entity-name">Críticos</span><span class="badge badge-red">${crits}</span></div>
+      <div class="ha-entity-row"><span class="ha-entity-name">Avisos</span><span class="badge badge-yellow">${warns}</span></div>
+      <div class="ha-entity-row"><span class="ha-entity-name">Normais</span><span class="badge badge-green">${reservoirs.filter(r=>r.online&&(r.pct??0)>THRESH.warn).length}</span></div>
+      <div class="ha-entity-row"><span class="ha-entity-name">Online</span><span class="badge badge-blue">${reservoirs.filter(r=>r.online).length}/${reservoirs.length}</span></div>
+      <div class="ha-entity-row"><span class="ha-entity-name" style="font-size:var(--font-xs);color:var(--text3)">Última verificação: ${new Date().toLocaleTimeString('pt-BR')}</span></div>
+    </div>`;
 }
 
 let reservoirs = [];
@@ -123,7 +123,7 @@ async function load() {
     render(reservoirs);
   } catch(e) {
     setStatus(false);
-    document.getElementById('alertsList').innerHTML = `<div class="alert">Erro: ${e.message}</div>`;
+    document.getElementById('alertsList').innerHTML = `<div class="ha-alert ha-alert-crit">Erro: ${e.message}</div>`;
   }
 }
 

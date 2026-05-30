@@ -428,3 +428,12 @@ button { cursor: pointer; font-family: var(--sans); border: none; background: no
 .ha-gauge-value { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--text); margin-top: -8px; }
 .ha-gauge-name { font-size: 11px; color: var(--text3); }
 ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* Notification / alert cards (alerts.html) */
+.ha-alert { border-left: 4px solid; border-radius: 8px; padding: 11px 14px; margin-bottom: 10px; font-size: 13px; background: var(--bg2); }
+.ha-alert strong { display: block; margin-bottom: 3px; }
+.ha-alert-crit { border-color: var(--red);    background: var(--red-dim); }
+.ha-alert-warn { border-color: var(--yellow); background: var(--yellow-dim); }
+.ha-alert-info { border-color: var(--blue);   background: var(--blue-dim); }
+.ha-alert-ok   { border-color: var(--green);  background: var(--green-dim); }
+.ha-alert-meta { font-size: 10px; opacity: .7; margin-top: 4px; }
