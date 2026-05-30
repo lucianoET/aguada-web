@@ -435,20 +435,36 @@
                     :style="`background:${r.online?'var(--green)':'var(--red)'}`"></span>
                 </div>
                 <div class="tank-kpi">
-                  <span class="tank-vol" x-text="r.volume_l!=null ? Math.round(r.volume_l/1000) : '—'"></span>
-                  <span class="tank-vol-unit" x-show="r.volume_l!=null">m³</span>
-                  <span class="tank-pct-sep" x-show="r.pct!=null"></span>
-                  <span class="tank-pct" x-show="r.pct!=null" x-text="Math.round(r.pct)+'%'"></span>
+                  <span class="tank-vol"
+                        :style="tankKpiColor(r)"
+                        x-text="r.volume_l != null ? (r.volume_l / 1000).toFixed(1) : '—'"></span>
+                  <span class="tank-vol-unit" x-show="r.volume_l != null" :style="tankKpiColor(r)">m³</span>
+                  <span class="tank-pct-sep" x-show="r.pct != null && r.volume_l != null"></span>
+                  <span class="tank-pct"
+                        :style="tankKpiColor(r)"
+                        x-text="r.pct != null ? Math.round(r.pct) + '%' : ''"></span>
                 </div>
                 <div class="tank-spacer"></div>
                 <div class="tank-detail">
                   <div>
-                    <div class="tank-d-lbl">Atualizado</div>
-                    <div class="tank-d-val" x-text="tankDateTime(r.ts)"></div>
+                    <div class="tank-d-lbl">Capacidade</div>
+                    <div class="tank-d-val"
+                         x-text="r.capacity_l ? (r.capacity_l / 1000).toFixed(0) + ' m³' : '—'"></div>
                   </div>
                   <div>
-                    <div class="tank-d-lbl">Status</div>
-                    <div class="tank-d-val" :class="!r.online ? 'accent' : ''" x-text="r.online ? 'Online' : 'Offline'"></div>
+                    <div class="tank-d-lbl">Cons. diário</div>
+                    <div class="tank-d-val"
+                         x-text="r.consumed_l != null ? Math.round(r.consumed_l).toLocaleString('pt-BR') + ' L' : '—'"></div>
+                  </div>
+                  <div>
+                    <div class="tank-d-lbl">Taxa cons.</div>
+                    <div class="tank-d-val"
+                         :class="r.rate_lh > 60 ? 'accent' : ''"
+                         x-text="r.rate_lh != null ? r.rate_lh + ' L/h' : '—'"></div>
+                  </div>
+                  <div>
+                    <div class="tank-d-lbl">Última leit.</div>
+                    <div class="tank-d-val" x-text="tankDateTime(r.ts)"></div>
                   </div>
                 </div>
               </div>
