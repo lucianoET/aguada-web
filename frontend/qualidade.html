@@ -21,50 +21,103 @@
   </div>
 
   <!-- ÁGUA DE CONSUMO -->
-  <div id="viewAgua" class="page-box">
-    <div class="page-title">Qualidade da Água — Reservatório Principal
-      <button class="btn-primary" style="font-size:12px;padding:6px 14px">+ Nova Análise</button>
+  <div id="viewAgua" class="ha-card">
+    <div class="ha-card-header">
+      <span class="ha-card-title">Qualidade da Água — Reservatório Principal</span>
+      <button class="btn btn-primary">+ Nova Análise</button>
     </div>
-    
-    <h3 style="font-size:var(--font-sm); color:var(--text-muted); margin-bottom:10px;">Últimos Indicadores (Teste: 15/04/2026)</h3>
-    <div class="param-grid">
-      <div class="param-card"><div class="lbl">pH</div><div class="val">7.2</div><div class="norma">✓ Normal (6.0 - 9.5)</div></div>
-      <div class="param-card"><div class="lbl">Cloro Residual</div><div class="val">0.8 mg/L</div><div class="norma">✓ Normal (0.2 - 2.0 mg/L)</div></div>
-      <div class="param-card"><div class="lbl">Turbidez</div><div class="val">1.5 NTU</div><div class="norma">✓ Normal (< 5.0 NTU)</div></div>
-      <div class="param-card"><div class="lbl">Coliformes</div><div class="val">Ausente</div><div class="norma">✓ Normal</div></div>
-    </div>
+    <div class="ha-card-body">
+      <div class="ha-section">Últimos Indicadores (Teste: 15/04/2026)</div>
+      <div class="ha-stat-grid">
+        <div class="ha-stat">
+          <div class="ha-stat-label">pH</div>
+          <div class="ha-stat-value">7.2</div>
+          <div class="ha-stat-delta up">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="vertical-align:middle;margin-right:2px"><path d="M2 8.5l4-5 4 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Normal (6.0 - 9.5)
+          </div>
+        </div>
+        <div class="ha-stat">
+          <div class="ha-stat-label">Cloro Residual</div>
+          <div class="ha-stat-value">0.8 mg/L</div>
+          <div class="ha-stat-delta up">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="vertical-align:middle;margin-right:2px"><path d="M2 8.5l4-5 4 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Normal (0.2 - 2.0 mg/L)
+          </div>
+        </div>
+        <div class="ha-stat">
+          <div class="ha-stat-label">Turbidez</div>
+          <div class="ha-stat-value">1.5 NTU</div>
+          <div class="ha-stat-delta up">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="vertical-align:middle;margin-right:2px"><path d="M2 8.5l4-5 4 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Normal (&lt; 5.0 NTU)
+          </div>
+        </div>
+        <div class="ha-stat">
+          <div class="ha-stat-label">Coliformes</div>
+          <div class="ha-stat-value">Ausente</div>
+          <div class="ha-stat-delta up">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="vertical-align:middle;margin-right:2px"><path d="M2 8.5l4-5 4 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Normal
+          </div>
+        </div>
+      </div>
 
-    <h3 style="font-size:var(--font-sm); color:var(--text-muted); margin-top:20px; margin-bottom:10px;">Histórico de Laudos (Demo)</h3>
-    <table>
-      <thead><tr><th>Data do Teste</th><th>Laboratório</th><th>Nº Relatório</th><th>Status</th><th>Ações</th></tr></thead>
-      <tbody>
-        <tr><td>15/04/2026</td><td>Lab AquaTest</td><td>REQ-2026-8982</td><td><span style="color:var(--success-green);font-weight:600">Aprovado</span></td><td><button class="btn-upload">Ver PDF</button></td></tr>
-        <tr><td>15/03/2026</td><td>Lab AquaTest</td><td>REQ-2026-8120</td><td><span style="color:var(--success-green);font-weight:600">Aprovado</span></td><td><button class="btn-upload">Ver PDF</button></td></tr>
-      </tbody>
-    </table>
+      <div class="ha-section" style="margin-top:20px">Histórico de Laudos (Demo)</div>
+      <table class="table">
+        <thead><tr><th>Data do Teste</th><th>Laboratório</th><th>Nº Relatório</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody>
+          <tr><td>15/04/2026</td><td>Lab AquaTest</td><td>REQ-2026-8982</td><td><span style="color:var(--green);font-weight:600">Aprovado</span></td><td><button class="btn btn-secondary">Ver PDF</button></td></tr>
+          <tr><td>15/03/2026</td><td>Lab AquaTest</td><td>REQ-2026-8120</td><td><span style="color:var(--green);font-weight:600">Aprovado</span></td><td><button class="btn btn-secondary">Ver PDF</button></td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- ESGOTO -->
-  <div id="viewEsgoto" class="page-box" style="display:none">
-    <div class="page-title">Qualidade do Efluente Tratado — ETE
-      <button class="btn-primary" style="font-size:12px;padding:6px 14px">+ Nova Análise</button>
+  <div id="viewEsgoto" class="ha-card" style="display:none">
+    <div class="ha-card-header">
+      <span class="ha-card-title">Qualidade do Efluente Tratado — ETE</span>
+      <button class="btn btn-primary">+ Nova Análise</button>
     </div>
-    
-    <h3 style="font-size:var(--font-sm); color:var(--text-muted); margin-bottom:10px;">Últimos Indicadores (Teste: 10/04/2026)</h3>
-    <div class="param-grid">
-      <div class="param-card"><div class="lbl">DBO (5 dias)</div><div class="val">45 mg/L</div><div class="norma" style="color:var(--yellow)">⚠ Atenção (Alvo < 50 mg/L)</div></div>
-      <div class="param-card"><div class="lbl">Sólidos Suspensos</div><div class="val">25 mg/L</div><div class="norma">✓ Normal (< 30 mg/L)</div></div>
-      <div class="param-card"><div class="lbl">pH</div><div class="val">7.8</div><div class="norma">✓ Normal (6.0 - 9.0)</div></div>
-    </div>
+    <div class="ha-card-body">
+      <div class="ha-section">Últimos Indicadores (Teste: 10/04/2026)</div>
+      <div class="ha-stat-grid">
+        <div class="ha-stat">
+          <div class="ha-stat-label">DBO (5 dias)</div>
+          <div class="ha-stat-value">45 mg/L</div>
+          <div class="ha-stat-delta" style="color:var(--yellow)">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="vertical-align:middle;margin-right:2px"><path d="M6 2L10.5 10H1.5L6 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/><line x1="6" y1="5.5" x2="6" y2="7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="6" cy="9" r="0.75" fill="currentColor"/></svg>
+            Atenção (Alvo &lt; 50 mg/L)
+          </div>
+        </div>
+        <div class="ha-stat">
+          <div class="ha-stat-label">Sólidos Suspensos</div>
+          <div class="ha-stat-value">25 mg/L</div>
+          <div class="ha-stat-delta up">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="vertical-align:middle;margin-right:2px"><path d="M2 8.5l4-5 4 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Normal (&lt; 30 mg/L)
+          </div>
+        </div>
+        <div class="ha-stat">
+          <div class="ha-stat-label">pH</div>
+          <div class="ha-stat-value">7.8</div>
+          <div class="ha-stat-delta up">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="vertical-align:middle;margin-right:2px"><path d="M2 8.5l4-5 4 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Normal (6.0 - 9.0)
+          </div>
+        </div>
+      </div>
 
-    <h3 style="font-size:var(--font-sm); color:var(--text-muted); margin-top:20px; margin-bottom:10px;">Histórico de Laudos (Demo)</h3>
-    <table>
-      <thead><tr><th>Data do Teste</th><th>Laboratório</th><th>Nº Relatório</th><th>Status</th><th>Ações</th></tr></thead>
-      <tbody>
-        <tr><td>10/04/2026</td><td>Lab Ambiental</td><td>AMB-2026-112</td><td><span style="color:var(--yellow);font-weight:600">Observação</span></td><td><button class="btn-upload">Ver PDF</button></td></tr>
-        <tr><td>10/03/2026</td><td>Lab Ambiental</td><td>AMB-2026-085</td><td><span style="color:var(--success-green);font-weight:600">Aprovado</span></td><td><button class="btn-upload">Ver PDF</button></td></tr>
-      </tbody>
-    </table>
+      <div class="ha-section" style="margin-top:20px">Histórico de Laudos (Demo)</div>
+      <table class="table">
+        <thead><tr><th>Data do Teste</th><th>Laboratório</th><th>Nº Relatório</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody>
+          <tr><td>10/04/2026</td><td>Lab Ambiental</td><td>AMB-2026-112</td><td><span style="color:var(--yellow);font-weight:600">Observação</span></td><td><button class="btn btn-secondary">Ver PDF</button></td></tr>
+          <tr><td>10/03/2026</td><td>Lab Ambiental</td><td>AMB-2026-085</td><td><span style="color:var(--green);font-weight:600">Aprovado</span></td><td><button class="btn btn-secondary">Ver PDF</button></td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
