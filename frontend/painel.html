@@ -138,98 +138,141 @@
       grid-template-columns: repeat(4, minmax(140px, 1fr));
       gap: 10px;
     }
+    /* ── Tank Cards redesign ── */
     .tank-card {
-      background: var(--bg2);
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
       border: 1px solid var(--border2);
-      border-radius: 10px;
-      padding: 8px;
+      background: var(--bg2);
+      height: 240px;
       cursor: pointer;
-      min-height: 206px;
+      transition: border-color .2s, box-shadow .2s;
       display: flex;
       flex-direction: column;
-      gap: 8px;
     }
-    .tank-card:hover {
-      border-color: var(--blue);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
-    }
-    .tank-name {
-      font-size: 11px;
-      color: var(--text2);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .tank-visual {
-      position: relative;
-      flex: 1;
-      min-height: 162px;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--border2);
-      background: linear-gradient(180deg, rgba(117, 143, 166, 0.16) 0%, rgba(55, 73, 89, 0.08) 100%);
-    }
+    .tank-card:hover { border-color: var(--blue); box-shadow: 0 4px 16px rgba(37,99,235,.1); }
+    .tank-card.state-warn { border-color: #fde68a; }
+    [data-theme="dark"] .tank-card.state-warn { border-color: #2a2010; }
+    .tank-card.state-critical { border-color: var(--red-dim); }
+    .tank-card.state-offline { opacity: .7; }
+
+    /* Water background — no text inside */
     .tank-water {
       position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      transition: height 0.35s ease;
-      border-top: 1px solid rgba(255, 255, 255, 0.45);
-    }
-    .tank-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 8px;
+      left: 0; right: 0; bottom: 0;
+      border-top: 2px solid;
+      transition: height .5s ease;
       pointer-events: none;
     }
-    .tank-status-corner {
+
+    /* Content overlay */
+    .tank-content {
+      position: absolute;
+      inset: 0;
+      padding: 11px 12px;
+      z-index: 2;
       display: flex;
-      justify-content: flex-end;
+      flex-direction: column;
+    }
+
+    /* Header: name + alias + dot */
+    .tank-hdr {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .tank-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      font-family: var(--sans);
+      letter-spacing: -.01em;
+      line-height: 1.2;
+    }
+    .tank-alias {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text3);
+      letter-spacing: .1em;
+      margin-top: 2px;
     }
     .tank-status-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.22);
+      margin-top: 3px;
+      flex-shrink: 0;
     }
-    .tank-values {
+
+    /* Main KPI: volume m³ + % */
+    .tank-kpi {
       display: flex;
-      flex-direction: column;
-      gap: 2px;
-      color: var(--text);
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42);
+      align-items: flex-end;
+      gap: 6px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
     }
-    .tank-alias {
+    .tank-vol {
       font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-    }
-    .tank-pct-line {
-      display: inline-flex;
-      align-items: baseline;
-      gap: 2px;
-    }
-    .tank-pct-value {
-      font-family: var(--mono);
-      font-size: 24px;
-      line-height: 1;
+      font-size: 28px;
       font-weight: 700;
+      line-height: 1;
+      letter-spacing: -.03em;
     }
-    .tank-pct-unit {
-      font-size: 11px;
-      font-weight: 600;
-    }
-    .tank-volume-line,
-    .tank-datetime {
-      font-size: 10px;
-      color: rgba(255, 255, 255, 0.92);
+    .tank-vol-unit {
       font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      padding-bottom: 3px;
+      opacity: .6;
     }
+    .tank-pct-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--border2);
+      margin: 0 2px 3px;
+      flex-shrink: 0;
+    }
+    .tank-pct {
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1;
+      padding-bottom: 1px;
+      letter-spacing: -.02em;
+      opacity: .75;
+    }
+
+    /* Spacer pushes detail to bottom */
+    .tank-spacer { flex: 1; }
+
+    /* Detail grid: 2x2 */
+    .tank-detail {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px 10px;
+    }
+    .tank-d-lbl {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      font-weight: 600;
+      color: var(--text3);
+      font-family: var(--sans);
+      opacity: .7;
+    }
+    .tank-d-val {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text2);
+      margin-top: 1px;
+    }
+    .tank-d-val.accent { color: var(--yellow); }
+    [data-theme="dark"] .tank-d-val.accent { color: #fcd34d; }
 
     .cell-map .cell-body {
       padding: 0;
@@ -378,31 +421,34 @@
       <div class="cell-body">
         <div class="tanks-grid">
           <template x-for="r in sortedReservoirs" :key="r.alias">
-            <div class="tank-card" @click="openResModal(r.alias)">
-              <div class="tank-name" x-text="r.name || '—'"></div>
-              <div class="tank-visual">
-                <div class="tank-water"
-                  :class="r.online ? 'online' : ''"
-                  :style="tankWaterStyle(r)">
+            <div class="tank-card"
+              :class="{'state-warn': r.pct!=null && r.pct<30 && r.pct>=15, 'state-critical': r.pct!=null && r.pct<15, 'state-offline': !r.online}"
+              @click="openResModal(r.alias)">
+              <div class="tank-water" :style="tankWaterStyle(r)"></div>
+              <div class="tank-content">
+                <div class="tank-hdr">
+                  <div>
+                    <div class="tank-name" x-text="r.name || '—'"></div>
+                    <div class="tank-alias" x-text="r.alias"></div>
+                  </div>
+                  <span class="tank-status-dot"
+                    :style="`background:${r.online?'var(--green)':'var(--red)'}`"></span>
                 </div>
-                <div class="tank-overlay">
-                  <span class="tank-status-corner">
-                    <span class="tank-status-dot"
-                      :style="`background:${r.online?'var(--green)':'var(--red)'}`"></span>
-                  </span>
-                  <div class="tank-values">
-                    <div class="tank-alias-row">
-                      <span class="tank-alias" x-text="r.alias"></span>
-                    </div>
-                    <div class="tank-pct-line">
-                      <span class="tank-pct-value" x-text="r.pct!=null?Math.round(r.pct):'—'"></span>
-                      <span class="tank-pct-unit" x-show="r.pct!=null">%</span>
-                    </div>
-                    <div class="tank-volume-line" x-show="r.volume_l != null">
-                      <span class="tank-volume-value" x-text="Math.round(r.volume_l / 1000)"></span>
-                      <span class="tank-volume-unit">m³</span>
-                    </div>
-                    <div class="tank-datetime" x-text="tankDateTime(r.ts)"></div>
+                <div class="tank-kpi">
+                  <span class="tank-vol" x-text="r.volume_l!=null ? Math.round(r.volume_l/1000) : '—'"></span>
+                  <span class="tank-vol-unit" x-show="r.volume_l!=null">m³</span>
+                  <span class="tank-pct-sep" x-show="r.pct!=null"></span>
+                  <span class="tank-pct" x-show="r.pct!=null" x-text="Math.round(r.pct)+'%'"></span>
+                </div>
+                <div class="tank-spacer"></div>
+                <div class="tank-detail">
+                  <div>
+                    <div class="tank-d-lbl">Atualizado</div>
+                    <div class="tank-d-val" x-text="tankDateTime(r.ts)"></div>
+                  </div>
+                  <div>
+                    <div class="tank-d-lbl">Status</div>
+                    <div class="tank-d-val" :class="!r.online ? 'accent' : ''" x-text="r.online ? 'Online' : 'Offline'"></div>
                   </div>
                 </div>
               </div>
