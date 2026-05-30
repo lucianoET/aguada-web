@@ -8,7 +8,7 @@
 
 /* ── Variáveis — Tema Claro (padrão) ───────────────────────── */
 :root {
-  --bg:         #f1f5f9;
+  --bg:         #f0f4f8;
   --bg2:        #ffffff;
   --bg3:        #e2e8f0;
   --card:       #ffffff;
@@ -28,12 +28,13 @@
   --cyan:       #0891b2;
   --surface1:   #ffffff;
   --surface2:   #f8fafc;
-  --mono: 'Courier New', Courier, monospace;
-  --sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+  --sans: 'DM Sans', system-ui, -apple-system, sans-serif;
   --sidebar-w-collapsed: 42px;
   --sidebar-w-expanded:  220px;
   --topbar-h: 48px;
   --radius: 8px;
+  --card-shadow: 0 1px 3px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04);
 
   /* ── Variáveis SCADA / ISA-101 — Tema Claro ── */
   --scada-site-hdr-bg:       #d7e3f7;
@@ -85,6 +86,7 @@
   --cyan:       #06b6d4;
   --surface1:   #192030;
   --surface2:   #161e28;
+  --card-shadow: none;
 
   /* ── Variáveis SCADA / ISA-101 — Tema Escuro ── */
   --scada-site-hdr-bg:       #1a2740;
