@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Layout dos Cards</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #18181b; color: #e4e4e7; padding: 24px; }
+h1 { font-size: 17px; font-weight: 700; color: #f4f4f5; margin-bottom: 4px; }
+.sub { font-size: 12px; color: #71717a; margin-bottom: 28px; }
+.section-title { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #71717a; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #27272a; }
+.row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 40px; }
+
+/* ── shared card shell ── */
+.tc { border-radius: 12px; border: 1px solid; padding: 10px; cursor: pointer; transition: border-color .15s; }
+.dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── OPTION A: Info em cima, gráfico embaixo ── */
+.a-card { background: #141c28; border-color: #1e2d3d; }
+.a-card.warn { border-color: #2a2010; }
+.a-card:hover { border-color: #2d4a7a; }
+
+.a-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+.a-name { font-size: 12px; font-weight: 600; color: #8aa2bf; font-family: 'DM Sans',sans-serif; }
+.a-alias { font-family: 'JetBrains Mono',monospace; font-size: 9px; color: #2d4a6e; font-weight: 600; letter-spacing: .08em; margin-top: 2px; }
+
+.a-pct { font-family: 'JetBrains Mono',monospace; font-size: 28px; font-weight: 700; line-height: 1; }
+.a-pct.ok { color: #93c5fd; }
+.a-pct.warn { color: #fcd34d; }
+.a-pct-unit { font-size: 13px; font-weight: 600; }
+
+.a-info { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 10px; margin-bottom: 10px; }
+.a-info-item { }
+.a-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .09em; font-weight: 600; color: #2d4a6e; font-family: 'DM Sans',sans-serif; }
+.a-val { font-family: 'JetBrains Mono',monospace; font-size: 12px; font-weight: 700; color: #c9d4e0; margin-top: 1px; }
+.a-val.muted { color: #4a6580; }
+.a-val.warn { color: #fcd34d; }
+
+.a-vis { border-radius: 8px; border: 1px solid #1e2d3d; position: relative; overflow: hidden; background: #0f1620; height: 52px; }
+.a-water { position: absolute; left:0;right:0;bottom:0; border-radius: 0 0 7px 7px; border-top: 1px solid; }
+.a-water.ok { background: linear-gradient(180deg,rgba(59,130,246,.1),rgba(59,130,246,.35)); border-color: rgba(96,165,250,.55); }
+.a-water.warn { background: linear-gradient(180deg,rgba(245,158,11,.08),rgba(245,158,11,.28)); border-color: rgba(251,191,36,.5); }
+.a-dot-corner { position: absolute; top: 7px; right: 7px; }
+
+
+/* ── OPTION B: Gráfico à esquerda, info à direita (layout horizontal) ── */
+.b-card { background: #141c28; border-color: #1e2d3d; display: flex; gap: 10px; }
+.b-card.warn { border-color: #2a2010; }
+.b-card:hover { border-color: #2d4a7a; }
+.b-vis-col { width: 44px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; }
+.b-vis { flex: 1; border-radius: 8px; border: 1px solid #1e2d3d; position: relative; overflow: hidden; background: #0f1620; min-height: 120px; }
+.b-water { position: absolute; left:0;right:0;bottom:0; border-radius: 0 0 7px 7px; border-top: 1px solid; }
+.b-water.ok { background: linear-gradient(180deg,rgba(59,130,246,.1),rgba(59,130,246,.35)); border-color: rgba(96,165,250,.55); }
+.b-water.warn { background: linear-gradient(180deg,rgba(245,158,11,.08),rgba(245,158,11,.28)); border-color: rgba(251,191,36,.5); }
+.b-dot { margin: 0 auto; }
+.b-dot.ok { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,.5); }
+.b-dot.warn { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,.4); }
+
+.b-info-col { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.b-name { font-size: 11px; font-weight: 600; color: #8aa2bf; font-family: 'DM Sans',sans-serif; }
+.b-alias { font-family: 'JetBrains Mono',monospace; font-size: 9px; color: #2d4a6e; font-weight: 600; }
+.b-pct { font-family: 'JetBrains Mono',monospace; font-size: 26px; font-weight: 700; line-height: 1; }
+.b-pct.ok { color: #93c5fd; }
+.b-pct.warn { color: #fcd34d; }
+.b-divider { height: 1px; background: #1e2d3d; }
+.b-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; }
+.b-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .09em; font-weight: 600; color: #2d4a6e; font-family: 'DM Sans',sans-serif; }
+.b-val { font-family: 'JetBrains Mono',monospace; font-size: 11px; font-weight: 700; color: #c9d4e0; margin-top: 1px; }
+.b-val.muted { color: #4a6580; }
+.b-val.warn { color: #fcd34d; }
+
+
+/* ── OPTION C: Info em cima, gráfico bar horizontal embaixo ── */
+.c-card { background: #141c28; border-color: #1e2d3d; }
+.c-card.warn { border-color: #2a2010; }
+.c-card:hover { border-color: #2d4a7a; }
+.c-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.c-name { font-size: 12px; font-weight: 600; color: #8aa2bf; }
+.c-alias { font-family: 'JetBrains Mono',monospace; font-size: 9px; color: #2d4a6e; font-weight: 600; }
+.c-pct-big { font-family: 'JetBrains Mono',monospace; font-size: 30px; font-weight: 700; line-height: 1; }
+.c-pct-big.ok { color: #93c5fd; }
+.c-pct-big.warn { color: #fcd34d; }
+.c-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 10px; margin-bottom: 10px; }
+.c-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .09em; font-weight: 600; color: #2d4a6e; font-family: 'DM Sans',sans-serif; }
+.c-val { font-family: 'JetBrains Mono',monospace; font-size: 12px; font-weight: 700; color: #c9d4e0; margin-top: 1px; }
+.c-val.muted { color: #4a6580; }
+.c-val.warn { color: #fcd34d; }
+/* Bar gauge (não tem texto dentro) */
+.c-bar-track { height: 20px; border-radius: 6px; background: #0f1620; border: 1px solid #1e2d3d; overflow: hidden; position: relative; }
+.c-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; }
+.c-bar-fill.ok { background: linear-gradient(90deg, rgba(59,130,246,.4), rgba(96,165,250,.7)); border-right: 2px solid rgba(96,165,250,.8); }
+.c-bar-fill.warn { background: linear-gradient(90deg, rgba(245,158,11,.3), rgba(251,191,36,.6)); border-right: 2px solid rgba(251,191,36,.8); }
+.c-bar-labels { display: flex; justify-content: space-between; margin-top: 3px; }
+.c-bar-lbl { font-size: 9px; font-family: 'JetBrains Mono',monospace; color: #2d4a6e; font-weight: 600; }
+
+.option-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; color: #a1a1aa; }
+</style>
+</head>
+<body>
+
+<h1>Layout dos Cards — 3 opções sem sobreposição</h1>
+<p class="sub">Gráfico sempre limpo, sem texto dentro. Informações separadas do visual.</p>
+
+<div class="section-title" style="margin-top:16px;">Opção A — Dados em cima · Gráfico estreito embaixo</div>
+<div class="row">
+  <!-- RAP-01 ok -->
+  <div class="tc a-card">
+    <div class="a-top">
+      <div>
+        <div class="a-name">RAP Principal</div>
+        <div class="a-alias">RAP-01</div>
+      </div>
+      <div>
+        <span class="a-pct ok">70<span class="a-pct-unit">%</span></span>
+      </div>
+    </div>
+    <div class="a-info">
+      <div class="a-info-item">
+        <div class="a-lbl">Volume</div>
+        <div class="a-val">4,900 L</div>
+      </div>
+      <div class="a-info-item">
+        <div class="a-lbl">Capacidade</div>
+        <div class="a-val muted">7,000 L</div>
+      </div>
+      <div class="a-info-item">
+        <div class="a-lbl">Cons. diário</div>
+        <div class="a-val">1,240 L</div>
+      </div>
+      <div class="a-info-item">
+        <div class="a-lbl">Taxa cons.</div>
+        <div class="a-val">52 L/h</div>
+      </div>
+    </div>
+    <div class="a-vis">
+      <div class="a-water ok" style="height:70%"></div>
+      <div class="a-dot-corner"><span class="dot" style="background:#22c55e;display:block;box-shadow:0 0 6px rgba(34,197,94,.5);"></span></div>
+    </div>
+  </div>
+
+  <!-- RAP-02 ok -->
+  <div class="tc a-card">
+    <div class="a-top">
+      <div>
+        <div class="a-name">RAP Secundário</div>
+        <div class="a-alias">RAP-02</div>
+      </div>
+      <div>
+        <span class="a-pct ok">90<span class="a-pct-unit">%</span></span>
+      </div>
+    </div>
+    <div class="a-info">
+      <div class="a-info-item">
+        <div class="a-lbl">Volume</div>
+        <div class="a-val">9,000 L</div>
+      </div>
+      <div class="a-info-item">
+        <div class="a-lbl">Capacidade</div>
+        <div class="a-val muted">10,000 L</div>
+      </div>
+      <div class="a-info-item">
+        <div class="a-lbl">Cons. diário</div>
+        <div class="a-val">980 L</div>
+      </div>
+      <div class="a-info-item">
+        <div class="a-lbl">Taxa cons.</div>
+        <div class="a-val">41 L/h</div>
+      </div>
+    </div>
+    <div class="a-vis">
+      <div class="a-water ok" style="height:90%"></div>
+      <div class="a-dot-corner"><span class="dot" style="background:#22c55e;display:block;box-shadow:0 0 6px rgba(34,197,94,.5);"></span></div>
+    </div>
+  </div>
+
+  <!-- RAP-03 warn -->
+  <div class="tc a-card warn">
+    <div class="a-top">
+      <div>
+        <div class="a-name">RAP Leste</div>
+        <div class="a-alias">RAP-03</div>
+      </div>
+      <div>
+        <span class="a-pct warn">42<span class="a-pct-unit">%</span></span>
+      </div>
+    </div>
+    <div class="a-info">
+      <div class="a-info-item">
+        <div class="a-lbl">Volume</div>
+        <div class="a-val">2,100 L</div>
+      </div>
+      <div class="a-info-item">
+        <div class="a-lbl">Capacidade</div>
+        <div class="a-val muted">5,000 L</div>
+      </div>
+      <div class="a-info-item">
+        <div class="a-lbl">Cons. diário</div>
+        <div class="a-val">760 L</div>
+      </div>
+      <div class="a-info-item">
+        <div class="a-lbl">Taxa cons.</div>
+        <div class="a-val warn">68 L/h ↑</div>
+      </div>
+    </div>
+    <div class="a-vis">
+      <div class="a-water warn" style="height:42%"></div>
+      <div class="a-dot-corner"><span class="dot" style="background:#f59e0b;display:block;box-shadow:0 0 6px rgba(245,158,11,.4);"></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="section-title">Opção B — Gráfico vertical à esquerda · Dados à direita</div>
+<div class="row">
+  <div class="tc b-card">
+    <div class="b-vis-col">
+      <div class="dot b-dot ok" style="margin:0 auto;"></div>
+      <div class="b-vis">
+        <div class="b-water ok" style="height:70%"></div>
+      </div>
+    </div>
+    <div class="b-info-col">
+      <div>
+        <div class="b-name">RAP Principal</div>
+        <div class="b-alias">RAP-01</div>
+      </div>
+      <div class="b-pct ok">70%</div>
+      <div class="b-divider"></div>
+      <div class="b-grid">
+        <div><div class="b-lbl">Volume</div><div class="b-val">4,900 L</div></div>
+        <div><div class="b-lbl">Capacidade</div><div class="b-val muted">7,000 L</div></div>
+        <div><div class="b-lbl">Cons. diário</div><div class="b-val">1,240 L</div></div>
+        <div><div class="b-lbl">Taxa cons.</div><div class="b-val">52 L/h</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc b-card">
+    <div class="b-vis-col">
+      <div class="dot b-dot ok" style="margin:0 auto;"></div>
+      <div class="b-vis">
+        <div class="b-water ok" style="height:90%"></div>
+      </div>
+    </div>
+    <div class="b-info-col">
+      <div>
+        <div class="b-name">RAP Secundário</div>
+        <div class="b-alias">RAP-02</div>
+      </div>
+      <div class="b-pct ok">90%</div>
+      <div class="b-divider"></div>
+      <div class="b-grid">
+        <div><div class="b-lbl">Volume</div><div class="b-val">9,000 L</div></div>
+        <div><div class="b-lbl">Capacidade</div><div class="b-val muted">10,000 L</div></div>
+        <div><div class="b-lbl">Cons. diário</div><div class="b-val">980 L</div></div>
+        <div><div class="b-lbl">Taxa cons.</div><div class="b-val">41 L/h</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc b-card warn">
+    <div class="b-vis-col">
+      <div class="dot b-dot warn" style="margin:0 auto;"></div>
+      <div class="b-vis">
+        <div class="b-water warn" style="height:42%"></div>
+      </div>
+    </div>
+    <div class="b-info-col">
+      <div>
+        <div class="b-name">RAP Leste</div>
+        <div class="b-alias">RAP-03</div>
+      </div>
+      <div class="b-pct warn">42%</div>
+      <div class="b-divider"></div>
+      <div class="b-grid">
+        <div><div class="b-lbl">Volume</div><div class="b-val">2,100 L</div></div>
+        <div><div class="b-lbl">Capacidade</div><div class="b-val muted">5,000 L</div></div>
+        <div><div class="b-lbl">Cons. diário</div><div class="b-val">760 L</div></div>
+        <div><div class="b-lbl">Taxa cons.</div><div class="b-val warn">68 L/h ↑</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-title">Opção C — Dados em cima · Barra horizontal embaixo</div>
+<div class="row">
+  <div class="tc c-card">
+    <div class="c-top">
+      <div>
+        <div class="c-name">RAP Principal</div>
+        <div class="c-alias">RAP-01 &nbsp;·&nbsp; <span style="color:#22c55e;font-family:'JetBrains Mono',monospace;font-size:9px;">ONLINE</span></div>
+      </div>
+      <div class="c-pct-big ok">70%</div>
+    </div>
+    <div class="c-grid">
+      <div><div class="c-lbl">Volume</div><div class="c-val">4,900 L</div></div>
+      <div><div class="c-lbl">Capacidade</div><div class="c-val muted">7,000 L</div></div>
+      <div><div class="c-lbl">Cons. diário</div><div class="c-val">1,240 L</div></div>
+      <div><div class="c-lbl">Taxa cons.</div><div class="c-val">52 L/h</div></div>
+    </div>
+    <div class="c-bar-track" style="margin-top:10px;">
+      <div class="c-bar-fill ok" style="width:70%"></div>
+    </div>
+    <div class="c-bar-labels">
+      <span class="c-bar-lbl">0</span>
+      <span class="c-bar-lbl">7,000 L</span>
+    </div>
+  </div>
+
+  <div class="tc c-card">
+    <div class="c-top">
+      <div>
+        <div class="c-name">RAP Secundário</div>
+        <div class="c-alias">RAP-02 &nbsp;·&nbsp; <span style="color:#22c55e;font-family:'JetBrains Mono',monospace;font-size:9px;">ONLINE</span></div>
+      </div>
+      <div class="c-pct-big ok">90%</div>
+    </div>
+    <div class="c-grid">
+      <div><div class="c-lbl">Volume</div><div class="c-val">9,000 L</div></div>
+      <div><div class="c-lbl">Capacidade</div><div class="c-val muted">10,000 L</div></div>
+      <div><div class="c-lbl">Cons. diário</div><div class="c-val">980 L</div></div>
+      <div><div class="c-lbl">Taxa cons.</div><div class="c-val">41 L/h</div></div>
+    </div>
+    <div class="c-bar-track" style="margin-top:10px;">
+      <div class="c-bar-fill ok" style="width:90%"></div>
+    </div>
+    <div class="c-bar-labels">
+      <span class="c-bar-lbl">0</span>
+      <span class="c-bar-lbl">10,000 L</span>
+    </div>
+  </div>
+
+  <div class="tc c-card warn">
+    <div class="c-top">
+      <div>
+        <div class="c-name">RAP Leste</div>
+        <div class="c-alias">RAP-03 &nbsp;·&nbsp; <span style="color:#f59e0b;font-family:'JetBrains Mono',monospace;font-size:9px;">ATENÇÃO</span></div>
+      </div>
+      <div class="c-pct-big warn">42%</div>
+    </div>
+    <div class="c-grid">
+      <div><div class="c-lbl">Volume</div><div class="c-val">2,100 L</div></div>
+      <div><div class="c-lbl">Capacidade</div><div class="c-val muted">5,000 L</div></div>
+      <div><div class="c-lbl">Cons. diário</div><div class="c-val">760 L</div></div>
+      <div><div class="c-lbl">Taxa cons.</div><div class="c-val warn">68 L/h ↑</div></div>
+    </div>
+    <div class="c-bar-track" style="margin-top:10px;">
+      <div class="c-bar-fill warn" style="width:42%"></div>
+    </div>
+    <div class="c-bar-labels">
+      <span class="c-bar-lbl">0</span>
+      <span class="c-bar-lbl">5,000 L</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

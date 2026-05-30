@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Tank Overlay</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #18181b; color: #e4e4e7; padding: 24px; }
+h1 { font-size: 17px; font-weight: 700; color: #f4f4f5; margin-bottom: 4px; }
+.sub { font-size: 12px; color: #71717a; margin-bottom: 28px; }
+.stitle { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #71717a; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #27272a; }
+.row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 40px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   OPÇÃO A — água sobe pela parte de baixo
+   dados flutuam acima da linha d'água
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.a-card {
+  border-radius: 12px;
+  border: 1px solid #1e2d3d;
+  background: #0f1620;
+  position: relative;
+  overflow: hidden;
+  height: 220px;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.a-card.warn { border-color: #2a2010; }
+.a-card:hover { border-color: #2d4a7a; }
+
+/* Water fill — rises from bottom */
+.a-water {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  border-top: 1px solid;
+  transition: height .4s ease;
+}
+.a-water.ok {
+  background: linear-gradient(180deg, rgba(37,99,235,.15) 0%, rgba(37,99,235,.42) 100%);
+  border-color: rgba(96,165,250,.5);
+}
+.a-water.warn {
+  background: linear-gradient(180deg, rgba(245,158,11,.12) 0%, rgba(245,158,11,.38) 100%);
+  border-color: rgba(251,191,36,.45);
+}
+
+/* Content sits on top of everything via z-index */
+.a-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 11px 12px;
+  z-index: 2;
+}
+
+/* Header row */
+.a-hdr { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: auto; }
+.a-name { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.55); font-family: 'DM Sans',sans-serif; }
+.a-alias { font-family: 'JetBrains Mono',monospace; font-size: 9px; color: rgba(255,255,255,.25); font-weight: 600; letter-spacing: .08em; margin-top: 2px; }
+.a-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+.a-dot.ok { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,.6); }
+.a-dot.warn { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,.5); }
+
+/* Big % in the middle */
+.a-pct-wrap { display: flex; align-items: baseline; gap: 2px; margin-bottom: 2px; }
+.a-pct { font-family: 'JetBrains Mono',monospace; font-size: 48px; font-weight: 700; line-height: 1; letter-spacing: -.03em; }
+.a-pct.ok { color: #93c5fd; text-shadow: 0 0 20px rgba(96,165,250,.25); }
+.a-pct.warn { color: #fcd34d; text-shadow: 0 0 20px rgba(252,211,77,.25); }
+.a-pct-unit { font-family: 'JetBrains Mono',monospace; font-size: 18px; font-weight: 700; }
+.a-pct-unit.ok { color: rgba(147,197,253,.6); }
+.a-pct-unit.warn { color: rgba(252,211,77,.6); }
+
+/* Info grid at the bottom — semi-transparent backdrop */
+.a-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 8px;
+  padding: 7px 9px;
+  gap: 4px 12px;
+  margin-top: 6px;
+}
+.a-info-item {}
+.a-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .09em; font-weight: 600; color: rgba(255,255,255,.25); font-family: 'DM Sans',sans-serif; }
+.a-val { font-family: 'JetBrains Mono',monospace; font-size: 11px; font-weight: 700; color: rgba(255,255,255,.75); margin-top: 1px; }
+.a-val.accent-ok { color: #93c5fd; }
+.a-val.accent-warn { color: #fcd34d; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   OPÇÃO B — água como BG da metade inferior
+   Dados no topo claro, água cresce por baixo
+   linha d'água separa as duas zonas
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.b-card {
+  border-radius: 12px;
+  border: 1px solid #1e2d3d;
+  background: #141c28;
+  position: relative;
+  overflow: hidden;
+  height: 220px;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.b-card.warn { border-color: #2a2010; }
+.b-card:hover { border-color: #2d4a7a; }
+
+.b-water {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  border-top: 2px solid;
+  transition: height .4s ease;
+}
+.b-water.ok {
+  background: linear-gradient(180deg, rgba(37,99,235,.2) 0%, rgba(37,99,235,.5) 100%);
+  border-color: #3b82f6;
+}
+.b-water.warn {
+  background: linear-gradient(180deg, rgba(245,158,11,.18) 0%, rgba(245,158,11,.45) 100%);
+  border-color: #f59e0b;
+}
+
+/* "dry" zone top — card background color shows through */
+.b-content {
+  position: absolute;
+  inset: 0;
+  padding: 11px 12px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.b-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.b-name { font-size: 11px; font-weight: 600; color: #8aa2bf; }
+.b-alias { font-family: 'JetBrains Mono',monospace; font-size: 9px; color: #2d4a6e; font-weight: 600; letter-spacing:.08em; margin-top:2px; }
+.b-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 3px; }
+.b-dot.ok { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,.6); }
+.b-dot.warn { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,.5); }
+
+.b-pct-row { display: flex; align-items: baseline; gap: 3px; margin-bottom: 8px; }
+.b-pct { font-family: 'JetBrains Mono',monospace; font-size: 40px; font-weight: 700; line-height: 1; letter-spacing: -.03em; }
+.b-pct.ok { color: #93c5fd; }
+.b-pct.warn { color: #fcd34d; }
+.b-unit { font-family: 'JetBrains Mono',monospace; font-size: 16px; font-weight: 600; color: rgba(147,197,253,.5); }
+.b-unit.warn { color: rgba(252,211,77,.5); }
+
+.b-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+.b-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .09em; font-weight: 600; color: #2d4a6e; font-family: 'DM Sans',sans-serif; }
+.b-val { font-family: 'JetBrains Mono',monospace; font-size: 11px; font-weight: 700; color: #c9d4e0; margin-top: 1px; }
+.b-val.muted { color: #4a6580; }
+.b-val.accent { color: #fcd34d; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   OPÇÃO C — claro: água como BG fill
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.c-card {
+  border-radius: 12px;
+  border: 1px solid #e8edf5;
+  background: #f8fafc;
+  position: relative;
+  overflow: hidden;
+  height: 220px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  transition: border-color .15s, box-shadow .15s;
+}
+.c-card.warn { border-color: #fde68a; }
+.c-card:hover { border-color: #93c5fd; box-shadow: 0 4px 16px rgba(37,99,235,.1); }
+
+.c-water {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  border-top: 2px solid;
+  transition: height .4s ease;
+}
+.c-water.ok {
+  background: linear-gradient(180deg, rgba(37,99,235,.08) 0%, rgba(37,99,235,.22) 100%);
+  border-color: #3b82f6;
+}
+.c-water.warn {
+  background: linear-gradient(180deg, rgba(245,158,11,.08) 0%, rgba(245,158,11,.2) 100%);
+  border-color: #d97706;
+}
+
+.c-content {
+  position: absolute;
+  inset: 0;
+  padding: 11px 12px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+.c-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.c-name { font-size: 11px; font-weight: 600; color: #334155; }
+.c-alias { font-family: 'JetBrains Mono',monospace; font-size: 9px; color: #94a3b8; font-weight: 600; letter-spacing:.08em; margin-top:2px; }
+.c-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 3px; }
+.c-dot.ok { background: #22c55e; box-shadow: 0 0 0 2px rgba(34,197,94,.2); }
+.c-dot.warn { background: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,.2); }
+.c-pct { font-family: 'JetBrains Mono',monospace; font-size: 40px; font-weight: 700; line-height: 1; letter-spacing: -.03em; margin-bottom: 8px; }
+.c-pct.ok { color: #1d4ed8; }
+.c-pct.warn { color: #92400e; }
+.c-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+.c-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .09em; font-weight: 600; color: #94a3b8; font-family: 'DM Sans',sans-serif; }
+.c-val { font-family: 'JetBrains Mono',monospace; font-size: 11px; font-weight: 700; color: #0f172a; margin-top: 1px; }
+.c-val.muted { color: #64748b; }
+.c-val.accent { color: #b45309; }
+</style>
+</head>
+<body>
+
+<h1>Cards com sobreposição — 3 tratamentos</h1>
+<p class="sub">Água como background, dados flutuando em cima. Variações de contraste e hierarquia.</p>
+
+<!-- ══ OPÇÃO A ══ -->
+<div class="stitle" style="margin-top:8px;">A — Escuro · backdrop translúcido nos dados</div>
+<div class="row">
+  <div class="a-card">
+    <div class="a-water ok" style="height:70%"></div>
+    <div class="a-content">
+      <div class="a-hdr">
+        <div><div class="a-name">RAP Principal</div><div class="a-alias">RAP-01</div></div>
+        <div class="a-dot ok"></div>
+      </div>
+      <div class="a-pct-wrap"><span class="a-pct ok">70</span><span class="a-pct-unit ok">%</span></div>
+      <div class="a-info">
+        <div class="a-info-item"><div class="a-lbl">Volume</div><div class="a-val">4,900 L</div></div>
+        <div class="a-info-item"><div class="a-lbl">Capacidade</div><div class="a-val">7,000 L</div></div>
+        <div class="a-info-item"><div class="a-lbl">Cons. diário</div><div class="a-val accent-ok">1,240 L</div></div>
+        <div class="a-info-item"><div class="a-lbl">Taxa</div><div class="a-val">52 L/h</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="a-card">
+    <div class="a-water ok" style="height:90%"></div>
+    <div class="a-content">
+      <div class="a-hdr">
+        <div><div class="a-name">RAP Secundário</div><div class="a-alias">RAP-02</div></div>
+        <div class="a-dot ok"></div>
+      </div>
+      <div class="a-pct-wrap"><span class="a-pct ok">90</span><span class="a-pct-unit ok">%</span></div>
+      <div class="a-info">
+        <div class="a-info-item"><div class="a-lbl">Volume</div><div class="a-val">9,000 L</div></div>
+        <div class="a-info-item"><div class="a-lbl">Capacidade</div><div class="a-val">10,000 L</div></div>
+        <div class="a-info-item"><div class="a-lbl">Cons. diário</div><div class="a-val accent-ok">980 L</div></div>
+        <div class="a-info-item"><div class="a-lbl">Taxa</div><div class="a-val">41 L/h</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="a-card warn">
+    <div class="a-water warn" style="height:42%"></div>
+    <div class="a-content">
+      <div class="a-hdr">
+        <div><div class="a-name">RAP Leste</div><div class="a-alias">RAP-03</div></div>
+        <div class="a-dot warn"></div>
+      </div>
+      <div class="a-pct-wrap"><span class="a-pct warn">42</span><span class="a-pct-unit warn">%</span></div>
+      <div class="a-info">
+        <div class="a-info-item"><div class="a-lbl">Volume</div><div class="a-val">2,100 L</div></div>
+        <div class="a-info-item"><div class="a-lbl">Capacidade</div><div class="a-val">5,000 L</div></div>
+        <div class="a-info-item"><div class="a-lbl">Cons. diário</div><div class="a-val accent-warn">760 L</div></div>
+        <div class="a-info-item"><div class="a-lbl">Taxa</div><div class="a-val accent-warn">68 L/h ↑</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OPÇÃO B ══ -->
+<div class="stitle">B — Escuro · dados na zona seca, água sobe por baixo</div>
+<div class="row">
+  <div class="b-card">
+    <div class="b-water ok" style="height:70%"></div>
+    <div class="b-content">
+      <div class="b-top">
+        <div><div class="b-name">RAP Principal</div><div class="b-alias">RAP-01</div></div>
+        <div class="b-dot ok"></div>
+      </div>
+      <div class="b-pct-row"><span class="b-pct ok">70</span><span class="b-unit">%</span></div>
+      <div class="b-grid">
+        <div><div class="b-lbl">Volume</div><div class="b-val">4,900 L</div></div>
+        <div><div class="b-lbl">Capacidade</div><div class="b-val muted">7,000 L</div></div>
+        <div><div class="b-lbl">Cons. diário</div><div class="b-val">1,240 L</div></div>
+        <div><div class="b-lbl">Taxa cons.</div><div class="b-val">52 L/h</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="b-card">
+    <div class="b-water ok" style="height:90%"></div>
+    <div class="b-content">
+      <div class="b-top">
+        <div><div class="b-name">RAP Secundário</div><div class="b-alias">RAP-02</div></div>
+        <div class="b-dot ok"></div>
+      </div>
+      <div class="b-pct-row"><span class="b-pct ok">90</span><span class="b-unit">%</span></div>
+      <div class="b-grid">
+        <div><div class="b-lbl">Volume</div><div class="b-val">9,000 L</div></div>
+        <div><div class="b-lbl">Capacidade</div><div class="b-val muted">10,000 L</div></div>
+        <div><div class="b-lbl">Cons. diário</div><div class="b-val">980 L</div></div>
+        <div><div class="b-lbl">Taxa cons.</div><div class="b-val">41 L/h</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="b-card warn">
+    <div class="b-water warn" style="height:42%"></div>
+    <div class="b-content">
+      <div class="b-top">
+        <div><div class="b-name">RAP Leste</div><div class="b-alias">RAP-03</div></div>
+        <div class="b-dot warn"></div>
+      </div>
+      <div class="b-pct-row"><span class="b-pct warn">42</span><span class="b-unit warn">%</span></div>
+      <div class="b-grid">
+        <div><div class="b-lbl">Volume</div><div class="b-val">2,100 L</div></div>
+        <div><div class="b-lbl">Capacidade</div><div class="b-val muted">5,000 L</div></div>
+        <div><div class="b-lbl">Cons. diário</div><div class="b-val">760 L</div></div>
+        <div><div class="b-lbl">Taxa cons.</div><div class="b-val accent">68 L/h ↑</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OPÇÃO C ══ -->
+<div class="stitle">C — Claro · mesmo conceito, fundo branco</div>
+<div class="row">
+  <div class="c-card">
+    <div class="c-water ok" style="height:70%"></div>
+    <div class="c-content">
+      <div class="c-top">
+        <div><div class="c-name">RAP Principal</div><div class="c-alias">RAP-01</div></div>
+        <div class="c-dot ok"></div>
+      </div>
+      <div class="c-pct ok">70%</div>
+      <div class="c-grid">
+        <div><div class="c-lbl">Volume</div><div class="c-val">4,900 L</div></div>
+        <div><div class="c-lbl">Capacidade</div><div class="c-val muted">7,000 L</div></div>
+        <div><div class="c-lbl">Cons. diário</div><div class="c-val">1,240 L</div></div>
+        <div><div class="c-lbl">Taxa cons.</div><div class="c-val">52 L/h</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="c-card">
+    <div class="c-water ok" style="height:90%"></div>
+    <div class="c-content">
+      <div class="c-top">
+        <div><div class="c-name">RAP Secundário</div><div class="c-alias">RAP-02</div></div>
+        <div class="c-dot ok"></div>
+      </div>
+      <div class="c-pct ok">90%</div>
+      <div class="c-grid">
+        <div><div class="c-lbl">Volume</div><div class="c-val">9,000 L</div></div>
+        <div><div class="c-lbl">Capacidade</div><div class="c-val muted">10,000 L</div></div>
+        <div><div class="c-lbl">Cons. diário</div><div class="c-val">980 L</div></div>
+        <div><div class="c-lbl">Taxa cons.</div><div class="c-val">41 L/h</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="c-card warn">
+    <div class="c-water warn" style="height:42%"></div>
+    <div class="c-content">
+      <div class="c-top">
+        <div><div class="c-name">RAP Leste</div><div class="c-alias">RAP-03</div></div>
+        <div class="c-dot warn"></div>
+      </div>
+      <div class="c-pct warn">42%</div>
+      <div class="c-grid">
+        <div><div class="c-lbl">Volume</div><div class="c-val">2,100 L</div></div>
+        <div><div class="c-lbl">Capacidade</div><div class="c-val muted">5,000 L</div></div>
+        <div><div class="c-lbl">Cons. diário</div><div class="c-val">760 L</div></div>
+        <div><div class="c-lbl">Taxa cons.</div><div class="c-val accent">68 L/h ↑</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

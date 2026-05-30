@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Antes / Depois</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #18181b; color: #e4e4e7; }
+
+.page { padding: 24px; max-width: 1300px; margin: 0 auto; }
+h1 { font-size: 18px; font-weight: 700; color: #f4f4f5; margin-bottom: 4px; }
+.sub { font-size: 13px; color: #71717a; margin-bottom: 28px; }
+
+.section { margin-bottom: 40px; }
+.section-title { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #71717a; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #27272a; }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.col-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+.col-label.before { color: #6b6b6b; }
+.col-label.after { color: #22c55e; }
+
+/* ── BEFORE: current styles reproduced ── */
+.b-header {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+  height: 46px; display: flex; align-items: center;
+  border-radius: 8px; overflow: hidden;
+}
+.b-brand { padding: 0 18px; font-size: 15px; font-weight: 700; color: white; border-right: 1px solid rgba(255,255,255,.15); height: 100%; display: flex; align-items: center; }
+.b-nav { display: flex; height: 100%; }
+.b-nav a { padding: 0 13px; color: rgba(255,255,255,.75); font-size: 12px; font-weight: 500; border-bottom: 2px solid transparent; display: flex; align-items: center; text-decoration: none; font-family: system-ui, sans-serif; }
+.b-nav a.active { border-bottom-color: #10b981; color: white; background: rgba(255,255,255,.08); }
+.b-kpi-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-top: 8px; }
+.b-kpi { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; min-height: 72px; display: flex; align-items: center; justify-content: space-between; }
+.b-kpi-lbl { color: #64748b; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; font-family: system-ui; }
+.b-kpi-val { color: #1e293b; font-family: 'Courier New', monospace; font-size: 22px; font-weight: 700; margin-top: 2px; }
+.b-kpi-side { color: #64748b; font-size: 11px; font-family: 'Courier New', monospace; }
+.b-tank { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 8px; height: 160px; position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 6px; }
+.b-tank-name { font-size: 11px; color: #475569; font-family: system-ui; }
+.b-tank-vis { flex: 1; border-radius: 8px; border: 1px solid #cbd5e1; position: relative; overflow: hidden; background: linear-gradient(180deg,rgba(117,143,166,.16),rgba(55,73,89,.08)); }
+.b-tank-water { position: absolute; left:0;right:0;bottom:0; background: linear-gradient(180deg,rgba(37,99,235,.38),rgba(37,99,235,.7)); border-top: 1px solid rgba(255,255,255,.45); }
+.b-tank-pct { position: absolute; bottom: 8px; left:0;right:0; text-align: center; font-family: 'Courier New',monospace; font-size: 20px; font-weight: 700; color: white; text-shadow: 0 1px 3px rgba(0,0,0,.5); }
+.b-tanks { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 8px; }
+
+/* ── AFTER: improved styles ── */
+.a-header {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  height: 48px; display: flex; align-items: center;
+  border-radius: 10px; overflow: hidden;
+}
+.a-brand { padding: 0 18px; height: 100%; display: flex; align-items: center; gap: 8px; border-right: 1px solid #1e293b; }
+.a-brand-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,.6); flex-shrink: 0; }
+.a-brand-name { font-size: 14px; font-weight: 700; color: #f1f5f9; font-family: 'DM Sans',sans-serif; letter-spacing: -.01em; }
+.a-nav { display: flex; height: 100%; }
+.a-nav a { padding: 0 14px; color: #64748b; font-size: 12px; font-weight: 500; border-bottom: 2px solid transparent; display: flex; align-items: center; text-decoration: none; font-family: 'DM Sans',sans-serif; transition: all .15s; }
+.a-nav a:hover { color: #94a3b8; }
+.a-nav a.active { border-bottom-color: #3b82f6; color: #e2e8f0; }
+.a-header-right { margin-left: auto; padding: 0 16px; display: flex; align-items: center; gap: 8px; }
+.a-time { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; font-weight: 600; }
+
+.a-kpi-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 8px; }
+.a-kpi { background: #fff; border: 1px solid #e8edf5; border-radius: 10px; padding: 12px 14px; min-height: 76px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04); }
+.a-kpi-lbl { color: #94a3b8; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; font-weight: 600; font-family: 'DM Sans',sans-serif; }
+.a-kpi-val { color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; margin-top: 4px; letter-spacing: -.02em; }
+.a-kpi-val.blue { color: #2563eb; }
+.a-kpi-val.red { color: #dc2626; }
+.a-kpi-side { text-align: right; }
+.a-kpi-tag { font-size: 10px; font-weight: 600; font-family: 'DM Sans',sans-serif; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 999px; padding: 3px 8px; color: #64748b; }
+.a-kpi-tag.blue { background: #dbeafe; border-color: #bfdbfe; color: #1d4ed8; }
+
+.a-tanks { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 8px; }
+.a-tank { background: #fff; border: 1px solid #e8edf5; border-radius: 12px; padding: 10px; height: 172px; position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); transition: box-shadow .15s, border-color .15s; }
+.a-tank:hover { border-color: #93c5fd; box-shadow: 0 4px 16px rgba(37,99,235,.1); }
+.a-tank-name { font-size: 11px; font-weight: 500; color: #64748b; font-family: 'DM Sans',sans-serif; }
+.a-tank-vis { flex: 1; border-radius: 8px; border: 1px solid #e2e8f0; position: relative; overflow: hidden; background: #f8fafc; }
+.a-tank-water { position: absolute; left:0;right:0;bottom:0; border-radius: 0 0 7px 7px; border-top: 2px solid; }
+.a-tank-water.ok { background: linear-gradient(180deg,rgba(37,99,235,.12),rgba(37,99,235,.32)); border-color: #3b82f6; }
+.a-tank-water.warn { background: linear-gradient(180deg,rgba(217,119,6,.12),rgba(217,119,6,.32)); border-color: #d97706; }
+.a-tank-dot { position: absolute; top: 8px; right: 8px; width: 7px; height: 7px; border-radius: 50%; }
+.a-tank-dot.ok { background: #22c55e; box-shadow: 0 0 0 2px rgba(34,197,94,.2); }
+.a-tank-pct { position: absolute; bottom: 6px; left:0;right:0; text-align: center; font-family: 'JetBrains Mono',monospace; font-size: 18px; font-weight: 700; }
+.a-tank-pct.ok { color: #1d4ed8; }
+.a-tank-pct.warn { color: #b45309; }
+
+/* ── DARK sections ── */
+.dark-section { background: #0d1117; border-radius: 12px; padding: 16px; margin-top: 8px; }
+
+/* Before dark header */
+.bd-header { background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%); height: 46px; display: flex; align-items: center; border-radius: 8px; overflow: hidden; }
+
+/* After dark header — uses correct theme var */
+.ad-header { background: #111820; border: 1px solid #1e2d3d; height: 48px; display: flex; align-items: center; border-radius: 10px; overflow: hidden; }
+
+.bd-kpi-row, .ad-kpi-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-top: 8px; }
+.bd-kpi { background: #192030; border: 1px solid #1e2d3d; border-radius: 8px; padding: 10px 12px; min-height: 68px; }
+.bd-kpi-lbl { color: #3b5f82; font-size: 10px; text-transform: uppercase; font-weight: 600; font-family: system-ui; }
+.bd-kpi-val { color: #c9d4e0; font-family: 'Courier New',monospace; font-size: 20px; font-weight: 700; margin-top: 2px; }
+
+.ad-kpi { background: #141c28; border: 1px solid #1e2d3d; border-radius: 10px; padding: 12px 14px; min-height: 72px; }
+.ad-kpi-lbl { color: #4a6580; font-size: 10px; text-transform: uppercase; font-weight: 600; letter-spacing: .1em; font-family: 'DM Sans',sans-serif; }
+.ad-kpi-val { color: #dde6f0; font-family: 'JetBrains Mono',monospace; font-size: 20px; font-weight: 700; margin-top: 4px; letter-spacing: -.02em; }
+.ad-kpi-val.blue { color: #60a5fa; }
+
+.bd-tanks, .ad-tanks { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 8px; }
+.bd-tank { background: #192030; border: 1px solid #1e2d3d; border-radius: 10px; padding: 8px; height: 140px; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; }
+.bd-tank-name { font-size: 10px; color: #4a6580; font-family: system-ui; }
+.bd-tank-vis { flex:1; border-radius: 6px; border: 1px solid #1e2d3d; position: relative; overflow: hidden; }
+.bd-tank-water { position: absolute; left:0;right:0;bottom:0; border-top: 1px solid rgba(255,255,255,.35); }
+.bd-tank-pct { position: absolute; bottom: 6px; left:0;right:0; text-align:center; font-family: 'Courier New',monospace; font-size: 16px; font-weight: 700; color: #c9d4e0; }
+
+.ad-tank { background: #141c28; border: 1px solid #1e2d3d; border-radius: 12px; padding: 10px; height: 148px; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; transition: border-color .15s; }
+.ad-tank:hover { border-color: #2d4a7a; }
+.ad-tank-name { font-size: 11px; font-weight: 500; color: #4a6580; font-family: 'DM Sans',sans-serif; }
+.ad-tank-vis { flex:1; border-radius: 8px; border: 1px solid #1e2d3d; position: relative; overflow: hidden; background: #0f1620; }
+.ad-tank-water { position: absolute; left:0;right:0;bottom:0; border-radius: 0 0 7px 7px; border-top: 1px solid; }
+.ad-tank-water.ok { background: linear-gradient(180deg,rgba(59,130,246,.12),rgba(59,130,246,.38)); border-color: rgba(96,165,250,.7); }
+.ad-tank-water.warn { background: linear-gradient(180deg,rgba(245,158,11,.1),rgba(245,158,11,.3)); border-color: rgba(251,191,36,.6); }
+.ad-tank-dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; }
+.ad-tank-dot.ok { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,.5); }
+.ad-tank-pct { position: absolute; bottom: 5px; left:0;right:0; text-align:center; font-family: 'JetBrains Mono',monospace; font-size: 16px; font-weight: 700; }
+.ad-tank-pct.ok { color: #93c5fd; }
+.ad-tank-pct.warn { color: #fcd34d; }
+
+.badge-new { display: inline-block; background: #16a34a; color: white; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 999px; vertical-align: middle; margin-left: 6px; font-family: 'DM Sans',sans-serif; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Antes / Depois — Refinamento Visual</h1>
+  <p class="sub">Mesmos dados, mesma estrutura. Só CSS: fontes, paleta, espaçamento, sombras.</p>
+
+  <!-- ════ TEMA CLARO ════ -->
+  <div class="section">
+    <div class="section-title">☀️ Tema Claro — Header + KPIs + Reservatórios</div>
+    <div class="split">
+      <!-- BEFORE light -->
+      <div>
+        <div class="col-label before">Atual</div>
+        <div style="background:#f1f5f9; border-radius:10px; padding:12px;">
+          <div class="b-header">
+            <div class="b-brand">AGUADA</div>
+            <div class="b-nav">
+              <a class="active" href="#">Painel</a>
+              <a href="#">SCADA</a>
+              <a href="#">Dados</a>
+              <a href="#">Alertas</a>
+            </div>
+          </div>
+          <div class="b-kpi-row">
+            <div class="b-kpi">
+              <div>
+                <div class="b-kpi-lbl">Volume Total</div>
+                <div class="b-kpi-val">14.2 / 17.0 m³</div>
+              </div>
+              <div class="b-kpi-side">5 res</div>
+            </div>
+            <div class="b-kpi">
+              <div>
+                <div class="b-kpi-lbl">Consumo</div>
+                <div class="b-kpi-val" style="color:#dc2626;">3.8 m³</div>
+              </div>
+              <div class="b-kpi-side">Saída</div>
+            </div>
+            <div class="b-kpi">
+              <div>
+                <div class="b-kpi-lbl">Alertas</div>
+                <div class="b-kpi-val" style="color:#16a34a;">0 ativos</div>
+              </div>
+              <div class="b-kpi-side">Tudo Normal</div>
+            </div>
+          </div>
+          <div class="b-tanks">
+            <div class="b-tank">
+              <div class="b-tank-name">RAP Principal</div>
+              <div class="b-tank-vis">
+                <div class="b-tank-water" style="height:70%;"></div>
+                <div class="b-tank-pct">70%</div>
+              </div>
+            </div>
+            <div class="b-tank">
+              <div class="b-tank-name">RAP Secundário</div>
+              <div class="b-tank-vis">
+                <div class="b-tank-water" style="height:90%;"></div>
+                <div class="b-tank-pct">90%</div>
+              </div>
+            </div>
+            <div class="b-tank">
+              <div class="b-tank-name">RAP Leste</div>
+              <div class="b-tank-vis">
+                <div class="b-tank-water" style="height:42%; background:linear-gradient(180deg,rgba(217,119,6,.38),rgba(217,119,6,.65)); border-top:1px solid rgba(217,119,6,.8);"></div>
+                <div class="b-tank-pct">42%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AFTER light -->
+      <div>
+        <div class="col-label after">Melhorado <span class="badge-new">B</span></div>
+        <div style="background:#f0f4f8; border-radius:10px; padding:12px;">
+          <div class="a-header">
+            <div class="a-brand">
+              <div class="a-brand-dot"></div>
+              <span class="a-brand-name">AGUADA</span>
+            </div>
+            <div class="a-nav">
+              <a class="active" href="#">Painel</a>
+              <a href="#">SCADA</a>
+              <a href="#">Dados</a>
+              <a href="#">Alertas</a>
+            </div>
+            <div class="a-header-right">
+              <span class="a-time">05:47:22</span>
+            </div>
+          </div>
+          <div class="a-kpi-row">
+            <div class="a-kpi">
+              <div>
+                <div class="a-kpi-lbl">Volume Total</div>
+                <div class="a-kpi-val">14.2 / 17.0 m³</div>
+              </div>
+              <span class="a-kpi-tag">5 res</span>
+            </div>
+            <div class="a-kpi">
+              <div>
+                <div class="a-kpi-lbl">Consumo</div>
+                <div class="a-kpi-val red">3.8 m³</div>
+              </div>
+              <span class="a-kpi-tag">Saída</span>
+            </div>
+            <div class="a-kpi">
+              <div>
+                <div class="a-kpi-lbl">Alertas</div>
+                <div class="a-kpi-val" style="color:#16a34a;">0 ativos</div>
+              </div>
+              <span class="a-kpi-tag" style="background:#f0fdf4;border-color:#bbf7d0;color:#15803d;">Normal</span>
+            </div>
+          </div>
+          <div class="a-tanks">
+            <div class="a-tank">
+              <div class="a-tank-name">RAP Principal</div>
+              <div class="a-tank-vis">
+                <div class="a-tank-dot ok"></div>
+                <div class="a-tank-water ok" style="height:70%;"></div>
+                <div class="a-tank-pct ok">70%</div>
+              </div>
+            </div>
+            <div class="a-tank">
+              <div class="a-tank-name">RAP Secundário</div>
+              <div class="a-tank-vis">
+                <div class="a-tank-dot ok"></div>
+                <div class="a-tank-water ok" style="height:90%;"></div>
+                <div class="a-tank-pct ok">90%</div>
+              </div>
+            </div>
+            <div class="a-tank" style="border-color:#fde68a;">
+              <div class="a-tank-name">RAP Leste</div>
+              <div class="a-tank-vis">
+                <div class="a-tank-dot" style="background:#f59e0b;box-shadow:0 0 0 2px rgba(245,158,11,.2);"></div>
+                <div class="a-tank-water warn" style="height:42%;"></div>
+                <div class="a-tank-pct warn">42%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ TEMA ESCURO ════ -->
+  <div class="section">
+    <div class="section-title">🌙 Tema Escuro — Header + KPIs + Reservatórios</div>
+    <div class="split">
+      <!-- BEFORE dark -->
+      <div>
+        <div class="col-label before">Atual</div>
+        <div class="dark-section">
+          <div class="bd-header">
+            <div class="b-brand">AGUADA</div>
+            <div class="b-nav">
+              <a class="active" href="#" style="color:white;border-bottom:2px solid #10b981;background:rgba(255,255,255,.08);padding:0 13px;display:flex;align-items:center;font-size:12px;font-family:system-ui;">Painel</a>
+              <a href="#" style="color:rgba(255,255,255,.75);padding:0 13px;display:flex;align-items:center;font-size:12px;font-family:system-ui;">SCADA</a>
+              <a href="#" style="color:rgba(255,255,255,.75);padding:0 13px;display:flex;align-items:center;font-size:12px;font-family:system-ui;">Dados</a>
+            </div>
+          </div>
+          <div class="bd-kpi-row">
+            <div class="bd-kpi">
+              <div class="bd-kpi-lbl">Volume Total</div>
+              <div class="bd-kpi-val">14.2 m³</div>
+            </div>
+            <div class="bd-kpi">
+              <div class="bd-kpi-lbl">Consumo</div>
+              <div class="bd-kpi-val" style="color:#60a5fa;">3.8 m³</div>
+            </div>
+            <div class="bd-kpi">
+              <div class="bd-kpi-lbl">Alertas</div>
+              <div class="bd-kpi-val" style="color:#22c55e;">0 ativos</div>
+            </div>
+          </div>
+          <div class="bd-tanks">
+            <div class="bd-tank">
+              <div class="bd-tank-name">RAP Principal</div>
+              <div class="bd-tank-vis">
+                <div class="bd-tank-water" style="height:70%;background:linear-gradient(180deg,rgba(59,130,246,.3),rgba(59,130,246,.6));"></div>
+                <div class="bd-tank-pct">70%</div>
+              </div>
+            </div>
+            <div class="bd-tank">
+              <div class="bd-tank-name">RAP Secundário</div>
+              <div class="bd-tank-vis">
+                <div class="bd-tank-water" style="height:90%;background:linear-gradient(180deg,rgba(59,130,246,.3),rgba(59,130,246,.6));"></div>
+                <div class="bd-tank-pct">90%</div>
+              </div>
+            </div>
+            <div class="bd-tank">
+              <div class="bd-tank-name">RAP Leste</div>
+              <div class="bd-tank-vis">
+                <div class="bd-tank-water" style="height:42%;background:linear-gradient(180deg,rgba(217,119,6,.3),rgba(217,119,6,.6));border-color:rgba(245,158,11,.6);"></div>
+                <div class="bd-tank-pct" style="color:#fcd34d;">42%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AFTER dark -->
+      <div>
+        <div class="col-label after">Melhorado <span class="badge-new">B</span></div>
+        <div style="background:#090d12; border-radius:12px; padding:16px;">
+          <div class="ad-header">
+            <div class="a-brand" style="border-right:1px solid #1e2d3d;">
+              <div class="a-brand-dot"></div>
+              <span style="font-size:14px;font-weight:700;color:#c9d4e0;font-family:'DM Sans',sans-serif;letter-spacing:-.01em;">AGUADA</span>
+            </div>
+            <div class="a-nav" style="">
+              <a class="active" href="#" style="color:#c9d4e0;border-bottom:2px solid #3b82f6;padding:0 14px;display:flex;align-items:center;font-size:12px;font-family:'DM Sans',sans-serif;">Painel</a>
+              <a href="#" style="color:#4a6580;padding:0 14px;display:flex;align-items:center;font-size:12px;font-family:'DM Sans',sans-serif;">SCADA</a>
+              <a href="#" style="color:#4a6580;padding:0 14px;display:flex;align-items:center;font-size:12px;font-family:'DM Sans',sans-serif;">Dados</a>
+            </div>
+            <div class="a-header-right">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#2d4a6e;font-weight:600;">05:47:22</span>
+            </div>
+          </div>
+          <div class="ad-kpi-row">
+            <div class="ad-kpi">
+              <div class="ad-kpi-lbl">Volume Total</div>
+              <div class="ad-kpi-val">14.2 m³</div>
+            </div>
+            <div class="ad-kpi">
+              <div class="ad-kpi-lbl">Consumo</div>
+              <div class="ad-kpi-val blue">3.8 m³</div>
+            </div>
+            <div class="ad-kpi">
+              <div class="ad-kpi-lbl">Alertas</div>
+              <div class="ad-kpi-val" style="color:#4ade80;">0 ativos</div>
+            </div>
+          </div>
+          <div class="ad-tanks">
+            <div class="ad-tank">
+              <div class="ad-tank-name">RAP Principal</div>
+              <div class="ad-tank-vis">
+                <div class="ad-tank-dot ok"></div>
+                <div class="ad-tank-water ok" style="height:70%;"></div>
+                <div class="ad-tank-pct ok">70%</div>
+              </div>
+            </div>
+            <div class="ad-tank">
+              <div class="ad-tank-name">RAP Secundário</div>
+              <div class="ad-tank-vis">
+                <div class="ad-tank-dot ok"></div>
+                <div class="ad-tank-water ok" style="height:90%;"></div>
+                <div class="ad-tank-pct ok">90%</div>
+              </div>
+            </div>
+            <div class="ad-tank" style="border-color:#2a2010;">
+              <div class="ad-tank-name">RAP Leste</div>
+              <div class="ad-tank-vis">
+                <div class="ad-tank-dot" style="background:#f59e0b;box-shadow:0 0 6px rgba(245,158,11,.4);"></div>
+                <div class="ad-tank-water warn" style="height:42%;"></div>
+                <div class="ad-tank-pct warn">42%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:#111; border:1px solid #222; border-radius:8px; padding:14px; font-size:12px; color:#71717a; line-height:1.7;">
+    <strong style="color:#a1a1aa;">Mudanças no B:</strong><br>
+    • <strong style="color:#c4c4c8;">Fontes</strong> — DM Sans nas labels, JetBrains Mono nos números (já carregadas, não usadas)<br>
+    • <strong style="color:#c4c4c8;">Header</strong> — usa variáveis do tema em vez de gradiente hardcoded azul fixo<br>
+    • <strong style="color:#c4c4c8;">KPIs</strong> — sombra suave, mais respiro, tag de contexto substituindo texto solto<br>
+    • <strong style="color:#c4c4c8;">Tanques</strong> — borda colorida no alerta, dot de status com glow, água com border-radius<br>
+    • <strong style="color:#c4c4c8;">Paleta</strong> — fundo claro um pouco mais quente (#f0f4f8), dark mais profundo (#090d12)
+  </div>
+</div>
+</body>
+</html>

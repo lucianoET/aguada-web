@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Tank v3</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #18181b; color: #e4e4e7; padding: 24px; }
+h1 { font-size: 17px; font-weight: 700; color: #f4f4f5; margin-bottom: 4px; }
+.sub { font-size: 12px; color: #71717a; margin-bottom: 28px; }
+.stitle { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #52525b; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #27272a; }
+.row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 40px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DARK — B melhorado
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.dk {
+  border-radius: 12px;
+  border: 1px solid #1e2d3d;
+  background: #141c28;
+  position: relative;
+  overflow: hidden;
+  height: 240px;
+  cursor: pointer;
+  transition: border-color .2s;
+}
+.dk.warn { border-color: #2a2010; }
+.dk:hover { border-color: #2d4a7a; }
+
+.dk-water {
+  position: absolute; left:0; right:0; bottom:0;
+  border-top: 2px solid;
+  transition: height .5s ease;
+}
+.dk-water.ok {
+  background: linear-gradient(180deg, rgba(37,99,235,.22) 0%, rgba(37,99,235,.52) 100%);
+  border-color: #3b82f6;
+}
+.dk-water.warn {
+  background: linear-gradient(180deg, rgba(245,158,11,.18) 0%, rgba(245,158,11,.46) 100%);
+  border-color: #f59e0b;
+}
+
+.dk-content {
+  position: absolute; inset: 0;
+  padding: 12px 13px 11px;
+  z-index: 2;
+  display: flex; flex-direction: column;
+}
+
+/* — Nome do reservatório — destaque máximo */
+.dk-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #dde8f5;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: -.01em;
+  line-height: 1.2;
+}
+.dk-alias {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  color: #2d4a6e;
+  letter-spacing: .1em;
+  margin-top: 1px;
+}
+.dk-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.dk-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+.dk-dot.ok  { background: #22c55e; box-shadow: 0 0 7px rgba(34,197,94,.65); }
+.dk-dot.warn{ background: #f59e0b; box-shadow: 0 0 7px rgba(245,158,11,.6); }
+
+/* — Volume + % grandes — principal KPI visual */
+.dk-kpi { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 6px; }
+.dk-vol {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+.dk-vol.ok   { color: #93c5fd; }
+.dk-vol.warn { color: #fcd34d; }
+.dk-vol-unit {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 600;
+  padding-bottom: 3px;
+}
+.dk-vol-unit.ok   { color: rgba(147,197,253,.55); }
+.dk-vol-unit.warn { color: rgba(252,211,77,.55); }
+
+.dk-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  padding-bottom: 1px;
+  border-left: 1px solid #1e2d3d;
+  padding-left: 10px;
+  letter-spacing: -.02em;
+}
+.dk-pct.ok   { color: rgba(147,197,253,.7); }
+.dk-pct.warn { color: rgba(252,211,77,.7); }
+
+/* spacer pushes detail grid to bottom */
+.dk-spacer { flex: 1; }
+
+/* — Info detail — small, secondary */
+.dk-detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 12px;
+}
+.dk-d-lbl {
+  font-size: 9px; text-transform: uppercase; letter-spacing: .09em;
+  font-weight: 600; color: #2d4a6e; font-family: 'DM Sans', sans-serif;
+}
+.dk-d-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700; color: #8aa2bf; margin-top: 1px;
+}
+.dk-d-val.cap  { color: #3b5f82; }
+.dk-d-val.accent { color: #fcd34d; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LIGHT — C melhorado
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.lt {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+  height: 240px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04);
+  transition: border-color .2s, box-shadow .2s;
+}
+.lt.warn { border-color: #fde68a; }
+.lt:hover { border-color: #93c5fd; box-shadow: 0 4px 16px rgba(37,99,235,.1); }
+
+.lt-water {
+  position: absolute; left:0; right:0; bottom:0;
+  border-top: 2px solid;
+  transition: height .5s ease;
+}
+.lt-water.ok {
+  background: linear-gradient(180deg, rgba(37,99,235,.09) 0%, rgba(37,99,235,.23) 100%);
+  border-color: #3b82f6;
+}
+.lt-water.warn {
+  background: linear-gradient(180deg, rgba(245,158,11,.08) 0%, rgba(245,158,11,.2) 100%);
+  border-color: #d97706;
+}
+
+.lt-content {
+  position: absolute; inset: 0;
+  padding: 12px 13px 11px;
+  z-index: 2;
+  display: flex; flex-direction: column;
+}
+
+.lt-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.lt-name {
+  font-size: 13px; font-weight: 700;
+  color: #0f172a;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: -.01em; line-height: 1.2;
+}
+.lt-alias {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 600;
+  color: #94a3b8; letter-spacing: .1em; margin-top: 1px;
+}
+.lt-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+.lt-dot.ok   { background: #22c55e; box-shadow: 0 0 0 2px rgba(34,197,94,.2); }
+.lt-dot.warn { background: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,.2); }
+
+.lt-kpi { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 6px; }
+.lt-vol {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 30px; font-weight: 700;
+  line-height: 1; letter-spacing: -.03em;
+}
+.lt-vol.ok   { color: #1d4ed8; }
+.lt-vol.warn { color: #92400e; }
+.lt-vol-unit {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 600; padding-bottom: 3px;
+}
+.lt-vol-unit.ok   { color: #93c5fd; }
+.lt-vol-unit.warn { color: #fde68a; }
+
+.lt-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px; font-weight: 700;
+  line-height: 1; padding-bottom: 1px;
+  border-left: 1px solid #e2e8f0;
+  padding-left: 10px; letter-spacing: -.02em;
+}
+.lt-pct.ok   { color: #60a5fa; }
+.lt-pct.warn { color: #d97706; }
+
+.lt-spacer { flex: 1; }
+
+.lt-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 12px; }
+.lt-d-lbl {
+  font-size: 9px; text-transform: uppercase; letter-spacing: .09em;
+  font-weight: 600; color: #94a3b8; font-family: 'DM Sans', sans-serif;
+}
+.lt-d-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700; color: #334155; margin-top: 1px;
+}
+.lt-d-val.cap    { color: #94a3b8; }
+.lt-d-val.accent { color: #b45309; }
+</style>
+</head>
+<body>
+<h1>Cards v3 — nome + volume + % em destaque</h1>
+<p class="sub">Água como background. Nome do reservatório, volume m³ e percentual são os KPIs principais.</p>
+
+<div class="stitle" style="margin-top:8px;">🌙 Tema Escuro</div>
+<div class="row">
+
+  <div class="dk">
+    <div class="dk-water ok" style="height:70%"></div>
+    <div class="dk-content">
+      <div class="dk-hdr">
+        <div><div class="dk-name">RAP Principal</div><div class="dk-alias">RAP-01</div></div>
+        <div class="dk-dot ok"></div>
+      </div>
+      <div class="dk-kpi">
+        <span class="dk-vol ok">4,900</span><span class="dk-vol-unit ok">m³</span>
+        <span class="dk-pct ok">70%</span>
+      </div>
+      <div class="dk-spacer"></div>
+      <div class="dk-detail">
+        <div><div class="dk-d-lbl">Capacidade</div><div class="dk-d-val cap">7,000 m³</div></div>
+        <div><div class="dk-d-lbl">Cons. diário</div><div class="dk-d-val">1,240 L</div></div>
+        <div><div class="dk-d-lbl">Taxa cons.</div><div class="dk-d-val">52 L/h</div></div>
+        <div><div class="dk-d-lbl">Última leit.</div><div class="dk-d-val">05:43</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dk">
+    <div class="dk-water ok" style="height:90%"></div>
+    <div class="dk-content">
+      <div class="dk-hdr">
+        <div><div class="dk-name">RAP Secundário</div><div class="dk-alias">RAP-02</div></div>
+        <div class="dk-dot ok"></div>
+      </div>
+      <div class="dk-kpi">
+        <span class="dk-vol ok">9,000</span><span class="dk-vol-unit ok">m³</span>
+        <span class="dk-pct ok">90%</span>
+      </div>
+      <div class="dk-spacer"></div>
+      <div class="dk-detail">
+        <div><div class="dk-d-lbl">Capacidade</div><div class="dk-d-val cap">10,000 m³</div></div>
+        <div><div class="dk-d-lbl">Cons. diário</div><div class="dk-d-val">980 L</div></div>
+        <div><div class="dk-d-lbl">Taxa cons.</div><div class="dk-d-val">41 L/h</div></div>
+        <div><div class="dk-d-lbl">Última leit.</div><div class="dk-d-val">05:41</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dk warn">
+    <div class="dk-water warn" style="height:42%"></div>
+    <div class="dk-content">
+      <div class="dk-hdr">
+        <div><div class="dk-name">RAP Leste</div><div class="dk-alias">RAP-03</div></div>
+        <div class="dk-dot warn"></div>
+      </div>
+      <div class="dk-kpi">
+        <span class="dk-vol warn">2,100</span><span class="dk-vol-unit warn">m³</span>
+        <span class="dk-pct warn">42%</span>
+      </div>
+      <div class="dk-spacer"></div>
+      <div class="dk-detail">
+        <div><div class="dk-d-lbl">Capacidade</div><div class="dk-d-val cap">5,000 m³</div></div>
+        <div><div class="dk-d-lbl">Cons. diário</div><div class="dk-d-val">760 L</div></div>
+        <div><div class="dk-d-lbl">Taxa cons.</div><div class="dk-d-val accent">68 L/h ↑</div></div>
+        <div><div class="dk-d-lbl">Última leit.</div><div class="dk-d-val">05:38</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="stitle">☀️ Tema Claro</div>
+<div class="row">
+
+  <div class="lt">
+    <div class="lt-water ok" style="height:70%"></div>
+    <div class="lt-content">
+      <div class="lt-hdr">
+        <div><div class="lt-name">RAP Principal</div><div class="lt-alias">RAP-01</div></div>
+        <div class="lt-dot ok"></div>
+      </div>
+      <div class="lt-kpi">
+        <span class="lt-vol ok">4,900</span><span class="lt-vol-unit ok">m³</span>
+        <span class="lt-pct ok">70%</span>
+      </div>
+      <div class="lt-spacer"></div>
+      <div class="lt-detail">
+        <div><div class="lt-d-lbl">Capacidade</div><div class="lt-d-val cap">7,000 m³</div></div>
+        <div><div class="lt-d-lbl">Cons. diário</div><div class="lt-d-val">1,240 L</div></div>
+        <div><div class="lt-d-lbl">Taxa cons.</div><div class="lt-d-val">52 L/h</div></div>
+        <div><div class="lt-d-lbl">Última leit.</div><div class="lt-d-val">05:43</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lt">
+    <div class="lt-water ok" style="height:90%"></div>
+    <div class="lt-content">
+      <div class="lt-hdr">
+        <div><div class="lt-name">RAP Secundário</div><div class="lt-alias">RAP-02</div></div>
+        <div class="lt-dot ok"></div>
+      </div>
+      <div class="lt-kpi">
+        <span class="lt-vol ok">9,000</span><span class="lt-vol-unit ok">m³</span>
+        <span class="lt-pct ok">90%</span>
+      </div>
+      <div class="lt-spacer"></div>
+      <div class="lt-detail">
+        <div><div class="lt-d-lbl">Capacidade</div><div class="lt-d-val cap">10,000 m³</div></div>
+        <div><div class="lt-d-lbl">Cons. diário</div><div class="lt-d-val">980 L</div></div>
+        <div><div class="lt-d-lbl">Taxa cons.</div><div class="lt-d-val">41 L/h</div></div>
+        <div><div class="lt-d-lbl">Última leit.</div><div class="lt-d-val">05:41</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lt warn">
+    <div class="lt-water warn" style="height:42%"></div>
+    <div class="lt-content">
+      <div class="lt-hdr">
+        <div><div class="lt-name">RAP Leste</div><div class="lt-alias">RAP-03</div></div>
+        <div class="lt-dot warn"></div>
+      </div>
+      <div class="lt-kpi">
+        <span class="lt-vol warn">2,100</span><span class="lt-vol-unit warn">m³</span>
+        <span class="lt-pct warn">42%</span>
+      </div>
+      <div class="lt-spacer"></div>
+      <div class="lt-detail">
+        <div><div class="lt-d-lbl">Capacidade</div><div class="lt-d-val cap">5,000 m³</div></div>
+        <div><div class="lt-d-lbl">Cons. diário</div><div class="lt-d-val">760 L</div></div>
+        <div><div class="lt-d-lbl">Taxa cons.</div><div class="lt-d-val accent">68 L/h ↑</div></div>
+        <div><div class="lt-d-lbl">Última leit.</div><div class="lt-d-val">05:38</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

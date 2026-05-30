@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Design v2</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #18181b; color: #e4e4e7; }
+.page { padding: 24px; max-width: 1300px; margin: 0 auto; }
+h1 { font-size: 18px; font-weight: 700; color: #f4f4f5; margin-bottom: 4px; }
+.sub { font-size: 13px; color: #71717a; margin-bottom: 28px; }
+.section { margin-bottom: 40px; }
+.section-title { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #71717a; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #27272a; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.col-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; color: #22c55e; }
+
+/* ━━━━ SHARED COMPONENTS (same look, different surface colors) ━━━━ */
+
+/* Header */
+.hdr { height: 48px; display: flex; align-items: center; border-radius: 10px; overflow: hidden; border: 1px solid; }
+.hdr-brand { padding: 0 18px; height: 100%; display: flex; align-items: center; gap: 8px; border-right: 1px solid; }
+.hdr-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,.55); flex-shrink: 0; }
+.hdr-name { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
+.hdr-nav { display: flex; height: 100%; }
+.hdr-nav a { padding: 0 14px; font-size: 12px; font-weight: 500; border-bottom: 2px solid transparent; display: flex; align-items: center; text-decoration: none; font-family: 'DM Sans',sans-serif; }
+.hdr-nav a.active { border-bottom-color: #3b82f6; }
+.hdr-time { margin-left: auto; padding: 0 16px; font-family: 'JetBrains Mono',monospace; font-size: 11px; font-weight: 600; }
+
+/* KPIs */
+.kpi-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 8px; }
+.kpi { border-radius: 10px; padding: 12px 14px; min-height: 76px; display: flex; align-items: center; justify-content: space-between; border: 1px solid; }
+.kpi-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; font-weight: 600; font-family: 'DM Sans',sans-serif; }
+.kpi-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; margin-top: 4px; letter-spacing: -.02em; }
+.kpi-tag { font-size: 10px; font-weight: 600; font-family: 'DM Sans',sans-serif; border-radius: 999px; padding: 3px 8px; border: 1px solid; white-space: nowrap; }
+
+/* Tank cards — improved, shared */
+.tanks { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 8px; }
+.tank { border-radius: 12px; padding: 10px; border: 1px solid; display: flex; flex-direction: column; gap: 0; transition: border-color .15s; }
+.tank-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.tank-name { font-size: 11px; font-weight: 600; font-family: 'DM Sans',sans-serif; }
+.tank-alias { font-family: 'JetBrains Mono',monospace; font-size: 9px; font-weight: 600; letter-spacing: .08em; }
+.tank-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.tank-vis { border-radius: 8px; border: 1px solid; position: relative; overflow: hidden; height: 80px; margin-bottom: 8px; }
+.tank-water { position: absolute; left:0;right:0;bottom:0; border-radius: 0 0 7px 7px; border-top: 2px solid; }
+.tank-pct-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: 'JetBrains Mono',monospace; font-size: 22px; font-weight: 700; }
+/* Info grid */
+.tank-info { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; }
+.tank-info-item { display: flex; flex-direction: column; gap: 1px; }
+.tank-info-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; font-family: 'DM Sans',sans-serif; }
+.tank-info-val { font-family: 'JetBrains Mono',monospace; font-size: 11px; font-weight: 700; }
+.tank-divider { height: 1px; margin: 7px 0; }
+
+/* ━━━━ LIGHT theme values ━━━━ */
+.light-wrap { background: #f0f4f8; border-radius: 12px; padding: 14px; }
+.light-wrap .hdr { background: #fff; border-color: #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.light-wrap .hdr-brand { border-color: #e2e8f0; }
+.light-wrap .hdr-name { color: #0f172a; }
+.light-wrap .hdr-nav a { color: #94a3b8; }
+.light-wrap .hdr-nav a:hover { color: #475569; }
+.light-wrap .hdr-nav a.active { color: #1e293b; }
+.light-wrap .hdr-time { color: #94a3b8; }
+.light-wrap .kpi { background: #fff; border-color: #e8edf5; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04); }
+.light-wrap .kpi-lbl { color: #94a3b8; }
+.light-wrap .kpi-val { color: #0f172a; }
+.light-wrap .kpi-val.blue { color: #2563eb; }
+.light-wrap .kpi-val.red { color: #dc2626; }
+.light-wrap .kpi-val.green { color: #16a34a; }
+.light-wrap .kpi-tag { background: #f1f5f9; border-color: #e2e8f0; color: #64748b; }
+.light-wrap .kpi-tag.green { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
+.light-wrap .tank { background: #fff; border-color: #e8edf5; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+.light-wrap .tank:hover { border-color: #93c5fd; }
+.light-wrap .tank.warn { border-color: #fde68a; }
+.light-wrap .tank-name { color: #334155; }
+.light-wrap .tank-alias { color: #94a3b8; }
+.light-wrap .tank-dot.ok { background: #22c55e; box-shadow: 0 0 0 2px rgba(34,197,94,.2); }
+.light-wrap .tank-dot.warn { background: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,.2); }
+.light-wrap .tank-vis { background: #f8fafc; border-color: #e2e8f0; }
+.light-wrap .tank-water.ok { background: linear-gradient(180deg,rgba(37,99,235,.1),rgba(37,99,235,.28)); border-color: #3b82f6; }
+.light-wrap .tank-water.warn { background: linear-gradient(180deg,rgba(217,119,6,.1),rgba(217,119,6,.28)); border-color: #d97706; }
+.light-wrap .tank-pct-label.ok { color: #1d4ed8; }
+.light-wrap .tank-pct-label.warn { color: #92400e; }
+.light-wrap .tank-info-lbl { color: #94a3b8; }
+.light-wrap .tank-info-val { color: #0f172a; }
+.light-wrap .tank-info-val.muted { color: #64748b; }
+.light-wrap .tank-divider { background: #e2e8f0; }
+
+/* ━━━━ DARK theme values ━━━━ */
+.dark-wrap { background: #090d12; border-radius: 12px; padding: 14px; }
+.dark-wrap .hdr { background: #111820; border-color: #1e2d3d; }
+.dark-wrap .hdr-brand { border-color: #1e2d3d; }
+.dark-wrap .hdr-name { color: #c9d4e0; }
+.dark-wrap .hdr-nav a { color: #3b5f82; }
+.dark-wrap .hdr-nav a:hover { color: #6a8aab; }
+.dark-wrap .hdr-nav a.active { color: #c9d4e0; }
+.dark-wrap .hdr-time { color: #2d4a6e; }
+.dark-wrap .kpi { background: #141c28; border-color: #1e2d3d; }
+.dark-wrap .kpi-lbl { color: #4a6580; }
+.dark-wrap .kpi-val { color: #dde6f0; }
+.dark-wrap .kpi-val.blue { color: #60a5fa; }
+.dark-wrap .kpi-val.red { color: #f87171; }
+.dark-wrap .kpi-val.green { color: #4ade80; }
+.dark-wrap .kpi-tag { background: #0f1620; border-color: #1e2d3d; color: #4a6580; }
+.dark-wrap .kpi-tag.green { background: #0a1f10; border-color: #14532d; color: #4ade80; }
+.dark-wrap .tank { background: #141c28; border-color: #1e2d3d; }
+.dark-wrap .tank:hover { border-color: #2d4a7a; }
+.dark-wrap .tank.warn { border-color: #2a2010; }
+.dark-wrap .tank-name { color: #8aa2bf; }
+.dark-wrap .tank-alias { color: #2d4a6e; }
+.dark-wrap .tank-dot.ok { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,.5); }
+.dark-wrap .tank-dot.warn { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,.4); }
+.dark-wrap .tank-vis { background: #0f1620; border-color: #1e2d3d; }
+.dark-wrap .tank-water.ok { background: linear-gradient(180deg,rgba(59,130,246,.1),rgba(59,130,246,.35)); border-color: rgba(96,165,250,.6); }
+.dark-wrap .tank-water.warn { background: linear-gradient(180deg,rgba(245,158,11,.08),rgba(245,158,11,.28)); border-color: rgba(251,191,36,.55); }
+.dark-wrap .tank-pct-label.ok { color: #93c5fd; }
+.dark-wrap .tank-pct-label.warn { color: #fcd34d; }
+.dark-wrap .tank-info-lbl { color: #2d4a6e; }
+.dark-wrap .tank-info-val { color: #c9d4e0; }
+.dark-wrap .tank-info-val.muted { color: #4a6580; }
+.dark-wrap .tank-divider { background: #1e2d3d; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Design v2 — Claro como Escuro · Cards com mais dados</h1>
+  <p class="sub">Mesma linguagem visual em ambos os temas. Cards de reservatório com volume, capacidade, %, consumo diário e taxa.</p>
+
+  <div class="split">
+
+    <!-- ── LIGHT ── -->
+    <div>
+      <div class="col-label">☀️ Tema Claro</div>
+      <div class="light-wrap">
+        <div class="hdr">
+          <div class="hdr-brand">
+            <div class="hdr-dot"></div>
+            <span class="hdr-name">AGUADA</span>
+          </div>
+          <div class="hdr-nav">
+            <a class="active" href="#">Painel</a>
+            <a href="#">SCADA</a>
+            <a href="#">Dados</a>
+            <a href="#">Alertas</a>
+          </div>
+          <span class="hdr-time">05:47:22</span>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi">
+            <div>
+              <div class="kpi-lbl">Volume Total</div>
+              <div class="kpi-val">14.2 m³</div>
+            </div>
+            <span class="kpi-tag">5 res</span>
+          </div>
+          <div class="kpi">
+            <div>
+              <div class="kpi-lbl">Consumo 24h</div>
+              <div class="kpi-val red">3.8 m³</div>
+            </div>
+            <span class="kpi-tag">Saída</span>
+          </div>
+          <div class="kpi">
+            <div>
+              <div class="kpi-lbl">Alertas</div>
+              <div class="kpi-val green">0 ativos</div>
+            </div>
+            <span class="kpi-tag green">Normal</span>
+          </div>
+        </div>
+        <div class="tanks">
+
+          <!-- tank ok -->
+          <div class="tank">
+            <div class="tank-hdr">
+              <div>
+                <div class="tank-name">RAP Principal</div>
+                <div class="tank-alias">RAP-01</div>
+              </div>
+              <div class="tank-dot ok"></div>
+            </div>
+            <div class="tank-vis">
+              <div class="tank-water ok" style="height:70%"></div>
+              <div class="tank-pct-label ok">70%</div>
+            </div>
+            <div class="tank-divider"></div>
+            <div class="tank-info">
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Volume</span>
+                <span class="tank-info-val">4,900 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Capacidade</span>
+                <span class="tank-info-val muted">7,000 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Cons. diário</span>
+                <span class="tank-info-val">1,240 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Taxa cons.</span>
+                <span class="tank-info-val">52 L/h</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- tank ok high -->
+          <div class="tank">
+            <div class="tank-hdr">
+              <div>
+                <div class="tank-name">RAP Secundário</div>
+                <div class="tank-alias">RAP-02</div>
+              </div>
+              <div class="tank-dot ok"></div>
+            </div>
+            <div class="tank-vis">
+              <div class="tank-water ok" style="height:90%"></div>
+              <div class="tank-pct-label ok">90%</div>
+            </div>
+            <div class="tank-divider"></div>
+            <div class="tank-info">
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Volume</span>
+                <span class="tank-info-val">9,000 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Capacidade</span>
+                <span class="tank-info-val muted">10,000 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Cons. diário</span>
+                <span class="tank-info-val">980 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Taxa cons.</span>
+                <span class="tank-info-val">41 L/h</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- tank warn -->
+          <div class="tank warn">
+            <div class="tank-hdr">
+              <div>
+                <div class="tank-name">RAP Leste</div>
+                <div class="tank-alias">RAP-03</div>
+              </div>
+              <div class="tank-dot warn"></div>
+            </div>
+            <div class="tank-vis">
+              <div class="tank-water warn" style="height:42%"></div>
+              <div class="tank-pct-label warn">42%</div>
+            </div>
+            <div class="tank-divider"></div>
+            <div class="tank-info">
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Volume</span>
+                <span class="tank-info-val">2,100 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Capacidade</span>
+                <span class="tank-info-val muted">5,000 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Cons. diário</span>
+                <span class="tank-info-val">760 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Taxa cons.</span>
+                <span class="tank-info-val" style="color:#d97706;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;">68 L/h ↑</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DARK ── -->
+    <div>
+      <div class="col-label">🌙 Tema Escuro</div>
+      <div class="dark-wrap">
+        <div class="hdr">
+          <div class="hdr-brand">
+            <div class="hdr-dot"></div>
+            <span class="hdr-name">AGUADA</span>
+          </div>
+          <div class="hdr-nav">
+            <a class="active" href="#">Painel</a>
+            <a href="#">SCADA</a>
+            <a href="#">Dados</a>
+            <a href="#">Alertas</a>
+          </div>
+          <span class="hdr-time">05:47:22</span>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi">
+            <div>
+              <div class="kpi-lbl">Volume Total</div>
+              <div class="kpi-val">14.2 m³</div>
+            </div>
+            <span class="kpi-tag">5 res</span>
+          </div>
+          <div class="kpi">
+            <div>
+              <div class="kpi-lbl">Consumo 24h</div>
+              <div class="kpi-val red">3.8 m³</div>
+            </div>
+            <span class="kpi-tag">Saída</span>
+          </div>
+          <div class="kpi">
+            <div>
+              <div class="kpi-lbl">Alertas</div>
+              <div class="kpi-val green">0 ativos</div>
+            </div>
+            <span class="kpi-tag green">Normal</span>
+          </div>
+        </div>
+        <div class="tanks">
+
+          <div class="tank">
+            <div class="tank-hdr">
+              <div>
+                <div class="tank-name">RAP Principal</div>
+                <div class="tank-alias">RAP-01</div>
+              </div>
+              <div class="tank-dot ok"></div>
+            </div>
+            <div class="tank-vis">
+              <div class="tank-water ok" style="height:70%"></div>
+              <div class="tank-pct-label ok">70%</div>
+            </div>
+            <div class="tank-divider"></div>
+            <div class="tank-info">
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Volume</span>
+                <span class="tank-info-val">4,900 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Capacidade</span>
+                <span class="tank-info-val muted">7,000 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Cons. diário</span>
+                <span class="tank-info-val">1,240 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Taxa cons.</span>
+                <span class="tank-info-val">52 L/h</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tank">
+            <div class="tank-hdr">
+              <div>
+                <div class="tank-name">RAP Secundário</div>
+                <div class="tank-alias">RAP-02</div>
+              </div>
+              <div class="tank-dot ok"></div>
+            </div>
+            <div class="tank-vis">
+              <div class="tank-water ok" style="height:90%"></div>
+              <div class="tank-pct-label ok">90%</div>
+            </div>
+            <div class="tank-divider"></div>
+            <div class="tank-info">
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Volume</span>
+                <span class="tank-info-val">9,000 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Capacidade</span>
+                <span class="tank-info-val muted">10,000 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Cons. diário</span>
+                <span class="tank-info-val">980 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Taxa cons.</span>
+                <span class="tank-info-val">41 L/h</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tank warn">
+            <div class="tank-hdr">
+              <div>
+                <div class="tank-name">RAP Leste</div>
+                <div class="tank-alias">RAP-03</div>
+              </div>
+              <div class="tank-dot warn"></div>
+            </div>
+            <div class="tank-vis">
+              <div class="tank-water warn" style="height:42%"></div>
+              <div class="tank-pct-label warn">42%</div>
+            </div>
+            <div class="tank-divider"></div>
+            <div class="tank-info">
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Volume</span>
+                <span class="tank-info-val">2,100 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Capacidade</span>
+                <span class="tank-info-val muted">5,000 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Cons. diário</span>
+                <span class="tank-info-val">760 L</span>
+              </div>
+              <div class="tank-info-item">
+                <span class="tank-info-lbl">Taxa cons.</span>
+                <span class="tank-info-val" style="color:#fcd34d;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;">68 L/h ↑</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

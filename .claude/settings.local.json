@@ -11,7 +11,11 @@
       "Bash(git:*)",
       "Bash(grep:*)",
       "mcp__plugin_playwright_playwright__browser_evaluate",
-      "mcp__plugin_playwright_playwright__browser_close"
+      "mcp__plugin_playwright_playwright__browser_close",
+      "Bash(pytest tests/ -q)",
+      "Bash(git -C \"C:\\\\Users\\\\luc10\\\\Dev\\\\aguada-web\" show 63b27ae:frontend/assets/aguada.css)",
+      "Bash(git -C \"C:\\\\Users\\\\luc10\\\\Dev\\\\aguada-web\" show 169c509dbaa7fdc257b4172167a98f9f0313cb3f:frontend/assets/aguada.css)",
+      "Bash(python -m pytest tests/ -q)"
     ]
   }
 }
