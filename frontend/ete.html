@@ -7,9 +7,6 @@
 <title>AGUADA — Esgoto (ETE)</title>
 <link rel="stylesheet" href="assets/aguada.css?v=2">
 <link rel="stylesheet" href="assets/style.css">
-<style>
-  table { width: 100%; border-collapse: collapse; margin-top:10px; }
-</style>
 </head>
 <body class="admin-page">
 <div id="topbar" class="admin-header"></div>
@@ -23,76 +20,103 @@
   </div>
 
   <!-- ETE -->
-  <div id="viewEte" class="page-box">
-    <div class="page-title">Monitoramento Central — ETE
-      <button class="btn-primary" style="font-size:12px;padding:6px 14px">Modo Manual</button>
+  <div id="viewEte" class="ha-card">
+    <div class="ha-card-header">
+      <span class="ha-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        Monitoramento Central — ETE
+      </span>
+      <button class="btn btn-primary">Modo Manual</button>
     </div>
-    <span class="page-subtitle">Demonstração de Parâmetros Operacionais (Mockup SCADA)</span>
-    
-    <div class="param-grid">
-      <div class="param-card">
-        <div class="lbl">Elevatória (Afluente)</div>
-        <div class="val" style="color:var(--yellow)">65%</div>
-        <div class="sub">Vazão Entrada: 2.4 L/s</div>
+    <div class="ha-card-body">
+      <p style="font-size:13px;color:var(--text3);margin:0 0 16px">Demonstração de Parâmetros Operacionais (Mockup SCADA)</p>
+
+      <div class="ha-stat-grid">
+        <div class="ha-stat">
+          <span class="ha-stat-label">Elevatória (Afluente)</span>
+          <span class="ha-stat-value" style="color:var(--yellow)">65<span class="ha-stat-unit">%</span></span>
+          <span class="ha-stat-delta">Vazão Entrada: 2.4 L/s</span>
+        </div>
+        <div class="ha-stat">
+          <span class="ha-stat-label">Tanque de Aeração</span>
+          <span class="ha-stat-value">4.5<span class="ha-stat-unit">mg/L O₂</span></span>
+          <span class="ha-stat-delta up">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            Soprador: Ligado
+          </span>
+        </div>
+        <div class="ha-stat">
+          <span class="ha-stat-label">Decantador</span>
+          <span class="ha-stat-value" style="font-size:20px">Normal</span>
+          <span class="ha-stat-delta">Recirculação: Lodo Ativo</span>
+        </div>
+        <div class="ha-stat">
+          <span class="ha-stat-label">Efluente Final</span>
+          <span class="ha-stat-value" style="color:var(--green)">1.8<span class="ha-stat-unit">L/s</span></span>
+          <span class="ha-stat-delta">Dosagem Cloro: Automática</span>
+        </div>
       </div>
-      <div class="param-card">
-        <div class="lbl">Tanque de Aeração</div>
-        <div class="val">4.5 mg/L O₂</div>
-        <div class="sub">Soprador: <span style="color:var(--success-green);font-weight:600">● Ligado</span></div>
+
+      <div class="diagram-ph" style="margin-top:20px">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text3);margin-bottom:8px"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-14v4m0 4h.01"/></svg><br>
+        Diagrama P&amp;ID da ETE será montado aqui integrado ao WebSockets (SCADA).<br>
+        <span style="font-size:12px;color:var(--text3)">Controle de bombas (Ligar/Desligar), Válvulas e Níveis em tempo real.</span>
       </div>
-      <div class="param-card">
-        <div class="lbl">Decantador</div>
-        <div class="val">Normal</div>
-        <div class="sub">Recirculação: Lodo Ativo</div>
-      </div>
-      <div class="param-card">
-        <div class="lbl">Efluente Final</div>
-        <div class="val" style="color:var(--success-green)">1.8 L/s</div>
-        <div class="sub">Dosagem Cloro: Automática</div>
-      </div>
-    </div>
-    
-    <div class="diagram-ph">
-      <div style="font-size:32px;margin-bottom:10px">⚙️💧</div>
-      Diagrama P&ID da ETE será montado aqui integrado ao WebSockets (SCADA).<br>
-      <span style="font-size:12px;opacity:0.7">Controle de bombas (Ligar/Desligar), Válvulas e Níveis em tempo real.</span>
     </div>
   </div>
 
   <!-- FOSSAS SÉPTICAS -->
-  <div id="viewFossas" class="page-box" style="display:none">
-    <div class="page-title">Controle de Fossas Sépticas
-      <button class="btn-primary" style="font-size:12px;padding:6px 14px">+ Nova Inspeção</button>
+  <div id="viewFossas" class="ha-card" style="display:none">
+    <div class="ha-card-header">
+      <span class="ha-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Controle de Fossas Sépticas
+      </span>
+      <button class="btn btn-primary">+ Nova Inspeção</button>
     </div>
-    <span class="page-subtitle">Mapeamento de fossas no complexo e cronograma de esgotamento.</span>
-    <table>
-      <thead><tr><th>Código</th><th>Local</th><th>Volume (L)</th><th>Última Limpeza</th><th>Próxima Limpeza</th><th>Status</th><th>Ações</th></tr></thead>
-      <tbody id="fossaList"></tbody>
-    </table>
+    <div class="ha-card-body">
+      <p style="font-size:13px;color:var(--text3);margin:0 0 16px">Mapeamento de fossas no complexo e cronograma de esgotamento.</p>
+      <table class="table">
+        <thead><tr><th>Código</th><th>Local</th><th>Volume (L)</th><th>Última Limpeza</th><th>Próxima Limpeza</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody id="fossaList"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- CAIXAS GORDURA -->
-  <div id="viewGordura" class="page-box" style="display:none">
-    <div class="page-title">Caixas de Gordura
-      <button class="btn-primary" style="font-size:12px;padding:6px 14px">+ Registro de Limpeza</button>
+  <div id="viewGordura" class="ha-card" style="display:none">
+    <div class="ha-card-header">
+      <span class="ha-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12h8M12 8v8"/></svg>
+        Caixas de Gordura
+      </span>
+      <button class="btn btn-primary">+ Registro de Limpeza</button>
     </div>
-    <span class="page-subtitle">Frequência alta de limpeza preventiva (Cozinhas e Refeitórios).</span>
-    <table>
-      <thead><tr><th>Código</th><th>Local</th><th>Origem</th><th>Ciclo</th><th>Última Limpeza</th><th>Status</th><th>Ações</th></tr></thead>
-      <tbody id="gorduraList"></tbody>
-    </table>
+    <div class="ha-card-body">
+      <p style="font-size:13px;color:var(--text3);margin:0 0 16px">Frequência alta de limpeza preventiva (Cozinhas e Refeitórios).</p>
+      <table class="table">
+        <thead><tr><th>Código</th><th>Local</th><th>Origem</th><th>Ciclo</th><th>Última Limpeza</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody id="gorduraList"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- CAIXAS SAO -->
-  <div id="viewSao" class="page-box" style="display:none">
-    <div class="page-title">Separadoras de Água e Óleo (SAO)
-      <button class="btn-primary" style="font-size:12px;padding:6px 14px">+ Relatório Manutenção</button>
+  <div id="viewSao" class="ha-card" style="display:none">
+    <div class="ha-card-header">
+      <span class="ha-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="10" ry="4"/><path d="M2 12c0 2.21 4.48 4 10 4s10-1.79 10-4M2 12v6c0 2.21 4.48 4 10 4s10-1.79 10-4v-6"/></svg>
+        Separadoras de Água e Óleo (SAO)
+      </span>
+      <button class="btn btn-primary">+ Relatório Manutenção</button>
     </div>
-    <span class="page-subtitle">Destinação correta de resíduos de oficinas e lava-jatos.</span>
-    <table>
-      <thead><tr><th>Código</th><th>Local</th><th>Responsável</th><th>Capacidade</th><th>Nível Borra/Óleo</th><th>Status</th><th>Ações</th></tr></thead>
-      <tbody id="saoList"></tbody>
-    </table>
+    <div class="ha-card-body">
+      <p style="font-size:13px;color:var(--text3);margin:0 0 16px">Destinação correta de resíduos de oficinas e lava-jatos.</p>
+      <table class="table">
+        <thead><tr><th>Código</th><th>Local</th><th>Responsável</th><th>Capacidade</th><th>Nível Borra/Óleo</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody id="saoList"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -118,10 +142,10 @@ const fossas = [
 
 document.getElementById('fossaList').innerHTML = fossas.map(f => `
   <tr>
-    <td><strong>${f.cod}</strong></td><td>${f.local}</td><td style="color:var(--text-muted)">${f.vol} L</td>
+    <td><strong>${f.cod}</strong></td><td>${f.local}</td><td style="color:var(--text3)">${f.vol} L</td>
     <td>${f.ult}</td><td style="font-weight:600">${f.prox}</td>
-    <td><span class="badge-${f.sts}">${f.sts==='ok'?'No Prazo':f.sts==='warn'?'Atenção':'Atrasado'}</span></td>
-    <td><a href="#" style="color:var(--primary-blue);font-size:12px;font-weight:600;text-decoration:none">Ver Ficha</a></td>
+    <td><span class="badge badge-${f.sts==='ok'?'green':f.sts==='warn'?'yellow':'red'}">${f.sts==='ok'?'No Prazo':f.sts==='warn'?'Atenção':'Atrasado'}</span></td>
+    <td><a href="#" class="btn btn-secondary" style="font-size:12px;padding:4px 10px;text-decoration:none">Ver Ficha</a></td>
   </tr>
 `).join('');
 
@@ -134,10 +158,10 @@ const gorduras = [
 
 document.getElementById('gorduraList').innerHTML = gorduras.map(g => `
   <tr>
-    <td><strong>${g.cod}</strong></td><td>${g.local}</td><td style="color:var(--text-muted)">${g.orig}</td>
-    <td style="color:var(--text-muted)">${g.ciclo}</td><td>${g.ult}</td>
-    <td><span class="badge-${g.sts}">${g.sts==='ok'?'Limpa':g.sts==='warn'?'Agendar':'Crítico'}</span></td>
-    <td><a href="#" style="color:var(--primary-blue);font-size:12px;font-weight:600;text-decoration:none">Gerir</a></td>
+    <td><strong>${g.cod}</strong></td><td>${g.local}</td><td style="color:var(--text3)">${g.orig}</td>
+    <td style="color:var(--text3)">${g.ciclo}</td><td>${g.ult}</td>
+    <td><span class="badge badge-${g.sts==='ok'?'green':g.sts==='warn'?'yellow':'red'}">${g.sts==='ok'?'Limpa':g.sts==='warn'?'Agendar':'Crítico'}</span></td>
+    <td><a href="#" class="btn btn-secondary" style="font-size:12px;padding:4px 10px;text-decoration:none">Gerir</a></td>
   </tr>
 `).join('');
 
@@ -151,10 +175,10 @@ const saos = [
 document.getElementById('saoList').innerHTML = saos.map(s => `
   <tr>
     <td><strong>${s.cod}</strong></td><td>${s.local}</td><td>${s.resp}</td>
-    <td style="color:var(--text-muted)">${s.cap} L</td>
-    <td style="font-weight:600;color:${s.sts==='danger'?'var(--red)':'var(--text-dark)'}">${s.nivel}</td>
-    <td><span class="badge-${s.sts==='danger'?'warn':'ok'}">${s.sts==='danger'?'Limpeza Urgente':'Limpa'}</span></td>
-    <td><a href="#" style="color:var(--primary-blue);font-size:12px;font-weight:600;text-decoration:none">Coleta</a></td>
+    <td style="color:var(--text3)">${s.cap} L</td>
+    <td style="font-weight:600;color:${s.sts==='danger'?'var(--red)':'var(--text)'}">${s.nivel}</td>
+    <td><span class="badge badge-${s.sts==='danger'?'yellow':'green'}">${s.sts==='danger'?'Limpeza Urgente':'Limpa'}</span></td>
+    <td><a href="#" class="btn btn-secondary" style="font-size:12px;padding:4px 10px;text-decoration:none">Coleta</a></td>
   </tr>
 `).join('');
 </script>
