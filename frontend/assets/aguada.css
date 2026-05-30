@@ -377,4 +377,54 @@ button { cursor: pointer; font-family: var(--sans); border: none; background: no
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ===================== HA COMPONENT LAYER ===================== */
+/* Linguagem visual Home Assistant sobre tokens Aguada. */
+
+.ha-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+}
+.ha-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border);
+}
+.ha-card-title {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 15px; font-weight: 500; color: var(--text);
+}
+.ha-card-title svg { color: var(--text3); flex-shrink: 0; }
+.ha-card-body { padding: 16px; }
+
+/* Stat big-number */
+.ha-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.ha-stat { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.ha-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; color: var(--text3); }
+.ha-stat-value { font-family: var(--mono); font-size: 28px; font-weight: 700; line-height: 1.05; color: var(--text); }
+.ha-stat-unit { font-size: 13px; font-weight: 600; color: var(--text3); margin-left: 2px; }
+.ha-stat-delta { font-size: 11px; font-weight: 600; font-family: var(--mono); color: var(--text3); }
+.ha-stat-delta.up { color: var(--green); }
+.ha-stat-delta.down { color: var(--red); }
+
+/* Entities list (estilo type: entities do HA) */
+.ha-entities { display: flex; flex-direction: column; }
+.ha-entity-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.ha-entity-row:last-child { border-bottom: none; }
+.ha-entity-row > svg { color: var(--text3); flex-shrink: 0; }
+.ha-entity-name { flex: 1; min-width: 0; font-size: 13px; color: var(--text2); }
+.ha-entity-value { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.ha-divider { height: 1px; background: var(--border); margin: 6px 0; }
+
+/* Section header com ícone */
+.ha-section { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text); margin: 18px 0 10px; }
+.ha-section svg { color: var(--text3); flex-shrink: 0; }
+
+/* Gauge radial (preenchido por renderGauge em ha-ui.js) */
+.ha-gauge { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+.ha-gauge svg { display: block; }
+.ha-gauge-value { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--text); margin-top: -8px; }
+.ha-gauge-name { font-size: 11px; color: var(--text3); }
 ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
