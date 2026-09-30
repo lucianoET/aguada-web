@@ -1,30 +1,39 @@
+# FONTE ÚNICA dos parâmetros de reservatório — usada pelo bridge.py (HA) e pelo
+# backend web (cmms-aguada, via RESERVOIRS_FILE ou cópia idêntica em backend/).
+# Depois de editar: tools/sync_reservoirs.sh
+#   also:    node_ids alternativos que alimentam o mesmo reservatório
+#   lat/lng: usados só pelo mapa do web
 reservoirs:
-  "0x7758":
+  # node_id must match exactly the hex string printed by the gateway (uppercase, "0x" prefix)
+
+  "0X7758":
     - sensor_id: 1
       alias: CON
       name: Castelo de Consumo
       level_max_cm: 450
-      volume_max_l: 80000
+      volume_max_L: 80000
       sensor_offset_cm: 20
       lat: -22.8382228
       lng: -43.1080717
 
-  "0xc9c4":
+  # CAV: node ESP-NOW (MAC 38:18:2B:8A:C9:C4) + node cabeado firmware/node-eth (0xEE02)
+  "0XC9C4":
     - sensor_id: 1
       alias: CAV
       name: Castelo de Incêndio
       level_max_cm: 450
-      volume_max_l: 80000
+      volume_max_L: 80000
       sensor_offset_cm: 20
       lat: -22.8370961
       lng: -43.1093818
+      also: ["0XEE02"]
 
-  "0x2ec4":
+  "0X2EC4":
     - sensor_id: 1
       alias: CB31
       name: Casa de Bombas Nº3-1
       level_max_cm: 200
-      volume_max_l: 40000
+      volume_max_L: 40000
       sensor_offset_cm: 10
       lat: -22.8384676
       lng: -43.1083677
@@ -32,35 +41,35 @@ reservoirs:
       alias: CB32
       name: Casa de Bombas Nº3-2
       level_max_cm: 200
-      volume_max_l: 40000
+      volume_max_L: 40000
       sensor_offset_cm: 10
       lat: -22.8384876
       lng: -43.1083877
 
-  "0x9eac":
+  "0X9EAC":
     - sensor_id: 1
       alias: CIE1
       name: Cisterna IE-1
       level_max_cm: 240
-      volume_max_l: 245000
+      volume_max_L: 245000
       sensor_offset_cm: 10
-      lat: -22.8389980
+      lat: -22.838998
       lng: -43.1080397
     - sensor_id: 2
       alias: CIE2
       name: Cisterna IE-2
       level_max_cm: 240
-      volume_max_l: 245000
+      volume_max_L: 245000
       sensor_offset_cm: 10
-      lat: -22.8390200
+      lat: -22.83902
       lng: -43.1080597
 
-  "0x3456":
+  "0X3456":
     - sensor_id: 1
       alias: CBIF1
       name: Casa de Bombas IF-1
       level_max_cm: 200
-      volume_max_l: 40000
+      volume_max_L: 40000
       sensor_offset_cm: 10
       lat: -22.8453673
       lng: -43.1004556
@@ -68,7 +77,20 @@ reservoirs:
       alias: CBIF2
       name: Casa de Bombas IF-2
       level_max_cm: 200
-      volume_max_l: 40000
+      volume_max_L: 40000
       sensor_offset_cm: 10
       lat: -22.8453873
       lng: -43.1004756
+
+  # ── ANI-01 nodes (Aguada Node Indoor — qualidade do ar) ─────────────────────
+  # type: air_quality → bridge usa eco2/aqi, sem cálculo de nível/volume.
+  # Pacote 2 (SENSOR_ID_ENV=0xFE) com temp+hum é tratado automaticamente
+  # pelo handler _handle_heartbeat() existente e publicado em aguada/{id}/env/state.
+  #
+  # Exemplo: node_id fictício 0xA101 — substituir pelo MAC real do dispositivo.
+
+  "0XA101":
+    - sensor_id: 1
+      type: air_quality
+      alias: SRN
+      name: Sala de Reunião

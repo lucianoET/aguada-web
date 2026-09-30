@@ -11,6 +11,7 @@ import queue
 import random
 import threading
 import time
+from collections import deque
 from glob import glob
 from pathlib import Path
 from typing import Callable, Optional
@@ -22,15 +23,22 @@ from .db import insert_reading, upsert_state, upsert_node, upsert_node_seen
 
 logger = logging.getLogger("bridge")
 
-# Carrega reservoirs.yaml uma vez
-_yaml_path = Path(__file__).parent / "reservoirs.yaml"
+# Carrega reservoirs.yaml uma vez. Fonte única: aguada-firmware/tools/reservoirs.yaml
+# (mesmo arquivo do bridge do Home Assistant). RESERVOIRS_FILE aponta direto para ele;
+# sem a variável, usa a cópia idêntica em backend/ (tools/sync_reservoirs.sh no firmware).
+_yaml_path = Path(os.getenv("RESERVOIRS_FILE") or Path(__file__).parent / "reservoirs.yaml")
 _raw = yaml.safe_load(_yaml_path.read_text())["reservoirs"]
 
 # Índice: (node_id_lower, sensor_id) → dict de parâmetros
 RESERVOIR_INDEX: dict[tuple[str, int], dict] = {}
 for _node_id, _sensors in _raw.items():
     for _s in _sensors:
-        RESERVOIR_INDEX[(_node_id.lower(), _s["sensor_id"])] = _s
+        if "level_max_cm" not in _s:
+            continue  # entradas sem nível (ex.: type: air_quality) são só do bridge HA
+        _s.setdefault("volume_max_l", _s.get("volume_max_L"))
+        # "also": node_ids alternativos que alimentam o mesmo reservatório (ex.: node cabeado)
+        for _nid in [_node_id, *_s.get("also", [])]:
+            RESERVOIR_INDEX[(str(_nid).lower(), _s["sensor_id"])] = _s
 
 
 FLAG_SENSOR_ERROR = 1 << 2
@@ -325,8 +333,15 @@ class Bridge:
                 logger.error("WiFi transport: MQTT connect negado rc=%s", rc)
             connected.set()
 
+        # O mesmo pacote pode chegar duas vezes em aguada/gateway/rx (espelho WiFi do
+        # gateway + republicação do bridge USB). As linhas levam seq/ts: igual = duplicado.
+        recent: deque = deque(maxlen=256)
+
         def on_message(client, userdata, msg):
             try:
+                if msg.payload in recent:
+                    return
+                recent.append(msg.payload)
                 raw = json.loads(msg.payload.decode("utf-8"))
                 self._gw_status["last_seen"] = int(time.time())
                 if raw.get("type") == "GATEWAY_STATUS":
