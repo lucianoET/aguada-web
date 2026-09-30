@@ -1,5 +1,5 @@
 # FONTE ÚNICA dos parâmetros de reservatório — usada pelo bridge.py (HA) e pelo
-# backend web (cmms-aguada, via RESERVOIRS_FILE ou cópia idêntica em backend/).
+# backend web (../aguada-web, via RESERVOIRS_FILE ou cópia idêntica em backend/).
 # Depois de editar: tools/sync_reservoirs.sh
 #   also:    node_ids alternativos que alimentam o mesmo reservatório
 #   lat/lng: usados só pelo mapa do web
