@@ -122,6 +122,40 @@ CREATE TABLE IF NOT EXISTS report_daily_data (
     valve_rows_json     TEXT,
     updated_ts          INTEGER NOT NULL
 );
+
+-- Eventos auditáveis (docs/sistemas-hidricos/Normas_Tecnicas.md §10, §12.1): insert-only.
+-- Alarme/falha ativo = sem evento de normalização apontando para ele (ref_id).
+CREATE TABLE IF NOT EXISTS events (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts          INTEGER NOT NULL,
+    tipo        TEXT    NOT NULL CHECK (tipo IN ('alarme', 'falha', 'comando', 'informativo')),
+    severidade  TEXT    NOT NULL CHECK (severidade IN ('critico', 'alerta', 'info')),
+    entidade    TEXT    NOT NULL,
+    entidade_id TEXT    NOT NULL,
+    codigo      TEXT    NOT NULL,
+    descricao   TEXT    NOT NULL,
+    valor       REAL,
+    usuario     TEXT,
+    ref_id      INTEGER REFERENCES events(id)
+);
+CREATE INDEX IF NOT EXISTS idx_events_ts  ON events(ts DESC);
+CREATE INDEX IF NOT EXISTS idx_events_ref ON events(ref_id);
+
+-- Reconhecimento pelo operador: tabela à parte para events continuar sem UPDATE
+CREATE TABLE IF NOT EXISTS event_acks (
+    event_id INTEGER PRIMARY KEY REFERENCES events(id),
+    ts       INTEGER NOT NULL,
+    usuario  TEXT    NOT NULL
+);
+
+CREATE TRIGGER IF NOT EXISTS events_no_update BEFORE UPDATE ON events
+BEGIN SELECT RAISE(ABORT, 'events é insert-only'); END;
+CREATE TRIGGER IF NOT EXISTS events_no_delete BEFORE DELETE ON events
+BEGIN SELECT RAISE(ABORT, 'events é insert-only'); END;
+CREATE TRIGGER IF NOT EXISTS event_acks_no_update BEFORE UPDATE ON event_acks
+BEGIN SELECT RAISE(ABORT, 'event_acks é insert-only'); END;
+CREATE TRIGGER IF NOT EXISTS event_acks_no_delete BEFORE DELETE ON event_acks
+BEGIN SELECT RAISE(ABORT, 'event_acks é insert-only'); END;
 """
 
 
@@ -645,3 +679,64 @@ async def upsert_report_daily_data(conn: aiosqlite.Connection, item: dict) -> No
         payload,
     )
     await conn.commit()
+
+
+# ── Eventos ──────────────────────────────────────────────────────
+
+_EVENT_SELECT = """SELECT e.*, a.ts AS ack_ts, a.usuario AS ack_usuario,
+       (SELECT n.ts FROM events n WHERE n.ref_id = e.id LIMIT 1) AS normalizado_ts
+    FROM events e LEFT JOIN event_acks a ON a.event_id = e.id"""
+
+
+async def insert_event(conn: aiosqlite.Connection, ev: dict) -> dict:
+    row = {"valor": None, "usuario": None, "ref_id": None, **ev}
+    cur = await conn.execute(
+        """INSERT INTO events (ts, tipo, severidade, entidade, entidade_id, codigo, descricao, valor, usuario, ref_id)
+           VALUES (:ts, :tipo, :severidade, :entidade, :entidade_id, :codigo, :descricao, :valor, :usuario, :ref_id)""",
+        row,
+    )
+    await conn.commit()
+    return {**row, "id": cur.lastrowid}
+
+
+async def get_active_alarms(conn: aiosqlite.Connection) -> list[dict]:
+    """Alarmes e falhas ainda não normalizados, mais recentes primeiro."""
+    async with conn.execute(
+        _EVENT_SELECT + """ WHERE e.tipo IN ('alarme', 'falha') AND e.ref_id IS NULL
+            AND NOT EXISTS (SELECT 1 FROM events n WHERE n.ref_id = e.id)
+            ORDER BY e.ts DESC"""
+    ) as cur:
+        return [dict(r) for r in await cur.fetchall()]
+
+
+async def get_events(conn: aiosqlite.Connection, limit: int = 200, since_ts: int | None = None) -> list[dict]:
+    async with conn.execute(
+        _EVENT_SELECT + " WHERE e.ts >= ? ORDER BY e.ts DESC, e.id DESC LIMIT ?",
+        (since_ts or 0, limit),
+    ) as cur:
+        return [dict(r) for r in await cur.fetchall()]
+
+
+async def ack_event(conn: aiosqlite.Connection, event_id: int, usuario: str, ts: int) -> bool:
+    """False se o evento não existe; reconhecer de novo não muda nada (o primeiro vale)."""
+    async with conn.execute("SELECT 1 FROM events WHERE id = ?", (event_id,)) as cur:
+        if not await cur.fetchone():
+            return False
+    await conn.execute("INSERT OR IGNORE INTO event_acks (event_id, ts, usuario) VALUES (?, ?, ?)", (event_id, ts, usuario))
+    await conn.commit()
+    return True
+
+
+async def get_hydrometer_neighbors(conn: aiosqlite.Connection, meter_name: str, ts: int) -> tuple[dict | None, dict | None]:
+    """Leituras imediatamente antes (ts <=) e depois (ts >) de `ts` para o hidrômetro."""
+    async with conn.execute(
+        "SELECT ts, reading FROM manual_hydrometer_readings WHERE meter_name = ? AND ts <= ? ORDER BY ts DESC, id DESC LIMIT 1",
+        (meter_name, ts),
+    ) as cur:
+        prev = await cur.fetchone()
+    async with conn.execute(
+        "SELECT ts, reading FROM manual_hydrometer_readings WHERE meter_name = ? AND ts > ? ORDER BY ts ASC, id ASC LIMIT 1",
+        (meter_name, ts),
+    ) as cur:
+        nxt = await cur.fetchone()
+    return (dict(prev) if prev else None, dict(nxt) if nxt else None)

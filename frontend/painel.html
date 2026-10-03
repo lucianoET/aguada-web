@@ -884,6 +884,7 @@ function painelApp() {
       sanitation: true,
     },
     infra: null,
+    alarms: null,
     _miniMap: null,
     _fullMapObj: null,
     _miniMarkers: {},
@@ -945,8 +946,9 @@ function painelApp() {
       const r = (this.reservoirs||[]).filter(x=>x.online);
       return r.length ? Math.round(r.reduce((s,x)=>s+(x.pct||0),0)/r.length) : 0;
     },
-    get critical() { return (this.reservoirs||[]).filter(r=>!r.online||r.pct<=20).length; },
-    get warning() { return (this.reservoirs||[]).filter(r=>r.online&&r.pct>20&&r.pct<=35).length; },
+    // Alarmes ativos do backend (histerese + falha de sensor); sem API, cai na conta local
+    get critical() { return this.alarms ? this.alarms.filter(a=>a.severidade==='critico').length : (this.reservoirs||[]).filter(r=>!r.online||r.pct<=20).length; },
+    get warning() { return this.alarms ? this.alarms.filter(a=>a.severidade==='alerta').length : (this.reservoirs||[]).filter(r=>r.online&&r.pct>20&&r.pct<=35).length; },
     get onlineCount() { return (this.reservoirs||[]).filter(r=>r.online).length; },
     get activePumps() { return this.pumps.filter(p=>p.state==='ligada').length; },
 
@@ -1145,9 +1147,11 @@ function painelApp() {
 
       await this._initMiniMap();
       this._updateMiniMarkers();
+      await this._loadAlarms();
 
       this.wsConnect(data => {
         const msg = normalizeWsMessage(data);
+        if (msg.type==='event') { this._loadAlarms(); return; }
         if (msg.type==='snapshot') {
           // Mantém consumed_l/rate_lh calculados no init (o snapshot não traz)
           this.reservoirs = msg.reservoirs.map(s => ({...this.reservoirs.find(o=>o.alias===s.alias), ...s}));
@@ -1165,6 +1169,11 @@ function painelApp() {
           if(r) this._fillModal(r);
         }
       });
+    },
+
+    async _loadAlarms() {
+      const res = await fetch('/api/events/active').then((r) => r.ok ? r.json() : null).catch(() => null);
+      this.alarms = res?.items ?? null;
     },
 
     async _loadConsumption() {

@@ -222,9 +222,10 @@ def _process_message(raw: dict) -> Optional[dict]:
 
 
 class Bridge:
-    def __init__(self, db_path: str, notify_cb: Callable[[dict], None]):
+    def __init__(self, db_path: str, notify_cb: Callable[[dict], None], after_save=None):
         self.db_path = db_path
         self.notify_cb = notify_cb
+        self.after_save = after_save  # async (record) → None, ex.: avaliação de alarmes
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._thread: Optional[threading.Thread] = None
         self._mqtt_client = None
@@ -723,3 +724,8 @@ class Bridge:
             return
         self.notify_cb(record)
         self._publish_mqtt(record)
+        if self.after_save:
+            try:
+                await self.after_save(record)
+            except Exception as e:
+                logger.error("after_save falhou: %s — registro: %s", e, record.get("alias"))

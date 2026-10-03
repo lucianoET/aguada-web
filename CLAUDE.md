@@ -73,6 +73,7 @@ O backend é um **FastAPI** com lifespan que inicializa:
 - `db.py` — schema SQLite e todas as queries (sem lógica de negócio). Tabelas: `readings`, `reservoir_state`, mais tabelas manuais (hidrometros, bombas, válvulas, reservatórios) e `nodes`
 - `calc.py` — cálculo de `level_cm`/`volume_l`/`pct` a partir de `distance_cm`, e agregação de eventos de consumo/abastecimento (medianas por hora + deadband de ruído: variação só conta ao acumular >= max(1,5 cm, ruído medido do sensor))
 - `report.py` — geração de PDF diário via WeasyPrint
+- `alarms.py` — alarmes de nível com histerese e falhas de sensor (offline, fora da faixa, salto); cada transição vira evento na tabela `events` (insert-only por trigger; reconhecimento em `event_acks`). Normas em `docs/sistemas-hidricos/Normas_Tecnicas.md`
 - `main.py` — rotas FastAPI + servir SPA estática do `frontend/`
 
 ### Configuração de reservatórios

@@ -61,9 +61,15 @@ from .db import (
     get_node,
     patch_node,
     is_supported_valve_name,
+    insert_event,
+    get_events,
+    get_active_alarms,
+    ack_event,
+    get_hydrometer_neighbors,
 )
 from .calc import calc_consumption_events, decimate_readings
 from .dashboard import build_data as build_dashboard_data
+from .alarms import AlarmEngine
 from .report import generate_daily_report_pdf
 
 logger = logging.getLogger("main")
@@ -91,6 +97,16 @@ class WSManager:
     def disconnect(self, ws: WebSocket):
         if ws in self._clients:
             self._clients.remove(ws)
+
+    def broadcast_event(self, event: dict):
+        """Evento novo (alarme, normalização, comando) para as páginas abertas."""
+        if self._loop is None:
+            return
+        msg = json.dumps({"type": "event", "data": event})
+        try:
+            self._loop.call_soon_threadsafe(lambda: asyncio.ensure_future(self._send_all(msg), loop=self._loop))
+        except RuntimeError:
+            pass  # loop já encerrado (shutdown, testes): evento já está gravado
 
     def broadcast(self, data: dict):
         """Chamado pela bridge thread — agenda envio no loop asyncio principal."""
@@ -122,11 +138,12 @@ class WSManager:
 ws_manager = WSManager()
 bridge: Optional[Bridge] = None
 scheduler: Optional[AsyncIOScheduler] = None
+alarms: Optional[AlarmEngine] = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global bridge, scheduler, DATA_DIR, DB_PATH, REPORTS_DIR
+    global bridge, scheduler, alarms, DATA_DIR, DB_PATH, REPORTS_DIR
     try:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         REPORTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -147,11 +164,15 @@ async def lifespan(app: FastAPI):
     loop = asyncio.get_running_loop()
     ws_manager.set_loop(loop)
 
-    bridge = Bridge(db_path=DB_PATH, notify_cb=ws_manager.broadcast)
+    alarms = AlarmEngine(DB_PATH, notify=ws_manager.broadcast_event)
+    await alarms.load()
+
+    bridge = Bridge(db_path=DB_PATH, notify_cb=ws_manager.broadcast, after_save=alarms.on_reading)
     bridge.start(loop)
 
     scheduler = AsyncIOScheduler(timezone=os.getenv("TZ", "America/Sao_Paulo"))
     scheduler.add_job(_daily_report_job, "cron", hour=6, minute=0)
+    scheduler.add_job(alarms.check_offline, "interval", minutes=1)
     scheduler.start()
 
     yield
@@ -376,6 +397,8 @@ class ManualHydrometerRequest(BaseModel):
     unit: str = "m3"
     ts: Optional[int] = None
     note: Optional[str] = None
+    usuario: Optional[str] = None
+    substituicao: bool = False  # hidrômetro trocado/zerado: aceita leitura menor (exige note)
 
 
 class ManualPumpRequest(BaseModel):
@@ -385,6 +408,7 @@ class ManualPumpRequest(BaseModel):
     mode: str = "manual"
     ts: Optional[int] = None
     note: Optional[str] = None
+    usuario: Optional[str] = None
 
 
 class ManualValveRequest(BaseModel):
@@ -392,6 +416,11 @@ class ManualValveRequest(BaseModel):
     state: str  # aberta | fechada | parcial | falha
     ts: Optional[int] = None
     note: Optional[str] = None
+    usuario: Optional[str] = None
+
+
+class AckRequest(BaseModel):
+    usuario: str
 
 
 class ManualReservoirRequest(BaseModel):
@@ -459,6 +488,8 @@ async def post_manual_reading(body: ManualReadingRequest):
 
     # Notifica WebSocket em tempo real
     ws_manager.broadcast(record)
+    if alarms:
+        await alarms.on_reading(record)
 
     return {"ok": True, "alias": alias, "volume_l": volume_l, "pct": pct, "level_cm": level_cm}
 
@@ -476,7 +507,24 @@ async def post_manual_hydrometer(body: ManualHydrometerRequest):
         "note": body.note,
     }
     async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        # Normas §8.2: leitura acumulada só cresce. Encaixa entre a anterior e a posterior (lançamento retroativo).
+        prev, nxt = await get_hydrometer_neighbors(conn, meter_name, item["ts"])
+        regressiva = (prev and item["reading"] < prev["reading"]) or (nxt and item["reading"] > nxt["reading"])
+        if regressiva and not body.substituicao:
+            ref = prev if prev and item["reading"] < prev["reading"] else nxt
+            raise HTTPException(409, f"Leitura fora de ordem: {meter_name} tem {ref['reading']:.3f} {item['unit']} em "
+                                     f"{time.strftime('%d/%m/%Y %H:%M', time.localtime(ref['ts']))}. "
+                                     "Se o hidrômetro foi trocado ou zerado, marque substituição e informe o motivo.")
+        if regressiva and not (body.note or "").strip():
+            raise HTTPException(400, "Substituição de hidrômetro exige o motivo em note")
         await insert_manual_hydrometer_reading(conn, item)
+        if regressiva:
+            ev = await insert_event(conn, {"ts": item["ts"], "tipo": "informativo", "severidade": "alerta",
+                                           "entidade": "hidrometro", "entidade_id": meter_name, "codigo": "hidrometro_substituido",
+                                           "descricao": f"{meter_name}: leitura reiniciada em {item['reading']:.3f} {item['unit']} — {body.note}",
+                                           "valor": item["reading"], "usuario": body.usuario})
+            ws_manager.broadcast_event(ev)
     return {"ok": True, **item}
 
 
@@ -508,7 +556,10 @@ async def post_manual_pump(body: ManualPumpRequest):
         "note": body.note,
     }
     async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        before = next((p["state"] for p in await get_latest_pump_states(conn) if p["pump_name"] == pump_name), None)
         await insert_manual_pump_log(conn, item)
+        await _command_event(conn, "bomba", pump_name, before, state, body.note, body.usuario, item["ts"])
     return {"ok": True, **item}
 
 
@@ -537,8 +588,45 @@ async def post_manual_valve(body: ManualValveRequest):
         "note": body.note,
     }
     async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        before = next((v["state"] for v in await get_latest_valve_states(conn) if v["valve_name"] == valve_name), None)
         await insert_manual_valve_log(conn, item)
+        await _command_event(conn, "valvula", valve_name, before, state, body.note, body.usuario, item["ts"])
     return {"ok": True, **item}
+
+
+async def _command_event(conn, entidade: str, nome: str, antes: Optional[str], depois: str,
+                         motivo: Optional[str], usuario: Optional[str], ts: int) -> None:
+    desc = f"{nome}: {antes or 'sem registro'} → {depois}" + (f" — {motivo}" if motivo else "")
+    ev = await insert_event(conn, {"ts": ts, "tipo": "comando", "severidade": "info", "entidade": entidade,
+                                   "entidade_id": nome, "codigo": "estado_manual", "descricao": desc, "usuario": usuario})
+    ws_manager.broadcast_event(ev)
+
+
+@app.get("/api/events")
+async def list_events(limit: int = Query(200, ge=1, le=2000), since_ts: Optional[int] = Query(None)):
+    async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        return {"items": await get_events(conn, limit=limit, since_ts=since_ts)}
+
+
+@app.get("/api/events/active")
+async def list_active_alarms():
+    async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        return {"items": await get_active_alarms(conn)}
+
+
+@app.post("/api/events/{event_id}/ack")
+async def ack_alarm(event_id: int, body: AckRequest):
+    usuario = body.usuario.strip()
+    if not usuario:
+        raise HTTPException(400, "Informe quem reconheceu")
+    async with aiosqlite.connect(DB_PATH) as conn:
+        if not await ack_event(conn, event_id, usuario, int(time.time())):
+            raise HTTPException(404, "Evento não encontrado")
+    ws_manager.broadcast_event({"id": event_id, "ack": True})
+    return {"ok": True}
 
 
 @app.get("/api/manual/valves")
