@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>AGUADA — Alertas</title>
-<link rel="stylesheet" href="assets/aguada.css?v=2">
+<link rel="stylesheet" href="assets/aguada.css?v=3">
 <link rel="stylesheet" href="assets/style.css">
 <style>
   .alerts-layout { display:grid; grid-template-columns:1fr 300px; gap:16px; }
@@ -24,6 +24,8 @@
   .abadge-warn { background:#fef3c7; color:#92400e; }
   .abadge-ok   { background:#d1fae5; color:#065f46; }
   .abadge-info { background:#eff6ff; color:#1e40af; }
+  .sum-lbl { display:inline-flex; align-items:center; gap:8px; }
+  .sdot { width:8px; height:8px; border-radius:50%; display:inline-block; }
 </style>
 </head>
 <body class="admin-page">
@@ -33,13 +35,13 @@
   <div class="alerts-layout">
     <div class="box">
       <div class="box-header">
-        <h2>🚨 Alertas Ativos</h2>
+        <h2>Alertas Ativos</h2>
         <span id="alertCount" class="abadge abadge-info">—</span>
       </div>
       <div class="box-body" id="alertsList"><div class="loader"></div></div>
     </div>
     <div class="box">
-      <div class="box-header"><h2>📊 Resumo</h2></div>
+      <div class="box-header"><h2>Resumo</h2></div>
       <div class="box-body" id="summary"><div class="loader"></div></div>
     </div>
   </div>
@@ -63,28 +65,29 @@ function generateAlerts(reservoirs) {
     const pct  = r.pct ?? 0;
     const name = r.name ? `${r.alias} (${r.name})` : r.alias;
     if (!r.online) {
-      const minsAgo = r.ts ? Math.round((now-r.ts)/60) : '?';
+      const mins = r.ts ? Math.round((now-r.ts)/60) : null;
+      const ago = mins == null ? '?' : mins < 60 ? `${mins} min` : mins < 1440 ? `${Math.round(mins/60)} h` : `${Math.round(mins/1440)} dias`;
       alerts.push({ level:'crit',
-        title:`🔴 CRÍTICO — ${name} sem comunicação`,
-        body:`Último dado há ${minsAgo} minutos. Verifique o sensor e a alimentação.` });
+        title:`CRÍTICO — ${name} sem comunicação`,
+        body:`Último dado há ${ago}. Verifique o sensor e a alimentação.` });
     } else if (pct <= THRESH.crit) {
       alerts.push({ level:'crit',
-        title:`🔴 CRÍTICO — ${name} com nível baixo`,
+        title:`CRÍTICO — ${name} com nível baixo`,
         body:`Nível: ${pct.toFixed(1)}% (limite crítico: ${THRESH.crit}%). Volume: ${r.volume_l!=null?(r.volume_l/1000).toFixed(2)+' m³':'—'}.` });
     } else if (pct <= THRESH.warn) {
       alerts.push({ level:'warn',
-        title:`🟡 AVISO — ${name} com nível reduzido`,
+        title:`AVISO — ${name} com nível reduzido`,
         body:`Nível: ${pct.toFixed(1)}% (limite: ${THRESH.warn}%). Considere acionar abastecimento.` });
     }
     if (r.out_of_range) {
       alerts.push({ level:'warn',
-        title:`🟡 AVISO — ${name} com leitura fora do alcance`,
+        title:`AVISO — ${name} com leitura fora do alcance`,
         body:`Sensor reportou distância inválida. Verifique obstrução ou posicionamento.` });
     }
   });
   if (!alerts.length)
     alerts.push({ level:'ok',
-      title:'✅ Todos os reservatórios em condições normais',
+      title:'Todos os reservatórios em condições normais',
       body:`${reservoirs.filter(r=>r.online).length} de ${reservoirs.length} sensores online. Níveis dentro dos limites.` });
   return alerts;
 }
@@ -108,10 +111,10 @@ function render(raw) {
     </div>`).join('');
 
   document.getElementById('summary').innerHTML = `
-    <div class="sum-row"><span>🔴 Críticos</span><span class="abadge abadge-crit">${crits}</span></div>
-    <div class="sum-row"><span>🟡 Avisos</span><span class="abadge abadge-warn">${warns}</span></div>
-    <div class="sum-row"><span>✅ Normais</span><span class="abadge abadge-ok">${reservoirs.filter(r=>r.online&&(r.pct??0)>THRESH.warn).length}</span></div>
-    <div class="sum-row"><span>📡 Online</span><span class="abadge abadge-info">${reservoirs.filter(r=>r.online).length}/${reservoirs.length}</span></div>
+    <div class="sum-row"><span class="sum-lbl"><i class="sdot" style="background:var(--red)"></i>Críticos</span><span class="abadge abadge-crit">${crits}</span></div>
+    <div class="sum-row"><span class="sum-lbl"><i class="sdot" style="background:var(--yellow)"></i>Avisos</span><span class="abadge abadge-warn">${warns}</span></div>
+    <div class="sum-row"><span class="sum-lbl"><i class="sdot" style="background:var(--green)"></i>Normais</span><span class="abadge abadge-ok">${reservoirs.filter(r=>r.online&&(r.pct??0)>THRESH.warn).length}</span></div>
+    <div class="sum-row"><span class="sum-lbl"><i class="sdot" style="background:var(--blue)"></i>Online</span><span class="abadge abadge-info">${reservoirs.filter(r=>r.online).length}/${reservoirs.length}</span></div>
     <div class="sum-row"><span style="font-size:var(--font-xs);color:var(--text-muted)">Última verificação: ${new Date().toLocaleTimeString('pt-BR')}</span></div>`;
 }
 

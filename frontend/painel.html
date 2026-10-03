@@ -5,13 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" href="data:,">
   <title>Aguada — Painel Hidráulico</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/aguada.css?v=2"/>
+  <link rel="stylesheet" href="assets/aguada.css?v=3"/>
   <link rel="stylesheet" href="assets/style.css"/>
   <link rel="stylesheet" href="assets/vendor/leaflet.min.css"/>
   <style>
     [x-cloak]{display:none}
+    /* Saneamento e Δ dos hidrômetros (estilos perdidos no commit 1d89e08) */
+    .san-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 2px; border-bottom: 1px solid var(--border); }
+    .san-row:last-child { border-bottom: none; }
+    .san-row[style*="cursor:pointer"]:hover { background: var(--bg3); border-radius: 8px; }
+    .delta-pos { color: var(--green); }
+    .delta-neg { color: var(--red); }
     /* Overrides para integrar no shell */
     .admin-page { background: var(--bg); }
     .painel-main {
@@ -80,16 +84,19 @@
     }
     .hero-kpi--blue .hero-kpi-val { color: var(--blue); }
     .hero-kpi--red .hero-kpi-val { color: var(--red); }
-    .spark {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid var(--border2);
-      background: var(--bg3);
-      color: var(--text2);
-      font-family: var(--mono);
-      font-size: 11px;
+    /* Estado do equipamento: cor + rótulo (cor nunca é o único sinal) */
+    .eq-btn { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+    .eq-btn.state-blue   { background: var(--blue-dim);   border-color: var(--blue); }
+    .eq-btn.state-yellow { background: var(--yellow-dim); border-color: var(--yellow); }
+    .eq-btn.state-red    { background: var(--red-dim);    border-color: var(--red); }
+    .eq-btn.state-off    { color: var(--text2); }
+    .eq-btn.state-neutral { border-style: dashed; color: var(--text3); }
+    .eq-btn:not(.state-neutral) .eq-label { color: var(--text); }
+    .eq-state { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; opacity: .8; }
+    .hero-kpi-of {
+      font-size: 13px;
       font-weight: 600;
+      color: var(--text3);
     }
     .dash-grid {
       display: grid;
@@ -265,11 +272,13 @@
     .tank-d-lbl {
       font-size: 9px;
       text-transform: uppercase;
-      letter-spacing: .09em;
+      letter-spacing: .04em;
       font-weight: 600;
       color: var(--text3);
       font-family: var(--sans);
-      opacity: .7;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .tank-d-val {
       font-family: var(--mono);
@@ -281,17 +290,20 @@
     .tank-d-val.accent { color: var(--yellow); }
     [data-theme="dark"] .tank-d-val.accent { color: #fcd34d; }
 
+    .cell-map { display: flex; flex-direction: column; }
     .cell-map .cell-body {
       padding: 0;
       min-height: 430px;
+      flex: 1;
       display: flex;
       flex-direction: column;
     }
     #mini-map {
       width: 100%;
-      height: 100%;
+      flex: 1;
       min-height: 430px;
     }
+    .cell-hydro .cell-body { overflow-x: auto; }
     .map-toolbar {
       display: inline-flex;
       align-items: center;
@@ -356,18 +368,16 @@
   <div id="topbar" class="admin-header"></div>
   <div class="admin-main painel-main">
 
-  <div x-data="painelApp()" x-init="init()" x-cloak>
+  <div x-data="painelApp()" x-init="init()" x-cloak @keydown.escape.window="closeModal(); closeEquipmentModal(); closeLocationModal(); fullMap && closeFullMap()">
 
   <!-- ══════════ HERO KPI STRIP ══════════ -->
   <div class="hero-strip">
     <div class="hero-kpi">
       <div class="hero-kpi-info">
-        <div class="hero-kpi-lbl">Volume Total / Vol Max</div>
-        <div class="hero-kpi-val"><span x-text="volumeTotal">0</span> / <span x-text="volumeMax">0</span> m³</div>
+        <div class="hero-kpi-lbl">Volume total</div>
+        <div class="hero-kpi-val"><span x-text="volumeTotal">0</span><span class="hero-kpi-of"> / <span x-text="volumeMax">0</span> m³</span></div>
       </div>
-      <div class="hero-kpi-side">
-        <span class="spark" x-text="reservoirCount + ' res'"></span>
-      </div>
+      <div class="hero-kpi-side" x-text="reservoirCount + ' res'"></div>
     </div>
     <div class="hero-kpi hero-kpi--blue">
       <div class="hero-kpi-info">
@@ -406,7 +416,7 @@
         </div>
       </div>
       <div class="hero-kpi-side">
-        <span x-show="critical>0" style="color:var(--red)" x-text="critical+' crítico'"></span>
+        <span x-show="critical>0" style="color:var(--red)" x-text="critical + (critical > 1 ? ' críticos' : ' crítico')"></span>
         <span x-show="critical===0 && warning>0" style="color:var(--yellow)" x-text="warning+' atenção'"></span>
         <span x-show="critical===0 && warning===0" style="color:var(--green)">Tudo Normal</span>
       </div>
@@ -454,23 +464,23 @@
                 <div class="tank-spacer"></div>
                 <div class="tank-detail">
                   <div>
-                    <div class="tank-d-lbl">Capacidade</div>
+                    <div class="tank-d-lbl" title="Capacidade">Capac.</div>
                     <div class="tank-d-val"
                          x-text="r.capacity_l ? (r.capacity_l / 1000).toFixed(0) + ' m³' : '—'"></div>
                   </div>
                   <div>
-                    <div class="tank-d-lbl">Cons. diário</div>
+                    <div class="tank-d-lbl" title="Consumo diário">Consumo</div>
                     <div class="tank-d-val"
                          x-text="r.consumed_l != null ? Math.round(r.consumed_l).toLocaleString('pt-BR') + ' L' : '—'"></div>
                   </div>
                   <div>
-                    <div class="tank-d-lbl">Taxa cons.</div>
+                    <div class="tank-d-lbl" title="Taxa de consumo">Taxa</div>
                     <div class="tank-d-val"
                          :class="r.rate_lh > 60 ? 'accent' : ''"
                          x-text="r.rate_lh != null ? r.rate_lh + ' L/h' : '—'"></div>
                   </div>
                   <div>
-                    <div class="tank-d-lbl">Última leit.</div>
+                    <div class="tank-d-lbl" title="Última leitura">Leitura</div>
                     <div class="tank-d-val" x-text="tankDateTime(r.ts)"></div>
                   </div>
                 </div>
@@ -501,7 +511,7 @@
               ></button>
             </template>
           </div>
-          <button class="icon-btn" title="Expandir mapa" @click="openFullMap()">
+          <button class="icon-btn" title="Expandir mapa" aria-label="Expandir mapa" @click="openFullMap()">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
           </button>
         </div>
@@ -525,8 +535,9 @@
             <div style="display:flex; flex-direction:column; gap:6px;">
               <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600;text-align:center" x-text="grp[0]"></div>
               <template x-for="p in grp[1]" :key="p.id">
-                <button type="button" class="eq-btn" :class="eqStateClass(p.state)" :title="p.pump_name" @click="openEquipment('pump', canonicalPumpName(p.pump_name))">
+                <button type="button" class="eq-btn" :class="eqStateClass(p.state)" :title="p.pump_name + ' — ' + eqStateLabel(p.state)" @click="openEquipment('pump', canonicalPumpName(p.pump_name))">
                   <div class="eq-label" x-text="p.pump_name"></div>
+                  <div class="eq-state" x-text="eqStateLabel(p.state)"></div>
                 </button>
               </template>
               <div x-show="!grp[1].length" style="color:var(--text3);font-size:10px;text-align:center;padding:4px">Nenhuma</div>
@@ -551,8 +562,9 @@
               <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:0;font-weight:600;text-align:center" x-text="grp[0]"></div>
               <div style="display:flex; flex-direction:column; gap: 6px;">
                 <template x-for="v in grp[1]" :key="v.id">
-                  <button type="button" class="eq-btn" :class="eqStateClass(v.state)" :title="v.valve_name" @click="openEquipment('valve', canonicalValveName(v.valve_name))">
+                  <button type="button" class="eq-btn" :class="eqStateClass(v.state)" :title="v.valve_name + ' — ' + eqStateLabel(v.state)" @click="openEquipment('valve', canonicalValveName(v.valve_name))">
                     <div class="eq-label" x-text="v.valve_name.replace('V-','')"></div>
+                    <div class="eq-state" x-text="eqStateLabel(v.state)"></div>
                   </button>
                 </template>
                 <div x-show="!grp[1].length" style="color:var(--text3);font-size:10px;text-align:center;padding:4px">Nenhuma</div>
@@ -632,10 +644,10 @@
     <div class="modal-box" style="max-width:720px;width:min(92vw,720px)">
       <div class="modal-header">
         <div>
-          <div class="modal-title" x-text="modal.alias + ' - ' + modal.name"></div>
-          <div class="modal-subtitle">Reservatorio - entrada manual por percentual ou volume</div>
+          <div class="modal-title" x-text="modal.alias + ' · ' + modal.name"></div>
+          <div class="modal-subtitle">Reservatório · entrada manual por percentual ou volume</div>
         </div>
-        <button class="modal-close" @click="closeModal()">&times;</button>
+        <button type="button" class="modal-close" aria-label="Fechar" title="Fechar" @click="closeModal()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
 
       <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
@@ -649,11 +661,11 @@
             <div class="modal-kpi-value" x-text="modal.volume_l != null ? (modal.volume_l / 1000).toFixed(1) + ' m³' : '—'"></div>
           </div>
           <div class="modal-kpi">
-            <div class="modal-kpi-label">Nivel</div>
+            <div class="modal-kpi-label">Nível</div>
             <div class="modal-kpi-value" x-text="modal.level_cm != null ? Number(modal.level_cm).toFixed(1) + ' cm' : '—'"></div>
           </div>
           <div class="modal-kpi">
-            <div class="modal-kpi-label">Atualizacao</div>
+            <div class="modal-kpi-label">Atualização</div>
             <div class="modal-kpi-value" x-text="formatTs(modal.ts)"></div>
           </div>
         </div>
@@ -687,17 +699,17 @@
           <div class="modal-title" x-text="equipmentModal.name"></div>
           <div class="modal-subtitle" x-text="equipmentModal.kindLabel"></div>
         </div>
-        <button class="modal-close" @click="closeEquipmentModal()">&times;</button>
+        <button type="button" class="modal-close" aria-label="Fechar" title="Fechar" @click="closeEquipmentModal()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
 
       <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
         <div class="modal-grid">
           <div class="modal-kpi">
             <div class="modal-kpi-label">Estado / leitura</div>
-            <div class="modal-kpi-value" x-text="equipmentModal.currentLabel"></div>
+            <div class="modal-kpi-value" x-text="equipmentModal.kind === 'hydrometer' ? equipmentModal.currentLabel : eqStateLabel(equipmentModal.currentLabel)"></div>
           </div>
           <div class="modal-kpi">
-            <div class="modal-kpi-label">Atualizacao</div>
+            <div class="modal-kpi-label">Atualização</div>
             <div class="modal-kpi-value" x-text="equipmentModal.ts ? formatTs(equipmentModal.ts) : '—'"></div>
           </div>
         </div>
@@ -710,7 +722,7 @@
               <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'ligada'}" @click="equipmentModal.state='ligada'">Ligada</button>
               <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'desligada'}" @click="equipmentModal.state='desligada'">Desligada</button>
               <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'falha'}" @click="equipmentModal.state='falha'">Falha</button>
-              <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'manutencao'}" @click="equipmentModal.state='manutencao'">Manutencao</button>
+              <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'manutencao'}" @click="equipmentModal.state='manutencao'">Manutenção</button>
             </div>
             <div class="field-stack">
               <label>Status operacional</label>
@@ -751,8 +763,8 @@
         </template>
 
         <div class="field-stack">
-          <label>Observacao</label>
-          <textarea class="form-input" rows="3" x-model="equipmentModal.note" placeholder="Observacao operacional"></textarea>
+          <label>Observação</label>
+          <textarea class="form-input" rows="3" x-model="equipmentModal.note" placeholder="Observação operacional"></textarea>
         </div>
 
         <template x-if="equipmentModal.feedback">
@@ -772,9 +784,9 @@
       <div class="modal-header">
         <div>
           <div class="modal-title" x-text="locationModal.title"></div>
-          <div class="modal-subtitle">Detalhes do local e anotacao operacional</div>
+          <div class="modal-subtitle">Detalhes do local e anotação operacional</div>
         </div>
-        <button class="modal-close" @click="closeLocationModal()">&times;</button>
+        <button type="button" class="modal-close" aria-label="Fechar" title="Fechar" @click="closeLocationModal()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
 
       <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
@@ -784,8 +796,8 @@
         </div>
 
         <div class="field-stack">
-          <label>Anotacao local</label>
-          <textarea class="form-input" rows="5" x-model="locationModal.note" placeholder="Registrar observacao do container/local"></textarea>
+          <label>Anotação local</label>
+          <textarea class="form-input" rows="5" x-model="locationModal.note" placeholder="Registrar observação do container/local"></textarea>
         </div>
 
         <template x-if="locationModal.feedback">
@@ -794,7 +806,7 @@
 
         <div class="modal-actions">
           <button class="eq-btn secondary-btn" @click="closeLocationModal()">Fechar</button>
-          <button class="eq-btn btn-primary" @click="saveLocationNote()">Salvar anotacao</button>
+          <button class="eq-btn btn-primary" @click="saveLocationNote()">Salvar anotação</button>
         </div>
       </div>
     </div>
@@ -817,7 +829,7 @@
             ></button>
           </template>
         </div>
-        <button class="icon-btn" @click="closeFullMap()" title="Fechar">
+        <button class="icon-btn" @click="closeFullMap()" title="Fechar" aria-label="Fechar mapa">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -925,14 +937,15 @@ function painelApp() {
       return Math.round(maxL / 1000);
     },
     get reservoirCount() { return (this.reservoirs || []).length; },
-    get aporte() { return 342; },
-    get consumo() { return 315; },
-    get retencao() { return this.aporte - this.consumo; },
+    // Somas do dia via /api/consumption (inclui transferências entre reservatórios)
+    get aporte() { return +((this.reservoirs||[]).reduce((t,r)=>t+(r.supplied_l||0),0)/1000).toFixed(1); },
+    get consumo() { return +((this.reservoirs||[]).reduce((t,r)=>t+(r.consumed_l||0),0)/1000).toFixed(1); },
+    get retencao() { return +(this.aporte - this.consumo).toFixed(1); },
     get avgPct() {
       const r = (this.reservoirs||[]).filter(x=>x.online);
       return r.length ? Math.round(r.reduce((s,x)=>s+(x.pct||0),0)/r.length) : 0;
     },
-    get critical() { return (this.reservoirs||[]).filter(r=>r.online&&r.pct<=20).length; },
+    get critical() { return (this.reservoirs||[]).filter(r=>!r.online||r.pct<=20).length; },
     get warning() { return (this.reservoirs||[]).filter(r=>r.online&&r.pct>20&&r.pct<=35).length; },
     get onlineCount() { return (this.reservoirs||[]).filter(r=>r.online).length; },
     get activePumps() { return this.pumps.filter(p=>p.state==='ligada').length; },
@@ -989,6 +1002,12 @@ function painelApp() {
       return 'color:var(--blue)';
     },
 
+    eqStateLabel(state) {
+      const labels = { ligada: 'Ligada', desligada: 'Desligada', aberta: 'Aberta', fechada: 'Fechada',
+                       falha: 'Falha', manutencao: 'Manutenção', parcial: 'Parcial' };
+      return labels[(state || '').toLowerCase()] || 'Sem registro';
+    },
+
     eqStateClass(state) {
       switch ((state || '').toLowerCase()) {
         case 'ligada':
@@ -996,6 +1015,7 @@ function painelApp() {
           return 'state-blue';
         case 'desligada':
         case 'fechada':
+          return 'state-off';  // estado normal, não alarme (ISA-101)
         case 'falha':
           return 'state-red';
         case 'manutencao':
@@ -1107,52 +1127,20 @@ function painelApp() {
       this.infra = infra || null;
       this.reservoirs = Array.isArray(resData) ? resData : [];
 
-      // Fetch consumption data for each reservoir
-      const today = todayDateStr();
-      const consumptionResults = await Promise.allSettled(
-        this.reservoirs.map(r =>
-          fetch(`/api/consumption?alias=${r.alias}&date=${today}`)
-            .then(res => res.json())
-            .catch(() => null)
-        )
-      );
+      await this._loadConsumption();
+      setInterval(() => this._loadConsumption(), 60000);  // muda a cada leitura nova
 
-      const hoursElapsed = hoursElapsedToday();
-      this.reservoirs = this.reservoirs.map((r, i) => {
-        const result = consumptionResults[i];
-        if (result.status !== 'fulfilled' || !result.value?.summary) return r;
-        const consumed_l = result.value.summary.consumed_l ?? 0;
-        const rate_lh = Math.round(consumed_l / hoursElapsed);
-        return { ...r, consumed_l, rate_lh };
-      });
+      // Sem registro manual: lista o equipamento do infra.json SEM estado (cinza),
+      // nunca um estado inventado. Hidrômetro sem leitura = tabela vazia.
+      const unknownPumps = (infra?.pumps || []).map(p => ({ id: p.id, pump_name: p.name, state: null }));
+      const unknownValves = (infra?.valves || []).filter(v => v.name.startsWith('V-'))
+        .map(v => ({ id: v.id, valve_name: v.name, state: null }));
+      const hydroItems = hidData.items || [];
 
-      const fallbackPumps = infra?.pumps?.length ? infra.pumps.map(p=>({id:p.id, pump_name:p.name, state:'ligada'})) : [
-        { id: 'f1', pump_name: 'B-01 CB3', state: 'ligada' }, { id: 'f2', pump_name: 'B-02 CB3', state: 'ligada' },
-        { id: 'f3', pump_name: 'B-01 CB2', state: 'ligada' }, { id: 'f4', pump_name: 'B-02 CB2', state: 'falha' },
-        { id: 'f5', pump_name: 'B-01 CBIF', state: 'ligada' }, { id: 'f6', pump_name: 'B-02 CBIF', state: 'desligada' }
-      ];
-      
-      const fallbackValves = infra?.valves?.length ? infra.valves.filter(v=> v.name.startsWith('V-')).map(v=>({id:v.id, valve_name:v.name, state:'aberta'})) : [
-        { id: 'v1', valve_name: 'V-CON-IN', state: 'aberta' }, { id: 'v2', valve_name: 'V-CON-AV', state: 'aberta' }, { id: 'v3', valve_name: 'V-CON-AZ', state: 'fechada' }, { id: 'v4', valve_name: 'V-CON-OUT', state: 'aberta' }, { id: 'v5', valve_name: 'V-CON-AVAZ', state: 'aberta' },
-        { id: 'v6', valve_name: 'V-CAV-IN', state: 'aberta' }, { id: 'v7', valve_name: 'V-CAV-AV', state: 'fechada' }, { id: 'v8', valve_name: 'V-CAV-AZ', state: 'aberta' }, { id: 'v9', valve_name: 'V-CAV-OUT', state: 'aberta' },
-        { id: 'v10', valve_name: 'V-CIE-IN', state: 'aberta' }, { id: 'v11', valve_name: 'V-CIE-OUT', state: 'aberta' },
-        { id: 'v12', valve_name: 'V-CB03-IN', state: 'aberta' }, { id: 'v13', valve_name: 'V-CB03-OUT', state: 'aberta' },
-        { id: 'v14', valve_name: 'V-IE-IN', state: 'aberta' }
-      ];
-      
-      const fallbackHydros = [
-        { meter_name: 'HID-AVAZ', reading: 201.2, ts: Date.now()/1000 },
-        { meter_name: 'HID-AV', reading: 99.4, ts: Date.now()/1000 },
-        { meter_name: 'HID-AZ', reading: 101.8, ts: Date.now()/1000 },
-        { meter_name: 'HID-CONC', reading: 1250.4, ts: Date.now()/1000 },
-        { meter_name: 'HID-IF', reading: 840.2, ts: Date.now()/1000 },
-        { meter_name: 'HID-PRAIA', reading: 331.0, ts: Date.now()/1000 }
-      ];
-
-      this.pumps = equipData.pumps && equipData.pumps.length > 0 ? equipData.pumps : fallbackPumps;
-      this.valves = equipData.valves && equipData.valves.length > 0 ? equipData.valves : fallbackValves;
-      this.hydrometers = hidData.items && hidData.items.length > 0 ? hidData.items : fallbackHydros;
-      this.hydrometerHistory = hidData.items && hidData.items.length > 0 ? hidData.items : fallbackHydros;
+      this.pumps = equipData.pumps?.length ? equipData.pumps : unknownPumps;
+      this.valves = equipData.valves?.length ? equipData.valves : unknownValves;
+      this.hydrometers = hydroItems;
+      this.hydrometerHistory = hydroItems;
       this._updateGw(gwData);
 
       await this._initMiniMap();
@@ -1161,7 +1149,8 @@ function painelApp() {
       this.wsConnect(data => {
         const msg = normalizeWsMessage(data);
         if (msg.type==='snapshot') {
-          this.reservoirs = msg.reservoirs;
+          // Mantém consumed_l/rate_lh calculados no init (o snapshot não traz)
+          this.reservoirs = msg.reservoirs.map(s => ({...this.reservoirs.find(o=>o.alias===s.alias), ...s}));
           this._updateGw(msg.gateway);
         } else if (msg.type==='reading' && msg.reading) {
           const idx = this.reservoirs.findIndex(r=>r.alias===msg.reading.alias);
@@ -1175,6 +1164,23 @@ function painelApp() {
           const r=this.reservoirs.find(r=>r.alias===this.modal.alias);
           if(r) this._fillModal(r);
         }
+      });
+    },
+
+    async _loadConsumption() {
+      const today = todayDateStr();
+      const results = await Promise.all(this.reservoirs.map(r =>
+        fetch(`/api/consumption?alias=${r.alias}&date=${today}`).then(res => res.json()).catch(() => null)
+      ));
+      const byAlias = {};
+      this.reservoirs.forEach((r, i) => { if (results[i]?.summary) byAlias[r.alias] = results[i].summary; });
+      const hoursElapsed = hoursElapsedToday();
+      // Aplica por alias: o snapshot do WS pode ter reordenado a lista no meio do fetch
+      this.reservoirs = this.reservoirs.map(r => {
+        const sm = byAlias[r.alias];
+        if (!sm) return r;
+        const consumed_l = sm.consumed_l ?? 0;
+        return { ...r, consumed_l, supplied_l: sm.supplied_l ?? 0, rate_lh: Math.round(consumed_l / hoursElapsed) };
       });
     },
 
@@ -1207,7 +1213,8 @@ function painelApp() {
       }).setView([-22.8382228,-43.1080717],17);
       L.control.layers({'Mapa':osmLayer,'Satélite':satLayer},{},{position:'topright',collapsed:true}).addTo(this._miniMap);
       this._ensureInfraLayer(this._miniMap, '_miniInfraLayer');
-      setTimeout(()=>this._miniMap.invalidateSize(),200);
+      // a célula cresce quando os cards de reservatório chegam
+      new ResizeObserver(() => this._miniMap.invalidateSize()).observe(document.getElementById('mini-map'));
     },
 
     _ensureInfraLayer(mapInst, layerKey) {
@@ -1468,8 +1475,8 @@ function painelApp() {
 
     equipmentKindLabel(kind) {
       if (kind === 'pump') return 'Bomba';
-      if (kind === 'valve') return 'Valvula';
-      return 'Hidrometro';
+      if (kind === 'valve') return 'Válvula';
+      return 'Hidrômetro';
     },
 
     equipmentPrimaryLabel(item) {
@@ -1507,7 +1514,7 @@ function painelApp() {
     saveLocationNote() {
       this.locationNotes[this.locationModal.siteId] = this.locationModal.note || '';
       localStorage.setItem(locationNotesKey, JSON.stringify(this.locationNotes));
-      this.locationModal.feedback = 'Anotacao salva neste navegador.';
+      this.locationModal.feedback = 'Anotação salva neste navegador.';
     },
 
     openEquipment(kind, name) {

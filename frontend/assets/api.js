@@ -134,6 +134,7 @@ const aguadaAPI = (() => {
         ['painel.html',   'Painel'],
         ['scada.html',    'SCADA'],
         ['dados.html',    'Dados'],
+        ['analise.html',  'Análise'],
         ['relatorio_tabelas.html', 'Relatório'],
         ['alerts.html',   'Alertas'],
         ['manutencao.html','Manutenção'],
@@ -144,16 +145,28 @@ const aguadaAPI = (() => {
       const navItems = links.map(([href, label]) =>
         `<a href="${href}"${href === active ? ' class="active"' : ''}>${label}</a>`
       ).join('');
+      // Páginas sem WebSocket/status próprio ficavam em "Buscando rede..." para sempre:
+      // reflete /api/gateway. Páginas que atualizam o indicador prevalecem.
+      setTimeout(async () => {
+        const gw = await _get('/api/gateway').catch(() => null);
+        const txt = document.getElementById('statusText');
+        if (!txt || txt.textContent !== 'Buscando rede...') return;
+        const ok = !!(gw?.connected || gw?.sim_mode);
+        document.getElementById('statusDot').className = 'status-dot ' + (ok ? 'online' : 'offline');
+        txt.textContent = ok ? 'Online' : 'Offline';
+      }, 0);
+      // No celular a aba ativa pode ficar fora da área visível da nav
+      setTimeout(() => document.querySelector('.admin-nav a.active')?.scrollIntoView({ inline: 'center', block: 'nearest' }), 0);
       return `
-        <span class="admin-header-brand">💧 AGUADA</span>
+        <a href="painel.html" class="admin-header-brand" aria-label="AGUADA — Painel"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--cyan)" aria-hidden="true" style="margin-right:6px"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg><span class="brand-text">AGUADA</span></a>
         <nav class="admin-nav">${navItems}</nav>
         <div class="admin-status" style="display:flex; align-items:center; gap:16px;">
-          <button onclick="aguadaAPI.toggleTheme()" title="Alternar Tema Claro/Escuro" style="color:var(--text); cursor:pointer; background:none; border:none; display:flex; align-items:center;">
+          <button onclick="aguadaAPI.toggleTheme()" title="Alternar Tema Claro/Escuro" aria-label="Alternar tema claro/escuro" style="color:var(--text); cursor:pointer; background:none; border:none; display:flex; align-items:center;">
              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
           </button>
           <div style="display:flex; align-items:center; gap:6px;">
              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0114.08 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
-             <div class="status-dot" id="statusDot"></div>
+             <div class="status-dot" id="statusDot" role="img" aria-label="Status da rede"></div>
              <span id="statusText">Buscando rede...</span>
           </div>
         </div>`;

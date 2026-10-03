@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>AGUADA — Análise</title>
+<link rel="stylesheet" href="assets/aguada.css?v=3">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/dashboard.css">
+</head>
+<body class="admin-page">
+<div id="topbar" class="admin-header"></div>
+<main class="dash" id="dash"></main>
+
+<script src="assets/vendor/chart.min.js"></script>
+<script src="assets/api.js"></script>
+<script>document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('analise.html');</script>
+<script src="assets/dashboard.js"></script>
+</body>
+</html>

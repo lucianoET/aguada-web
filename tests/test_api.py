@@ -55,9 +55,7 @@ def test_ws_snapshot(set_test_db):
     import backend.main as m
     from starlette.testclient import TestClient
 
-    asyncio.get_event_loop().run_until_complete(
-        _init_db_for_ws(m.DB_PATH)
-    )
+    asyncio.run(_init_db_for_ws(m.DB_PATH))
     with TestClient(m.app) as client:
         with client.websocket_connect("/ws") as ws:
             msg = ws.receive_json()
@@ -343,3 +341,56 @@ async def test_report_notes_invalidate_cached_pdf(set_test_db):
 
     assert archived.status_code == 200
     assert not cached_pdf.exists()
+
+
+def test_ws_snapshot_has_reservoir_meta(set_test_db):
+    # Snapshot do WS no mesmo formato de /api/reservoirs (capacity_l/lat/lng do yaml)
+    import asyncio
+    import backend.main as m
+    from starlette.testclient import TestClient
+
+    async def seed():
+        async with aiosqlite.connect(m.DB_PATH) as conn:
+            conn.row_factory = aiosqlite.Row
+            await init_db(conn)
+            await upsert_state(conn, {
+                "alias": "CON", "node_id": "0x7758", "sensor_id": 1,
+                "name": "Castelo de Consumo", "ts": int(time.time()),
+                "level_cm": 255, "volume_l": 45333, "pct": 56.7,
+                "level_max_cm": 450, "volume_max_l": 80000, "rssi": -62,
+            })
+    asyncio.run(seed())
+    with TestClient(m.app) as client:
+        with client.websocket_connect("/ws") as ws:
+            msg = ws.receive_json()
+    con = next(r for r in msg["data"] if r["alias"] == "CON")
+    assert con["capacity_l"] == 80000
+    assert "lat" in con and "lng" in con
+
+
+@pytest.mark.asyncio
+async def test_dashboard_hourly_and_daily(set_test_db, monkeypatch):
+    import backend.main as m
+    monkeypatch.setattr("backend.main._dashboard_cache", None)
+    h0 = int(time.time()) // 3600 * 3600 - 7200
+    async with aiosqlite.connect(m.DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        await init_db(conn)
+        await upsert_state(conn, {
+            "alias": "CON", "node_id": "0x7758", "sensor_id": 1, "name": "Castelo de Consumo", "ts": h0,
+            "level_cm": 255, "volume_l": 45000, "pct": 56.0, "level_max_cm": 450, "volume_max_l": 80000, "rssi": -60,
+        })
+        # 3 leituras na mesma hora: mediana 50% / 40 m³
+        for i, (pct, vol) in enumerate([(40.0, 32000), (50.0, 40000), (90.0, 72000)]):
+            await insert_reading(conn, {
+                "ts": h0 + i * 60, "node_id": "0x7758", "sensor_id": 1, "alias": "CON",
+                "distance_cm": 200, "level_cm": 200, "volume_l": vol, "pct": pct, "rssi": -60, "vbat": 3.3, "seq": i,
+            })
+        await conn.commit()
+    async with AsyncClient(transport=ASGITransport(app=m.app), base_url="http://test") as client:
+        r = await client.get("/api/dashboard")
+    assert r.status_code == 200
+    d = r.json()
+    assert d["reservoirs"] == [{"alias": "CON", "name": "Castelo de Consumo", "cap_m3": 80}]
+    assert d["hourly"]["CON"] == [[h0 * 1000, 50.0, 40.0]]
+    assert d["daily"][0]["n"] == 3 and d["daily"][0]["vavg"] == 40.0

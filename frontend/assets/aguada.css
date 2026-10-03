@@ -4,6 +4,10 @@
    Compatível com padrão ISA-101. 100% offline.
    ============================================================ */
 
+/* Fontes vendorizadas (offline, OFL): antes só o Painel carregava do Google Fonts */
+@font-face { font-family: 'DM Sans'; src: url('fonts/dm-sans-var.woff2') format('woff2'); font-weight: 100 1000; font-display: swap; }
+@font-face { font-family: 'JetBrains Mono'; src: url('fonts/jetbrains-mono-var.woff2') format('woff2'); font-weight: 100 800; font-display: swap; }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* ── Variáveis — Tema Claro (padrão) ───────────────────────── */
@@ -19,9 +23,9 @@
   --text3:      #64748b;
   --blue:       #2563eb;
   --blue-dim:   #dbeafe;
-  --green:      #16a34a;
+  --green:      #15803d;  /* 700: ≥4.5:1 em texto sobre branco e -dim */
   --green-dim:  #dcfce7;
-  --yellow:     #d97706;
+  --yellow:     #b45309;
   --yellow-dim: #fef3c7;
   --red:        #dc2626;
   --red-dim:    #fee2e2;
@@ -66,6 +70,7 @@
 
 /* ── Tema Escuro ─────────────────────────────────────────────── */
 [data-theme="dark"] {
+  color-scheme: dark;  /* date picker, select e scrollbar nativos no tema escuro */
   --bg:         #0b0f14;
   --bg2:        #111820;
   --bg3:        #161e28;
@@ -74,7 +79,7 @@
   --border2:    #243344;
   --text:       #c9d4e0;
   --text2:      #8aa2bf;
-  --text3:      #6a829f;
+  --text3:      #7d93ad;  /* ≥5:1 sobre card/bg escuros (#6a829f dava 4.1) */
   --blue:       #3b82f6;
   --blue-dim:   #1e3a5f;
   --green:      #22c55e;
@@ -225,6 +230,14 @@ button { cursor: pointer; font-family: var(--sans); border: none; background: no
 .badge-red    { background: var(--red-dim);    color: var(--red); }
 .badge-gray   { background: var(--bg3);        color: var(--text3); }
 .badge-blue   { background: var(--blue-dim);   color: var(--blue); }
+/* Texto de badge 10px precisa de 4.5:1 sobre o fundo -dim */
+.badge-red  { color: #b91c1c; }
+.badge-blue { color: #1d4ed8; }
+.badge-gray { color: var(--text2); }
+[data-theme="dark"] .badge-green  { color: #86efac; }
+[data-theme="dark"] .badge-yellow { color: #fcd34d; }
+[data-theme="dark"] .badge-red    { color: #fca5a5; }
+[data-theme="dark"] .badge-blue   { color: #93c5fd; }
 
 /* ── SCADA — Equipamentos ───────────────────────────────────── */
 .eq-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
@@ -249,11 +262,79 @@ button { cursor: pointer; font-family: var(--sans); border: none; background: no
 .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
 
 /* ── Modal ──────────────────────────────────────────────────── */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1400; display: flex; align-items: center; justify-content: center; }
-.modal-box { background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 0; width: 400px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
-.modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
-.modal-body { padding: 16px 18px; }
-.modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1400; padding: 16px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(15, 23, 42, .55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+}
+.modal-box {
+  background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, .28), 0 2px 8px rgba(15, 23, 42, .08);
+  width: 440px; max-width: 100%; max-height: min(90vh, 900px);
+  display: flex; flex-direction: column; overflow: hidden;
+  animation: modal-in .18s ease-out;
+}
+@keyframes modal-in { from { opacity: 0; transform: translateY(8px) scale(.985); } }
+.modal-header {
+  padding: 16px 16px 14px 20px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-shrink: 0;
+}
+.modal-title { font-size: 16px; font-weight: 600; line-height: 1.3; color: var(--text); }
+.modal-subtitle { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.modal-close {
+  width: 36px; height: 36px; margin: -4px 0 -4px; border-radius: 8px; flex-shrink: 0;
+  display: grid; place-items: center; color: var(--text2); transition: background .15s, color .15s;
+}
+.modal-close:hover { background: var(--bg3); color: var(--text); }
+.modal-body { padding: 18px 20px 20px; overflow-y: auto; }
+.modal-footer { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; background: var(--surface2); }
+
+/* Conteúdo de modal (Painel, SCADA) */
+.modal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.modal-kpi { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); min-width: 0; }
+.modal-kpi-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+.modal-kpi-value { font-family: var(--mono); font-size: 17px; font-weight: 600; color: var(--text); overflow-wrap: anywhere; }
+.modal-section-title { font-size: 13px; font-weight: 600; color: var(--text); padding-top: 14px; margin-top: 4px; border-top: 1px solid var(--border); }
+.form-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+.field-stack { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 140px; }
+.field-stack label { font-size: 12px; font-weight: 500; color: var(--text2); }
+.form-row .eq-btn, .modal-actions .eq-btn { display: inline-flex; align-items: center; justify-content: center; }
+.form-row .eq-btn { min-height: 36px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 500; transition: background .15s, color .15s, border-color .15s; }
+.form-row .eq-btn.active { background: var(--blue-dim); border-color: var(--blue); color: var(--blue); font-weight: 600; }
+[data-theme="dark"] .form-row .eq-btn.active { color: #93c5fd; }
+.feedback { font-size: 13px; padding: 10px 12px; border-radius: 10px; }
+.feedback.ok { background: var(--green-dim); color: var(--green); }
+.feedback.error { background: var(--red-dim); color: #b91c1c; }
+[data-theme="dark"] .feedback.ok { color: #86efac; }
+[data-theme="dark"] .feedback.error { color: #fca5a5; }
+/* barra de ações fica visível no rodapé enquanto o corpo rola */
+.modal-actions {
+  display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap;
+  position: sticky; bottom: -20px; margin: 6px -20px -20px; padding: 14px 20px;
+  border-top: 1px solid var(--border); background: var(--surface2);
+}
+.modal-actions .eq-btn, .modal-actions .btn { min-height: 38px; padding: 0 18px; border-radius: 8px; font-size: 13px; font-weight: 500; }
+.modal-actions .btn-primary:disabled { opacity: .6; cursor: progress; }
+.secondary-btn { background: var(--bg3); color: var(--text2); border: 1px solid var(--border2); }
+.secondary-btn:hover { color: var(--text); border-color: var(--text3); }
+
+/* Celular: modal vira folha inferior */
+@media (max-width: 640px) {
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-box { width: 100% !important; max-width: 100% !important; max-height: 92vh; border-radius: 16px 16px 0 0; animation-name: sheet-in; }
+}
+@keyframes sheet-in { from { transform: translateY(24px); opacity: .6; } }
+
+/* Mapa em tela cheia (Painel) */
+.fullscreen-modal { position: fixed; inset: 0; z-index: 1500; background: var(--bg); flex-direction: column; animation: modal-in .18s ease-out; }
+.fs-bar { min-height: 56px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px 8px 20px; background: var(--card); border-bottom: 1px solid var(--border); }
+.fs-title { font-size: 15px; font-weight: 600; white-space: nowrap; }
+.fs-controls { display: flex; align-items: center; gap: 10px; min-width: 0; overflow-x: auto; }
+#full-map { position: absolute; inset: 0; }
+
+/* Botão só com ícone */
+.icon-btn { width: 36px; height: 36px; border-radius: 8px; display: inline-grid; place-items: center; flex-shrink: 0; color: var(--text2); transition: background .15s, color .15s; }
+.icon-btn:hover { background: var(--bg3); color: var(--text); }
 
 /* Modal lateral (Dashboard — deslizante da direita) */
 .modal-side {
@@ -271,13 +352,17 @@ button { cursor: pointer; font-family: var(--sans); border: none; background: no
 
 /* ── Inputs / Forms ─────────────────────────────────────────── */
 .form-input {
-  width: 100%; padding: 7px 10px;
-  background: var(--bg3); border: 1px solid var(--border2);
-  border-radius: 4px; color: var(--text); font-family: var(--sans); font-size: 13px;
+  width: 100%; min-height: 38px; padding: 8px 12px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; color: var(--text); font-family: var(--sans); font-size: 14px;
+  transition: border-color .15s, box-shadow .15s;
 }
-.form-input:focus { outline: none; border-color: var(--blue); }
-.form-select { width: 100%; padding: 6px 10px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 4px; color: var(--text); font-size: 13px; cursor: pointer; }
-.btn { padding: 6px 16px; border-radius: 4px; font-size: 12px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+textarea.form-input { resize: vertical; line-height: 1.5; }
+.form-input::placeholder { color: var(--text3); }
+.form-input:hover { border-color: var(--text3); }
+.form-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); }
+.form-select { width: 100%; min-height: 38px; padding: 6px 10px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-size: 14px; cursor: pointer; }
+.btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s, background .15s, color .15s; }
 .btn-primary { background: var(--blue); color: white; }
 .btn-primary:hover { opacity: 0.9; }
 .btn-secondary { background: var(--bg3); color: var(--text2); border: 1px solid var(--border2); }
@@ -302,6 +387,7 @@ button { cursor: pointer; font-family: var(--sans); border: none; background: no
   .main { margin-left: 0 !important; }
 }
 @media (max-width: 768px) {
+  .form-input, .form-select { font-size: 16px; }
   .kpi-strip { gap: 6px; padding: 8px 12px; }
   .content { padding: 12px; }
   .modal-side { width: 100%; }
@@ -371,6 +457,25 @@ button { cursor: pointer; font-family: var(--sans); border: none; background: no
 .ph-right {
   display:flex; align-items:center; gap:8px;
   padding-left:12px; border-left:1px solid var(--border); flex-shrink:0;
+}
+
+/* ── Foco visível (teclado) ─────────────────────────────────── */
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+
+/* ── Alvos de toque ≥44px em tela touch ─────────────────────── */
+@media (pointer: coarse) {
+  .btn, .btn-primary, .btn-secondary, .tab-btn, .eq-btn, .theme-btn, .icon-btn { min-height: 44px; }
+}
+
+/* ── Movimento reduzido ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* ── Leaflet: ícone do seletor de camadas (layers.png não é vendorizado) ── */
+.leaflet-control-layers-toggle {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2 2 7l10 5 10-5-10-5z'/%3E%3Cpath d='m2 17 10 5 10-5'/%3E%3Cpath d='m2 12 10 5 10-5'/%3E%3C/svg%3E") !important;
+  background-size: 22px 22px !important;
 }
 
 /* ── Scrollbar fina (webkit) ────────────────────────────────── */

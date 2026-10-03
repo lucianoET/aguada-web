@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" href="data:,">
   <title>Aguada - SCADA</title>
-  <link rel="stylesheet" href="assets/aguada.css?v=2"/>
+  <link rel="stylesheet" href="assets/aguada.css?v=3"/>
   <link rel="stylesheet" href="assets/style.css"/>
   <style>
     /* ── layout: topbar fora do .layout, rolagem de página ── */
@@ -618,91 +618,7 @@
       display: none;
     }
 
-    .modal-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .modal-kpi {
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: var(--bg2);
-    }
-
-    .modal-kpi-label {
-      font-size: 10px;
-      color: var(--text3);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 6px;
-    }
-
-    .modal-kpi-value {
-      font-family: var(--mono);
-      font-size: 16px;
-      color: var(--text);
-    }
-
-    .modal-section-title {
-      font-size: 11px;
-      color: var(--text3);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin: 14px 0 8px;
-    }
-
-    .form-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .field-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex: 1;
-      min-width: 140px;
-    }
-
-    .field-stack label {
-      font-size: 11px;
-      color: var(--text3);
-    }
-
-    .feedback {
-      font-size: 12px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      margin-top: 8px;
-    }
-
-    .feedback.ok {
-      background: var(--green-dim);
-      color: var(--green);
-    }
-
-    .feedback.error {
-      background: var(--red-dim);
-      color: var(--red);
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 16px;
-      flex-wrap: wrap;
-    }
-
-    .secondary-btn {
-      background: var(--bg3);
-      color: var(--text2);
-      border: 1px solid var(--border2);
-    }
+    /* modal: componentes compartilhados em aguada.css */
 
     @media (max-width: 1200px) {
       .sidebar { width: 100%; height: auto; }
@@ -710,7 +626,8 @@
 
     @media (max-width: 760px) {
       .scada-toolbar { align-items: flex-start; flex-direction: column; }
-      .modal-grid { grid-template-columns: 1fr; }
+      /* diagrama em escala mínima passa da largura do celular: rola dentro do quadro, não a página */
+      .scada-wrap { overflow-x: auto; justify-content: flex-start; }
     }
 
     /* ===== SCADA LAYOUT ===== */
@@ -1631,10 +1548,10 @@
     <div class="modal-box" style="max-width:720px;width:min(92vw,720px)">
       <div class="modal-header">
         <div>
-          <div class="modal-title" x-text="modal.alias + ' - ' + modal.name"></div>
-          <div class="modal-subtitle">Reservatorio - entrada manual por percentual ou volume</div>
+          <div class="modal-title" x-text="modal.alias + ' · ' + modal.name"></div>
+          <div class="modal-subtitle">Reservatório · entrada manual por percentual ou volume</div>
         </div>
-        <button class="modal-close" @click="closeModal()">&times;</button>
+        <button type="button" class="modal-close" aria-label="Fechar" title="Fechar" @click="closeModal()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
 
       <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
@@ -1648,11 +1565,11 @@
             <div class="modal-kpi-value" x-text="modal.volume_l != null ? (modal.volume_l / 1000).toFixed(1) + ' m³' : '—'"></div>
           </div>
           <div class="modal-kpi">
-            <div class="modal-kpi-label">Nivel</div>
+            <div class="modal-kpi-label">Nível</div>
             <div class="modal-kpi-value" x-text="modal.level_cm != null ? modal.level_cm.toFixed(1) + ' cm' : '—'"></div>
           </div>
           <div class="modal-kpi">
-            <div class="modal-kpi-label">Atualizacao</div>
+            <div class="modal-kpi-label">Atualização</div>
             <div class="modal-kpi-value" x-text="formatTs(modal.ts)"></div>
           </div>
         </div>
@@ -1686,17 +1603,17 @@
           <div class="modal-title" x-text="equipmentModal.name"></div>
           <div class="modal-subtitle" x-text="equipmentModal.kindLabel"></div>
         </div>
-        <button class="modal-close" @click="closeEquipmentModal()">&times;</button>
+        <button type="button" class="modal-close" aria-label="Fechar" title="Fechar" @click="closeEquipmentModal()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
 
       <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
         <div class="modal-grid">
           <div class="modal-kpi">
             <div class="modal-kpi-label">Estado / leitura</div>
-            <div class="modal-kpi-value" x-text="equipmentModal.currentLabel"></div>
+            <div class="modal-kpi-value" x-text="equipmentModal.kind === 'hydrometer' ? equipmentModal.currentLabel : eqStateLabel(equipmentModal.currentLabel)"></div>
           </div>
           <div class="modal-kpi">
-            <div class="modal-kpi-label">Atualizacao</div>
+            <div class="modal-kpi-label">Atualização</div>
             <div class="modal-kpi-value" x-text="equipmentModal.ts ? formatTs(equipmentModal.ts) : '—'"></div>
           </div>
         </div>
@@ -1709,7 +1626,7 @@
               <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'ligada'}" @click="equipmentModal.state='ligada'">Ligada</button>
               <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'desligada'}" @click="equipmentModal.state='desligada'">Desligada</button>
               <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'falha'}" @click="equipmentModal.state='falha'">Falha</button>
-              <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'manutencao'}" @click="equipmentModal.state='manutencao'">Manutencao</button>
+              <button type="button" class="eq-btn" :class="{active: equipmentModal.state === 'manutencao'}" @click="equipmentModal.state='manutencao'">Manutenção</button>
             </div>
             <div class="field-stack">
               <label>Status operacional</label>
@@ -1750,8 +1667,8 @@
         </template>
 
         <div class="field-stack">
-          <label>Observacao</label>
-          <textarea class="form-input" rows="3" x-model="equipmentModal.note" placeholder="Observacao operacional"></textarea>
+          <label>Observação</label>
+          <textarea class="form-input" rows="3" x-model="equipmentModal.note" placeholder="Observação operacional"></textarea>
         </div>
 
         <template x-if="equipmentModal.feedback">
@@ -1771,9 +1688,9 @@
       <div class="modal-header">
         <div>
           <div class="modal-title" x-text="locationModal.title"></div>
-          <div class="modal-subtitle">Detalhes do local e anotacao operacional</div>
+          <div class="modal-subtitle">Detalhes do local e anotação operacional</div>
         </div>
-        <button class="modal-close" @click="closeLocationModal()">&times;</button>
+        <button type="button" class="modal-close" aria-label="Fechar" title="Fechar" @click="closeLocationModal()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
 
       <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
@@ -1783,8 +1700,8 @@
         </div>
 
         <div class="field-stack">
-          <label>Anotacao local</label>
-          <textarea class="form-input" rows="5" x-model="locationModal.note" placeholder="Registrar observacao do container/local"></textarea>
+          <label>Anotação local</label>
+          <textarea class="form-input" rows="5" x-model="locationModal.note" placeholder="Registrar observação do container/local"></textarea>
         </div>
 
         <template x-if="locationModal.feedback">
@@ -1793,7 +1710,7 @@
 
         <div class="modal-actions">
           <button class="eq-btn secondary-btn" @click="closeLocationModal()">Fechar</button>
-          <button class="eq-btn btn-primary" @click="saveLocationNote()">Salvar anotacao</button>
+          <button class="eq-btn btn-primary" @click="saveLocationNote()">Salvar anotação</button>
         </div>
       </div>
     </div>
@@ -1801,6 +1718,8 @@
 </div>
 
 <script>
+  const ORDERED_ALIASES = ['CON', 'CAV', 'CB31', 'CB32', 'CIE1', 'CIE2', 'CBIF1', 'CBIF2'];
+
   function scadaApp() {
     const reservoirMixin = reservoirModalMixin();
     const locationNotesKey = 'aguada-scada-location-notes';
@@ -2001,17 +1920,9 @@
           const res = await fetch(aguadaAPI.BASE + '/api/reservoirs');
           const json = await res.json();
           this.reservoirs = this.sortReservoirs(Array.isArray(json) ? json : []);
-        } catch (_) {
-          this.reservoirs = [
-            { alias: 'CBIF1', name: 'CBIF 1', pct: 65.2, online: true, ts: Date.now()/1000, volume_l: 26080, capacity_l: 40000 },
-            { alias: 'CBIF2', name: 'CBIF 2', pct: 65.2, online: true, ts: Date.now()/1000, volume_l: 26080, capacity_l: 40000 },
-            { alias: 'CIE1', name: 'Cisterna CIE 1', pct: 90.5, online: true, ts: Date.now()/1000, volume_l: 72400, capacity_l: 80000 },
-            { alias: 'CIE2', name: 'Cisterna CIE 2', pct: 90.5, online: true, ts: Date.now()/1000, volume_l: 72400, capacity_l: 80000 },
-            { alias: 'CB31', name: 'Elevatória CB3', pct: 50.0, online: true, ts: Date.now()/1000, volume_l: 15000, capacity_l: 30000 },
-            { alias: 'CB32', name: 'Elevatória CB3', pct: 50.0, online: true, ts: Date.now()/1000, volume_l: 15000, capacity_l: 30000 },
-            { alias: 'CAV', name: 'Castelo de Incêndio', pct: 45.0, online: true, ts: Date.now()/1000, volume_l: 9000, capacity_l: 20000 },
-            { alias: 'CON', name: 'Castelo de Consumo', pct: 72.4, online: true, ts: Date.now()/1000, volume_l: 21720, capacity_l: 30000 }
-          ];
+        } catch (e) {
+          // Mantém o último dado real; nunca exibir nível fictício como "online"
+          console.warn('SCADA: falha ao carregar reservatórios', e);
         }
       },
 
@@ -2231,7 +2142,7 @@
       saveLocationNote() {
         this.locationNotes[this.locationModal.siteId] = this.locationModal.note || '';
         localStorage.setItem(locationNotesKey, JSON.stringify(this.locationNotes));
-        this.locationModal.feedback = 'Anotacao salva neste navegador.';
+        this.locationModal.feedback = 'Anotação salva neste navegador.';
       },
 
       pumpDefaults(siteId) {
@@ -2550,23 +2461,29 @@
 
       equipmentKindLabel(kind) {
         if (kind === 'pump') return 'Bomba';
-        if (kind === 'valve') return 'Valvula';
-        return 'Hidrometro';
+        if (kind === 'valve') return 'Válvula';
+        return 'Hidrômetro';
       },
 
       equipmentBadgeClass(item) {
         const label = this.equipmentPrimaryLabel(item).toLowerCase();
         if (label.includes('ligada') || label.includes('aberta') || label.includes('m3')) return 'badge-blue';
         if (label.includes('falha')) return 'badge-red';
-        if (label.includes('manutencao') || label.includes('parcial')) return 'badge-yellow';
+        if (label.includes('manut') || label.includes('parcial')) return 'badge-yellow';
         return 'badge-gray';
+      },
+
+      eqStateLabel(state) {
+        const labels = { ligada: 'Ligada', desligada: 'Desligada', aberta: 'Aberta', fechada: 'Fechada',
+                         falha: 'Falha', manutencao: 'Manutenção', parcial: 'Parcial' };
+        return labels[(state || '').toLowerCase()] || 'Sem registro';
       },
 
       equipmentPrimaryLabel(item) {
         if (item.kind === 'hydrometer') {
           return Number.isFinite(Number(item.reading)) ? `${Number(item.reading).toFixed(2)} ${item.unit || 'm3'}` : 'Sem leitura';
         }
-        return item.state || '—';
+        return { manutencao: 'Manut.' }[item.state] || item.state || '—';
       },
 
       equipmentSecondaryLabel(item) {

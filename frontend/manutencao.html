@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>AGUADA — Manutenção</title>
-<link rel="stylesheet" href="assets/aguada.css?v=2">
+<link rel="stylesheet" href="assets/aguada.css?v=3">
 <link rel="stylesheet" href="assets/style.css">
 <style>
   .maint-layout { display:grid; grid-template-columns:2fr 1fr; gap:16px; }
@@ -30,11 +30,13 @@
   .checklist li { padding:8px 10px; border-bottom:1px solid var(--border, #f3f4f6); font-size:var(--font-sm); display:flex; align-items:center; gap:8px; color:var(--text-dark, var(--text)); }
   .checklist li:last-child { border-bottom:none; }
   .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .icon-del { border:none; background:transparent; cursor:pointer; color:var(--text3); padding:6px; border-radius:6px; display:flex; }
+  .icon-del:hover { color:var(--red); background:var(--red-dim); }
   .side-col { display:flex; flex-direction:column; gap:16px; }
   .sys-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px; }
   .sys-card { background:var(--card, white); border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; }
   .sys-card-header { padding:12px 18px; color:white; font-size:var(--font-sm); font-weight:600; display:flex; justify-content:space-between; align-items:center; }
-  .sys-card-body { padding:14px 18px; }
+  .sys-card-body { padding:14px 18px; overflow-x:auto; }
   .frow { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border, #f3f4f6); font-size:var(--font-sm); }
   .frow:last-child { border-bottom:none; }
   .frow .flbl { font-size:var(--font-xxs); color:var(--text-muted, var(--text3)); text-transform:uppercase; font-weight:600; letter-spacing:.4px; }
@@ -56,15 +58,13 @@
   <!-- ── MANUTENÇÃO ── -->
   <div id="viewMaint">
   <div class="stats-row">
-    <div class="stat-box"><div class="num" style="color:var(--danger-red)">2</div><div class="lbl">Atrasadas</div></div>
-    <div class="stat-box"><div class="num" style="color:var(--warning-orange)">3</div><div class="lbl">Pendentes</div></div>
-    <div class="stat-box"><div class="num" style="color:var(--success-green)">8</div><div class="lbl">Concluídas (30d)</div></div>
+    
   </div>
 
   <div class="maint-layout">
     <div class="box">
       <div class="box-header">
-        <h2>🔧 Ordens de Serviço (Tarefas Locais)</h2>
+        <h2>Ordens de Serviço (Tarefas Locais)</h2>
         <button class="btn-primary" style="font-size:var(--font-xs);padding:6px 14px" onclick="openMaintModal()">+ Nova OS</button>
       </div>
       <div class="box-body" id="maintList">
@@ -74,24 +74,26 @@
 
     <div class="side-col">
       <div class="box">
-        <div class="box-header"><h2>📋 Checklist Diário</h2></div>
+        <div class="box-header"><h2>Checklist Diário</h2></div>
         <div class="box-body">
           <ul class="checklist">
-            <li><span class="dot" style="background:#10b981"></span>Verificar níveis de todos os reservatórios</li>
-            <li><span class="dot" style="background:#10b981"></span>Confirmar conectividade dos sensores</li>
-            <li><span class="dot" style="background:#10b981"></span>Checar alertas do sistema</li>
-            <li><span class="dot" style="background:#f59e0b"></span>Inspecionar pressão das tubulações</li>
-            <li><span class="dot" style="background:#f59e0b"></span>Registrar leituras dos hidrômetros</li>
-            <li><span class="dot" style="background:#e5e7eb"></span>Revisar relatório do dia anterior</li>
+            <li><span class="dot" style="background:var(--green)"></span>Verificar níveis de todos os reservatórios</li>
+            <li><span class="dot" style="background:var(--green)"></span>Confirmar conectividade dos sensores</li>
+            <li><span class="dot" style="background:var(--green)"></span>Checar alertas do sistema</li>
+            <li><span class="dot" style="background:var(--yellow)"></span>Inspecionar pressão das tubulações</li>
+            <li><span class="dot" style="background:var(--yellow)"></span>Registrar leituras dos hidrômetros</li>
+            <li><span class="dot" style="background:var(--text3)"></span>Revisar relatório do dia anterior</li>
           </ul>
-          <div style="font-size:var(--font-xxs);color:var(--text-muted);margin-top:8px;padding-top:8px;border-top:1px solid #f3f4f6">
-            🟢 Concluído &nbsp;·&nbsp; 🟡 Em andamento &nbsp;·&nbsp; ⚪ Pendente
+          <div style="font-size:var(--font-xxs);color:var(--text-muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;gap:12px;align-items:center">
+            <span style="display:inline-flex;align-items:center;gap:5px"><span class="dot" style="background:var(--green)"></span>Concluído</span>
+            <span style="display:inline-flex;align-items:center;gap:5px"><span class="dot" style="background:var(--yellow)"></span>Em andamento</span>
+            <span style="display:inline-flex;align-items:center;gap:5px"><span class="dot" style="background:var(--text3)"></span>Pendente</span>
           </div>
         </div>
       </div>
 
       <div class="box">
-        <div class="box-header"><h2>📅 Próximas</h2></div>
+        <div class="box-header"><h2>Próximas</h2></div>
         <div class="box-body">
           <table>
             <thead><tr><th>Data</th><th>Tipo</th><th>Local</th></tr></thead>
@@ -115,19 +117,27 @@
 </div>
 
 <!-- Modal Nova OS -->
-<div id="maintModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:white;padding:24px;border-radius:12px;width:100%;max-width:400px;box-shadow:0 10px 25px rgba(0,0,0,0.2);">
-    <h3 style="margin-top:0;margin-bottom:16px;">Adicionar Ordem de Serviço</h3>
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      <input type="text" id="osTitle" placeholder="Título da tarefa..." style="padding:10px;border:1px solid #ccc;border-radius:6px;width:100%;box-sizing:border-box;">
-      <input type="text" id="osResp" placeholder="Responsável..." style="padding:10px;border:1px solid #ccc;border-radius:6px;width:100%;box-sizing:border-box;">
-      <input type="date" id="osDate" style="padding:10px;border:1px solid #ccc;border-radius:6px;width:100%;box-sizing:border-box;">
-      <input type="text" id="osLocal" placeholder="Local/Equipamento..." style="padding:10px;border:1px solid #ccc;border-radius:6px;width:100%;box-sizing:border-box;">
+<div id="maintModal" class="modal-overlay" style="display:none" onclick="if (event.target === this) closeMaintModal()">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="osModalTitle" style="width:480px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="osModalTitle">Nova ordem de serviço</div>
+        <div class="modal-subtitle">Fica salva neste navegador</div>
+      </div>
+      <button type="button" class="modal-close" aria-label="Fechar" title="Fechar" onclick="closeMaintModal()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
-    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
-      <button style="padding:8px 16px;border:none;background:#e5e7eb;border-radius:6px;cursor:pointer;" onclick="closeMaintModal()">Cancelar</button>
-      <button class="btn-primary" style="padding:8px 16px;border:none;border-radius:6px;cursor:pointer;" onclick="saveMaintOrder()">Salvar</button>
-    </div>
+    <form class="modal-body" style="display:flex;flex-direction:column;gap:14px" onsubmit="event.preventDefault(); saveMaintOrder()">
+      <div class="field-stack"><label for="osTitle">Título *</label><input type="text" id="osTitle" class="form-input" placeholder="Ex.: Trocar bateria do node CB31" aria-describedby="osTitleErr"><div id="osTitleErr" class="feedback error" role="alert" hidden>Informe o título da tarefa.</div></div>
+      <div class="form-row">
+        <div class="field-stack"><label for="osResp">Responsável</label><input type="text" id="osResp" class="form-input" placeholder="Nome"></div>
+        <div class="field-stack"><label for="osDate">Vencimento</label><input type="date" id="osDate" class="form-input"></div>
+      </div>
+      <div class="field-stack"><label for="osLocal">Local / equipamento</label><input type="text" id="osLocal" class="form-input" placeholder="Ex.: Casa de Bombas Nº3"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeMaintModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -144,12 +154,15 @@ function saveMaintOrders() {
 
 function openMaintModal() {
   document.getElementById('maintModal').style.display = 'flex';
+  document.getElementById('osTitle').focus();
 }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMaintModal(); });
 function closeMaintModal() {
   document.getElementById('maintModal').style.display = 'none';
   document.getElementById('osTitle').value = '';
   document.getElementById('osResp').value = '';
   document.getElementById('osLocal').value = '';
+  document.getElementById('osTitleErr').hidden = true;
 }
 
 function saveMaintOrder() {
@@ -157,7 +170,7 @@ function saveMaintOrder() {
   const resp = document.getElementById('osResp').value.trim();
   const date = document.getElementById('osDate').value;
   const local = document.getElementById('osLocal').value.trim();
-  if(!title) return alert("Título é obrigatório!");
+  if(!title) { document.getElementById('osTitleErr').hidden = false; document.getElementById('osTitle').focus(); return; }
   maintOrders.push({ id: Date.now(), title, resp, date, local, status: 'pending' });
   saveMaintOrders();
   closeMaintModal();
@@ -180,8 +193,20 @@ function toggleMaintStatus(id) {
 
 function renderMaintOrders() {
   const listEl = document.getElementById('maintList');
+  const todayStr = new Date().toISOString().split('T')[0];
+  const delayed = maintOrders.filter(o => o.status === 'pending' && o.date && o.date < todayStr).length;
+  const pending = maintOrders.filter(o => o.status === 'pending').length - delayed;
+  const completed = maintOrders.filter(o => o.status === 'completed').length;
+  document.querySelector('.stats-row').innerHTML = `
+    <div class="stat-box"><div class="num" style="color:var(--red)">${delayed}</div><div class="lbl">Atrasadas</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--yellow)">${pending}</div><div class="lbl">Pendentes</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--green)">${completed}</div><div class="lbl">Concluídas</div></div>
+  `;
   if(!maintOrders.length) {
-    listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">Nenhuma OS pendente.</div>';
+    listEl.innerHTML = `<div class="empty-block">
+      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <strong>Nenhuma ordem de serviço</strong><span>Registre tarefas de campo para acompanhar prazos.</span>
+      <button class="btn btn-primary" onclick="openMaintModal()">+ Nova OS</button></div>`;
     return;
   }
   
@@ -192,45 +217,33 @@ function renderMaintOrders() {
   });
 
   let html = '';
-  const todayStr = new Date().toISOString().split('T')[0];
 
   sorted.forEach(o => {
     let cssClass = 'pending';
-    let badge = '<span class="maint-badge badge-pending">🕐 Pendente</span>';
+    let badge = '<span class="maint-badge badge-pending">Pendente</span>';
     
     if(o.status === 'completed') {
       cssClass = 'completed';
-      badge = '<span class="maint-badge badge-completed">✅ Concluído</span>';
+      badge = '<span class="maint-badge badge-completed">Concluído</span>';
     } else if(o.date && o.date < todayStr) {
       cssClass = 'overdue';
-      badge = '<span class="maint-badge badge-overdue">⚠️ Atrasado</span>';
+      badge = '<span class="maint-badge badge-overdue">Atrasado</span>';
     }
 
     const dStr = o.date ? new Date(o.date+'T12:00:00').toLocaleDateString('pt-BR') : 'Sem data';
 
     html += `<div class="maint-item ${cssClass}">
       <div class="maint-header">
-        <span class="maint-title" style="cursor:pointer; ${o.status==='completed'?'text-decoration:line-through;color:#aaa':''}" onclick="toggleMaintStatus(${o.id})">${o.title}</span>
+        <span class="maint-title" style="cursor:pointer; ${o.status==='completed'?'text-decoration:line-through;color:var(--text3)':''}" onclick="toggleMaintStatus(${o.id})">${o.title}</span>
         <div style="display:flex;gap:8px;align-items:center;">
           ${badge}
-          <button style="border:none;background:transparent;cursor:pointer;font-size:14px;" onclick="deleteMaintOrder(${o.id})">❌</button>
+          <button class="icon-del" aria-label="Excluir ordem" title="Excluir" onclick="deleteMaintOrder(${o.id})"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
         </div>
       </div>
       <div class="maint-details">Resp.: ${o.resp||'—'} &nbsp;·&nbsp; Venc.: ${dStr} &nbsp;·&nbsp; ${o.local||'Geral'}</div>
     </div>`;
   });
   listEl.innerHTML = html;
-  
-  // Update stats
-  const delayed = maintOrders.filter(o => o.status === 'pending' && o.date && o.date < todayStr).length;
-  const pending = maintOrders.filter(o => o.status === 'pending').length - delayed;
-  const completed = maintOrders.filter(o => o.status === 'completed').length;
-  
-  document.querySelector('.stats-row').innerHTML = `
-    <div class="stat-box"><div class="num" style="color:var(--danger-red)">${delayed}</div><div class="lbl">Atrasadas</div></div>
-    <div class="stat-box"><div class="num" style="color:var(--warning-orange)">${pending}</div><div class="lbl">Pendentes</div></div>
-    <div class="stat-box"><div class="num" style="color:var(--success-green)">${completed}</div><div class="lbl">Concluídas</div></div>
-  `;
 }
 
 // Initial render
@@ -253,8 +266,8 @@ function gatewayCard(gw) {
     ? '<span class="tag-sim">● Simulação</span>'
     : gw.connected ? '<span class="tag-online">● Conectado</span>' : '<span class="tag-offline">● Desconectado</span>';
   return `<div class="sys-card">
-    <div class="sys-card-header" style="background:linear-gradient(135deg,#667eea,#764ba2)">
-      <span>⚡ Gateway</span>${tag}
+    <div class="sys-card-header" style="background:var(--blue)">
+      <span>Gateway</span>${tag}
     </div>
     <div class="sys-card-body">
       ${frow('Conectado', gw.connected ? 'Sim' : 'Não')}
@@ -269,8 +282,8 @@ function gatewayCard(gw) {
 
 function nodesCard(nodes) {
   if (!nodes?.length) return `<div class="sys-card">
-    <div class="sys-card-header" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">
-      <span>📡 Nodes</span><span style="font-size:var(--font-xs);opacity:.8">0 nodes</span>
+    <div class="sys-card-header" style="background:#0e7490">
+      <span>Nodes</span><span style="font-size:var(--font-xs);opacity:.8">0 nodes</span>
     </div>
     <div class="sys-card-body"><div style="text-align:center;color:var(--text-muted);padding:20px">Nenhum node encontrado</div></div>
   </div>`;
@@ -282,8 +295,8 @@ function nodesCard(nodes) {
     <td>${aguadaAPI.fmtTs(n.last_seen)}</td>
   </tr>`).join('');
   return `<div class="sys-card" style="grid-column:1/-1">
-    <div class="sys-card-header" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">
-      <span>📡 Nodes (${nodes.length})</span>
+    <div class="sys-card-header" style="background:#0e7490">
+      <span>Nodes (${nodes.length})</span>
       <span style="font-size:var(--font-xs);opacity:.8">${nodes.filter(n=>n.online).length} online</span>
     </div>
     <div class="sys-card-body">
@@ -303,8 +316,8 @@ async function loadSys() {
       aguadaAPI.getNodes().catch(()=>[]),
     ]);
     const backendCard = `<div class="sys-card">
-      <div class="sys-card-header" style="background:linear-gradient(135deg,#43e97b,#38f9d7)">
-        <span>🖥️ Backend</span><span class="tag-online">● Online</span>
+      <div class="sys-card-header" style="background:var(--green)">
+        <span>Backend</span><span class="tag-online">● Online</span>
       </div>
       <div class="sys-card-body">
         ${frow('URL', location.origin)}

@@ -6,11 +6,12 @@
 :root {
     --primary-blue: #1e3c72;
     --primary-light: #2a5298;
-    --accent-purple: #667eea;
+    --accent-purple: #2563eb; /* botões/abas ativas: branco sobre #667eea dava 3.7:1 */
     --accent-pink: #764ba2;
-    --success-green: #10b981;
-    --warning-orange: #f59e0b;
-    --danger-red: #ef4444;
+    /* seguem os tokens do tema: #10b981/#f59e0b como texto ficavam < 3:1 no claro */
+    --success-green: var(--green);
+    --warning-orange: var(--yellow);
+    --danger-red: var(--red);
 
     /* Tipografia padronizada */
     --font-base: 14px;
@@ -92,7 +93,6 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
 .res-cards-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 16px; }
 
 .res-card { background: var(--card, white); border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); overflow: hidden; transition: all .3s; }
-.res-card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,.12); }
 .res-card-header { padding: 12px 16px; color: white; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; }
 .res-card-status { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: rgba(255,255,255,.25); font-weight: 500; }
 .res-card-body { padding: 16px; }
@@ -119,9 +119,9 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
 .gauge-ok   { background: #10b981; }
 .gauge-warn { background: #f59e0b; }
 .gauge-crit { background: #ef4444; }
-.text-ok    { color: #10b981; }
-.text-warn  { color: #f59e0b; }
-.text-crit  { color: #ef4444; }
+.text-ok    { color: var(--green); }
+.text-warn  { color: var(--yellow); }
+.text-crit  { color: var(--red); }
 
 /* ── Tabs (compartilhado — admin pages) ─────────────────────── */
 .tab-bar {
@@ -131,7 +131,7 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
 }
 /* Override tab-btn ONLY inside .tab-bar to avoid conflicts with aguada.css .tabs */
 .tab-bar .tab-btn {
-    padding: 7px 18px; border-radius: 7px; border: none; cursor: pointer;
+    min-height: 36px; padding: 7px 18px; border-radius: 8px; border: none; cursor: pointer;
     font-size: var(--font-sm); font-weight: 500; background: transparent;
     color: var(--text-muted); transition: all .15s;
     border-bottom: none;
@@ -146,8 +146,7 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
     cursor: pointer; font-size: var(--font-sm); font-weight: 600;
     transition: all 0.2s;
 }
-.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-.btn-primary:active { transform: translateY(0); }
+.btn-primary:hover { opacity: 0.9; }
 
 /* ── Shared page-level components ── */
 .page-box {
@@ -203,7 +202,6 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
     box-shadow: 0 1px 3px rgba(0,0,0,.04);
     transition: all 0.2s;
 }
-.param-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); transform: translateY(-1px); }
 .param-card .lbl { font-size: var(--font-xs); color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
 .param-card .val { font-size: 24px; font-weight: 700; color: var(--blue, var(--primary-blue)); margin-top: 6px; }
 .param-card .sub { font-size: var(--font-xs); color: var(--text-muted); margin-top: 4px; }
@@ -217,8 +215,8 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
 }
 
 /* ── Status badges (admin) ── */
-.badge-online  { background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 8px; font-size: var(--font-xxs); font-weight: 600; }
-.badge-offline { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 8px; font-size: var(--font-xxs); font-weight: 600; }
+.badge-online  { background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 8px; font-size: var(--font-xxs); font-weight: 600; white-space: nowrap; }
+.badge-offline { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 8px; font-size: var(--font-xxs); font-weight: 600; white-space: nowrap; }
 
 /* ── Alert-level badges (in-table) ── */
 .badge-warn   { background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
@@ -237,7 +235,36 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
 }
 .btn-upload:hover { opacity: 0.9; }
 
+/* ── Superfícies: um só cartão em todas as páginas (antes: sombra sem borda aqui, borda sem sombra no Painel) ── */
+body.admin-page :is(.box, .page-box, .tbl-wrap, .stat-box, .chart-wrap, .stat-mini, .tab-bar, .top-bar, .sys-card, .res-card, .chart-card, .supply-card) {
+    border: 1px solid var(--border); box-shadow: var(--card-shadow); border-radius: 12px;
+}
+.box-header h2 { letter-spacing: -.01em; }
+
+/* ── Estado vazio ── */
+.empty-block { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 32px 16px; text-align: center; color: var(--text2); }
+.empty-block svg { color: var(--text3); margin-bottom: 4px; }
+.empty-block strong { color: var(--text); font-size: 14px; font-weight: 600; }
+.empty-block span { font-size: 13px; }
+.empty-block .btn-primary { margin-top: 8px; }
+
+/* ── Mobile: header e tabelas ── */
+@media (max-width: 640px) {
+    .admin-header-brand { padding: 0 12px; }
+    .admin-header-brand .brand-text, #statusText { display: none; }
+    .admin-status { padding: 0 12px; gap: 10px !important; }
+    /* Indica que a nav rola horizontalmente */
+    .admin-nav { -webkit-mask-image: linear-gradient(to right, #000 80%, transparent); mask-image: linear-gradient(to right, #000 80%, transparent); }
+}
+
 /* ── Dark Mode — style.css extensions ── */
+/* Variáveis legadas sem override escuro deixavam texto de tabela #1f2937 sobre card escuro */
+[data-theme="dark"] {
+    --text-dark: var(--text);
+    --text-muted: var(--text3);
+    --border-color: var(--border);
+    --background-light: var(--bg3);
+}
 [data-theme="dark"] body.admin-page { background: var(--bg); color: var(--text); }
 [data-theme="dark"] .admin-status { color: var(--text2); border-left-color: var(--border); }
 
@@ -257,7 +284,7 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
 [data-theme="dark"] .stat-box { background: var(--card); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,.3); }
 
 [data-theme="dark"] .tab-bar .tab-btn { color: var(--text2); }
-[data-theme="dark"] .tab-bar .tab-btn.active { background: var(--blue); color: white; }
+[data-theme="dark"] .tab-bar .tab-btn.active { background: var(--accent-purple); color: white; }
 [data-theme="dark"] .tbl-bar { border-bottom-color: var(--border); }
 [data-theme="dark"] .tbl-bar h2 { color: var(--text); }
 [data-theme="dark"] .tbl-info { color: var(--text3); }

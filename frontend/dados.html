@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>AGUADA — Dados</title>
-<link rel="stylesheet" href="assets/aguada.css?v=2">
+<link rel="stylesheet" href="assets/aguada.css?v=3">
 <link rel="stylesheet" href="assets/style.css">
 <style>
   /* ── Atual ── */
@@ -52,7 +52,7 @@
   <div id="viewAtual">
     <div class="tbl-wrap">
       <div class="tbl-bar">
-        <h2>📋 Leituras Atuais</h2>
+        <h2>Leituras Atuais</h2>
         <div class="tbl-info"><span class="refresh-dot"></span>Atualiza 30s &nbsp;|&nbsp; <span id="lastUpdate">—</span></div>
       </div>
       <div id="tableContainer" style="padding:20px; overflow-x:auto;"><div class="loader"></div></div>
@@ -99,7 +99,7 @@
       <div class="stat-mini"><div class="slbl">Leituras</div><div class="sval" id="hCnt">—</div></div>
     </div>
     <div class="chart-wrap">
-      <h3 id="chartTitleHist">📈 Histórico Contínuo</h3>
+      <h3 id="chartTitleHist">Histórico Contínuo</h3>
       <canvas id="histChart" height="100"></canvas>
     </div>
   </div>
@@ -187,9 +187,9 @@ async function preloadData() {
 
 // ── LEITURAS ATUAIS ──
 function gc(pct) {
-  if (pct <= 20) return '#ef4444';
-  if (pct <= 35) return '#f59e0b';
-  return '#10b981';
+  if (pct <= 20) return 'var(--red)';
+  if (pct <= 35) return 'var(--yellow)';
+  return 'var(--green)';
 }
 
 function renderAtual(data) {
@@ -201,7 +201,7 @@ function renderAtual(data) {
     const cap = r.volume_max_l != null ? formatVolumeM3(r.volume_max_l, 1) : (r.capacity_l != null ? formatVolumeM3(r.capacity_l, 1) : '—');
     const badge = r.online ? '<span class="badge-online">● Online</span>' : '<span class="badge-offline">● Offline</span>';
     return `<tr>
-      <td><strong style="color:#1e3a5f;font-size:var(--font-base)">${r.alias}</strong></td>
+      <td><strong style="color:var(--text);font-size:var(--font-base)">${r.alias}</strong></td>
       <td style="color:var(--text-muted)">${r.name || '—'}</td>
       <td>${badge}</td>
       <td><div style="display:flex;align-items:center">
@@ -359,7 +359,7 @@ async function loadHist() {
     document.getElementById('hAvg').textContent = vals.length ? formatMetric(varKey, (vals.reduce((a,b)=>a+b,0)/vals.length) * (varKey === 'volume_l' ? LITERS_PER_M3 : 1), 1) : '—';
     document.getElementById('hCur').textContent = vals.length ? formatMetric(varKey, vals[vals.length-1] * (varKey === 'volume_l' ? LITERS_PER_M3 : 1), 1) : '—';
     document.getElementById('hCnt').textContent = merged.length;
-    document.getElementById('chartTitleHist').textContent = `📈 ${metricLabel(varKey)} — ${selAliasHist === ALL_ALIAS ? 'Todos os reservatórios' : selAliasHist} (${periodLabel(period)} em ${formatDateLabel(date)})`;
+    document.getElementById('chartTitleHist').textContent = `${metricLabel(varKey)} — ${selAliasHist === ALL_ALIAS ? 'Todos os reservatórios' : selAliasHist} (${periodLabel(period)} em ${formatDateLabel(date)})`;
     if (histChart) histChart.destroy();
     const chartData = buildCategoryChartData(targets.map((reservoir, index) => {
       const history = collapseHistoryRows(histories[index] || [], period);

@@ -31,7 +31,7 @@ if dotenv_values is not None:
             if value and key not in os.environ:
                 os.environ[key] = value
 
-from .bridge import Bridge, RESERVOIR_INDEX
+from .bridge import Bridge, RESERVOIR_INDEX, reload_reservoirs
 from .db import (
     init_db,
     get_all_states,
@@ -63,6 +63,7 @@ from .db import (
     is_supported_valve_name,
 )
 from .calc import calc_consumption_events, decimate_readings
+from .dashboard import build_data as build_dashboard_data
 from .report import generate_daily_report_pdf
 
 logger = logging.getLogger("main")
@@ -95,7 +96,8 @@ class WSManager:
         """Chamado pela bridge thread — agenda envio no loop asyncio principal."""
         if self._loop is None:
             return
-        msg = json.dumps({"type": "reading", "data": data})
+        # Leitura acabou de chegar: online por definição (o record do bridge não traz o campo)
+        msg = json.dumps({"type": "reading", "data": {**data, "online": True}})
         self._loop.call_soon_threadsafe(
             lambda: asyncio.ensure_future(self._send_all(msg), loop=self._loop)
         )
@@ -114,7 +116,7 @@ class WSManager:
         async with aiosqlite.connect(DB_PATH) as conn:
             conn.row_factory = aiosqlite.Row
             states = await get_all_states(conn)
-        await ws.send_text(json.dumps({"type": "snapshot", "data": states}))
+        await ws.send_text(json.dumps({"type": "snapshot", "data": _with_meta(states)}))
 
 
 ws_manager = WSManager()
@@ -189,14 +191,12 @@ class ReportDailyDataRequest(BaseModel):
     valve_rows: list[dict] = Field(default_factory=list)
 
 
-@app.get("/api/reservoirs")
-async def get_reservoirs():
-    async with aiosqlite.connect(DB_PATH) as conn:
-        conn.row_factory = aiosqlite.Row
-        states = await get_all_states(conn)
-    # Enriquecer com lat/lng e capacity_l do reservoirs.yaml via RESERVOIR_INDEX
+def _with_meta(states: list[dict]) -> list[dict]:
+    """Enriquece estados com lat/lng e capacity_l do reservoirs.yaml.
+    Usado por /api/reservoirs e pelo snapshot do WebSocket (mesmo formato nos dois)."""
+    reload_reservoirs()
     alias_to_meta: dict[str, dict] = {}
-    for params in RESERVOIR_INDEX.values():
+    for params in list(RESERVOIR_INDEX.values()):
         alias = params.get("alias")
         if not alias:
             continue
@@ -211,6 +211,14 @@ async def get_reservoirs():
         meta = alias_to_meta.get(s.get("alias", ""), {})
         s.update(meta)
     return states
+
+
+@app.get("/api/reservoirs")
+async def get_reservoirs():
+    async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        states = await get_all_states(conn)
+    return _with_meta(states)
 
 
 @app.get("/api/history/{alias}")
@@ -260,6 +268,19 @@ async def get_consumption(
         },
         "events": events,
     }
+
+
+_dashboard_cache: tuple[float, dict] | None = None
+
+
+@app.get("/api/dashboard")
+def get_dashboard():
+    """Série horária e resumo diário de todos os reservatórios (página Análise)."""
+    # def síncrono: FastAPI roda em threadpool. Cache de 2 min porque o cálculo varre a tabela toda.
+    global _dashboard_cache
+    if _dashboard_cache is None or time.time() - _dashboard_cache[0] > 120:
+        _dashboard_cache = (time.time(), build_dashboard_data(DB_PATH))
+    return _dashboard_cache[1]
 
 
 @app.get("/api/report/daily")
@@ -388,18 +409,14 @@ class ReportNoteRequest(BaseModel):
     note: str
 
 
-# Build alias → params index from RESERVOIR_INDEX for manual readings
-_ALIAS_PARAMS: dict[str, dict] = {}
-for (_nid, _sid), _p in RESERVOIR_INDEX.items():
-    _ALIAS_PARAMS[_p["alias"]] = {**_p, "node_id": _nid, "sensor_id": _sid}
-
-
 @app.post("/api/readings/manual")
 async def post_manual_reading(body: ManualReadingRequest):
     alias = body.alias.upper()
-    params = _ALIAS_PARAMS.get(alias)
-    if params is None:
+    reload_reservoirs()
+    found = next(((k, p) for k, p in list(RESERVOIR_INDEX.items()) if p["alias"] == alias), None)
+    if found is None:
         raise HTTPException(400, f"Alias '{alias}' não encontrado")
+    (node_id, sensor_id), params = found
 
     volume_max = params["volume_max_l"]
     level_max = params["level_max_cm"]
@@ -420,8 +437,8 @@ async def post_manual_reading(body: ManualReadingRequest):
 
     record = {
         "ts": int(time.time()),
-        "node_id": params["node_id"],
-        "sensor_id": params["sensor_id"],
+        "node_id": node_id,
+        "sensor_id": sensor_id,
         "alias": alias,
         "distance_cm": distance_cm,
         "level_cm": level_cm,
