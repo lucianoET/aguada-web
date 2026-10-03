@@ -48,12 +48,13 @@
 
   <div x-data="dashApp()" x-init="init()" x-cloak class="dash2">
 
-    <!-- Banner de alerta crítico -->
-    <template x-if="critical > 0 || offline > 0">
-      <div class="ha-alert ha-alert-crit">
-        <strong x-text="bannerTitle"></strong>
-        <span x-text="bannerText"></span> Verifique a aba Alertas.
-      </div>
+    <!-- Banner: alarmes ativos do backend (mesma fonte da página Alertas) -->
+    <template x-if="critical + warning > 0">
+      <a class="ha-alert" :class="critical > 0 ? 'ha-alert-crit' : 'ha-alert-warn'" href="alerts.html" style="display:block;color:inherit;text-decoration:none">
+        <strong x-text="critical > 0 ? `${critical} alarme(s) crítico(s)` + (warning ? ` e ${warning} alerta(s)` : '') : `${warning} alerta(s) ativo(s)`"></strong>
+        <template x-for="a in alarms.slice(0, 3)" :key="a.id"><span style="display:block" x-text="'• ' + a.descricao + (a.ack_ts ? ' (reconhecido)' : '')"></span></template>
+        <span style="display:block;margin-top:4px;font-weight:600" x-text="alarms.length > 3 ? `+ ${alarms.length - 3} — ver todos em Alertas →` : 'Ver em Alertas →'"></span>
+      </a>
     </template>
 
     <!-- Faixa hero -->
@@ -76,7 +77,7 @@
       </div>
       <div class="ha-stat">
         <span class="ha-stat-label">Alertas Ativos</span>
-        <span class="ha-stat-value" :style="critical > 0 ? 'color:var(--red)' : (warning > 0 ? 'color:var(--yellow)' : 'color:var(--green)')" x-text="critical + warning + offline">0</span>
+        <span class="ha-stat-value" :style="critical > 0 ? 'color:var(--red)' : (warning > 0 ? 'color:var(--yellow)' : 'color:var(--green)')" x-text="critical + warning">0</span>
         <span class="ha-stat-delta" :class="(critical + offline) > 0 ? 'down' : 'up'"
               x-text="alertSummary"></span>
       </div>
@@ -87,6 +88,7 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
       Reservatórios
     </div>
+    <p x-show="!reservoirs.length" style="color:var(--text2);font-size:13px;margin:0 0 12px">Sem leitura dos reservatórios no momento (servidor ou gateway sem resposta).</p>
     <div class="dash2-res-grid">
       <template x-for="r in sortedReservoirs" :key="r.alias">
         <div class="ha-card res2">
@@ -125,6 +127,7 @@ document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('dashboard.html'
 function dashApp() {
   return {
     reservoirs: [],
+    alarms: [],
     _initialized: false,
     ...wsMixin(),
 
@@ -142,28 +145,23 @@ function dashApp() {
       const r = (this.reservoirs || []).filter(x => x.online);
       return r.length ? Math.round(r.reduce((s, x) => s + (x.pct || 0), 0) / r.length) : 0;
     },
-    // Nível crítico só com leitura válida; sem comunicação é contado à parte (não é nível 0).
-    get critical() { return (this.reservoirs || []).filter(r => r.online && r.pct != null && r.pct <= 20).length; },
+    // Alarmes ativos do backend: histerese, limites por reservatório, falha de sensor e laudos
+    get critical() { return this.alarms.filter(a => a.severidade === 'critico').length; },
+    get warning() { return this.alarms.filter(a => a.severidade !== 'critico').length; },
+
+    async _loadAlarms() {
+      const res = await fetch('/api/events/active').then(r => r.ok ? r.json() : null).catch(() => null);
+      if (res) this.alarms = [...res.items].sort((a, b) => (a.severidade === 'critico' ? 0 : 1) - (b.severidade === 'critico' ? 0 : 1) || b.ts - a.ts);
+    },
+    // Sem comunicação é contado à parte (não é nível 0) — do fix "elementos sem leitura"
     get offline() { return (this.reservoirs || []).filter(r => !r.online).length; },
-    get bannerTitle() {
-      const p = [];
-      if (this.critical) p.push(this.critical + ' reservatório(s) em nível crítico');
-      if (this.offline) p.push(this.offline + ' sem comunicação');
-      return p.join(' · ');
-    },
-    get bannerText() {
-      if (this.offline && this.offline === this.reservoirCount) return 'Nenhum sensor está enviando leitura — verifique o gateway e o servidor MQTT.';
-      if (this.critical) return 'Nível ≤ 20%.';
-      return 'Sensor(es) sem leitura há mais de 10 min.';
-    },
     get alertSummary() {
       const p = [];
       if (this.critical) p.push(this.critical + ' crítico');
+      if (this.warning) p.push(this.warning + ' atenção');
       if (this.offline) p.push(this.offline + ' offline');
-      if (!p.length && this.warning) p.push(this.warning + ' atenção');
       return p.length ? p.join(' · ') : 'Tudo normal';
     },
-    get warning() { return (this.reservoirs || []).filter(r => r.online && r.pct != null && r.pct > 20 && r.pct <= 35).length; },
     get sortedReservoirs() {
       const order = ['CON', 'CAV', 'CIE', 'CB3', 'CBIF'];
       const rank = a => { const u = (a || '').toUpperCase(); for (let i = 0; i < order.length; i++) if (u.startsWith(order[i])) return i; return 99; };
@@ -189,21 +187,15 @@ function dashApp() {
       if (this._initialized) return;
       this._initialized = true;
 
+      // Sem dado não inventa nível: lista vazia até a API/WS responder
       const data = await aguadaAPI.getReservoirs().catch(() => []);
-      this.reservoirs = Array.isArray(data) && data.length ? data : [
-        { alias: 'CON',  name: 'Castelo de Consumo',  pct: 85, volume_l: 68000,  volume_max_l: 80000,  capacity_l: 80000,  online: true },
-        { alias: 'CAV',  name: 'Castelo de Incêndio', pct: 81, volume_l: 65000,  volume_max_l: 80000,  capacity_l: 80000,  online: true },
-        { alias: 'CIE1', name: 'Cisterna IE-1',       pct: 80, volume_l: 196000, volume_max_l: 245000, capacity_l: 245000, online: true },
-        { alias: 'CIE2', name: 'Cisterna IE-2',       pct: 66, volume_l: 161000, volume_max_l: 245000, capacity_l: 245000, online: true },
-        { alias: 'CB31', name: 'Casa de Bombas Nº3-1',pct: 73, volume_l: 29000,  volume_max_l: 40000,  capacity_l: 40000,  online: true },
-        { alias: 'CB32', name: 'Casa de Bombas Nº3-2',pct: 95, volume_l: 38000,  volume_max_l: 40000,  capacity_l: 40000,  online: true },
-        { alias: 'CBIF1',name: 'Casa de Bombas IF-1', pct: 70, volume_l: 28000,  volume_max_l: 40000,  capacity_l: 40000,  online: false },
-        { alias: 'CBIF2',name: 'Casa de Bombas IF-2', pct: 40, volume_l: 16000,  volume_max_l: 40000,  capacity_l: 40000,  online: false }
-      ];
+      this.reservoirs = Array.isArray(data) ? data : [];
+      await this._loadAlarms();
       this._renderGauge();
 
       this.wsConnect(data => {
         const msg = normalizeWsMessage(data);
+        if (msg.type === 'event') { this._loadAlarms(); return; }
         if (msg.type === 'snapshot' && msg.reservoirs) {
           this.reservoirs = msg.reservoirs;
         } else if (msg.type === 'reading' && msg.reading) {
