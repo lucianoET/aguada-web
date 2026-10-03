@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>AGUADA — Usuários</title>
+<link rel="stylesheet" href="assets/aguada.css?v=3">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .grid { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  table.users { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.users th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--text2); padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  table.users td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  table.users tr.off td { opacity: .55; }
+  .in, select.in { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; font-size: 13px; }
+  .fld { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; font-size: 12px; color: var(--text2); }
+  .btn { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .btn.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+  .btn:disabled { opacity: .5; cursor: wait; }
+  .msg { font-size: 12px; min-height: 16px; margin-top: 6px; }
+  .msg.err { color: #dc2626; } .msg.ok { color: #16a34a; }
+  .roles { font-size: 12px; color: var(--text2); line-height: 1.5; margin-top: 12px; }
+  .table-wrap { overflow-x: auto; }
+</style>
+</head>
+<body class="admin-page">
+<div id="topbar" class="admin-header"></div>
+
+<div class="admin-main">
+  <div class="grid">
+    <div class="box">
+      <div class="box-header"><h2>Usuários</h2></div>
+      <div class="box-body table-wrap" id="list"><div class="loader"></div></div>
+    </div>
+    <div class="box">
+      <div class="box-header"><h2>Novo usuário</h2></div>
+      <div class="box-body">
+        <form id="create" novalidate>
+          <label class="fld">Nome<input class="in" id="cName" maxlength="60"></label>
+          <label class="fld">Usuário<input class="in" id="cUser" maxlength="40" autocapitalize="none"></label>
+          <label class="fld">Perfil
+            <select class="in" id="cRole"><option value="operador">Operador</option><option value="supervisor">Supervisor</option><option value="admin">Administrador</option></select>
+          </label>
+          <label class="fld">Senha inicial (mín. 8)<input class="in" id="cPass" type="password" autocomplete="new-password"></label>
+          <button class="btn primary" id="cBtn" type="submit">Criar usuário</button>
+          <div class="msg" id="cMsg" role="alert"></div>
+        </form>
+        <p class="roles"><b>Operador</b>: leituras manuais, bombas, válvulas, reconhecer alarmes.<br>
+          <b>Supervisor</b>: + limites de alarme, laudos de qualidade, comandos aos nós.<br>
+          <b>Administrador</b>: + usuários.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('users.html');
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+const ROLE = { operador:'Operador', supervisor:'Supervisor', admin:'Administrador' };
+let me = null;
+
+async function api(path, method, body) {
+  const r = await fetch(path, { method, headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) }).catch(() => null);
+  if (!r) return 'Servidor indisponível';
+  if (!r.ok) return (await r.json().catch(() => ({}))).detail || `Erro ${r.status}`;
+  return null;
+}
+
+async function load() {
+  me = await aguadaAPI.me();
+  const r = await fetch('/api/users');
+  if (r.status === 401) { location.href = 'login.html?next=users.html'; return; }
+  if (r.status === 403) { $('list').innerHTML = '<p>Só administradores gerenciam usuários.</p>'; $('create').hidden = true; return; }
+  const users = (await r.json()).items;
+  $('list').innerHTML = `<table class="users">
+    <thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th>Ativo</th><th>Nova senha</th></tr></thead>
+    <tbody>${users.map((u) => `<tr class="${u.active ? '' : 'off'}">
+      <td><b>${esc(u.name)}</b>${u.id === me?.id ? ' <small>(você)</small>' : ''}</td>
+      <td>${esc(u.username)}</td>
+      <td><select class="in" aria-label="Perfil de ${esc(u.name)}" onchange="patch(${u.id}, { role: this.value }, this)" ${u.id === me?.id ? 'disabled' : ''}>
+        ${Object.entries(ROLE).map(([k, v]) => `<option value="${k}" ${k === u.role ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
+      <td><input type="checkbox" aria-label="Ativo" ${u.active ? 'checked' : ''} ${u.id === me?.id ? 'disabled' : ''} onchange="patch(${u.id}, { active: this.checked }, this)"></td>
+      <td style="white-space:nowrap"><input class="in" type="password" placeholder="mín. 8" id="pw${u.id}" style="width:110px" autocomplete="new-password">
+        <button class="btn" type="button" onclick="setPw(${u.id}, this)">Trocar</button><div class="msg" id="m${u.id}"></div></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+async function patch(id, body, el) {
+  el.disabled = true;
+  const err = await api(`/api/users/${id}`, 'PATCH', body);
+  if (err) { alertMsg(id, err); el.disabled = false; return; }
+  await load();
+}
+function alertMsg(id, text, ok = false) { const m = $(`m${id}`); if (m) { m.textContent = text; m.className = `msg ${ok ? 'ok' : 'err'}`; } }
+
+async function setPw(id, btn) {
+  const pw = $(`pw${id}`).value;
+  btn.disabled = true;
+  const err = await api(`/api/users/${id}`, 'PATCH', { password: pw });
+  btn.disabled = false;
+  if (err) { alertMsg(id, err); return; }
+  $(`pw${id}`).value = '';
+  alertMsg(id, 'Senha trocada; sessões do usuário encerradas.', true);
+}
+
+$('create').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('cBtn').disabled = true;
+  const err = await api('/api/users', 'POST', { name: $('cName').value.trim(), username: $('cUser').value.trim(), role: $('cRole').value, password: $('cPass').value });
+  $('cBtn').disabled = false;
+  $('cMsg').textContent = err || 'Usuário criado.';
+  $('cMsg').className = `msg ${err ? 'err' : 'ok'}`;
+  if (!err) { ['cName', 'cUser', 'cPass'].forEach((k) => { $(k).value = ''; }); load(); }
+});
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>AGUADA — Entrar</title>
+<link rel="stylesheet" href="assets/aguada.css?v=3">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .login-wrap { min-height: calc(100dvh - 48px); display: grid; place-items: center; padding: 24px 16px; box-sizing: border-box; }
+  .login-card { width: 100%; max-width: 380px; background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+  .login-card h1 { margin: 0 0 4px; font-size: 20px; color: var(--text); }
+  .login-card p.sub { margin: 0 0 18px; color: var(--text2); font-size: 13px; line-height: 1.4; }
+  .fld { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; font-size: 13px; color: var(--text2); }
+  .fld input { padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; font-size: 14px; }
+  .fld input:focus { outline: 2px solid #2563eb55; border-color: #2563eb; }
+  .btn-main { width: 100%; padding: 10px; border: 0; border-radius: 8px; background: #2563eb; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .btn-main:hover:not(:disabled) { background: #1d4ed8; }
+  .btn-main:disabled { opacity: .6; cursor: wait; }
+  .msg { min-height: 18px; margin: 10px 0 0; font-size: 13px; color: #dc2626; }
+  .hint { margin-top: 14px; font-size: 12px; color: var(--text2); line-height: 1.4; }
+</style>
+</head>
+<body class="admin-page">
+<div id="topbar" class="admin-header"></div>
+
+<main class="login-wrap">
+  <form class="login-card" id="form" novalidate>
+    <h1 id="title">Entrar</h1>
+    <p class="sub" id="sub">Necessário para registrar leituras, comandos e reconhecer alarmes.</p>
+    <div id="setupFields" hidden>
+      <label class="fld">Seu nome<input id="name" autocomplete="name" maxlength="60"></label>
+    </div>
+    <label class="fld">Usuário<input id="username" autocomplete="username" maxlength="40" autocapitalize="none" required></label>
+    <label class="fld">Senha<input id="password" type="password" autocomplete="current-password" required></label>
+    <div id="confirmField" hidden>
+      <label class="fld">Repita a senha<input id="password2" type="password" autocomplete="new-password"></label>
+    </div>
+    <button class="btn-main" id="submit" type="submit">Entrar</button>
+    <p class="msg" id="msg" role="alert" aria-live="polite"></p>
+    <p class="hint" id="hint">Sem acesso? Peça ao administrador do sistema.</p>
+  </form>
+</main>
+
+<script src="assets/api.js"></script>
+<script>
+document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('login.html');
+const $ = (id) => document.getElementById(id);
+const next = (() => {
+  const n = new URLSearchParams(location.search).get('next') || 'painel.html';
+  return /^[\w.\-]+\.html(\?[\w=&%\-]*)?$/.test(n) ? n : 'painel.html';   // só páginas locais
+})();
+let setup = false;
+
+(async () => {
+  const me = await fetch('/api/auth/me').then((r) => r.json()).catch(() => null);
+  if (me?.user) { location.replace(next); return; }
+  if (me?.setup_needed) {
+    setup = true;
+    $('title').textContent = 'Criar administrador';
+    $('sub').textContent = 'Nenhum usuário cadastrado. Este primeiro acesso cria o administrador, que depois cadastra os operadores.';
+    $('setupFields').hidden = false;
+    $('confirmField').hidden = false;
+    $('password').autocomplete = 'new-password';
+    $('submit').textContent = 'Criar e entrar';
+    $('hint').textContent = 'Senha com pelo menos 8 caracteres.';
+    $('name').focus();
+  } else {
+    $('username').focus();
+  }
+})();
+
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('msg').textContent = '';
+  const body = { username: $('username').value.trim(), password: $('password').value };
+  if (!body.username || !body.password) { $('msg').textContent = 'Preencha usuário e senha.'; return; }
+  if (setup) {
+    body.name = $('name').value.trim();
+    if (!body.name) { $('msg').textContent = 'Informe seu nome.'; return; }
+    if (body.password !== $('password2').value) { $('msg').textContent = 'As senhas não conferem.'; return; }
+  }
+  $('submit').disabled = true;
+  const label = $('submit').textContent;
+  $('submit').textContent = setup ? 'Criando…' : 'Entrando…';
+  const r = await fetch(setup ? '/api/auth/setup' : '/api/auth/login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  }).catch(() => null);
+  if (r?.ok) { location.replace(next); return; }
+  $('msg').textContent = r ? ((await r.json().catch(() => ({}))).detail || 'Não foi possível entrar.') : 'Servidor indisponível.';
+  $('submit').disabled = false;
+  $('submit').textContent = label;
+});
+</script>
+</body>
+</html>

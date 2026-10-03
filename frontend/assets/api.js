@@ -3,6 +3,20 @@
  * Funciona local sem internet. Usa URLs relativas ao origin atual.
  */
 
+// Escrita sem sessão volta 401: manda para o login e retorna à página depois (Normas §12.4)
+if (!window.__aguadaFetch) {
+  window.__aguadaFetch = window.fetch.bind(window);
+  window.fetch = async (input, init = {}) => {
+    const res = await window.__aguadaFetch(input, init);
+    const url = typeof input === 'string' ? input : input.url;
+    const method = (init.method || (typeof input === 'string' ? 'GET' : input.method) || 'GET').toUpperCase();
+    if (res.status === 401 && method !== 'GET' && url.includes('/api/') && !url.includes('/api/auth/')) {
+      location.href = `login.html?next=${encodeURIComponent((location.pathname.split('/').pop() || 'painel.html') + location.search)}`;
+    }
+    return res;
+  };
+}
+
 const aguadaAPI = (() => {
   // Quando servido pelo FastAPI (porta 8001) ou nginx (porta 80), usa origin relativo.
   // Quando aberto via file://, usa localhost:8001 como fallback.
@@ -136,6 +150,7 @@ const aguadaAPI = (() => {
         ['planta.html',   'Planta'],
         ['dados.html',    'Dados'],
         ['analise.html',  'Análise'],
+        ['indicadores.html', 'Indicadores'],
         ['relatorio_tabelas.html', 'Relatório'],
         ['alerts.html',   'Alertas'],
         ['manutencao.html','Manutenção'],
@@ -158,6 +173,18 @@ const aguadaAPI = (() => {
         document.getElementById('statusDot').className = 'status-dot ' + (ok ? 'online' : 'offline');
         txt.textContent = ok ? 'Online' : 'Offline';
       }, 0);
+      // Quem está logado (ou link para entrar); admin ganha atalho para Usuários
+      setTimeout(async () => {
+        const el = document.getElementById('navUser');
+        if (!el) return;
+        const me = await _get('/api/auth/me').catch(() => null);
+        const next = encodeURIComponent((location.pathname.split('/').pop() || 'painel.html') + location.search);
+        if (!me?.user) { el.innerHTML = `<a href="login.html?next=${next}">Entrar</a>`; return; }
+        const u = me.user;
+        el.innerHTML = `<span class="nav-user-name" title="${u.name} · ${u.role}">${u.name}</span>`
+          + (u.role === 'admin' ? `<a href="users.html">Usuários</a>` : '')
+          + `<button type="button" onclick="aguadaAPI.logout()">Sair</button>`;
+      }, 0);
       // No celular a aba ativa pode ficar fora da área visível da nav
       setTimeout(() => document.querySelector('.admin-nav a.active')?.scrollIntoView({ inline: 'center', block: 'nearest' }), 0);
       return `
@@ -172,8 +199,17 @@ const aguadaAPI = (() => {
              <div class="status-dot" id="statusDot" role="img" aria-label="Status da rede"></div>
              <span id="statusText">Buscando rede...</span>
           </div>
+          <div class="nav-user" id="navUser"></div>
         </div>`;
     },
+
+    async logout() {
+      await fetch(BASE + '/api/auth/logout', { method: 'POST' }).catch(() => null);
+      location.reload();
+    },
+
+    /** Usuário logado ou null (cache por página) */
+    me() { return this._me ??= _get('/api/auth/me').then((r) => r.user).catch(() => null); },
 
     toggleTheme() {
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';

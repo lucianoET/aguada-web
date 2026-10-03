@@ -156,6 +156,54 @@ CREATE TRIGGER IF NOT EXISTS event_acks_no_update BEFORE UPDATE ON event_acks
 BEGIN SELECT RAISE(ABORT, 'event_acks é insert-only'); END;
 CREATE TRIGGER IF NOT EXISTS event_acks_no_delete BEFORE DELETE ON event_acks
 BEGIN SELECT RAISE(ABORT, 'event_acks é insert-only'); END;
+
+-- Limites de alarme por reservatório (% do volume); sem linha = padrão de alarms.LIMITS.
+-- Cada alteração também vira evento 'comando' (histórico fica em events).
+CREATE TABLE IF NOT EXISTS reservoir_limits (
+    alias      TEXT PRIMARY KEY,
+    critico    REAL NOT NULL,
+    baixo      REAL NOT NULL,
+    alto       REAL NOT NULL,
+    updated_ts INTEGER NOT NULL,
+    updated_by TEXT
+);
+
+-- Laudos de qualidade (Normas §9): insert-only — correção é um laudo novo
+CREATE TABLE IF NOT EXISTS pontos_coleta (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome         TEXT    NOT NULL UNIQUE,
+    reservatorio TEXT
+);
+CREATE TABLE IF NOT EXISTS laudos (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    ponto_id    INTEGER NOT NULL REFERENCES pontos_coleta(id),
+    data_coleta TEXT    NOT NULL,
+    laboratorio TEXT    NOT NULL,
+    numero      TEXT,
+    arquivo     TEXT,
+    obs         TEXT,
+    criado_ts   INTEGER NOT NULL,
+    criado_por  TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_laudos_ponto ON laudos(ponto_id, data_coleta DESC);
+CREATE TABLE IF NOT EXISTS laudo_parametros (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    laudo_id   INTEGER NOT NULL REFERENCES laudos(id),
+    parametro  TEXT    NOT NULL,
+    valor      REAL    NOT NULL,
+    unidade    TEXT,
+    limite_min REAL,
+    limite_max REAL,
+    conforme   INTEGER NOT NULL
+);
+CREATE TRIGGER IF NOT EXISTS laudos_no_update BEFORE UPDATE ON laudos
+BEGIN SELECT RAISE(ABORT, 'laudos é insert-only'); END;
+CREATE TRIGGER IF NOT EXISTS laudos_no_delete BEFORE DELETE ON laudos
+BEGIN SELECT RAISE(ABORT, 'laudos é insert-only'); END;
+CREATE TRIGGER IF NOT EXISTS laudo_parametros_no_update BEFORE UPDATE ON laudo_parametros
+BEGIN SELECT RAISE(ABORT, 'laudo_parametros é insert-only'); END;
+CREATE TRIGGER IF NOT EXISTS laudo_parametros_no_delete BEFORE DELETE ON laudo_parametros
+BEGIN SELECT RAISE(ABORT, 'laudo_parametros é insert-only'); END;
 """
 
 
@@ -170,7 +218,8 @@ def _filter_supported_valve_rows(rows: list[dict]) -> list[dict]:
     return [row for row in rows if is_supported_valve_name(row.get("valve_name"))]
 
 async def init_db(conn: aiosqlite.Connection) -> None:
-    await conn.executescript(SCHEMA)
+    from .auth import SCHEMA as AUTH_SCHEMA
+    await conn.executescript(SCHEMA + AUTH_SCHEMA)
     # Migration: add out_of_range column if missing (existing databases without it)
     try:
         await conn.execute(
@@ -740,3 +789,19 @@ async def get_hydrometer_neighbors(conn: aiosqlite.Connection, meter_name: str, 
     ) as cur:
         nxt = await cur.fetchone()
     return (dict(prev) if prev else None, dict(nxt) if nxt else None)
+
+
+async def get_reservoir_limits(conn: aiosqlite.Connection) -> dict[str, dict]:
+    conn.row_factory = aiosqlite.Row
+    async with conn.execute("SELECT * FROM reservoir_limits") as cur:
+        return {r["alias"]: dict(r) for r in await cur.fetchall()}
+
+
+async def set_reservoir_limits(conn: aiosqlite.Connection, alias: str, critico: float, baixo: float, alto: float, usuario: str) -> None:
+    await conn.execute(
+        """INSERT INTO reservoir_limits (alias, critico, baixo, alto, updated_ts, updated_by) VALUES (?, ?, ?, ?, ?, ?)
+           ON CONFLICT(alias) DO UPDATE SET critico=excluded.critico, baixo=excluded.baixo, alto=excluded.alto,
+               updated_ts=excluded.updated_ts, updated_by=excluded.updated_by""",
+        (alias, critico, baixo, alto, int(time.time()), usuario),
+    )
+    await conn.commit()

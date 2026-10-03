@@ -323,3 +323,10 @@ body.admin-page :is(.box, .page-box, .tbl-wrap, .stat-box, .chart-wrap, .stat-mi
 [data-theme="dark"] .alert-warn { background: var(--yellow-dim); color: var(--yellow); border-color: var(--yellow); }
 [data-theme="dark"] .alert-info { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
 [data-theme="dark"] .alert-ok   { background: var(--green-dim); color: var(--green); border-color: var(--green); }
+
+/* Usuário logado no cabeçalho (api.js navHTML) */
+.nav-user { display:flex; align-items:center; gap:8px; font-size:12px; white-space:nowrap; }
+.nav-user a, .nav-user button { color:var(--text2); background:none; border:1px solid var(--border); border-radius:6px; padding:3px 8px; font:inherit; font-size:12px; cursor:pointer; text-decoration:none; }
+.nav-user a:hover, .nav-user button:hover { color:var(--text); border-color:var(--text2); }
+.nav-user-name { font-weight:700; color:var(--text); max-width:120px; overflow:hidden; text-overflow:ellipsis; }
+@media (max-width: 640px) { .nav-user-name { display:none; } }

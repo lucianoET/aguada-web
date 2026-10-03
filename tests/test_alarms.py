@@ -142,11 +142,11 @@ async def test_pump_command_logs_before_and_after(api_db):
         await init_db(conn)
     async with AsyncClient(transport=ASGITransport(app=m.app), base_url="http://test") as client:
         await client.post("/api/manual/pumps", json={"pump_name": "B02-E", "state": "desligada"})
-        await client.post("/api/manual/pumps", json={"pump_name": "B02-E", "state": "ligada", "note": "teste", "usuario": "Luc"})
+        await client.post("/api/manual/pumps", json={"pump_name": "B02-E", "state": "ligada", "note": "teste"})
         items = (await client.get("/api/events")).json()["items"]
-        ack = await client.post(f"/api/events/{items[0]['id']}/ack", json={"usuario": "Luc"})
+        ack = await client.post(f"/api/events/{items[0]['id']}/ack")
         items = (await client.get("/api/events")).json()["items"]
     assert items[0]["descricao"] == "B02-E: desligada → ligada — teste"
-    assert items[0]["usuario"] == "Luc" and items[0]["ack_usuario"] == "Luc"
+    assert items[0]["usuario"] == "Teste" and items[0]["ack_usuario"] == "Teste"   # quem vem da sessão
     assert items[1]["descricao"] == "B02-E: sem registro → desligada"
     assert ack.status_code == 200

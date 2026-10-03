@@ -1,6 +1,9 @@
 # backend/main.py
 import asyncio
+import base64
+import datetime
 import json
+import uuid
 import logging
 import os
 import time
@@ -10,7 +13,7 @@ from typing import Optional
 
 import aiosqlite
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query
+from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, Request, Response
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
@@ -69,7 +72,11 @@ from .db import (
 )
 from .calc import calc_consumption_events, decimate_readings
 from .dashboard import build_data as build_dashboard_data
-from .alarms import AlarmEngine
+from .alarms import LIMITS, AlarmEngine
+from . import auth
+from .db import get_reservoir_limits, set_reservoir_limits
+from .indicadores import conciliacao, kpis as calc_kpis
+from .qualidade import PARAMETROS, conforme, get_laudo_arquivo, insert_laudo, list_laudos, list_pontos, seed_pontos
 from .report import generate_daily_report_pdf
 
 logger = logging.getLogger("main")
@@ -160,6 +167,7 @@ async def lifespan(app: FastAPI):
 
     async with aiosqlite.connect(DB_PATH) as conn:
         await init_db(conn)
+        await seed_pontos(conn)
 
     loop = asyncio.get_running_loop()
     ws_manager.set_loop(loop)
@@ -173,11 +181,27 @@ async def lifespan(app: FastAPI):
     scheduler = AsyncIOScheduler(timezone=os.getenv("TZ", "America/Sao_Paulo"))
     scheduler.add_job(_daily_report_job, "cron", hour=6, minute=0)
     scheduler.add_job(alarms.check_offline, "interval", minutes=1)
+    scheduler.add_job(_conciliacao_job, "cron", hour=0, minute=15)
     scheduler.start()
 
     yield
 
     scheduler.shutdown()
+
+
+async def _conciliacao_job():
+    """Dia anterior: diferença acima de DISCREP_PCT entre o que saiu e o que foi medido vira alerta (§8.3, §10.3)."""
+    async with aiosqlite.connect(DB_PATH) as conn:
+        dia = (await conciliacao(conn, days=1))[0]
+        for par in dia["pares"]:
+            if par["status"] != "inconsistente":
+                continue
+            ev = await insert_event(conn, {
+                "ts": int(time.time()), "tipo": "informativo", "severidade": "alerta", "entidade": "hidrometro",
+                "entidade_id": par["id"], "codigo": "hidrometro_inconsistente", "valor": par["diff_pct"],
+                "descricao": f"{par['nome']} em {dia['data']}: {par['a_m3']:.1f} m³ × {par['b_m3']:.1f} m³ "
+                             f"(diferença {par['diff_m3']:+.1f} m³, {par['diff_pct']:+.1f} %)"})
+            ws_manager.broadcast_event(ev)
 
 
 async def _daily_report_job():
@@ -200,6 +224,29 @@ def _invalidate_report_pdf(date_str: str) -> None:
 
 
 app = FastAPI(title="Aguada Web", lifespan=lifespan)
+
+
+# ── Autenticação (Normas §12.4): leitura aberta na rede local; escrita exige sessão ──
+
+async def current_user(request: Request) -> Optional[dict]:
+    async with aiosqlite.connect(DB_PATH) as conn:
+        return await auth.session_user(conn, request.cookies.get(auth.COOKIE))
+
+
+def _need(minimum: str):
+    async def dependency(request: Request) -> dict:
+        user = await current_user(request)
+        if not user:
+            raise HTTPException(401, "Entre com usuário e senha para registrar")
+        if not auth.role_at_least(user["role"], minimum):
+            raise HTTPException(403, f"Ação restrita ao perfil {minimum} ou acima")
+        return user
+    return dependency
+
+
+require_operador = _need("operador")
+require_supervisor = _need("supervisor")
+require_admin = _need("admin")
 
 
 class ReportDailyDataRequest(BaseModel):
@@ -345,7 +392,7 @@ async def get_report_data_route(date: str = Query(...)):
 
 
 @app.put("/api/report/data")
-async def put_report_data_route(body: ReportDailyDataRequest):
+async def put_report_data_route(body: ReportDailyDataRequest, user: dict = Depends(require_operador)):
     payload = body.model_dump() if hasattr(body, "model_dump") else body.dict()
     payload["updated_ts"] = int(time.time())
     async with aiosqlite.connect(DB_PATH) as conn:
@@ -397,7 +444,6 @@ class ManualHydrometerRequest(BaseModel):
     unit: str = "m3"
     ts: Optional[int] = None
     note: Optional[str] = None
-    usuario: Optional[str] = None
     substituicao: bool = False  # hidrômetro trocado/zerado: aceita leitura menor (exige note)
 
 
@@ -408,7 +454,6 @@ class ManualPumpRequest(BaseModel):
     mode: str = "manual"
     ts: Optional[int] = None
     note: Optional[str] = None
-    usuario: Optional[str] = None
 
 
 class ManualValveRequest(BaseModel):
@@ -416,11 +461,6 @@ class ManualValveRequest(BaseModel):
     state: str  # aberta | fechada | parcial | falha
     ts: Optional[int] = None
     note: Optional[str] = None
-    usuario: Optional[str] = None
-
-
-class AckRequest(BaseModel):
-    usuario: str
 
 
 class ManualReservoirRequest(BaseModel):
@@ -439,7 +479,7 @@ class ReportNoteRequest(BaseModel):
 
 
 @app.post("/api/readings/manual")
-async def post_manual_reading(body: ManualReadingRequest):
+async def post_manual_reading(body: ManualReadingRequest, user: dict = Depends(require_operador)):
     alias = body.alias.upper()
     reload_reservoirs()
     found = next(((k, p) for k, p in list(RESERVOIR_INDEX.items()) if p["alias"] == alias), None)
@@ -495,7 +535,7 @@ async def post_manual_reading(body: ManualReadingRequest):
 
 
 @app.post("/api/manual/hydrometers")
-async def post_manual_hydrometer(body: ManualHydrometerRequest):
+async def post_manual_hydrometer(body: ManualHydrometerRequest, user: dict = Depends(require_operador)):
     meter_name = body.meter_name.strip()
     if not meter_name:
         raise HTTPException(400, "meter_name é obrigatório")
@@ -523,7 +563,7 @@ async def post_manual_hydrometer(body: ManualHydrometerRequest):
             ev = await insert_event(conn, {"ts": item["ts"], "tipo": "informativo", "severidade": "alerta",
                                            "entidade": "hidrometro", "entidade_id": meter_name, "codigo": "hidrometro_substituido",
                                            "descricao": f"{meter_name}: leitura reiniciada em {item['reading']:.3f} {item['unit']} — {body.note}",
-                                           "valor": item["reading"], "usuario": body.usuario})
+                                           "valor": item["reading"], "usuario": user["name"]})
             ws_manager.broadcast_event(ev)
     return {"ok": True, **item}
 
@@ -537,7 +577,7 @@ async def get_manual_hydrometers(meter_name: Optional[str] = Query(None), limit:
 
 
 @app.post("/api/manual/pumps")
-async def post_manual_pump(body: ManualPumpRequest):
+async def post_manual_pump(body: ManualPumpRequest, user: dict = Depends(require_operador)):
     pump_name = body.pump_name.strip()
     if not pump_name:
         raise HTTPException(400, "pump_name é obrigatório")
@@ -559,7 +599,7 @@ async def post_manual_pump(body: ManualPumpRequest):
         conn.row_factory = aiosqlite.Row
         before = next((p["state"] for p in await get_latest_pump_states(conn) if p["pump_name"] == pump_name), None)
         await insert_manual_pump_log(conn, item)
-        await _command_event(conn, "bomba", pump_name, before, state, body.note, body.usuario, item["ts"])
+        await _command_event(conn, "bomba", pump_name, before, state, body.note, user["name"], item["ts"])
     return {"ok": True, **item}
 
 
@@ -572,7 +612,7 @@ async def get_manual_pumps(limit: int = Query(200, ge=1, le=1000)):
 
 
 @app.post("/api/manual/valves")
-async def post_manual_valve(body: ManualValveRequest):
+async def post_manual_valve(body: ManualValveRequest, user: dict = Depends(require_operador)):
     valve_name = body.valve_name.strip()
     if not valve_name:
         raise HTTPException(400, "valve_name é obrigatório")
@@ -591,7 +631,7 @@ async def post_manual_valve(body: ManualValveRequest):
         conn.row_factory = aiosqlite.Row
         before = next((v["state"] for v in await get_latest_valve_states(conn) if v["valve_name"] == valve_name), None)
         await insert_manual_valve_log(conn, item)
-        await _command_event(conn, "valvula", valve_name, before, state, body.note, body.usuario, item["ts"])
+        await _command_event(conn, "valvula", valve_name, before, state, body.note, user["name"], item["ts"])
     return {"ok": True, **item}
 
 
@@ -618,12 +658,9 @@ async def list_active_alarms():
 
 
 @app.post("/api/events/{event_id}/ack")
-async def ack_alarm(event_id: int, body: AckRequest):
-    usuario = body.usuario.strip()
-    if not usuario:
-        raise HTTPException(400, "Informe quem reconheceu")
+async def ack_alarm(event_id: int, user: dict = Depends(require_operador)):
     async with aiosqlite.connect(DB_PATH) as conn:
-        if not await ack_event(conn, event_id, usuario, int(time.time())):
+        if not await ack_event(conn, event_id, user["name"], int(time.time())):
             raise HTTPException(404, "Evento não encontrado")
     ws_manager.broadcast_event({"id": event_id, "ack": True})
     return {"ok": True}
@@ -638,7 +675,7 @@ async def get_manual_valves(limit: int = Query(200, ge=1, le=1000)):
 
 
 @app.post("/api/manual/reservoirs")
-async def post_manual_reservoir(body: ManualReservoirRequest):
+async def post_manual_reservoir(body: ManualReservoirRequest, user: dict = Depends(require_operador)):
     reservoir_name = body.reservoir_name.strip()
     if not reservoir_name:
         raise HTTPException(400, "reservoir_name é obrigatório")
@@ -665,7 +702,7 @@ async def get_manual_reservoirs(limit: int = Query(200, ge=1, le=1000)):
 
 
 @app.post("/api/report/notes")
-async def post_report_note(body: ReportNoteRequest):
+async def post_report_note(body: ReportNoteRequest, user: dict = Depends(require_operador)):
     note = body.note.strip()
     if not note:
         raise HTTPException(400, "note é obrigatório")
@@ -684,7 +721,7 @@ async def post_report_note(body: ReportNoteRequest):
 
 
 @app.post("/api/report/notes/{note_id}/archive")
-async def archive_report_note_route(note_id: int):
+async def archive_report_note_route(note_id: int, user: dict = Depends(require_operador)):
     async with aiosqlite.connect(DB_PATH) as conn:
         conn.row_factory = aiosqlite.Row
         async with conn.execute("SELECT date FROM report_notes WHERE id=?", (note_id,)) as cur:
@@ -736,7 +773,7 @@ async def get_node_detail(node_id: str):
 
 
 @app.patch("/api/nodes/{node_id}")
-async def patch_node_meta(node_id: str, body: dict):
+async def patch_node_meta(node_id: str, body: dict, user: dict = Depends(require_supervisor)):
     """Atualiza alias, nome e nota de um node. Campos permitidos: alias, name, note."""
     allowed = {"alias", "name", "note"}
     if not any(k in body for k in allowed):
@@ -750,7 +787,7 @@ async def patch_node_meta(node_id: str, body: dict):
 
 
 @app.post("/api/nodes/{node_id}/cmd")
-async def post_node_cmd(node_id: str, body: dict):
+async def post_node_cmd(node_id: str, body: dict, user: dict = Depends(require_supervisor)):
     """Envia um comando JSON ao nó via gateway serial (ex: RESTART, CMD_CONFIG)."""
     if bridge is None:
         raise HTTPException(503, "Bridge não inicializada")
@@ -761,6 +798,306 @@ async def post_node_cmd(node_id: str, body: dict):
     payload = {**body, "cmd": cmd, "node_id": node_id}
     bridge.send_cmd(payload)
     return {"ok": True, "queued": payload}
+
+
+# ── Usuários e sessão ────────────────────────────────────────────
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class SetupRequest(BaseModel):
+    username: str
+    name: str
+    password: str
+
+
+class UserCreateRequest(BaseModel):
+    username: str
+    name: str
+    role: str = "operador"
+    password: str
+
+
+class UserUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    role: Optional[str] = None
+    active: Optional[bool] = None
+    password: Optional[str] = None
+
+
+def _set_session_cookie(response: Response, token: str) -> None:
+    response.set_cookie(auth.COOKIE, token, max_age=auth.SESSION_S, httponly=True, samesite="strict", path="/")
+
+
+async def _audit(conn, entidade: str, entidade_id: str, codigo: str, descricao: str, usuario: Optional[str],
+                 tipo: str = "comando", severidade: str = "info") -> None:
+    ev = await insert_event(conn, {"ts": int(time.time()), "tipo": tipo, "severidade": severidade, "entidade": entidade,
+                                   "entidade_id": entidade_id, "codigo": codigo, "descricao": descricao, "usuario": usuario})
+    ws_manager.broadcast_event(ev)
+
+
+@app.get("/api/auth/me")
+async def auth_me(request: Request):
+    async with aiosqlite.connect(DB_PATH) as conn:
+        user = await auth.session_user(conn, request.cookies.get(auth.COOKIE))
+        setup = await auth.count_users(conn) == 0
+    return {"user": user, "setup_needed": setup}
+
+
+@app.post("/api/auth/setup")
+async def auth_setup(body: SetupRequest, response: Response):
+    """Cria o primeiro administrador; só funciona com a tabela de usuários vazia."""
+    if err := auth.validate_password(body.password):
+        raise HTTPException(400, err)
+    if not body.username.strip() or not body.name.strip():
+        raise HTTPException(400, "Informe usuário e nome")
+    async with aiosqlite.connect(DB_PATH) as conn:
+        if await auth.count_users(conn):
+            raise HTTPException(409, "Já existe administrador; entre com ele para criar usuários")
+        user = await auth.create_user(conn, body.username, body.name, "admin", body.password)
+        _set_session_cookie(response, await auth.create_session(conn, user["id"]))
+        await _audit(conn, "usuario", user["username"], "usuario_criado", f"Primeiro administrador: {user['name']}", user["name"])
+    return {"user": user}
+
+
+@app.post("/api/auth/login")
+async def auth_login(body: LoginRequest, response: Response):
+    username = body.username.strip()
+    if auth.locked(username):
+        raise HTTPException(429, "Muitas tentativas erradas; espere 10 minutos")
+    async with aiosqlite.connect(DB_PATH) as conn:
+        user = await auth.get_user_by_username(conn, username)
+        if not user or not user["active"] or not auth.check_password(body.password, user["pw_hash"]):
+            auth.register_fail(username)
+            await _audit(conn, "usuario", username or "?", "login_falhou", f"Login recusado para '{username}'", None,
+                         tipo="informativo", severidade="alerta")
+            raise HTTPException(401, "Usuário ou senha incorretos")
+        auth.clear_fails(username)
+        _set_session_cookie(response, await auth.create_session(conn, user["id"]))
+    return {"user": {k: user[k] for k in ("id", "username", "name", "role")}}
+
+
+@app.post("/api/auth/logout")
+async def auth_logout(request: Request, response: Response):
+    async with aiosqlite.connect(DB_PATH) as conn:
+        await auth.delete_session(conn, request.cookies.get(auth.COOKIE))
+    response.delete_cookie(auth.COOKIE, path="/")
+    return {"ok": True}
+
+
+@app.get("/api/users")
+async def users_list(user: dict = Depends(require_admin)):
+    async with aiosqlite.connect(DB_PATH) as conn:
+        return {"items": await auth.list_users(conn)}
+
+
+@app.post("/api/users")
+async def users_create(body: UserCreateRequest, user: dict = Depends(require_admin)):
+    if body.role not in auth.ROLES:
+        raise HTTPException(400, "Perfil inválido")
+    if err := auth.validate_password(body.password):
+        raise HTTPException(400, err)
+    if not body.username.strip() or not body.name.strip():
+        raise HTTPException(400, "Informe usuário e nome")
+    async with aiosqlite.connect(DB_PATH) as conn:
+        if await auth.get_user_by_username(conn, body.username):
+            raise HTTPException(409, "Usuário já existe")
+        created = await auth.create_user(conn, body.username, body.name, body.role, body.password)
+        await _audit(conn, "usuario", created["username"], "usuario_criado", f"{created['name']} criado como {created['role']}", user["name"])
+    return {"user": created}
+
+
+@app.patch("/api/users/{user_id}")
+async def users_update(user_id: int, body: UserUpdateRequest, user: dict = Depends(require_admin)):
+    if body.role is not None and body.role not in auth.ROLES:
+        raise HTTPException(400, "Perfil inválido")
+    if body.password and (err := auth.validate_password(body.password)):
+        raise HTTPException(400, err)
+    if user_id == user["id"] and (body.active is False or (body.role and body.role != "admin")):
+        raise HTTPException(400, "Você não pode desativar nem rebaixar o próprio usuário")
+    fields = {"name": body.name, "role": body.role, "password": body.password,
+              "active": None if body.active is None else int(body.active)}
+    async with aiosqlite.connect(DB_PATH) as conn:
+        if not await auth.update_user(conn, user_id, fields):
+            raise HTTPException(404, "Usuário não encontrado ou nada a alterar")
+        changes = ", ".join(k if k != "password" else "senha" for k, v in fields.items() if v is not None)
+        await _audit(conn, "usuario", str(user_id), "usuario_alterado", f"Usuário {user_id}: {changes}", user["name"])
+    return {"ok": True}
+
+
+# ── Limites de alarme por reservatório ───────────────────────────
+
+class LimitsRequest(BaseModel):
+    critico: float
+    baixo: float
+    alto: float
+
+
+@app.get("/api/limits")
+async def limits_list():
+    async with aiosqlite.connect(DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        own = await get_reservoir_limits(conn)
+        states = await get_all_states(conn)
+    return {"padrao": LIMITS, "items": [
+        {"alias": st["alias"], "nome": st["name"] or st["alias"], **(alarms.limits_for(st["alias"]) if alarms else LIMITS),
+         "proprio": st["alias"] in own, "updated_by": own.get(st["alias"], {}).get("updated_by"),
+         "updated_ts": own.get(st["alias"], {}).get("updated_ts")}
+        for st in sorted(states, key=lambda x: x["alias"])]}
+
+
+@app.put("/api/limits/{alias}")
+async def limits_set(alias: str, body: LimitsRequest, user: dict = Depends(require_supervisor)):
+    if not (0 <= body.critico < body.baixo < body.alto <= 100):
+        raise HTTPException(400, "Use 0 ≤ crítico < baixo < alto ≤ 100 (%)")
+    alias = alias.upper()
+    before = alarms.limits_for(alias) if alarms else LIMITS
+    async with aiosqlite.connect(DB_PATH) as conn:
+        await set_reservoir_limits(conn, alias, body.critico, body.baixo, body.alto, user["name"])
+        await _audit(conn, "reservatorio", alias, "limites_alterados",
+                     f"{alias}: limites {before['critico']:g}/{before['baixo']:g}/{before['alto']:g} % → "
+                     f"{body.critico:g}/{body.baixo:g}/{body.alto:g} % (crítico/baixo/alto)", user["name"])
+        if alarms:
+            alarms.limits = await get_reservoir_limits(conn)
+    return {"ok": True}
+
+
+# ── Qualidade da água (laudos) ───────────────────────────────────
+
+class LaudoParametro(BaseModel):
+    parametro: str
+    valor: float
+
+
+class LaudoRequest(BaseModel):
+    ponto_id: int
+    data_coleta: str
+    laboratorio: str
+    numero: Optional[str] = None
+    obs: Optional[str] = None
+    parametros: list[LaudoParametro]
+    pdf_base64: Optional[str] = None
+
+
+class PontoRequest(BaseModel):
+    nome: str
+    reservatorio: Optional[str] = None
+
+
+MAX_PDF_BYTES = 10 * 1024 * 1024
+
+
+@app.get("/api/qualidade/parametros")
+async def qualidade_parametros():
+    return {"items": [{"id": k, **v} for k, v in PARAMETROS.items()],
+            "referencia": "Portaria GM/MS nº 888/2021 (substituiu a 2.914/2011)"}
+
+
+@app.get("/api/qualidade/pontos")
+async def qualidade_pontos():
+    async with aiosqlite.connect(DB_PATH) as conn:
+        return {"items": await list_pontos(conn)}
+
+
+@app.post("/api/qualidade/pontos")
+async def qualidade_ponto_novo(body: PontoRequest, user: dict = Depends(require_supervisor)):
+    nome = body.nome.strip()
+    if not nome:
+        raise HTTPException(400, "Informe o nome do ponto")
+    async with aiosqlite.connect(DB_PATH) as conn:
+        try:
+            cur = await conn.execute("INSERT INTO pontos_coleta (nome, reservatorio) VALUES (?, ?)", (nome, body.reservatorio))
+            await conn.commit()
+        except aiosqlite.IntegrityError:
+            raise HTTPException(409, "Já existe ponto com esse nome")
+        await _audit(conn, "ponto_coleta", nome, "ponto_criado", f"Ponto de coleta criado: {nome}", user["name"])
+    return {"id": cur.lastrowid}
+
+
+@app.get("/api/qualidade/laudos")
+async def qualidade_laudos(ponto_id: Optional[int] = Query(None), limit: int = Query(100, ge=1, le=500)):
+    async with aiosqlite.connect(DB_PATH) as conn:
+        return {"items": await list_laudos(conn, ponto_id=ponto_id, limit=limit)}
+
+
+@app.post("/api/qualidade/laudos")
+async def qualidade_laudo_novo(body: LaudoRequest, user: dict = Depends(require_supervisor)):
+    try:
+        datetime.date.fromisoformat(body.data_coleta)
+    except ValueError:
+        raise HTTPException(400, "data_coleta deve ser AAAA-MM-DD")
+    if not body.laboratorio.strip():
+        raise HTTPException(400, "Informe o laboratório")
+    if not body.parametros:
+        raise HTTPException(400, "Informe ao menos um parâmetro")
+    unknown = [p.parametro for p in body.parametros if p.parametro not in PARAMETROS]
+    if unknown:
+        raise HTTPException(400, f"Parâmetro desconhecido: {', '.join(unknown)}")
+    arquivo = None
+    if body.pdf_base64:
+        try:
+            pdf = base64.b64decode(body.pdf_base64.split(",")[-1], validate=True)
+        except ValueError:
+            raise HTTPException(400, "PDF inválido")
+        if not pdf.startswith(b"%PDF") or len(pdf) > MAX_PDF_BYTES:
+            raise HTTPException(400, "Envie um PDF de até 10 MB")
+        laudos_dir = DATA_DIR / "laudos"
+        laudos_dir.mkdir(parents=True, exist_ok=True)
+        arquivo = f"{uuid.uuid4().hex}.pdf"
+        (laudos_dir / arquivo).write_bytes(pdf)
+    resultados = []
+    for p in body.parametros:
+        ref = PARAMETROS[p.parametro]
+        resultados.append({"parametro": p.parametro, "valor": p.valor, "unidade": ref["unidade"],
+                           "limite_min": ref["min"], "limite_max": ref["max"], "conforme": conforme(p.parametro, p.valor)})
+    async with aiosqlite.connect(DB_PATH) as conn:
+        pontos = {pt["id"]: pt for pt in await list_pontos(conn)}
+        if body.ponto_id not in pontos:
+            raise HTTPException(400, "Ponto de coleta não existe")
+        laudo_id = await insert_laudo(conn, {
+            "ponto_id": body.ponto_id, "data_coleta": body.data_coleta, "laboratorio": body.laboratorio.strip(),
+            "numero": (body.numero or "").strip() or None, "arquivo": arquivo, "obs": body.obs,
+            "criado_ts": int(time.time()), "criado_por": user["name"]}, resultados)
+        ponto = pontos[body.ponto_id]["nome"]
+        data_br = datetime.date.fromisoformat(body.data_coleta).strftime("%d/%m/%Y")
+        ruins = [r for r in resultados if not r["conforme"]]
+        await _audit(conn, "ponto_coleta", ponto, "laudo_registrado",
+                     f"Laudo {body.numero or laudo_id} de {data_br} ({body.laboratorio.strip()}): "
+                     + ("conforme" if not ruins else f"{len(ruins)} parâmetro(s) fora do limite"), user["name"],
+                     tipo="informativo")
+    # Não conforme abre alerta sanitário; resultado conforme do mesmo ponto/parâmetro normaliza (§10.3)
+    if alarms:
+        for r in resultados:
+            nome = PARAMETROS[r["parametro"]]["nome"]
+            key = f"{ponto} · {nome}"
+            if r["conforme"]:
+                await alarms.close_alarm(key, "laudo_nao_conforme", f"{key}: voltou a conforme no laudo de {data_br}")
+            else:
+                lim = " a ".join(f"{v:g}" for v in (r["limite_min"], r["limite_max"]) if v is not None)
+                await alarms.open_alarm({"tipo": "alarme", "severidade": "critico", "entidade": "ponto_coleta",
+                                         "entidade_id": key, "codigo": "laudo_nao_conforme", "valor": r["valor"],
+                                         "descricao": f"{key}: {r['valor']:g} {r['unidade']} fora do limite ({lim}) — laudo de {data_br}"})
+    return {"id": laudo_id, "conforme": not ruins}
+
+
+@app.get("/api/qualidade/laudos/{laudo_id}/pdf")
+async def qualidade_laudo_pdf(laudo_id: int):
+    async with aiosqlite.connect(DB_PATH) as conn:
+        arquivo = await get_laudo_arquivo(conn, laudo_id)
+    path = DATA_DIR / "laudos" / (arquivo or "")
+    if not arquivo or not path.is_file():
+        raise HTTPException(404, "Laudo sem PDF")
+    return FileResponse(path, media_type="application/pdf", filename=f"laudo-{laudo_id}.pdf")
+
+
+# ── Indicadores (Normas §8.3, §11) ───────────────────────────────
+
+@app.get("/api/indicadores")
+async def indicadores(days: int = Query(30, ge=1, le=180)):
+    async with aiosqlite.connect(DB_PATH) as conn:
+        return await calc_kpis(conn, days, alarms.limits_for if alarms else (lambda a: LIMITS))
 
 
 @app.websocket("/ws")
