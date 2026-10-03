@@ -41,8 +41,8 @@
         color: #000 !important;
       }
 
-      body.printing-form .card-header,
-      body.printing-form .card-body,
+      body.printing-form .ha-card-header,
+      body.printing-form .ha-card-body,
       body.printing-form [data-print-card] * {
         color: #000 !important;
         background: transparent !important;
@@ -64,22 +64,25 @@
 
       <!-- Manuais -->
       <div x-show="tab==='manuais'">
-        <div class="section-title">Manuais Operacionais</div>
+        <div class="ha-section">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Manuais Operacionais
+        </div>
         <div x-data="{open:null}" style="display:flex;flex-direction:column;gap:8px">
 
           <template x-for="(sec, i) in manuais" :key="i">
-            <div class="card">
-              <div class="card-header" style="cursor:pointer" @click="open=open===i?null:i">
-                <div style="display:flex;align-items:center;gap:10px">
+            <div class="ha-card">
+              <div class="ha-card-header" style="cursor:pointer" @click="open=open===i?null:i">
+                <div class="ha-card-title">
                   <span x-html="sec.icon" style="color:var(--blue)"></span>
-                  <span style="font-weight:500" x-text="sec.title"></span>
+                  <span x-text="sec.title"></span>
                 </div>
                 <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                   :style="open===i ? 'transform:rotate(180deg)' : ''" style="transition:transform 0.2s;color:var(--text3)">
                   <polyline points="6 9 12 15 18 9"/>
                 </svg>
               </div>
-              <div x-show="open===i" style="padding:16px;font-size:13px;color:var(--text2);line-height:1.75;white-space:pre-wrap" x-text="sec.content"></div>
+              <div x-show="open===i" class="ha-card-body" style="font-size:13px;color:var(--text2);line-height:1.75;white-space:pre-wrap" x-text="sec.content"></div>
             </div>
           </template>
 
@@ -88,62 +91,84 @@
 
       <!-- Normas -->
       <div x-show="tab==='normas'">
-        <div class="section-title">Normas Técnicas Aplicáveis</div>
+        <div class="ha-section">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Normas Técnicas Aplicáveis
+        </div>
         <div style="display:flex;flex-direction:column;gap:8px">
 
-          <div class="card card-body">
-            <div style="font-weight:600;margin-bottom:12px">ABNT — Sistemas de Abastecimento de Água</div>
-            <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
-              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
-                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR 12217</span>
-                <span style="color:var(--text2)">Projeto de reservatório de distribuição de água para abastecimento público</span>
-              </div>
-              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
-                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR 12218</span>
-                <span style="color:var(--text2)">Projeto de rede de distribuição de água para abastecimento público</span>
-              </div>
-              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
-                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR 12214</span>
-                <span style="color:var(--text2)">Projeto de sistema de bombeamento de água para abastecimento público</span>
-              </div>
-              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
-                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR 5626</span>
-                <span style="color:var(--text2)">Instalação predial de água fria</span>
+          <div class="ha-card">
+            <div class="ha-card-header">
+              <div class="ha-card-title">ABNT — Sistemas de Abastecimento de Água</div>
+            </div>
+            <div class="ha-card-body">
+              <div class="ha-entities">
+                <div class="ha-entity-row">
+                  <span class="ha-entity-name" style="font-family:var(--mono);color:var(--blue);flex:0 0 120px">NBR 12217</span>
+                  <span class="ha-entity-value" style="font-family:inherit;font-weight:normal;color:var(--text2)">Projeto de reservatório de distribuição de água para abastecimento público</span>
+                </div>
+                <div class="ha-entity-row">
+                  <span class="ha-entity-name" style="font-family:var(--mono);color:var(--blue);flex:0 0 120px">NBR 12218</span>
+                  <span class="ha-entity-value" style="font-family:inherit;font-weight:normal;color:var(--text2)">Projeto de rede de distribuição de água para abastecimento público</span>
+                </div>
+                <div class="ha-entity-row">
+                  <span class="ha-entity-name" style="font-family:var(--mono);color:var(--blue);flex:0 0 120px">NBR 12214</span>
+                  <span class="ha-entity-value" style="font-family:inherit;font-weight:normal;color:var(--text2)">Projeto de sistema de bombeamento de água para abastecimento público</span>
+                </div>
+                <div class="ha-entity-row">
+                  <span class="ha-entity-name" style="font-family:var(--mono);color:var(--blue);flex:0 0 120px">NBR 5626</span>
+                  <span class="ha-entity-value" style="font-family:inherit;font-weight:normal;color:var(--text2)">Instalação predial de água fria</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="card card-body">
-            <div style="font-weight:600;margin-bottom:12px">ISO — Gestão e Desempenho</div>
-            <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
-              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
-                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR ISO 24510</span>
-                <span style="color:var(--text2)">Atividades relativas aos serviços de água potável e de esgotamento sanitário — avaliação e melhoria do serviço prestado</span>
-              </div>
-              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
-                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR ISO 24511</span>
-                <span style="color:var(--text2)">Diretrizes para a gestão dos serviços de utilidade pública de esgotamento sanitário</span>
-              </div>
-              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
-                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">NBR ISO 24512</span>
-                <span style="color:var(--text2)">Diretrizes para a gestão dos sistemas de água potável</span>
+          <div class="ha-card">
+            <div class="ha-card-header">
+              <div class="ha-card-title">ISO — Gestão e Desempenho</div>
+            </div>
+            <div class="ha-card-body">
+              <div class="ha-entities">
+                <div class="ha-entity-row">
+                  <span class="ha-entity-name" style="font-family:var(--mono);color:var(--blue);flex:0 0 120px">NBR ISO 24510</span>
+                  <span class="ha-entity-value" style="font-family:inherit;font-weight:normal;color:var(--text2)">Atividades relativas aos serviços de água potável e de esgotamento sanitário — avaliação e melhoria do serviço prestado</span>
+                </div>
+                <div class="ha-entity-row">
+                  <span class="ha-entity-name" style="font-family:var(--mono);color:var(--blue);flex:0 0 120px">NBR ISO 24511</span>
+                  <span class="ha-entity-value" style="font-family:inherit;font-weight:normal;color:var(--text2)">Diretrizes para a gestão dos serviços de utilidade pública de esgotamento sanitário</span>
+                </div>
+                <div class="ha-entity-row">
+                  <span class="ha-entity-name" style="font-family:var(--mono);color:var(--blue);flex:0 0 120px">NBR ISO 24512</span>
+                  <span class="ha-entity-value" style="font-family:inherit;font-weight:normal;color:var(--text2)">Diretrizes para a gestão dos sistemas de água potável</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="card card-body">
-            <div style="font-weight:600;margin-bottom:12px">Legislação Federal</div>
-            <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
-              <div style="display:flex;gap:12px;padding:8px;background:var(--bg3);border-radius:6px">
-                <span style="font-family:var(--mono);color:var(--blue);min-width:120px">GM/MS 2.914/2011</span>
-                <span style="color:var(--text2)">Potabilidade e qualidade da água para consumo humano — procedimentos de controle e vigilância</span>
+          <div class="ha-card">
+            <div class="ha-card-header">
+              <div class="ha-card-title">Legislação Federal</div>
+            </div>
+            <div class="ha-card-body">
+              <div class="ha-entities">
+                <div class="ha-entity-row">
+                  <span class="ha-entity-name" style="font-family:var(--mono);color:var(--blue);flex:0 0 120px">GM/MS 2.914/2011</span>
+                  <span class="ha-entity-value" style="font-family:inherit;font-weight:normal;color:var(--text2)">Potabilidade e qualidade da água para consumo humano — procedimentos de controle e vigilância</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="card card-body" style="border-left:3px solid var(--yellow)">
-            <div style="font-weight:600;margin-bottom:8px;color:var(--yellow)">Regra Operacional Crítica</div>
-            <p style="font-size:13px;color:var(--text2)">Bloqueio automático de recalque abaixo do nível mínimo operacional. Nenhuma bomba pode ser acionada se o reservatório de sucção estiver abaixo de 10% da capacidade, salvo autorização expressa do operador responsável com registro em livro de ocorrências.</p>
+          <div class="ha-card ha-alert-warn" style="border-left:3px solid var(--yellow)">
+            <div class="ha-card-header">
+              <div class="ha-card-title" style="color:var(--yellow)">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Regra Operacional Crítica
+              </div>
+            </div>
+            <div class="ha-card-body">
+              <p style="font-size:13px;color:var(--text2)">Bloqueio automático de recalque abaixo do nível mínimo operacional. Nenhuma bomba pode ser acionada se o reservatório de sucção estiver abaixo de 10% da capacidade, salvo autorização expressa do operador responsável com registro em livro de ocorrências.</p>
+            </div>
           </div>
 
         </div>
@@ -151,27 +176,32 @@
 
       <!-- Procedimentos -->
       <div x-show="tab==='procedimentos'">
-        <div class="section-title">Procedimentos Operacionais</div>
+        <div class="ha-section">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Procedimentos Operacionais
+        </div>
         <div x-data="{open:null}" style="display:flex;flex-direction:column;gap:8px">
           <template x-for="(sec, i) in procedimentos" :key="i">
-            <div class="card">
-              <div class="card-header" style="cursor:pointer" @click="open=open===i?null:i">
-                <div style="display:flex;align-items:center;gap:10px">
+            <div class="ha-card">
+              <div class="ha-card-header" style="cursor:pointer" @click="open=open===i?null:i">
+                <div class="ha-card-title">
                   <span class="badge" :class="sec.badgeClass" x-text="sec.badge"></span>
-                  <span style="font-weight:500" x-text="sec.title"></span>
+                  <span x-text="sec.title"></span>
                 </div>
                 <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                   :style="open===i ? 'transform:rotate(180deg)' : ''" style="transition:transform 0.2s;color:var(--text3)">
                   <polyline points="6 9 12 15 18 9"/>
                 </svg>
               </div>
-              <div x-show="open===i" style="padding:16px">
-                <template x-for="(step, j) in sec.steps" :key="j">
-                  <div style="display:flex;gap:12px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)">
-                    <span style="font-family:var(--mono);color:var(--text3);min-width:20px" x-text="(j+1)+'.'"></span>
-                    <span x-text="step"></span>
-                  </div>
-                </template>
+              <div x-show="open===i" class="ha-card-body">
+                <div class="ha-entities">
+                  <template x-for="(step, j) in sec.steps" :key="j">
+                    <div class="ha-entity-row">
+                      <span class="ha-entity-name" style="font-family:var(--mono);color:var(--text3);flex:0 0 20px" x-text="(j+1)+'.'"></span>
+                      <span class="ha-entity-value" style="font-family:inherit;font-weight:normal;color:var(--text2)" x-text="step"></span>
+                    </div>
+                  </template>
+                </div>
               </div>
             </div>
           </template>
@@ -180,130 +210,133 @@
 
       <!-- Formulários -->
       <div x-show="tab==='formularios'">
-        <div class="section-title">Formulários de Registro</div>
+        <div class="ha-section">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Formulários de Registro
+        </div>
         <div class="print-hint" style="font-size:12px;color:var(--text3);margin-bottom:12px">O botão imprimir gera somente o formulário selecionado, sem sidebar nem navegação.</div>
         <div style="display:flex;flex-direction:column;gap:8px">
 
-          <div class="card" data-print-card="manutencao">
-            <div class="card-header">
-              <span style="font-weight:500">Ficha de Manutenção</span>
+          <div class="ha-card" data-print-card="manutencao">
+            <div class="ha-card-header">
+              <div class="ha-card-title">Ficha de Manutenção</div>
               <button @click="printForm('manutencao', $event)" class="btn btn-secondary" style="font-size:11px">Imprimir</button>
             </div>
-            <div class="card-body" style="font-size:13px">
+            <div class="ha-card-body" style="font-size:13px">
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Data</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">___/___/______</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;color:var(--text2)">___/___/______</div>
                 </div>
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Técnico responsável</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">_____________________________</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;color:var(--text2)">_____________________________</div>
                 </div>
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Equipamento / Local</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">_____________________________</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;color:var(--text2)">_____________________________</div>
                 </div>
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Tipo de manutenção</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">☐ Preventiva  ☐ Corretiva  ☐ Calibração</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;color:var(--text2)">☐ Preventiva  ☐ Corretiva  ☐ Calibração</div>
                 </div>
               </div>
               <div style="margin-top:16px">
                 <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Problema identificado</div>
-                <div style="border:1px solid var(--border2);border-radius:4px;height:60px;padding:8px;color:var(--text3);font-size:12px">Descrever o problema encontrado...</div>
+                <div style="border:1px solid var(--border);border-radius:4px;height:60px;padding:8px;color:var(--text3);font-size:12px">Descrever o problema encontrado...</div>
               </div>
               <div style="margin-top:12px">
                 <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Ação tomada</div>
-                <div style="border:1px solid var(--border2);border-radius:4px;height:60px;padding:8px;color:var(--text3);font-size:12px">Descrever a ação corretiva tomada...</div>
+                <div style="border:1px solid var(--border);border-radius:4px;height:60px;padding:8px;color:var(--text3);font-size:12px">Descrever a ação corretiva tomada...</div>
               </div>
               <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Resultado</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">_____________________________</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;color:var(--text2)">_____________________________</div>
                 </div>
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Assinatura</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">_____________________________</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;color:var(--text2)">_____________________________</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="card" data-print-card="calibracao">
-            <div class="card-header">
-              <span style="font-weight:500">Ficha de Calibração de Sensor</span>
+          <div class="ha-card" data-print-card="calibracao">
+            <div class="ha-card-header">
+              <div class="ha-card-title">Ficha de Calibração de Sensor</div>
               <button @click="printForm('calibracao', $event)" class="btn btn-secondary" style="font-size:11px">Imprimir</button>
             </div>
-            <div class="card-body" style="font-size:13px">
+            <div class="ha-card-body" style="font-size:13px">
               <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Data</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">___/___/______</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;color:var(--text2)">___/___/______</div>
                 </div>
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Node ID</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">0x____</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">0x____</div>
                 </div>
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Sensor ID</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">S___</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">S___</div>
                 </div>
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Distância referência (cm)</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">______</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">______</div>
                 </div>
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Distância medida (cm)</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">______</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">______</div>
                 </div>
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Offset ajustado (cm)</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">______</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;font-family:var(--mono);color:var(--text2)">______</div>
                 </div>
               </div>
               <div style="margin-top:16px">
                 <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Observações</div>
-                <div style="border:1px solid var(--border2);border-radius:4px;height:48px;padding:8px;color:var(--text3);font-size:12px">Condições de medição, anomalias observadas...</div>
+                <div style="border:1px solid var(--border);border-radius:4px;height:48px;padding:8px;color:var(--text3);font-size:12px">Condições de medição, anomalias observadas...</div>
               </div>
             </div>
           </div>
 
-          <div class="card" data-print-card="incidente">
-            <div class="card-header">
-              <span style="font-weight:500">Registro de Incidente</span>
+          <div class="ha-card" data-print-card="incidente">
+            <div class="ha-card-header">
+              <div class="ha-card-title">Registro de Incidente</div>
               <button @click="printForm('incidente', $event)" class="btn btn-secondary" style="font-size:11px">Imprimir</button>
             </div>
-            <div class="card-body" style="font-size:13px">
+            <div class="ha-card-body" style="font-size:13px">
               <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Data / Hora início</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">___/___/______ ____:____</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;color:var(--text2)">___/___/______ ____:____</div>
                 </div>
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Data / Hora fim</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">___/___/______ ____:____</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;color:var(--text2)">___/___/______ ____:____</div>
                 </div>
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Severidade</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">☐ Info  ☐ Atenção  ☐ Crítico</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;color:var(--text2)">☐ Info  ☐ Atenção  ☐ Crítico</div>
                 </div>
               </div>
               <div style="margin-top:16px">
                 <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Descrição do incidente</div>
-                <div style="border:1px solid var(--border2);border-radius:4px;height:60px;padding:8px;color:var(--text3);font-size:12px">Descrever o evento, local afetado e impacto...</div>
+                <div style="border:1px solid var(--border);border-radius:4px;height:60px;padding:8px;color:var(--text3);font-size:12px">Descrever o evento, local afetado e impacto...</div>
               </div>
               <div style="margin-top:12px">
                 <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Ação imediata tomada</div>
-                <div style="border:1px solid var(--border2);border-radius:4px;height:48px;padding:8px;color:var(--text3);font-size:12px">Medidas tomadas para contenção/resolução...</div>
+                <div style="border:1px solid var(--border);border-radius:4px;height:48px;padding:8px;color:var(--text3);font-size:12px">Medidas tomadas para contenção/resolução...</div>
               </div>
               <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Operador de plantão</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">_____________________________</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;color:var(--text2)">_____________________________</div>
                 </div>
                 <div>
                   <div style="color:var(--text3);font-size:11px;margin-bottom:4px">Assinatura</div>
-                  <div style="border-bottom:1px solid var(--border2);padding-bottom:4px;color:var(--text2)">_____________________________</div>
+                  <div style="border-bottom:1px solid var(--border);padding-bottom:4px;color:var(--text2)">_____________________________</div>
                 </div>
               </div>
             </div>

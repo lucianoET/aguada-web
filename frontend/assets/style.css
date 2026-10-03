@@ -4,26 +4,28 @@
    ============================================================ */
 
 :root {
-    --primary-blue: #1e3c72;
-    --primary-light: #2a5298;
-    --accent-purple: #2563eb; /* botões/abas ativas: branco sobre #667eea dava 3.7:1 */
-    --accent-pink: #764ba2;
-    /* seguem os tokens do tema: #10b981/#f59e0b como texto ficavam < 3:1 no claro */
+    /* Aliases de compatibilidade → tokens canônicos de aguada.css.
+       Mantidos para não quebrar marcação legada durante a migração. */
+    --primary-blue: var(--blue);
+    --primary-light: var(--blue);
+    --accent-purple: var(--blue);
+    --accent-pink: var(--cyan);
     --success-green: var(--green);
     --warning-orange: var(--yellow);
     --danger-red: var(--red);
 
-    /* Tipografia padronizada */
+    /* Escala tipográfica (conveniência) */
     --font-base: 14px;
     --font-sm:   12px;
     --font-xs:   11px;
     --font-xxs:  10px;
     --font-lg:   16px;
     --font-xl:   20px;
-    --background-light: #f8f9fa;
-    --border-color: #e5e7eb;
-    --text-dark: #1f2937;
-    --text-muted: #6b7280;
+
+    --background-light: var(--bg);
+    --border-color: var(--border);
+    --text-dark: var(--text);
+    --text-muted: var(--text3);
 }
 
 /* ============================================================
@@ -148,21 +150,6 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
 }
 .btn-primary:hover { opacity: 0.9; }
 
-/* ── Shared page-level components ── */
-.page-box {
-    background: var(--card, white); border-radius: 12px; padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08); margin-bottom: 20px;
-}
-.page-title {
-    color: var(--text, #1e3a5f); margin-bottom: 15px; font-size: 1.25rem;
-    font-weight: 600; display: flex; justify-content: space-between;
-    align-items: center;
-}
-.page-subtitle {
-    color: var(--text-muted); font-size: var(--font-sm);
-    margin-top: -10px; margin-bottom: 20px; display: block;
-}
-
 /* ── Shared table styling (admin pages without aguada .table class) ── */
 .admin-main table { width: 100%; border-collapse: collapse; }
 .admin-main th {
@@ -218,11 +205,6 @@ body.admin-page { padding: 0; background: var(--bg, #f0f2f5); }
 .badge-online  { background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 8px; font-size: var(--font-xxs); font-weight: 600; white-space: nowrap; }
 .badge-offline { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 8px; font-size: var(--font-xxs); font-weight: 600; white-space: nowrap; }
 
-/* ── Alert-level badges (in-table) ── */
-.badge-warn   { background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-.badge-danger { background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-.badge-ok     { background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-
 /* ── Pct bar (dados, inline) ── */
 .pct-bar { width: 72px; height: 7px; background: var(--bg3, #e5e7eb); border-radius: 4px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 5px; }
 .pct-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
@@ -269,27 +251,14 @@ body.admin-page :is(.box, .page-box, .tbl-wrap, .stat-box, .chart-wrap, .stat-mi
 [data-theme="dark"] .admin-status { color: var(--text2); border-left-color: var(--border); }
 
 /* Dark mode: boxes/cards/tables */
-[data-theme="dark"] .box,
-[data-theme="dark"] .page-box,
-[data-theme="dark"] .tbl-wrap,
-[data-theme="dark"] .stat-card,
-[data-theme="dark"] .kpi,
-[data-theme="dark"] .chart-wrap,
-[data-theme="dark"] .chart-card,
-[data-theme="dark"] .supply-card,
-[data-theme="dark"] .stat-mini,
 [data-theme="dark"] .top-bar,
-[data-theme="dark"] .tab-bar,
-[data-theme="dark"] .res-card,
-[data-theme="dark"] .stat-box { background: var(--card); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+[data-theme="dark"] .tab-bar { background: var(--card); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,.3); }
 
 [data-theme="dark"] .tab-bar .tab-btn { color: var(--text2); }
 [data-theme="dark"] .tab-bar .tab-btn.active { background: var(--accent-purple); color: white; }
 [data-theme="dark"] .tbl-bar { border-bottom-color: var(--border); }
 [data-theme="dark"] .tbl-bar h2 { color: var(--text); }
 [data-theme="dark"] .tbl-info { color: var(--text3); }
-[data-theme="dark"] .box-header { border-bottom-color: var(--border); }
-[data-theme="dark"] .box-header h2 { color: var(--text); }
 
 /* Dark mode: inputs/selects */
 [data-theme="dark"] .admin-main select,
@@ -297,14 +266,8 @@ body.admin-page :is(.box, .page-box, .tbl-wrap, .stat-box, .chart-wrap, .stat-mi
 [data-theme="dark"] .admin-main input[type="text"],
 [data-theme="dark"] .admin-main input[type="number"] { background: var(--bg3); border-color: var(--border2); color: var(--text); }
 
-/* Dark mode: param cards, page elements */
-[data-theme="dark"] .page-title { color: var(--text); }
-[data-theme="dark"] .page-subtitle { color: var(--text3); }
-[data-theme="dark"] .param-card { background: var(--bg2); border-color: var(--border); }
-[data-theme="dark"] .param-card .lbl { color: var(--text3); }
-[data-theme="dark"] .param-card .val { color: var(--blue); }
+/* Dark mode: diagram placeholder */
 [data-theme="dark"] .diagram-ph { background: var(--bg3); border-color: var(--border2); color: var(--text3); }
-[data-theme="dark"] .res-data-cell { background: var(--bg3); }
 
 /* Dark mode: manutencao specific */
 [data-theme="dark"] .maint-item { border-color: var(--border); }

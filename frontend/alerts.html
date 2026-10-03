@@ -57,15 +57,15 @@
 
 <div class="admin-main">
   <div class="alerts-layout">
-    <div class="box">
-      <div class="box-header">
-        <h2>Alarmes ativos</h2>
+    <div class="ha-card">
+      <div class="ha-card-header">
+        <span class="ha-card-title">Alarmes ativos</span>
         <span id="alertCount" class="abadge abadge-info">—</span>
       </div>
       <div class="box-body" id="alertsList"><div class="loader"></div></div>
     </div>
-    <div class="box">
-      <div class="box-header"><h2>Resumo</h2></div>
+    <div class="ha-card">
+      <div class="ha-card-header"><span class="ha-card-title">Resumo</span></div>
       <div class="box-body">
         <div class="operator" id="operator"></div>
         <div id="summary"><div class="loader"></div></div>
@@ -74,14 +74,14 @@
     </div>
   </div>
 
-  <div class="box" style="margin-top:16px">
-    <div class="box-header"><h2>Limites de alarme por reservatório</h2><span class="abadge abadge-info" id="limitsRole"></span></div>
+  <div class="ha-card" style="margin-top:16px">
+    <div class="ha-card-header"><span class="ha-card-title">Limites de alarme por reservatório</span><span class="abadge abadge-info" id="limitsRole"></span></div>
     <div class="box-body hist-wrap" id="limits"><div class="loader"></div></div>
   </div>
 
-  <div class="box" style="margin-top:16px">
-    <div class="box-header">
-      <h2>Histórico de eventos</h2>
+  <div class="ha-card" style="margin-top:16px">
+    <div class="ha-card-header">
+      <span class="ha-card-title">Histórico de eventos</span>
       <div class="hist-tools">
         <select id="histFilter" aria-label="Filtrar por tipo">
           <option value="">Todos</option>
