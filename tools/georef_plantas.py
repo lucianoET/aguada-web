@@ -4,7 +4,9 @@
 Uso: python3 tools/georef_plantas.py "<caminho do PDF>"
 
 Saída: frontend/assets/plantas/redes.geojson, uma feição por camada (propriedade `layer`):
-incendio, agua, predios, areas e os rótulos das Áreas A/B/C.
+incendio, agua, predios, areas, os rótulos das Áreas A/B/C e os pontos dos símbolos —
+hidrante (folha 1), registro (as duas folhas) e hidrometro (caixa "H" da folha 2). Os nomes
+(HID-0xx, prédio e vazão) vêm de tools/plantas_rotulos.json, lido à mão na planta.
 
 O PDF é vetor de CAD (A0, 1:1000, texto em traços SHX, sem layers): as camadas saem pela
 espessura do traço — 2,09 = tubulação (folha 1 incêndio, folha 2 água potável), 4,18 = prédios,
@@ -46,6 +48,8 @@ OFFSET_P1 = (24, -132)
 # (folha, espessura do traço) → camada
 LAYERS = {(1, 2.09): "incendio", (2, 2.09): "agua", (2, 4.18): "predios", (2, 4.70): "areas"}
 AREA_LABELS = {"Área A": (850, 944), "Área B": (1446, 3106), "Área C": (5490, 5046)}
+
+ROTULOS = Path(__file__).with_name("plantas_rotulos.json")
 
 TOKEN = re.compile(r"[MLCZ]|-?[\d.]+")
 
@@ -115,19 +119,29 @@ def main(pdf: str) -> None:
 
     # prédios também viram linha: quase todos vêm do CAD em segmentos soltos, sem anel fechado
     lines: dict[str, list] = {name: [] for name in LAYERS.values()}
+    dots, circles, squares = [], [], []   # símbolos, em px da folha 2
     with tempfile.TemporaryDirectory() as tmp:
         for page in (1, 2):
             svg = f"{tmp}/p{page}.svg"
             subprocess.run(["pdftocairo", "-svg", "-f", str(page), "-l", str(page), pdf, svg], check=True)
             dx, dy = OFFSET_P1 if page == 1 else (0, 0)
             for width, polys in svg_paths(Path(svg).read_text()):
-                layer = LAYERS.get((page, round(width, 2)))
-                if not layer:
-                    continue
+                w = round(width, 2)
+                layer = LAYERS.get((page, w))
                 for poly in polys:
                     # pt da página → px girados 90° (como a referência dos pontos de controle)
                     px = [(y * k + dx, (PAGE_W_PT - x) * k + dy) for x, y in poly]
                     if not all(inside(*p) for p in px):
+                        continue
+                    xs, ys = [q[0] for q in px], [q[1] for q in px]
+                    bw, bh, c = max(xs) - min(xs), max(ys) - min(ys), ((max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2)
+                    if page == 1 and w == 4.18 and bw < 5 and bh < 5:
+                        dots.append(c)                      # par de pontinhos do hidrante
+                    elif w == 2.09 and len(px) >= 9 and 13 <= bw <= 19 and 13 <= bh <= 19:
+                        circles.append((page, c))           # ⊗ do registro
+                    elif page == 2 and w == 2.09 and len(px) == 5 and 18 <= bw <= 30 and 18 <= bh <= 30:
+                        squares.append(c)                   # caixa do registro ou do "H"
+                    if not layer:
                         continue
                     coords = [latlon(*p) for p in px]
                     coords = [c for j, c in enumerate(coords) if j == 0 or c != coords[j - 1]]
@@ -136,10 +150,33 @@ def main(pdf: str) -> None:
 
     feats = [{"type": "Feature", "properties": {"layer": name}, "geometry": {"type": "MultiLineString", "coordinates": c}}
              for name, c in lines.items() if c]
+
+    near = lambda a, b, r: math.hypot(a[0] - b[0], a[1] - b[1]) < r
+    point = lambda layer, p, **props: {"type": "Feature", "properties": {"layer": layer, **{k: v for k, v in props.items() if v is not None}},
+                                       "geometry": {"type": "Point", "coordinates": latlon(*p)}}
+    rotulos = json.loads(ROTULOS.read_text())
+    hydrants: list[list] = []
+    for d in dots:
+        group = next((g for g in hydrants if near(g[0], d, 25)), None)
+        group.append(d) if group else hydrants.append([d])
+    for g in hydrants:
+        c = (sum(x for x, _ in g) / len(g), sum(y for _, y in g) / len(g))
+        r = next((r for r in rotulos["hidrantes"] if near((r["x"], r["y"]), c, 40)), {})
+        feats.append(point("hidrante", c, id=r.get("id"), obs=r.get("obs")))
+    feats += [point("registro", c, rede="incendio" if page == 1 else "agua") for page, c in circles]
+    for c in squares:
+        if any(page == 2 and near(c, rg, 4) for page, rg in circles):
+            continue
+        r = next((r for r in rotulos["hidrometros"] if near((r["x"], r["y"]), c, 40)), {})
+        feats.append(point("hidrometro", c, predio=r.get("predio"), vazao_m3h=r.get("vazao_m3h")))
     feats += [{"type": "Feature", "properties": {"layer": "rotulo", "label": label}, "geometry": {"type": "Point", "coordinates": latlon(*p)}}
               for label, p in AREA_LABELS.items()]
     out.write_text(json.dumps({"type": "FeatureCollection", "features": feats}, separators=(",", ":")) + "\n")
-    print({name: len(c) for name, c in lines.items()}, f"{out.stat().st_size // 1024} KB")
+    pts = {}
+    for f in feats:
+        if f["geometry"]["type"] == "Point":
+            pts[f["properties"]["layer"]] = pts.get(f["properties"]["layer"], 0) + 1
+    print({name: len(c) for name, c in lines.items()}, pts, f"{out.stat().st_size // 1024} KB")
 
 
 if __name__ == "__main__":
