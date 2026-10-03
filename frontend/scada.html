@@ -42,6 +42,8 @@
       --scada-block-bg-red: rgba(244, 226, 226, 0.96);
       --pipe-color: #3b94f4;
       --pipe-label-color: #4b6f9d;
+      --pipe-fire-color: #d63c34;
+      --pipe-sea-color: #0f8f86;
     }
 
     html[data-theme="dark"] .scada-main {
@@ -71,6 +73,8 @@
       --scada-block-bg-red: rgba(43, 23, 23, 0.96);
       --pipe-color: #3b94f4;
       --pipe-label-color: #5d8abf;
+      --pipe-fire-color: #f05a52;
+      --pipe-sea-color: #2cc4b4;
     }
 
     .scada-toolbar {
@@ -130,7 +134,7 @@
       height: 1370px;
       transform-origin: top left;
       font-size: 14px;
-      background-color: #d9dde3;
+      background-color: var(--scada-content-bg);
       border: 1px solid var(--border2);
       border-radius: 8px;
       overflow: hidden;
@@ -174,7 +178,60 @@
     .pipe-submarine {
       stroke: var(--pipe-color);
       stroke-width: 4;
+      stroke-dasharray: 12 8;
     }
+
+    .pipe-fire {
+      stroke: var(--pipe-fire-color);
+      stroke-width: 4;
+    }
+
+    .pipe-sea {
+      stroke: var(--pipe-sea-color);
+      stroke-width: 4;
+      stroke-dasharray: 12 8;
+    }
+
+    .arrow-main  { fill: var(--pipe-color); }
+    .arrow-fire  { fill: var(--pipe-fire-color); }
+    .arrow-sea   { fill: var(--pipe-sea-color); }
+
+    /* Válvula (gaveta) no traçado: só identificação, o estado fica nos blocos */
+    .valve-sym {
+      fill: var(--scada-eq-bg);
+      stroke: var(--pipe-color);
+      stroke-width: 2;
+      stroke-linejoin: round;
+    }
+
+    /* Origem/destino da água (fora dos reservatórios monitorados) */
+    .flow-terminal {
+      position: absolute;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      padding: 10px 14px;
+      border: 2px dashed var(--pipe-color);
+      border-radius: 8px;
+      background: var(--scada-eq-bg);
+      font-family: Arial, sans-serif;
+      line-height: 1.2;
+    }
+    .flow-terminal strong {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--scada-text-primary);
+    }
+    .flow-terminal span {
+      font-size: 12px;
+      color: var(--scada-text-secondary);
+    }
+    .flow-terminal.t-fire { border-color: var(--pipe-fire-color); }
+    .flow-terminal.t-sea  { border-color: var(--pipe-sea-color); }
 
     @keyframes ping {
       75%, 100% {
@@ -996,6 +1053,12 @@
       flex: 0 0 auto;
     }
 
+    .res-3x3 {
+      width: calc(var(--scada-sq) * 3 + var(--scada-gap) * 2);
+      height: calc(var(--scada-sq) * 3 + var(--scada-gap) * 2);
+      flex: 0 0 auto;
+    }
+
     .equip-col-3 {
       display: grid;
       grid-template-rows: repeat(3, var(--scada-sq));
@@ -1170,23 +1233,59 @@
       <div class="scada-wrap" x-ref="stageViewport">
         <div class="scada-stage-holder" :style="`width:${stageHolderWidth}px;height:${stageHolderHeight}px;`">
         <div class="scada-stage" :style="`transform:scale(${stageScale});`">
+          <!-- Traçado conforme a operação: concessionária → CBIF → linha submarina → CIE → CB3 → CON / CAV.
+               CON → rede de abastecimento. CAV → rede de incêndio (CB2 pressuriza, CB1 injeta água do mar). -->
           <svg class="pipe-layer" viewBox="0 0 1850 1370" preserveAspectRatio="none" aria-hidden="true">
-            <path class="pipe pipe-branch" d="M 410 464 V 498"/>
-            <path class="pipe pipe-branch" d="M 1275 464 V 498"/>
-            <path class="pipe pipe-main"   d="M 840 643 H 980"/>
-            <path class="pipe pipe-branch" d="M 530 788 V 914 H 621"/>
-            <path class="pipe pipe-branch" d="M 1275 788 V 914 H 1229"/>
-            <path class="pipe pipe-main"   d="M 621 914 H 1229"/>
-            <path class="pipe pipe-branch" d="M 621 914 V 818"/>
-            <path class="pipe pipe-branch" d="M 925 914 V 818"/>
-            <path class="pipe pipe-branch" d="M 1229 914 V 818"/>
-            <path class="pipe pipe-main"   d="M 925 914 V 934"/>
+            <defs>
+              <marker id="arr-main" class="arrow-main" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="arr-fire" class="arrow-fire" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="arr-sea"  class="arrow-sea"  viewBox="0 0 10 10" refX="10" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+
+            <!-- Concessionária → HID-CONC → CBIF -->
+            <path class="pipe pipe-main" d="M 141 1202 V 976" marker-end="url(#arr-main)"/>
+            <path class="pipe pipe-main" d="M 141 880 V 810" marker-end="url(#arr-main)"/>
+            <!-- CBIF → HID-IF → linha submarina → HID-PRAIA -->
+            <path class="pipe pipe-main" d="M 560 810 V 880" marker-end="url(#arr-main)"/>
+            <path class="pipe pipe-submarine" d="M 560 976 V 1250 H 760" marker-end="url(#arr-main)"/>
+            <text class="pipe-label" x="574" y="1150">Linha submarina</text>
+            <!-- HID-PRAIA → V-IE-IN → V-CIE-IN → CIE -->
+            <path class="pipe pipe-main" d="M 962 1250 H 1150" marker-end="url(#arr-main)"/>
+            <path class="valve-sym" d="M 1001 1243 V 1257 L 1019 1243 V 1257 Z"/>
+            <text class="pipe-label" x="1010" y="1282" text-anchor="middle">V-IE-IN</text>
+            <path class="valve-sym" d="M 1086 1243 V 1257 L 1104 1243 V 1257 Z"/>
+            <text class="pipe-label" x="1095" y="1282" text-anchor="middle">V-CIE-IN</text>
+            <!-- CIE → V-CIE-OUT → CB3 -->
+            <path class="pipe pipe-main" d="M 1210 930 V 810" marker-end="url(#arr-main)"/>
+            <path class="valve-sym" d="M 1203 861 H 1217 L 1203 879 H 1217 Z"/>
+            <text class="pipe-label" x="1224" y="875">V-CIE-OUT</text>
+            <!-- CB3 → V-CB03-OUT → V-CON-IN / V-CAV-IN -->
+            <path class="pipe pipe-main" d="M 975 520 V 478"/>
+            <path class="pipe pipe-main" d="M 735 478 H 1280"/>
+            <circle cx="975" cy="478" r="6" class="arrow-main"/>
+            <path class="valve-sym" d="M 968 490 H 982 L 968 508 H 982 Z"/>
+            <text class="pipe-label" x="989" y="504">V-CB03-OUT</text>
+            <path class="pipe pipe-main" d="M 735 478 V 424" marker-end="url(#arr-main)"/>
+            <path class="valve-sym" d="M 728 442 H 742 L 728 460 H 742 Z"/>
+            <text class="pipe-label" x="721" y="456" text-anchor="end">V-CON-IN</text>
+            <path class="pipe pipe-main" d="M 1280 478 V 424" marker-end="url(#arr-main)"/>
+            <path class="valve-sym" d="M 1273 442 H 1287 L 1273 460 H 1287 Z"/>
+            <text class="pipe-label" x="1294" y="456">V-CAV-IN</text>
+            <!-- CON → rede de abastecimento -->
+            <path class="pipe pipe-main" d="M 440 238 H 270" marker-end="url(#arr-main)"/>
+            <!-- CAV → rede de incêndio; CB2 pressuriza; mar → CB1 → rede -->
+            <path class="pipe pipe-fire" d="M 1470 338 H 1530" marker-end="url(#arr-fire)"/>
+            <path class="pipe pipe-fire" d="M 1670 220 V 290" marker-end="url(#arr-fire)"/>
+            <text class="pipe-label" x="1684" y="260">Pressurização</text>
+            <path class="pipe pipe-sea" d="M 1670 450 V 386" marker-end="url(#arr-sea)"/>
+            <text class="pipe-label" x="1684" y="423">Emergência</text>
+            <path class="pipe pipe-sea" d="M 1670 690 V 620" marker-end="url(#arr-sea)"/>
           </svg>
 
           <div class="stage-system-label">Sistema Hidraulico - CMASM</div>
 
           <!-- CBIF — C. BOMBAS ILHA DAS FLORES -->
-          <div class="scada-block block-blue scada-grid-units" style="left:220px;top:498px;width:620px;height:290px;">
+          <div class="scada-block block-blue scada-grid-units" style="left:40px;top:520px;width:610px;height:290px;">
             <div class="block-title">CBIF — C. BOMBAS ILHA DAS FLORES
               <button class="site-info-btn" @click.stop="openLocationModal('if_res')" title="Detalhes">i</button>
             </div>
@@ -1253,8 +1352,8 @@
             </div>
           </div>
 
-          <!-- Hydrometers below CIE and CB3 -->
-          <button class="hyd-chip hyd-2x1 scada-grid-units" style="position:absolute;left:520px;top:818px;" @click="openEquipment('hydrometer','HID-CONC')">
+          <!-- Hidrômetros no traçado: HID-CONC (entrada CBIF), HID-IF e HID-PRAIA (pontas da linha submarina) -->
+          <button class="hyd-chip hyd-2x1 scada-grid-units" style="position:absolute;left:40px;top:880px;" @click="openEquipment('hydrometer','HID-CONC')">
             <div class="hyd-chip-hdr">HID-CONC</div>
             <div class="hyd-chip-data">
               <div>L1: <strong x-text="hydrometerReadLabel(hydroRow('HID-CONC').prev)"></strong></div>
@@ -1262,7 +1361,7 @@
               <div>B: <strong x-text="hydrometerDeltaLabel(hydroRow('HID-CONC').delta)"></strong></div>
             </div>
           </button>
-          <button class="hyd-chip hyd-2x1 scada-grid-units" style="position:absolute;left:824px;top:818px;" @click="openEquipment('hydrometer','HID-IF')">
+          <button class="hyd-chip hyd-2x1 scada-grid-units" style="position:absolute;left:459px;top:880px;" @click="openEquipment('hydrometer','HID-IF')">
             <div class="hyd-chip-hdr">HID-IF</div>
             <div class="hyd-chip-data">
               <div>L1: <strong x-text="hydrometerReadLabel(hydroRow('HID-IF').prev)"></strong></div>
@@ -1270,7 +1369,7 @@
               <div>B: <strong x-text="hydrometerDeltaLabel(hydroRow('HID-IF').delta)"></strong></div>
             </div>
           </button>
-          <button class="hyd-chip hyd-2x1 scada-grid-units" style="position:absolute;left:1128px;top:818px;" @click="openEquipment('hydrometer','HID-PRAIA')">
+          <button class="hyd-chip hyd-2x1 scada-grid-units" style="position:absolute;left:760px;top:1202px;" @click="openEquipment('hydrometer','HID-PRAIA')">
             <div class="hyd-chip-hdr">HID-PRAIA</div>
             <div class="hyd-chip-data">
               <div>L1: <strong x-text="hydrometerReadLabel(hydroRow('HID-PRAIA').prev)"></strong></div>
@@ -1279,9 +1378,9 @@
             </div>
           </button>
 
-          <!-- CAV — CASTELO DE INCENDIO -->
-          <div class="scada-block block-red scada-grid-units" style="left:220px;top:90px;width:380px;height:374px;">
-            <div class="block-title">CAV — CASTELO DE INCENDIO
+          <!-- CAV — CASTELO DE INCÊNDIO -->
+          <div class="scada-block block-red scada-grid-units" style="left:1090px;top:50px;width:380px;height:374px;">
+            <div class="block-title">CAV — CASTELO DE INCÊNDIO
               <button class="site-info-btn" @click.stop="openLocationModal('incendio')" title="Detalhes">i</button>
             </div>
             <div class="block-body row" style="gap:8px;align-items:flex-start;">
@@ -1322,14 +1421,14 @@
             </div>
           </div>
 
-          <!-- CB1/CB2 — C. BOMBAS N1/N2 -->
-          <div class="scada-block block-red" style="left:640px;top:90px;width:210px;height:378px;">
-            <div class="block-title">CB1/CB2 — BOMBAS
+          <!-- CB2 — pressurização da rede de incêndio (só em combate) -->
+          <div class="scada-block block-red scada-grid-units" style="left:1530px;top:50px;width:280px;height:170px;">
+            <div class="block-title">CB2 — PRESSURIZAÇÃO
               <button class="site-info-btn" @click.stop="openLocationModal('cb2')" title="Detalhes">i</button>
             </div>
-            <div class="block-body">
-              <template x-for="item in [...equipmentForSite('cb2'), ...equipmentForSite('cb1')]" :key="item.kind+'-'+item.name">
-                <button class="mini-eq" style="flex:1;" @click="openEquipment(item.kind, item.name)">
+            <div class="block-body row" style="gap:10px;">
+              <template x-for="item in equipmentForSite('cb2')" :key="item.kind+'-'+item.name">
+                <button class="mini-eq sq-1x1" @click="openEquipment(item.kind, item.name)">
                   <img :src="equipmentIcon(item.kind)" :alt="item.kind" style="width:22px;height:22px;object-fit:contain;"/>
                   <span class="mini-eq-name" x-text="item.name"></span>
                   <span class="mini-eq-state" :class="equipmentBadgeClass(item)" x-text="equipmentPrimaryLabel(item)"></span>
@@ -1338,9 +1437,31 @@
             </div>
           </div>
 
+          <!-- CB1 — emergência: água do mar para a rede de incêndio -->
+          <div class="scada-block block-red scada-grid-units" style="left:1530px;top:450px;width:280px;height:170px;">
+            <div class="block-title">CB1 — EMERGÊNCIA
+              <button class="site-info-btn" @click.stop="openLocationModal('cb1')" title="Detalhes">i</button>
+            </div>
+            <div class="block-body row" style="gap:10px;">
+              <template x-for="item in equipmentForSite('cb1')" :key="item.kind+'-'+item.name">
+                <button class="mini-eq sq-1x1" @click="openEquipment(item.kind, item.name)">
+                  <img :src="equipmentIcon(item.kind)" :alt="item.kind" style="width:22px;height:22px;object-fit:contain;"/>
+                  <span class="mini-eq-name" x-text="item.name"></span>
+                  <span class="mini-eq-state" :class="equipmentBadgeClass(item)" x-text="equipmentPrimaryLabel(item)"></span>
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <!-- Origens e destinos fora dos reservatórios monitorados -->
+          <div class="flow-terminal" style="left:40px;top:1202px;width:202px;height:96px;"><strong>Concessionária</strong><span>água tratada</span></div>
+          <div class="flow-terminal" style="left:40px;top:190px;width:230px;height:96px;"><strong>Rede de abastecimento</strong><span>consumo · V-CON-AV / AZ</span></div>
+          <div class="flow-terminal t-fire" style="left:1530px;top:290px;width:280px;height:96px;"><strong>Rede de incêndio</strong><span>hidrantes Y · mangueiras</span></div>
+          <div class="flow-terminal t-sea" style="left:1530px;top:690px;width:280px;height:70px;"><strong>Água do mar</strong><span>captação de emergência</span></div>
+
 
           <!-- CON — CASTELO DE CONSUMO -->
-          <div class="scada-block block-blue scada-grid-units" style="left:980px;top:90px;width:590px;height:374px;">
+          <div class="scada-block block-blue scada-grid-units" style="left:440px;top:50px;width:590px;height:374px;">
             <div class="block-title">CON — CASTELO DE CONSUMO
               <button class="site-info-btn" @click.stop="openLocationModal('consumo')" title="Detalhes">i</button>
             </div>
@@ -1417,14 +1538,14 @@
           </div>
 
           <!-- CIE — CISTERNAS ILHA DO ENGENHO -->
-          <div class="scada-block block-blue scada-grid-units" style="left:220px;top:934px;width:1350px;height:396px;">
+          <div class="scada-block block-blue scada-grid-units" style="left:1150px;top:930px;width:680px;height:396px;">
             <div class="block-title">CIE — CISTERNAS ILHA DO ENGENHO
               <button class="site-info-btn" @click.stop="openLocationModal('cisternas')" title="Detalhes">i</button>
             </div>
             <div class="block-body" style="gap:8px;">
               <div class="sub-blk" style="flex:1;">
                 <div class="sub-blk-body res-grid-row">
-                  <button class="mini-res res-6x3" @click="openModal('CIE1')">
+                  <button class="mini-res res-3x3" @click="openModal('CIE1')">
                     <div class="mini-res-title">
                       <div class="mini-res-name" x-text="reservoirNameLabel('CIE1')"></div>
                       <div class="mini-res-sub">CIE1 · 245m³</div>
@@ -1445,7 +1566,7 @@
                       <span class="mini-res-status" :class="reservoirStatusClass('CIE1')" x-text="reservoirStatusLabel('CIE1')"></span>
                     </div>
                   </button>
-                  <button class="mini-res res-6x3" @click="openModal('CIE2')">
+                  <button class="mini-res res-3x3" @click="openModal('CIE2')">
                     <div class="mini-res-title">
                       <div class="mini-res-name" x-text="reservoirNameLabel('CIE2')"></div>
                       <div class="mini-res-sub">CIE2 · 245m³</div>
@@ -1471,9 +1592,9 @@
             </div>
           </div>
 
-          <!-- CB3 — CASA DE BOMBAS N3 -->
-          <div class="scada-block block-blue scada-grid-units" style="left:980px;top:498px;width:590px;height:290px;">
-            <div class="block-title">CB3 — CASA DE BOMBAS N3
+          <!-- CB3 — CASA DE BOMBAS Nº 3 -->
+          <div class="scada-block block-blue scada-grid-units" style="left:680px;top:520px;width:590px;height:290px;">
+            <div class="block-title">CB3 — CASA DE BOMBAS Nº 3
               <button class="site-info-btn" @click.stop="openLocationModal('cb3')" title="Detalhes">i</button>
             </div>
             <div class="block-body row" style="gap:10px;align-items:flex-start;">
@@ -1799,18 +1920,18 @@
           id: 'cb2',
           eyebrow: 'Pressurizacao',
           title: 'CB2',
-          subtitle: 'Bombas auxiliares do sistema de incendio.',
-          footer: 'Conjunto auxiliar de bombeamento para apoio ao sistema de incendio.',
-          summary: 'CB2 concentra duas bombas auxiliares usadas no apoio operacional do sistema de incendio.',
+          subtitle: 'Pressurização da rede de incêndio.',
+          footer: 'B02-E (elétrica) tem acionamento remoto por contatora. B02-D é a diesel.',
+          summary: 'Usada só em combate a incêndio: pressuriza a rede e os hidrantes Y onde se conectam as mangueiras. A rede é abastecida pelo CAV.',
           x: 1134, y: 116, w: 184, h: 236,
         },
         {
           id: 'cb1',
           eyebrow: 'Emergencia',
           title: 'CB1',
-          subtitle: 'Bomba auxiliar do sistema de incendio.',
-          footer: 'Conjunto auxiliar reservado para contingencia no sistema de incendio.',
-          summary: 'CB1 abriga a bomba auxiliar de contingencia que apoia o sistema de incendio quando necessario.',
+          subtitle: 'Água do mar para a rede de incêndio.',
+          footer: 'Bomba de emergência: entra se a água doce acabar durante um combate a incêndio.',
+          summary: 'CB1 bombeia água salgada direto para a rede de incêndio, como reserva quando o CAV não dá conta.',
           x: 1334, y: 116, w: 184, h: 236,
         },
         {
