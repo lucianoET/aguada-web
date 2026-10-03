@@ -133,6 +133,7 @@ const aguadaAPI = (() => {
       const links = [
         ['painel.html',   'Painel'],
         ['scada.html',    'SCADA'],
+        ['planta.html',   'Planta'],
         ['dados.html',    'Dados'],
         ['analise.html',  'Análise'],
         ['relatorio_tabelas.html', 'Relatório'],

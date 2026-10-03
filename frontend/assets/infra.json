@@ -396,5 +396,125 @@
       "substance": "water",
       "diameter": null
     }
+  ],
+  "sanitation": [
+    {
+      "id": "ETE",
+      "name": "Estação de Tratamento de Esgoto",
+      "type": "ete",
+      "lat": -22.835655,
+      "lon": -43.110975
+    },
+    {
+      "id": "CG",
+      "name": "Caixa de Gordura",
+      "type": "gordura",
+      "lat": -22.838357,
+      "lon": -43.109998
+    },
+    {
+      "id": "FS-01",
+      "name": "Fossa — Oficina Eletrônica",
+      "type": "fossa",
+      "lat": -22.838179,
+      "lon": -43.106665,
+      "approx": true
+    },
+    {
+      "id": "FS-02",
+      "name": "Fossa — Oficina Sidewinder",
+      "type": "fossa",
+      "lat": -22.838039,
+      "lon": -43.107038,
+      "approx": true
+    },
+    {
+      "id": "FS-03",
+      "name": "Fossa — Oficina Mistral e Bill",
+      "type": "fossa",
+      "lat": -22.837758,
+      "lon": -43.107073,
+      "approx": true
+    },
+    {
+      "id": "FS-04",
+      "name": "Fossa — Oficina SBAT",
+      "type": "fossa",
+      "lat": -22.837897,
+      "lon": -43.107324,
+      "approx": true
+    },
+    {
+      "id": "FS-05",
+      "name": "Fossa — Oficina Sea Skua [047]",
+      "type": "fossa",
+      "lat": -22.837475,
+      "lon": -43.107657,
+      "approx": true
+    },
+    {
+      "id": "FS-06",
+      "name": "Fossa — Oficina Seawolf, Aspide e Sea Skua [046]",
+      "type": "fossa",
+      "lat": -22.837261,
+      "lon": -43.107294,
+      "approx": true
+    },
+    {
+      "id": "FS-07",
+      "name": "Fossa — Oficina Elet. II",
+      "type": "fossa",
+      "lat": -22.83794,
+      "lon": -43.10625,
+      "approx": true
+    },
+    {
+      "id": "FS-08",
+      "name": "Fossa — Oficina Aspide",
+      "type": "fossa",
+      "lat": -22.837002,
+      "lon": -43.106865,
+      "approx": true
+    },
+    {
+      "id": "FS-09",
+      "name": "Fossa — Oficina Exocet",
+      "type": "fossa",
+      "lat": -22.836509,
+      "lon": -43.108326,
+      "approx": true
+    },
+    {
+      "id": "FS-10",
+      "name": "Fossa — Oficina TP MK-48 [125]",
+      "type": "fossa",
+      "lat": -22.83678,
+      "lon": -43.107777,
+      "approx": true
+    },
+    {
+      "id": "FS-11",
+      "name": "Fossa — Oficina TP MK-46",
+      "type": "fossa",
+      "lat": -22.836087,
+      "lon": -43.107474,
+      "approx": true
+    },
+    {
+      "id": "FS-12",
+      "name": "Fossa — Oficina TP MK-24",
+      "type": "fossa",
+      "lat": -22.835793,
+      "lon": -43.107067,
+      "approx": true
+    },
+    {
+      "id": "FS-13",
+      "name": "Fossa — Oficina Minas, Bombas e Foguetes",
+      "type": "fossa",
+      "lat": -22.835597,
+      "lon": -43.106632,
+      "approx": true
+    }
   ]
 }

@@ -89,6 +89,9 @@ Fonte de verdade: `luctronics_firmware/platformio/tools/reservoirs.yaml` (repo a
 
 Páginas HTML puras em `frontend/` servidas como SPA pelo FastAPI (fallback para `index.html`). Usa Tailwind CSS compilado em `frontend/assets/tailwind.css`. Em produção, o nginx serve o frontend estático e faz proxy reverso para o backend.
 
+- Mapa (Painel e `planta.html`): `assets/mapa.js` + `mapa.css` — base OSM/satélite, camadas e marcadores. Elementos fixos (reservatórios, bombas, válvulas, hidrômetros, saneamento) em `assets/infra.json`.
+- Redes, prédios e Áreas A/B/C vêm do PDF "PROJETO REDE INCÊNDIO E AGUADA" via `tools/georef_plantas.py` → `assets/plantas/redes.geojson` (camada pela espessura do traço; encaixe por pontos de controle no script).
+
 ### Dados
 
 `data/aguada.db` — SQLite com todas as leituras. `data/reports/` — PDFs gerados. `DATA_DIR` configurável via `.env`.
