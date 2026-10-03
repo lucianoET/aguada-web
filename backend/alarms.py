@@ -13,12 +13,11 @@ from typing import Callable, Optional
 
 import aiosqlite
 
-from .db import ONLINE_TIMEOUT_S, get_active_alarms, get_all_states, insert_event
+from .db import ONLINE_TIMEOUT_S, get_active_alarms, get_all_states, get_reservoir_limits, insert_event
 
 logger = logging.getLogger("alarms")
 
-# ponytail: limites globais em % do volume. Por reservatório (reservoirs.yaml) quando os
-# níveis operacionais de cada um forem definidos; hoje só existe volume/altura máximos.
+# Limites padrão em % do volume; por reservatório na tabela reservoir_limits (página Alertas).
 LIMITS = {"critico": 20.0, "baixo": 35.0, "alto": 98.0}
 HYST_PCT = 3.0          # dispara no limite, normaliza só depois de voltar HYST_PCT além dele
 JUMP_CM = 50.0          # salto abrupto: > 0,5 m ...
@@ -33,15 +32,15 @@ def duration(minutes: int) -> str:
     return f"{minutes // 1440} dias"
 
 
-def level_band(pct: Optional[float], current: Optional[str]) -> Optional[str]:
+def level_band(pct: Optional[float], current: Optional[str], limits: dict = LIMITS) -> Optional[str]:
     """Faixa de nível com histerese: None (normal), 'baixo', 'critico' ou 'alto'."""
     if pct is None:
         return current
-    if pct <= LIMITS["critico"] or (current == "critico" and pct <= LIMITS["critico"] + HYST_PCT):
+    if pct <= limits["critico"] or (current == "critico" and pct <= limits["critico"] + HYST_PCT):
         return "critico"
-    if pct <= LIMITS["baixo"] or (current in ("critico", "baixo") and pct <= LIMITS["baixo"] + HYST_PCT):
+    if pct <= limits["baixo"] or (current in ("critico", "baixo") and pct <= limits["baixo"] + HYST_PCT):
         return "baixo"
-    if pct >= LIMITS["alto"] or (current == "alto" and pct >= LIMITS["alto"] - HYST_PCT):
+    if pct >= limits["alto"] or (current == "alto" and pct >= limits["alto"] - HYST_PCT):
         return "alto"
     return None
 
@@ -59,12 +58,27 @@ class AlarmEngine:
         self.notify = notify
         self.active: dict[tuple[str, str], dict] = {}     # (alias, grupo) → evento aberto
         self.last: dict[str, tuple[int, float]] = {}      # alias → (ts, level_cm) p/ salto
+        self.limits: dict[str, dict] = {}                 # alias → limites próprios
 
     async def load(self) -> None:
         async with aiosqlite.connect(self.db_path) as conn:
             conn.row_factory = aiosqlite.Row
             for ev in await get_active_alarms(conn):
                 self.active.setdefault((ev["entidade_id"], self._group(ev["codigo"])), ev)
+            self.limits = await get_reservoir_limits(conn)
+
+    def limits_for(self, alias: str) -> dict:
+        own = self.limits.get(alias)
+        return {k: own[k] for k in LIMITS} if own else dict(LIMITS)
+
+    async def open_alarm(self, ev: dict) -> None:
+        """Abre alarme genérico (ex.: laudo não conforme); chave = (entidade_id, codigo)."""
+        async with aiosqlite.connect(self.db_path) as conn:
+            await self._open(conn, ev["entidade_id"], ev["codigo"], ev)
+
+    async def close_alarm(self, entidade_id: str, codigo: str, descricao: str) -> None:
+        async with aiosqlite.connect(self.db_path) as conn:
+            await self._close(conn, entidade_id, codigo, descricao)
 
     @staticmethod
     def _group(codigo: str) -> str:
@@ -117,7 +131,7 @@ class AlarmEngine:
 
             current = self.active.get((alias, "nivel"))
             band_now = current["codigo"].removeprefix("nivel_") if current else None
-            band = level_band(None if record.get("out_of_range") else pct, band_now)
+            band = level_band(None if record.get("out_of_range") else pct, band_now, self.limits_for(alias))
             if band != band_now:
                 if band_now:
                     await self._close(conn, alias, "nivel", f"{name}: nível normalizado ({pct:.0f}%)" if band is None

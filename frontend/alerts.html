@@ -33,7 +33,7 @@
   .abadge-info { background:#eff6ff; color:#1e40af; }
   .sum-lbl { display:inline-flex; align-items:center; gap:8px; }
   .sdot { width:8px; height:8px; border-radius:50%; display:inline-block; }
-  .operator { display:flex; flex-direction:column; gap:4px; padding-bottom:10px; margin-bottom:6px; border-bottom:1px solid var(--border); font-size:var(--font-xs); color:var(--text2); }
+  .operator { display:block; line-height:1.45; padding-bottom:10px; margin-bottom:6px; border-bottom:1px solid var(--border); font-size:var(--font-xs); color:var(--text2); }
   .operator input { padding:7px 9px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font:inherit; font-size:13px; }
   .operator input.missing { border-color:#ef4444; box-shadow:0 0 0 2px rgba(239,68,68,.2); }
   .hist-tools { display:flex; gap:8px; align-items:center; }
@@ -45,6 +45,11 @@
   table.hist td.ts { font-family:var(--mono); white-space:nowrap; }
   table.hist td.desc { min-width:260px; }
   .limits { font-size:var(--font-xxs); color:var(--text2); line-height:1.4; margin-top:8px; }
+  table.lim td input { width:64px; padding:5px 6px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font:inherit; font-size:12px; }
+  table.lim td input:disabled { opacity:.7; }
+  .lim-save { padding:5px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-weight:700; font-size:12px; cursor:pointer; }
+  .lim-save:disabled { opacity:.5; cursor:not-allowed; }
+  .lim-msg { font-size:11px; }
 </style>
 </head>
 <body class="admin-page">
@@ -62,13 +67,16 @@
     <div class="box">
       <div class="box-header"><h2>Resumo</h2></div>
       <div class="box-body">
-        <label class="operator">Operador (registrado no reconhecimento)
-          <input id="operator" type="text" autocomplete="name" placeholder="Seu nome ou posto" maxlength="60">
-        </label>
+        <div class="operator" id="operator"></div>
         <div id="summary"><div class="loader"></div></div>
-        <p class="limits">Nível: crítico ≤ 20 %, baixo ≤ 35 %, alto ≥ 98 %. Só normaliza 3 pontos além do limite (histerese, Normas §3.4). Sensor sem leitura há 10 min = falha. Salto &gt; 50 cm em 5 min fica no histórico como leitura suspeita.</p>
+        <p class="limits">Nível: limites de cada reservatório na tabela abaixo. Só normaliza 3 pontos além do limite (histerese, Normas §3.4). Sensor sem leitura há 10 min = falha. Salto &gt; 50 cm em 5 min fica no histórico como leitura suspeita.</p>
       </div>
     </div>
+  </div>
+
+  <div class="box" style="margin-top:16px">
+    <div class="box-header"><h2>Limites de alarme por reservatório</h2><span class="abadge abadge-info" id="limitsRole"></span></div>
+    <div class="box-body hist-wrap" id="limits"><div class="loader"></div></div>
   </div>
 
   <div class="box" style="margin-top:16px">
@@ -92,13 +100,8 @@
 <script>
 document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('alerts.html');
 
-const OP_KEY = 'aguada.operador';
-const opInput = document.getElementById('operator');
-try { opInput.value = localStorage.getItem(OP_KEY) || ''; } catch {}
-opInput.addEventListener('input', () => {
-  opInput.classList.remove('missing');
-  try { localStorage.setItem(OP_KEY, opInput.value.trim()); } catch {}
-});
+let me = null;   // usuário da sessão: quem reconhece e quem altera limites vem do servidor
+const canEdit = () => me && (me.role === 'supervisor' || me.role === 'admin');
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
 const fmt = (ts) => ts ? new Date(ts * 1000).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '—';
@@ -109,7 +112,7 @@ function ago(ts) {
 const sevClass = (sev) => sev === 'critico' ? 'crit' : sev === 'alerta' ? 'warn' : 'ok';
 const TIPO = { alarme:'Alarme', falha:'Falha', comando:'Comando', informativo:'Informativo' };
 const SEV = { critico:'Crítico', alerta:'Alerta', info:'Info' };
-const ENT = { reservatorio:'reservatório', valvula:'válvula', hidrometro:'hidrômetro' };
+const ENT = { reservatorio:'reservatório', valvula:'válvula', hidrometro:'hidrômetro', ponto_coleta:'ponto de coleta', usuario:'usuário' };
 
 let active = [], events = [], reservoirs = [];
 
@@ -130,7 +133,8 @@ function renderActive() {
       </div>
       ${a.ack_ts
         ? `<div class="acked">Reconhecido por<br><b>${esc(a.ack_usuario)}</b><br>${fmt(a.ack_ts)}</div>`
-        : `<button class="ack-btn" type="button" onclick="ack(${a.id}, this)">Reconhecer</button>`}
+        : me ? `<button class="ack-btn" type="button" onclick="ack(${a.id}, this)">Reconhecer</button>`
+             : `<a class="ack-btn" href="login.html?next=alerts.html" style="text-decoration:none">Entrar para reconhecer</a>`}
     </div>`).join('')
     : `<div class="alert-item alert-ok"><div class="txt"><strong>Nenhum alarme ativo</strong>
         ${reservoirs.filter((r) => r.online).length} de ${reservoirs.length} sensores comunicando.</div></div>`;
@@ -160,23 +164,51 @@ function renderHistory() {
 }
 
 async function ack(id, btn) {
-  const usuario = opInput.value.trim();
-  if (!usuario) { opInput.classList.add('missing'); opInput.focus(); return; }
   btn.disabled = true;
-  const r = await fetch(`/api/events/${id}/ack`, { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ usuario }) }).catch(() => null);
+  const r = await fetch(`/api/events/${id}/ack`, { method:'POST' }).catch(() => null);
   if (!r?.ok) { btn.disabled = false; btn.textContent = 'Falhou, tentar de novo'; return; }
+  await load();
+}
+
+let limits = null;
+function renderLimits() {
+  document.getElementById('limitsRole').textContent = canEdit() ? 'editável' : 'somente supervisor';
+  document.getElementById('limits').innerHTML = `<table class="hist lim">
+    <thead><tr><th>Reservatório</th><th>Crítico ≤ %</th><th>Baixo ≤ %</th><th>Alto ≥ %</th><th>Origem</th><th></th></tr></thead>
+    <tbody>${limits.items.map((l) => `<tr>
+      <td><b>${esc(l.nome)}</b><br><small style="color:var(--text2)">${esc(l.alias)}</small></td>
+      ${['critico', 'baixo', 'alto'].map((k) => `<td><input type="number" min="0" max="100" step="1" id="lim-${l.alias}-${k}" value="${l[k]}" aria-label="${k} ${esc(l.alias)}" ${canEdit() ? '' : 'disabled'}></td>`).join('')}
+      <td style="color:var(--text2)">${l.proprio ? `próprio · ${esc(l.updated_by || '')} ${fmt(l.updated_ts)}` : 'padrão'}</td>
+      <td>${canEdit() ? `<button class="lim-save" type="button" onclick="saveLimits('${l.alias}', this)">Salvar</button> <span class="lim-msg" id="lim-msg-${l.alias}"></span>` : ''}</td>
+    </tr>`).join('')}</tbody></table>
+    <p class="limits">Padrão: crítico ${limits.padrao.critico} %, baixo ${limits.padrao.baixo} %, alto ${limits.padrao.alto} %. Toda alteração fica no histórico de eventos.</p>`;
+}
+
+async function saveLimits(alias, btn) {
+  const v = (k) => Number(document.getElementById(`lim-${alias}-${k}`).value);
+  const msg = document.getElementById(`lim-msg-${alias}`);
+  btn.disabled = true;
+  const r = await fetch(`/api/limits/${alias}`, { method:'PUT', headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify({ critico: v('critico'), baixo: v('baixo'), alto: v('alto') }) }).catch(() => null);
+  btn.disabled = false;
+  if (!r?.ok) { msg.textContent = r ? (await r.json().catch(() => ({}))).detail || 'Erro' : 'Servidor indisponível'; msg.style.color = '#dc2626'; return; }
   await load();
 }
 
 async function load() {
   try {
-    const [a, e, r] = await Promise.all([
+    const [a, e, r, l, u] = await Promise.all([
       fetch('/api/events/active').then((x) => x.json()),
       fetch('/api/events?limit=300').then((x) => x.json()),
       aguadaAPI.getReservoirs().catch(() => []),
+      fetch('/api/limits').then((x) => x.json()),
+      fetch('/api/auth/me').then((x) => x.json()).catch(() => ({})),
     ]);
-    active = a.items || []; events = e.items || []; reservoirs = Array.isArray(r) ? r : [];
-    renderActive(); renderHistory();
+    active = a.items || []; events = e.items || []; reservoirs = Array.isArray(r) ? r : []; limits = l; me = u.user || null;
+    document.getElementById('operator').innerHTML = me
+      ? `Reconhecimentos e alterações ficam registrados como <b>${esc(me.name)}</b>.`
+      : `<span>Para reconhecer alarmes, <a href="login.html?next=alerts.html">entre com seu usuário</a>.</span>`;
+    renderActive(); renderHistory(); renderLimits();
   } catch (err) {
     document.getElementById('alertsList').innerHTML = `<div class="alert-item alert-crit"><div class="txt"><strong>Não foi possível carregar os alarmes</strong>${esc(err.message)}</div></div>`;
   }

@@ -73,6 +73,9 @@ O backend é um **FastAPI** com lifespan que inicializa:
 - `db.py` — schema SQLite e todas as queries (sem lógica de negócio). Tabelas: `readings`, `reservoir_state`, mais tabelas manuais (hidrometros, bombas, válvulas, reservatórios) e `nodes`
 - `calc.py` — cálculo de `level_cm`/`volume_l`/`pct` a partir de `distance_cm`, e agregação de eventos de consumo/abastecimento (medianas por hora + deadband de ruído: variação só conta ao acumular >= max(1,5 cm, ruído medido do sensor))
 - `report.py` — geração de PDF diário via WeasyPrint
+- `auth.py` — usuários (operador/supervisor/admin), senha scrypt, sessão em cookie HttpOnly (só o sha256 do token no banco). Leitura da API é aberta na rede local; toda escrita exige sessão (`require_operador/supervisor/admin` em `main.py`), e o usuário dos eventos vem da sessão. O primeiro acesso a `login.html` cria o admin (`/api/auth/setup`, só com a tabela vazia). Testes entram como admin pelo fixture `logged_in` do `conftest.py` (marcador `no_login` para testar o login real)
+- `qualidade.py` — laudos (Normas §9), limites de referência da Portaria GM/MS 888/2021 gravados junto do resultado; tabelas insert-only; não conforme abre alarme `laudo_nao_conforme`
+- `indicadores.py` — conciliação reservatórios × hidrômetros (§8.3, job diário 00:15) e KPIs da §11 (`/api/indicadores`)
 - `alarms.py` — alarmes de nível com histerese e falhas de sensor (offline, fora da faixa, salto); cada transição vira evento na tabela `events` (insert-only por trigger; reconhecimento em `event_acks`). Normas em `docs/sistemas-hidricos/Normas_Tecnicas.md`
 - `main.py` — rotas FastAPI + servir SPA estática do `frontend/`
 

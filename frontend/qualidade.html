@@ -8,76 +8,178 @@
 <link rel="stylesheet" href="assets/aguada.css?v=3">
 <link rel="stylesheet" href="assets/style.css">
 <style>
-  /* qualidade-specific only */
+  .q-grid { display: grid; grid-template-columns: 1fr 360px; gap: 16px; align-items: start; }
+  @media (max-width: 1000px) { .q-grid { grid-template-columns: 1fr; } }
+  .pontos { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+  .ponto { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--bg); border-left: 4px solid var(--border); }
+  .ponto.ok { border-left-color: #16a34a; } .ponto.bad { border-left-color: #dc2626; } .ponto.none { border-left-color: var(--text2); }
+  .ponto b { display: block; font-size: 13px; color: var(--text); }
+  .ponto small { color: var(--text2); font-size: 12px; }
+  .ponto .last5 { margin-top: 6px; font-size: 12px; }
+  table.laudos { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.laudos th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--text2); padding: 6px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  table.laudos td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .pv { display: inline-block; margin: 1px 4px 1px 0; padding: 1px 6px; border-radius: 6px; font-size: 11px; white-space: nowrap; }
+  .pv.ok { background: rgba(22,163,74,.12); color: #15803d; } .pv.bad { background: rgba(220,38,38,.12); color: #b91c1c; font-weight: 700; }
+  [data-theme="dark"] .pv.ok { color: #86efac; } [data-theme="dark"] .pv.bad { color: #fca5a5; }
+  .fld { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; font-size: 12px; color: var(--text2); }
+  .in { padding: 7px 9px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; font-size: 13px; width: 100%; box-sizing: border-box; }
+  .params { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+  .params .fld { margin: 0; }
+  .params .ref { font-size: 10px; color: var(--text2); }
+  .btn { padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .btn.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+  .btn:disabled { opacity: .5; cursor: wait; }
+  .msg { font-size: 12px; min-height: 16px; margin-top: 6px; }
+  .msg.err { color: #dc2626; } .msg.ok { color: #16a34a; }
+  .note { font-size: 11px; color: var(--text2); line-height: 1.4; margin-top: 10px; }
+  .wrap { overflow-x: auto; }
+  .locked { font-size: 13px; color: var(--text2); }
 </style>
 </head>
 <body class="admin-page">
 <div id="topbar" class="admin-header"></div>
 
 <div class="admin-main">
-  <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('agua', this)">Água de Consumo (CON)</button>
-    <button class="tab-btn" onclick="switchTab('esgoto', this)">Esgoto (ETE)</button>
-  </div>
-
-  <!-- ÁGUA DE CONSUMO -->
-  <div id="viewAgua" class="page-box">
-    <div class="page-title">Qualidade da Água — Reservatório Principal
-      <button class="btn-primary" style="font-size:12px;padding:6px 14px">+ Nova Análise</button>
-    </div>
-    
-    <h3 style="font-size:var(--font-sm); color:var(--text-muted); margin-bottom:10px;">Últimos Indicadores (Teste: 15/04/2026)</h3>
-    <div class="param-grid">
-      <div class="param-card"><div class="lbl">pH</div><div class="val">7.2</div><div class="norma">✓ Normal (6.0 - 9.5)</div></div>
-      <div class="param-card"><div class="lbl">Cloro Residual</div><div class="val">0.8 mg/L</div><div class="norma">✓ Normal (0.2 - 2.0 mg/L)</div></div>
-      <div class="param-card"><div class="lbl">Turbidez</div><div class="val">1.5 NTU</div><div class="norma">✓ Normal (< 5.0 NTU)</div></div>
-      <div class="param-card"><div class="lbl">Coliformes</div><div class="val">Ausente</div><div class="norma">✓ Normal</div></div>
+  <div class="q-grid">
+    <div>
+      <div class="box">
+        <div class="box-header"><h2>Pontos de coleta — últimas 5 coletas</h2></div>
+        <div class="box-body"><div class="pontos" id="pontos"><div class="loader"></div></div></div>
+      </div>
+      <div class="box" style="margin-top:16px">
+        <div class="box-header">
+          <h2>Laudos</h2>
+          <select class="in" id="filtro" style="width:auto" aria-label="Filtrar por ponto"><option value="">Todos os pontos</option></select>
+        </div>
+        <div class="box-body wrap" id="laudos"><div class="loader"></div></div>
+      </div>
     </div>
 
-    <h3 style="font-size:var(--font-sm); color:var(--text-muted); margin-top:20px; margin-bottom:10px;">Histórico de Laudos (Demo)</h3>
-    <div style="overflow-x:auto"><table>
-      <thead><tr><th>Data do Teste</th><th>Laboratório</th><th>Nº Relatório</th><th>Status</th><th>Ações</th></tr></thead>
-      <tbody>
-        <tr><td>15/04/2026</td><td>Lab AquaTest</td><td>REQ-2026-8982</td><td><span style="color:var(--success-green);font-weight:600">Aprovado</span></td><td><button class="btn-upload">Ver PDF</button></td></tr>
-        <tr><td>15/03/2026</td><td>Lab AquaTest</td><td>REQ-2026-8120</td><td><span style="color:var(--success-green);font-weight:600">Aprovado</span></td><td><button class="btn-upload">Ver PDF</button></td></tr>
-      </tbody>
-    </table></div>
-  </div>
-
-  <!-- ESGOTO -->
-  <div id="viewEsgoto" class="page-box" style="display:none">
-    <div class="page-title">Qualidade do Efluente Tratado — ETE
-      <button class="btn-primary" style="font-size:12px;padding:6px 14px">+ Nova Análise</button>
+    <div class="box">
+      <div class="box-header"><h2>Registrar laudo</h2></div>
+      <div class="box-body" id="formBox">
+        <form id="form" novalidate hidden>
+          <label class="fld">Ponto de coleta<select class="in" id="ponto"></select></label>
+          <div class="params" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
+            <label class="fld">Data da coleta<input class="in" id="data" type="date"></label>
+            <label class="fld">Nº do laudo<input class="in" id="numero" maxlength="40"></label>
+          </div>
+          <label class="fld">Laboratório<input class="in" id="lab" maxlength="80" list="labs"></label>
+          <datalist id="labs"></datalist>
+          <div class="fld">Resultados <small>(em branco = não analisado)</small></div>
+          <div class="params" id="params"></div>
+          <label class="fld" style="margin-top:10px">PDF do laudo (opcional, até 10 MB)<input class="in" id="pdf" type="file" accept="application/pdf"></label>
+          <label class="fld">Observação<input class="in" id="obs" maxlength="200"></label>
+          <button class="btn primary" id="send" type="submit">Registrar laudo</button>
+          <div class="msg" id="msg" role="alert" aria-live="polite"></div>
+          <p class="note">Laudo registrado não se edita (Normas §9.2): para corrigir, registre um novo com observação. Parâmetro fora do limite abre alerta sanitário em Alertas; o próximo resultado conforme do mesmo ponto o normaliza.</p>
+        </form>
+        <p class="locked" id="locked" hidden></p>
+        <p class="note" id="ref"></p>
+      </div>
     </div>
-    
-    <h3 style="font-size:var(--font-sm); color:var(--text-muted); margin-bottom:10px;">Últimos Indicadores (Teste: 10/04/2026)</h3>
-    <div class="param-grid">
-      <div class="param-card"><div class="lbl">DBO (5 dias)</div><div class="val">45 mg/L</div><div class="norma" style="color:var(--yellow)">⚠ Atenção (Alvo < 50 mg/L)</div></div>
-      <div class="param-card"><div class="lbl">Sólidos Suspensos</div><div class="val">25 mg/L</div><div class="norma">✓ Normal (< 30 mg/L)</div></div>
-      <div class="param-card"><div class="lbl">pH</div><div class="val">7.8</div><div class="norma">✓ Normal (6.0 - 9.0)</div></div>
-    </div>
-
-    <h3 style="font-size:var(--font-sm); color:var(--text-muted); margin-top:20px; margin-bottom:10px;">Histórico de Laudos (Demo)</h3>
-    <div style="overflow-x:auto"><table>
-      <thead><tr><th>Data do Teste</th><th>Laboratório</th><th>Nº Relatório</th><th>Status</th><th>Ações</th></tr></thead>
-      <tbody>
-        <tr><td>10/04/2026</td><td>Lab Ambiental</td><td>AMB-2026-112</td><td><span style="color:var(--yellow);font-weight:600">Observação</span></td><td><button class="btn-upload">Ver PDF</button></td></tr>
-        <tr><td>10/03/2026</td><td>Lab Ambiental</td><td>AMB-2026-085</td><td><span style="color:var(--success-green);font-weight:600">Aprovado</span></td><td><button class="btn-upload">Ver PDF</button></td></tr>
-      </tbody>
-    </table></div>
   </div>
 </div>
 
 <script src="assets/api.js"></script>
 <script>
 document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('qualidade.html');
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+const br = (iso) => iso ? iso.split('-').reverse().join('/') : '—';
+let PARAMS = [], pontos = [], laudos = [];
 
-function switchTab(view, btn) {
-  document.getElementById('viewAgua').style.display   = view === 'agua' ? 'block' : 'none';
-  document.getElementById('viewEsgoto').style.display = view === 'esgoto' ? 'block' : 'none';
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+const fmtVal = (p, ref) => ref?.presenca ? (p.valor ? 'presente' : 'ausente') : `${p.valor}${p.unidade ? ' ' + p.unidade : ''}`;
+const fmtLim = (r) => r.presenca ? 'ausência' : [r.min != null ? `≥ ${r.min}` : null, r.max != null ? `≤ ${r.max}` : null].filter(Boolean).join(' e ');
+
+function renderPontos() {
+  $('pontos').innerHTML = pontos.map((pt) => {
+    const ls = laudos.filter((l) => l.ponto_id === pt.id).slice(0, 5);
+    const bad = ls.filter((l) => !l.conforme).length;
+    const cls = !ls.length ? 'none' : (ls[0].conforme ? 'ok' : 'bad');
+    return `<div class="ponto ${cls}"><b>${esc(pt.nome)}</b>
+      <small>${ls.length ? `última coleta ${br(ls[0].data_coleta)}` : 'sem laudo registrado'}</small>
+      ${ls.length ? `<div class="last5">${ls.length - bad} OK · <span style="color:${bad ? '#dc2626' : 'inherit'}">${bad} não conforme</span></div>` : ''}</div>`;
+  }).join('');
 }
+
+function renderLaudos() {
+  const f = Number($('filtro').value) || null;
+  const rows = laudos.filter((l) => !f || l.ponto_id === f);
+  const ref = Object.fromEntries(PARAMS.map((p) => [p.id, p]));
+  $('laudos').innerHTML = rows.length ? `<table class="laudos">
+    <thead><tr><th>Coleta</th><th>Ponto</th><th>Laboratório / nº</th><th>Resultados</th><th>Registro</th></tr></thead>
+    <tbody>${rows.map((l) => `<tr>
+      <td style="white-space:nowrap">${br(l.data_coleta)}</td>
+      <td>${esc(l.ponto)}</td>
+      <td>${esc(l.laboratorio)}${l.numero ? `<br><small>${esc(l.numero)}</small>` : ''}${l.arquivo ? `<br><a href="/api/qualidade/laudos/${l.id}/pdf" target="_blank" rel="noopener">PDF</a>` : ''}</td>
+      <td>${l.parametros.map((p) => `<span class="pv ${p.conforme ? 'ok' : 'bad'}" title="limite: ${esc(fmtLim({ min:p.limite_min, max:p.limite_max, presenca:ref[p.parametro]?.presenca }))}">${esc(ref[p.parametro]?.nome || p.parametro)}: ${esc(fmtVal(p, ref[p.parametro]))}</span>`).join('')}
+        ${l.obs ? `<br><small>${esc(l.obs)}</small>` : ''}</td>
+      <td><small>${esc(l.criado_por)}<br>${new Date(l.criado_ts * 1000).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}</small></td>
+    </tr>`).join('')}</tbody></table>` : '<p style="color:var(--text2);font-size:13px">Nenhum laudo registrado.</p>';
+}
+
+function renderForm(me) {
+  const can = me && (me.role === 'supervisor' || me.role === 'admin');
+  $('form').hidden = !can;
+  $('locked').hidden = can;
+  $('locked').innerHTML = me ? 'Registro de laudos restrito a supervisor ou administrador.'
+    : 'Para registrar laudos, <a href="login.html?next=qualidade.html">entre com seu usuário</a> (supervisor ou administrador).';
+  $('ponto').innerHTML = pontos.map((p) => `<option value="${p.id}">${esc(p.nome)}</option>`).join('');
+  $('data').value ||= aguadaAPI.today();
+  $('labs').innerHTML = [...new Set(laudos.map((l) => l.laboratorio))].map((l) => `<option value="${esc(l)}">`).join('');
+  $('params').innerHTML = PARAMS.map((p) => `<label class="fld">${esc(p.nome)}${p.unidade && !p.presenca ? ` (${esc(p.unidade)})` : ''}
+      ${p.presenca
+        ? `<select class="in" data-param="${p.id}"><option value="">—</option><option value="0">Ausente</option><option value="1">Presente</option></select>`
+        : `<input class="in" data-param="${p.id}" type="number" step="any" inputmode="decimal">`}
+      <span class="ref">ref.: ${esc(fmtLim(p))}</span></label>`).join('');
+}
+
+function readPdf(file) {
+  return new Promise((ok, fail) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = fail; r.readAsDataURL(file); });
+}
+
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const parametros = [...document.querySelectorAll('[data-param]')].filter((el) => el.value !== '')
+    .map((el) => ({ parametro: el.dataset.param, valor: Number(el.value) }));
+  const msg = (t, ok = false) => { $('msg').textContent = t; $('msg').className = `msg ${ok ? 'ok' : 'err'}`; };
+  if (!$('lab').value.trim()) return msg('Informe o laboratório.');
+  if (!parametros.length) return msg('Preencha ao menos um resultado.');
+  const file = $('pdf').files[0];
+  if (file && file.size > 10 * 1024 * 1024) return msg('PDF acima de 10 MB.');
+  $('send').disabled = true; $('send').textContent = 'Registrando…';
+  const body = { ponto_id: Number($('ponto').value), data_coleta: $('data').value, laboratorio: $('lab').value.trim(),
+    numero: $('numero').value.trim() || null, obs: $('obs').value.trim() || null, parametros,
+    pdf_base64: file ? await readPdf(file) : null };
+  const r = await fetch('/api/qualidade/laudos', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) }).catch(() => null);
+  $('send').disabled = false; $('send').textContent = 'Registrar laudo';
+  if (!r?.ok) return msg(r ? (await r.json().catch(() => ({}))).detail || `Erro ${r.status}` : 'Servidor indisponível.');
+  const res = await r.json();
+  msg(res.conforme ? 'Laudo registrado: conforme.' : 'Laudo registrado com parâmetro fora do limite — alerta aberto em Alertas.', res.conforme);
+  document.querySelectorAll('[data-param]').forEach((el) => { el.value = ''; });
+  ['numero', 'obs', 'pdf'].forEach((k) => { $(k).value = ''; });
+  await load(false);
+});
+$('filtro').addEventListener('change', renderLaudos);
+
+async function load(full = true) {
+  const [p, pt, l, me] = await Promise.all([
+    full ? fetch('/api/qualidade/parametros').then((r) => r.json()) : null,
+    fetch('/api/qualidade/pontos').then((r) => r.json()),
+    fetch('/api/qualidade/laudos?limit=200').then((r) => r.json()),
+    aguadaAPI.me(),
+  ]);
+  if (p) { PARAMS = p.items; $('ref').textContent = `Limites de referência: ${p.referencia}. O limite usado fica gravado junto do resultado.`; }
+  pontos = pt.items; laudos = l.items;
+  if (full) {
+    $('filtro').innerHTML = '<option value="">Todos os pontos</option>' + pontos.map((x) => `<option value="${x.id}">${esc(x.nome)}</option>`).join('');
+    renderForm(me);
+  }
+  renderPontos(); renderLaudos();
+}
+load();
 </script>
 </body>
 </html>

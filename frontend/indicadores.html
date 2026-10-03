@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>AGUADA — Indicadores</title>
+<link rel="stylesheet" href="assets/aguada.css?v=3">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+  .kpi { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .kpi .v { font: 700 24px/1.2 var(--mono, monospace); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kpi .l { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .kpi .f { font-size: 10px; color: var(--text2); margin-top: 6px; opacity: .8; }
+  .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .toolbar h1 { margin: 0; font-size: 18px; color: var(--text); }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .seg button { padding: 6px 12px; border: 0; background: var(--bg2); color: var(--text2); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .seg button.on { background: #2563eb; color: #fff; }
+  table.t { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.t th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--text2); padding: 6px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  table.t td { padding: 7px 8px; border-bottom: 1px solid var(--border); }
+  table.t td.n { font-family: var(--mono, monospace); text-align: right; white-space: nowrap; }
+  .bar { height: 8px; border-radius: 4px; background: var(--bg3); overflow: hidden; min-width: 80px; }
+  .bar i { display: block; height: 100%; }
+  .st { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+  .st.ok { background: rgba(22,163,74,.12); color: #15803d; }
+  .st.inconsistente { background: rgba(220,38,38,.12); color: #b91c1c; }
+  .st.sem_dado { background: var(--bg3); color: var(--text2); }
+  .wrap { overflow-x: auto; }
+  .note { font-size: 11px; color: var(--text2); line-height: 1.45; margin-top: 10px; }
+</style>
+</head>
+<body class="admin-page">
+<div id="topbar" class="admin-header"></div>
+
+<div class="admin-main">
+  <div class="toolbar">
+    <h1>Indicadores operacionais <small style="font-size:12px;color:var(--text2);font-weight:400">NBR ISO 24510 · Normas §8.3 e §11</small></h1>
+    <div class="seg" role="group" aria-label="Período">
+      <button type="button" data-d="7">7 dias</button><button type="button" data-d="30" class="on">30 dias</button><button type="button" data-d="90">90 dias</button>
+    </div>
+  </div>
+
+  <div class="kpis" id="kpis"><div class="loader"></div></div>
+
+  <div class="box" style="margin-top:16px">
+    <div class="box-header"><h2>Disponibilidade por reservatório</h2></div>
+    <div class="box-body wrap" id="disp"><div class="loader"></div></div>
+  </div>
+
+  <div class="box" style="margin-top:16px">
+    <div class="box-header"><h2>Conciliação reservatórios × hidrômetros</h2></div>
+    <div class="box-body wrap" id="conc"><div class="loader"></div></div>
+  </div>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+document.getElementById('topbar').innerHTML = aguadaAPI.navHTML('indicadores.html');
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+const n = (v, d = 1) => v == null ? '—' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+const br = (iso) => iso.split('-').reverse().slice(0, 2).join('/');
+let days = 30;
+
+async function load() {
+  $('kpis').innerHTML = '<div class="loader"></div>';
+  const k = await fetch(`/api/indicadores?days=${days}`).then((r) => r.json()).catch(() => null);
+  if (!k) { $('kpis').innerHTML = '<p>Não foi possível carregar os indicadores.</p>'; return; }
+  const disp = k.disponibilidade;
+  const comDado = disp.filter((d) => d.pct != null);
+  const media = comDado.length ? comDado.reduce((s, d) => s + d.pct, 0) / comDado.length : null;
+  const cobertura = disp.length ? disp.reduce((s, d) => s + d.cobertura_pct, 0) / disp.length : null;
+  const c = k.conciliacao;
+  $('kpis').innerHTML = [
+    [`${n(media)} %`, 'Disponibilidade média', 'horas acima do crítico ÷ horas com leitura'],
+    [`${n(cobertura)} %`, 'Cobertura de leitura', 'horas com leitura ÷ horas do período'],
+    [k.acionamentos_bomba, 'Acionamentos de bomba', 'registros "ligada" após outro estado'],
+    [k.eventos_alarme, `Eventos de alarme (${k.eventos_criticos} críticos)`, 'alarmes e falhas abertos no período'],
+    [k.intervencoes_manuais, 'Intervenções manuais', 'comandos com usuário identificado'],
+    [`${k.nao_conformidades}`, `Não conformidades (${k.laudos} laudos)`, 'parâmetros fora do limite nos laudos'],
+    [c.dias_conciliados ? `${c.dias_ok}/${c.dias_conciliados}` : '—', 'Consumo conciliado', `dias com diferença ≤ ${c.limite_pct} %`],
+  ].map(([v, l, f]) => `<div class="kpi"><div class="v" title="${esc(v)}">${esc(v)}</div><div class="l">${esc(l)}</div><div class="f">${esc(f)}</div></div>`).join('');
+
+  $('disp').innerHTML = `<table class="t"><thead><tr><th>Reservatório</th><th style="width:35%">Acima do crítico</th><th>Disponibilidade</th><th>Cobertura</th><th>Crítico</th></tr></thead><tbody>
+    ${disp.map((d) => `<tr><td><b>${esc(d.nome)}</b> <small style="color:var(--text2)">${esc(d.alias)}</small></td>
+      <td><div class="bar"><i style="width:${d.pct ?? 0}%;background:${d.pct >= 95 ? '#16a34a' : d.pct >= 80 ? '#d97706' : '#dc2626'}"></i></div></td>
+      <td class="n">${d.pct == null ? 'sem leitura' : `${n(d.pct)} %`}</td>
+      <td class="n" title="${d.horas_com_dado} de ${d.horas_total} h com leitura">${n(d.cobertura_pct)} %</td><td class="n">${n(d.limite_critico, 0)} %</td></tr>`).join('')}
+    </tbody></table>
+    <p class="note">Disponibilidade = horas com mediana acima do nível crítico ÷ horas com leitura. Cobertura = horas com leitura ÷ horas do período (sensor ou gateway parado baixa a cobertura, não a disponibilidade). Limite crítico de cada reservatório em Alertas.</p>`;
+
+  const pares = c.dias[0]?.pares.map((p) => p.nome) || [];
+  $('conc').innerHTML = `<table class="t"><thead><tr><th>Dia</th>${pares.map((p) => `<th>${esc(p)}</th>`).join('')}</tr></thead><tbody>
+    ${c.dias.map((d) => `<tr><td class="n" style="text-align:left">${br(d.data)}</td>${d.pares.map((p) => `<td>${p.status === 'sem_dado'
+      ? '<span class="st sem_dado">sem dado</span>'
+      : `<span class="st ${p.status}">${p.status === 'ok' ? 'ok' : 'divergente'}</span> <span style="font-family:var(--mono);font-size:11px">${n(p.a_m3)} × ${n(p.b_m3)} m³ (${p.diff_pct > 0 ? '+' : ''}${n(p.diff_pct)} %)</span>`}</td>`).join('')}</tr>`).join('')}
+    </tbody></table>
+    <p class="note">Por dia: o que saiu (consumo calculado do CON pelo nível, ou hidrômetro de envio) × o que foi medido na chegada. Diferença acima de ${c.limite_pct} % vira alerta no histórico (rotina diária às 00:15). Consumo do hidrômetro = última leitura até o fim do dia − última leitura até o início; sem leitura nos dois lados, o dia fica "sem dado".</p>`;
+}
+
+document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b));
+  days = Number(b.dataset.d);
+  load();
+}));
+load();
+</script>
+</body>
+</html>
