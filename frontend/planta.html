@@ -36,6 +36,7 @@
     .legend input { accent-color: #2563eb; width: 15px; height: 15px; margin: 0; flex: none; }
     .legend .sw { width: 22px; height: 14px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
     .legend .line { width: 22px; height: 0; border-top: 3px solid; }
+    .legend .dot { width: 10px; height: 10px; border-radius: 50%; border: 3px solid; background: #fff; }
     .legend .hint { font-size: 11px; color: var(--text2); margin: 2px 0 0 23px; }
     .legend .note { font-size: 11px; color: var(--text2); padding: 0 14px 12px; }
 
@@ -58,7 +59,8 @@
       <template x-for="o in overlayList" :key="o.key">
         <label>
           <input type="checkbox" :checked="layers[o.key]" @change="toggleLayer(o.key)"/>
-          <span class="sw"><span class="line" :style="`border-color:${o.color}` + (o.key === 'areas' ? ';border-top-style:dashed' : '')"></span></span>
+          <span class="sw" x-show="o.kind !== 'point'"><span class="line" :style="`border-color:${o.color}` + (o.key === 'areas' ? ';border-top-style:dashed' : '')"></span></span>
+          <span class="sw" x-show="o.kind === 'point'"><span class="dot" :style="`border-color:${o.color}`"></span></span>
           <span x-text="o.label"></span>
         </label>
       </template>
@@ -101,7 +103,7 @@ function plantaApp() {
   return {
     ...wsMixin(),
     overlayList: aguadaMapa.OVERLAYS,
-    layers: { adutora:true, agua:true, incendio:true, predios:true, areas:true },
+    layers: Object.fromEntries(aguadaMapa.OVERLAYS.map((o) => [o.key, o.def !== false])),
     filters: { reservoirs:true, pumps:true, valves:true, hydrometers:true, sanitation:true },
     zoom: 17,
     data: { reservoirs:[], pumps:[], valves:[], hydrometers:[], infra:null },
@@ -124,7 +126,7 @@ function plantaApp() {
       };
       // Mapa e marcadores fora do proxy reativo do Alpine (Leaflet não gosta de ser observado)
       const { map, overlays } = await aguadaMapa.createMap('planta-map', {
-        infra, control:false, on:Object.keys(this.layers), zoomControl:true,
+        infra, control:false, on:Object.keys(this.layers).filter((k) => this.layers[k]), zoomControl:true,
       });
       this._m = () => ({ map, overlays });
       const markers = {};

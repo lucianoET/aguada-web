@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="data:,">
+  <title>AGUADA — Rede</title>
+  <link rel="stylesheet" href="assets/aguada.css?v=3"/>
+  <link rel="stylesheet" href="assets/style.css"/>
+  <link rel="stylesheet" href="assets/vendor/leaflet.min.css"/>
+  <link rel="stylesheet" href="assets/mapa.css"/>
+  <style>
+    [x-cloak] { display: none; }
+    body.admin-page { background: var(--bg); }
+    .rede { display: grid; grid-template-columns: 390px 1fr; height: calc(100dvh - 48px); }
+    #rede-map { height: 100%; background: #aad3df; }
+    .panel { overflow-y: auto; background: var(--bg2); border-right: 1px solid var(--border); color: var(--text); font: 13px/1.35 Arial, sans-serif; }
+    .panel header { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); border-left: 4px solid var(--rede); }
+    .panel h1 { margin: 0 0 6px; font-size: 18px; }
+    .panel header p { margin: 0; color: var(--text2); font-size: 12px; }
+    .panel section { padding: 12px 18px; border-bottom: 1px solid var(--border); }
+    .panel h2 { margin: 0 0 8px; font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--text2); }
+    .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .kpi { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; min-width: 0; }
+    .kpi .v { font: 700 18px/1.2 var(--mono, monospace); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .kpi .l { font-size: 11px; color: var(--text2); }
+    .row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid var(--border); }
+    .row:first-of-type { border-top: 0; }
+    .row .name { flex: 1; min-width: 0; }
+    .row .name b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .row .name small { color: var(--text2); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .row .num { font: 700 13px var(--mono, monospace); white-space: nowrap; text-align: right; }
+    .bar { width: 64px; height: 8px; border-radius: 4px; background: var(--bg3); overflow: hidden; flex: none; }
+    .bar i { display: block; height: 100%; }
+    .badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 7px; border-radius: 10px; border: 1px solid; white-space: nowrap; flex: none; }
+    .b-ok { color: #16a34a; background: rgba(22,163,74,.1); }
+    .b-off { color: #64748b; background: rgba(100,116,139,.1); }
+    .b-warn { color: #d97706; background: rgba(217,119,6,.12); }
+    .b-bad { color: #dc2626; background: rgba(220,38,38,.1); }
+    button.row { width: 100%; background: none; border-left: 0; border-right: 0; border-bottom: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+    button.row:hover, button.row:focus-visible { background: var(--bg3); outline: none; }
+    .search { width: 100%; box-sizing: border-box; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; margin-bottom: 8px; }
+    .chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 6px; }
+    .chip { padding: 6px 4px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font: 700 11px var(--mono, monospace); cursor: pointer; }
+    .chip:hover, .chip:focus-visible { border-color: var(--rede); outline: none; }
+    .chip.flag { border-style: dashed; }
+    .note { color: var(--text2); font-size: 11px; margin: 8px 0 0; }
+    .empty { color: var(--text2); font-size: 12px; padding: 4px 0; }
+    @media (max-width: 760px) {
+      .rede { grid-template-columns: 1fr; grid-template-rows: 52dvh auto; height: auto; }
+      #rede-map { order: -1; }
+      .panel { border-right: 0; overflow: visible; }
+    }
+  </style>
+</head>
+<body class="admin-page">
+<div id="topbar" class="admin-header"></div>
+
+<main class="rede" x-data="redeApp()" :style="`--rede:${cfg.color}`">
+  <aside class="panel" x-cloak>
+    <header>
+      <h1 x-text="cfg.title"></h1>
+      <p x-text="cfg.subtitle"></p>
+    </header>
+
+    <section class="kpis">
+      <template x-for="k in kpis()" :key="k.l">
+        <div class="kpi"><div class="v" x-text="k.v" :title="k.v"></div><div class="l" x-text="k.l"></div></div>
+      </template>
+    </section>
+
+    <section>
+      <h2>Reservatórios</h2>
+      <template x-for="r in reservoirRows()" :key="r.alias">
+        <button type="button" class="row" @click="focusReservoir(r.alias)">
+          <span class="name"><b x-text="r.name"></b><small x-text="`${r.alias} · ${r.online ? (r.ts ? timeAgo(r.ts) : 'sem leitura') : 'offline'}`"></small></span>
+          <span class="bar"><i :style="`width:${r.pct ?? 0}%;background:${statusColor(r.pct, r.online)}`"></i></span>
+          <span class="num" x-text="r.pct != null ? `${Math.round(r.pct)}% · ${(r.volume_l / 1000).toFixed(1)} m³` : '—'"></span>
+        </button>
+      </template>
+      <div class="empty" x-show="!reservoirRows().length">Sem leitura dos reservatórios.</div>
+    </section>
+
+    <section>
+      <h2>Bombas</h2>
+      <template x-for="p in pumpRows()" :key="p.name">
+        <div class="row">
+          <span class="name"><b x-text="p.name"></b><small x-text="p.note"></small></span>
+          <span class="badge" :class="stateClass(p.state)" x-text="stateLabel(p.state)"></span>
+        </div>
+      </template>
+    </section>
+
+    <section>
+      <h2>Válvulas</h2>
+      <template x-for="v in valveRows()" :key="v.name">
+        <div class="row">
+          <span class="name"><b x-text="v.name"></b><small x-text="v.note || ' '"></small></span>
+          <span class="badge" :class="stateClass(v.state)" x-text="stateLabel(v.state)"></span>
+        </div>
+      </template>
+    </section>
+
+    <template x-if="key === 'agua'">
+      <section>
+        <h2>Hidrômetros com leitura</h2>
+        <template x-for="h in meterRows()" :key="h.meter_name">
+          <div class="row">
+            <span class="name"><b x-text="h.meter_name"></b><small x-text="h.ts ? timeAgo(h.ts) : ''"></small></span>
+            <span class="num" x-text="`${Number(h.reading).toFixed(2)} ${h.unit || 'm³'}`"></span>
+          </div>
+        </template>
+        <div class="empty" x-show="!meterRows().length">Nenhuma leitura registrada.</div>
+      </section>
+    </template>
+
+    <template x-if="key === 'agua'">
+      <section>
+        <h2>Hidrômetros dos prédios (planta)</h2>
+        <template x-for="h in buildingMeters" :key="h.key">
+          <button type="button" class="row" @click="focusPoint('hid_predio', h.predio, h.key)">
+            <span class="name"><b x-text="h.predio"></b></span>
+            <span class="num" x-text="`${h.vazao} m³/h`"></span>
+          </button>
+        </template>
+        <p class="note">Vazão nominal indicada na planta; sem leitura no sistema.</p>
+      </section>
+    </template>
+
+    <template x-if="key === 'incendio'">
+      <section>
+        <h2 x-text="`Hidrantes (${hydrants.length})`"></h2>
+        <input class="search" type="search" placeholder="Buscar: 020, HID-054…" x-model="query" aria-label="Buscar hidrante"/>
+        <div class="chips">
+          <template x-for="h in hydrants.filter((x) => x.id.includes(query.trim().toUpperCase()))" :key="h.key">
+            <button type="button" class="chip" :class="h.obs ? 'flag' : ''" :title="h.obs || h.id" x-text="h.id.replace('HID-', '')" @click="focusPoint('hidrantes', h.id, h.key)"></button>
+          </template>
+        </div>
+        <p class="note" x-show="missing">Numeração sem hidrante na planta: <span x-text="missing"></span>. Tracejado = rótulo duvidoso na planta.</p>
+      </section>
+    </template>
+
+    <section><p class="note" style="margin:0" x-text="`Traçado, registros e ${key === 'incendio' ? 'hidrantes' : 'hidrômetros dos prédios'} vêm do projeto “Rede de incêndio e aguada” (as built). Extensão medida no desenho: ${lengthKm} km.`"></p></section>
+  </aside>
+
+  <div id="rede-map" role="application" :aria-label="cfg.title"></div>
+</main>
+
+<script src="assets/api.js"></script>
+<script src="assets/shared.js"></script>
+<script src="assets/vendor/leaflet.min.js"></script>
+<script src="assets/mapa.js"></script>
+<script defer src="assets/vendor/alpine.min.js"></script>
+<script>
+const REDES = {
+  agua: {
+    title:'Rede de água potável', color:'#2563eb',
+    subtitle:'Concessionária → CBIF → linha submarina → CIE → CB3 → CON → consumo nas Áreas A e B.',
+    layers:['adutora', 'agua', 'hid_predio', 'reg_agua', 'predios', 'areas'],
+    reservoirs:['CBIF1', 'CBIF2', 'CIE1', 'CIE2', 'CB31', 'CB32', 'CON'],
+    pumps:{ 'BIF-D':'CBIF · diesel', 'BIF-E':'CBIF · elétrica', 'B03-D':'CB3 · diesel, recalque', 'B03-E':'CB3 · elétrica, recalque' },
+    pumpSites:['CBIF', 'CB3'], valve:(name) => !name.startsWith('V-CAV'), hydrometers:true,
+  },
+  incendio: {
+    title:'Rede de incêndio', color:'#dc2626',
+    subtitle:'O CAV abastece a rede por gravidade (V-CAV-BA/AV/AZ). Em combate, a CB2 pressuriza a rede e os hidrantes Y; a CB1 bombeia água do mar se a água doce acabar.',
+    layers:['incendio', 'hidrantes', 'reg_incendio', 'predios', 'areas'],
+    reservoirs:['CAV'],
+    pumps:{ 'B02-D':'CB2 · diesel, pressurização', 'B02-E':'CB2 · elétrica, acionamento remoto (contatora)', 'B01-D':'CB1 · emergência, água do mar' },
+    pumpSites:['CB2', 'CB1'], valve:(name) => name.startsWith('V-CAV'), hydrometers:false,
+  },
+};
+
+function redeApp() {
+  const key = REDES[new URLSearchParams(location.search).get('r')] ? new URLSearchParams(location.search).get('r') : 'agua';
+  document.getElementById('topbar').innerHTML = aguadaAPI.navHTML(`rede.html?r=${key}`);
+  document.title = `AGUADA — ${REDES[key].title}`;
+  return {
+    ...wsMixin(),
+    key, cfg:REDES[key],
+    data:{ reservoirs:[], pumps:[], valves:[], hydrometers:[], infra:null },
+    hydrants:[], buildingMeters:[], missing:'', lengthKm:'—', query:'',
+    counts:{ hidrante:0, registro:0, hidrometro:0 },
+
+    async init() {
+      const [reservoirs, equip, infra] = await Promise.all([
+        aguadaAPI.getReservoirs().catch(() => []),
+        aguadaAPI.getEquipCurrent().catch(() => ({ pumps:[], valves:[], hydrometers:[] })),
+        fetch('assets/infra.json').then((r) => r.json()).catch(() => null),
+      ]);
+      this.data = { infra, reservoirs:Array.isArray(reservoirs) ? reservoirs : [],
+        pumps:equip.pumps || [], valves:equip.valves || [], hydrometers:equip.hydrometers || [] };
+
+      // Mapa fora do proxy reativo do Alpine
+      const { map, overlays, redes } = await aguadaMapa.createMap('rede-map', { infra, on:this.cfg.layers, zoomControl:true });
+      this._m = () => ({ map, overlays });
+      const markers = {};
+      this._markers = () => markers;
+      this.readPlan(redes);
+      map.on('zoomend', () => this.sync());
+      this.sync();
+
+      this.wsConnect((raw) => {
+        const msg = normalizeWsMessage(raw);
+        if (msg.type === 'snapshot') this.data.reservoirs = msg.reservoirs;
+        else if (msg.type === 'reading' && msg.reading) {
+          const i = this.data.reservoirs.findIndex((r) => r.alias === msg.reading.alias);
+          if (i >= 0) this.data.reservoirs[i] = { ...this.data.reservoirs[i], ...msg.reading };
+        }
+        this.sync();
+      });
+    },
+
+    // Pontos e extensão da rede a partir do GeoJSON da planta
+    readPlan(redes) {
+      const feats = redes?.features || [];
+      const rede = this.key;
+      const pts = (layer, test = () => true) => feats.filter((f) => f.properties.layer === layer && test(f.properties));
+      this.counts = {
+        hidrante:pts('hidrante').length,
+        registro:pts('registro', (p) => p.rede === rede).length,
+        hidrometro:pts('hidrometro').length,
+      };
+      this.hydrants = pts('hidrante').map((f, i) => ({ key:i, id:f.properties.id || '?', obs:f.properties.obs }))
+        .sort((a, b) => a.id.localeCompare(b.id));
+      const nums = new Set(this.hydrants.map((h) => Number(h.id.slice(4))));
+      const max = Math.max(0, ...nums);
+      const gaps = [];
+      for (let n = 1; n <= max; n++) if (!nums.has(n)) gaps.push(n);
+      // agrupa sequências: 64, 65, … 77 → 064–077
+      const runs = [];
+      gaps.forEach((n) => { const r = runs[runs.length - 1]; if (r && n === r[1] + 1) r[1] = n; else runs.push([n, n]); });
+      const pad = (n) => String(n).padStart(3, '0');
+      this.missing = runs.map(([a, b]) => a === b ? pad(a) : `${pad(a)}–${pad(b)}`).join(', ');
+      this.buildingMeters = pts('hidrometro').map((f, i) => ({ key:i, predio:f.properties.predio || 'Prédio', vazao:f.properties.vazao_m3h ?? '—' }));
+      // traços < 4 m são símbolos (caixas, registros), não tubulação
+      let meters = 0;
+      feats.filter((f) => f.properties.layer === rede).forEach((f) => f.geometry.coordinates.forEach((line) => {
+        let len = 0;
+        for (let i = 1; i < line.length; i++) len += L.latLng(line[i - 1][1], line[i - 1][0]).distanceTo(L.latLng(line[i][1], line[i][0]));
+        if (len >= 4) meters += len;
+      }));
+      this.lengthKm = (meters / 1000).toFixed(1).replace('.', ',');
+    },
+
+    kpis() {
+      const res = this.reservoirRows();
+      const vol = res.reduce((s, r) => s + (Number(r.volume_l) || 0), 0) / 1000;
+      const cap = res.reduce((s, r) => s + (Number(r.volume_max_l || r.capacity_l) || 0), 0) / 1000;
+      const kp = [{ v:`${vol.toFixed(0)} / ${cap.toFixed(0)} m³`, l:this.key === 'incendio' ? 'Reserva no CAV' : 'Volume reservado' }];
+      if (this.key === 'incendio') kp.push({ v:String(this.counts.hidrante), l:'Hidrantes' });
+      else kp.push({ v:String(this.counts.hidrometro), l:'Hidrômetros de prédio' });
+      kp.push({ v:String(this.counts.registro), l:'Registros' }, { v:`${this.lengthKm} km`, l:'Extensão (planta)' });
+      return kp;
+    },
+
+    reservoirRows() {
+      return this.cfg.reservoirs.map((a) => this.data.reservoirs.find((r) => r.alias === a)).filter(Boolean)
+        .map((r) => ({ ...r, name:r.name || r.alias }));
+    },
+
+    pumpRows() {
+      return Object.entries(this.cfg.pumps).map(([name, note]) => ({ name, note, state:this.data.pumps.find((p) => p.pump_name === name)?.state }));
+    },
+
+    valveRows() {
+      const names = [...new Set([...(this.data.infra?.valves || []).map((v) => v.name), ...this.data.valves.map((v) => v.valve_name)])]
+        .filter((n) => n?.startsWith('V-') && this.cfg.valve(n)).sort();
+      return names.map((name) => { const v = this.data.valves.find((x) => x.valve_name === name); return { name, state:v?.state, note:v?.note }; });
+    },
+
+    meterRows() { return this.data.hydrometers.filter((h) => Number.isFinite(Number(h.reading))); },
+
+    stateLabel(state) { return { manutencao:'manutenção' }[state] || state || 'sem registro'; },
+
+    stateClass(state) {
+      if (state === 'ligada' || state === 'aberta') return 'b-ok';
+      if (state === 'falha' || state === 'fechada') return 'b-bad';
+      if (state === 'manutencao' || state === 'parcial') return 'b-warn';
+      return 'b-off';
+    },
+
+    // Só os elementos desta rede
+    belongs(item) {
+      if (item.type === 'res') return (item.tanks || [item]).some((t) => this.cfg.reservoirs.includes(t.alias));
+      if (item.type === 'pump') return this.cfg.pumpSites.includes(item.alias);
+      if (item.type === 'valve') return this.cfg.valve(item.name);
+      if (item.type === 'hydrometer') return this.cfg.hydrometers;
+      return false;
+    },
+
+    sync() {
+      if (!this._m) return;
+      const { map } = this._m();
+      const elements = aguadaMapa.buildElements(this.data, map.getZoom()).filter((item) => this.belongs(item));
+      aguadaMapa.syncMarkers(map, this._markers(), elements, (marker, item) => marker.bindTooltip(item.summary?.detail || `<b>${item.name || item.alias}</b>`));
+    },
+
+    // No celular o mapa fica acima da lista: traz ele para a tela antes de voar
+    showMap() { if (window.innerWidth <= 760) this._m().map.getContainer().scrollIntoView({ behavior:'smooth', block:'start' }); },
+
+    focusReservoir(alias) {
+      const r = this.data.reservoirs.find((x) => x.alias === alias);
+      if (!r?.lat) return;
+      this.showMap();
+      this._m().map.flyTo([r.lat, r.lng], 18);
+    },
+
+    // Centraliza no símbolo da planta e abre o popup (liga a camada se estiver desligada)
+    focusPoint(layerKey, title, index) {
+      const { map, overlays } = this._m();
+      const layer = overlays[layerKey];
+      if (!layer) return;
+      if (!map.hasLayer(layer)) layer.addTo(map);
+      const all = layer.getLayers();
+      // índice = ordem das feições no GeoJSON, a mesma em que o mapa criou os marcadores
+      const marker = index != null ? all[index] : all.find((m) => m.options.title === title);
+      if (!marker) return;
+      this.showMap();
+      map.flyTo(marker.getLatLng(), 19);
+      map.once('moveend', () => marker.openPopup());
+    },
+  };
+}
+</script>
+</body>
+</html>

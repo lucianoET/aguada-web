@@ -140,6 +140,8 @@ const aguadaAPI = (() => {
         ['alerts.html',   'Alertas'],
         ['manutencao.html','Manutenção'],
         ['qualidade.html','Qualidade'],
+        ['rede.html?r=agua',     'Água'],
+        ['rede.html?r=incendio', 'Incêndio'],
         ['ete.html',      'Esgoto'],
         ['documentacao.html','Documentação']
       ];

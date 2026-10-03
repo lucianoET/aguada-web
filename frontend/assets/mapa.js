@@ -7,14 +7,43 @@ const aguadaMapa = (() => {
   const CENTER = [-22.8382228, -43.1080717];
   const INK = '#0b1626';
 
-  // Camadas sobre a base; `key` é o que as páginas usam para ligar/desligar
+  // Camadas sobre a base; `key` é o que as páginas usam para ligar/desligar.
+  // kind:'point' = símbolos lidos da planta; def = ligada por padrão na página Planta.
   const OVERLAYS = [
-    { key:'adutora',  label:'Adutora (OSM)',        color:'#0891b2' },
-    { key:'agua',     label:'Rede de água potável', color:'#2563eb' },
-    { key:'incendio', label:'Rede de incêndio',     color:'#dc2626' },
-    { key:'predios',  label:'Prédios',              color:'#475569' },
-    { key:'areas',    label:'Áreas A / B / C',      color:'#a16207' },
+    { key:'adutora',      label:'Adutora (OSM)',           color:'#0891b2' },
+    { key:'agua',         label:'Rede de água potável',    color:'#2563eb' },
+    { key:'hid_predio',   label:'Hidrômetros dos prédios', color:'#0f766e', kind:'point' },
+    { key:'reg_agua',     label:'Registros · água',        color:'#2563eb', kind:'point', def:false },
+    { key:'incendio',     label:'Rede de incêndio',        color:'#dc2626' },
+    { key:'hidrantes',    label:'Hidrantes',               color:'#dc2626', kind:'point' },
+    { key:'reg_incendio', label:'Registros · incêndio',    color:'#dc2626', kind:'point', def:false },
+    { key:'predios',      label:'Prédios',                 color:'#475569' },
+    { key:'areas',        label:'Áreas A / B / C',         color:'#a16207' },
   ];
+
+  // Símbolo da planta (hidrante, registro, hidrômetro de prédio); rótulo só a partir do zoom 18 (CSS)
+  function planPoint(f) {
+    const p = f.properties;
+    const [lng, lat] = f.geometry.coordinates;
+    let svg, label, popup;
+    if (p.layer === 'hidrante') {
+      svg = `<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#dc2626" stroke="#fff" stroke-width="2"/><circle cx="8" cy="8" r="2" fill="#fff"/></svg>`;
+      label = p.id || 'HID';
+      popup = `<b>${p.id || 'Hidrante'}</b><br>Hidrante · rede de incêndio${p.obs ? `<br><i>${p.obs}</i>` : ''}`;
+    } else if (p.layer === 'registro') {
+      const c = p.rede === 'incendio' ? '#dc2626' : '#2563eb';
+      svg = `<svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" fill="#fff" stroke="${c}" stroke-width="1.8"/><path d="M3.2 3.2 L10.8 10.8 M10.8 3.2 L3.2 10.8" stroke="${c}" stroke-width="1.5"/></svg>`;
+      label = 'RG';
+      popup = `<b>Registro</b><br>Rede ${p.rede === 'incendio' ? 'de incêndio' : 'de água potável'}`;
+    } else {
+      svg = `<svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="2" fill="#fff" stroke="#0f766e" stroke-width="1.8"/><text x="8" y="12" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#0f766e">H</text></svg>`;
+      label = p.vazao_m3h ? `${p.vazao_m3h} m³/h` : 'H';
+      popup = `<b>Hidrômetro — ${p.predio || 'prédio'}</b><br>vazão nominal ${p.vazao_m3h ?? '—'} m³/h (planta)`;
+    }
+    return L.marker([lat, lng], { keyboard:false, title:p.layer === 'hidrometro' ? (p.predio || label) : label,
+      icon:L.divIcon({ className:'plan-pt', html:`${svg}<span class="pt-lbl">${label}</span>`, iconSize:[16, 16], iconAnchor:[8, 8] }) })
+      .bindPopup(popup);
+  }
 
   const key = (value) => String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 
@@ -244,6 +273,15 @@ const aguadaMapa = (() => {
       overlays[k] = L.geoJSON(features, { renderer, interactive:false,
         style:{ color:style[k], weight:k === 'predios' ? 1.2 : (k === 'areas' ? 1.5 : 2.2), opacity:0.9 } });
     });
+    const points = (redes?.features || []).filter((f) => f.geometry.type === 'Point' && f.properties.layer !== 'rotulo');
+    const pointLayer = (test) => L.layerGroup(points.filter(test).map(planPoint));
+    overlays.hidrantes = pointLayer((f) => f.properties.layer === 'hidrante');
+    overlays.reg_incendio = pointLayer((f) => f.properties.layer === 'registro' && f.properties.rede === 'incendio');
+    overlays.reg_agua = pointLayer((f) => f.properties.layer === 'registro' && f.properties.rede === 'agua');
+    overlays.hid_predio = pointLayer((f) => f.properties.layer === 'hidrometro');
+    const detail = () => map.getContainer().classList.toggle('zoom-detail', map.getZoom() >= 18);
+    map.on('zoomend', detail);
+    detail();
     if (overlays.areas) {
       (redes.features || []).filter((f) => f.properties.layer === 'rotulo').forEach((f) => {
         const [lng, lat] = f.geometry.coordinates;
@@ -257,7 +295,7 @@ const aguadaMapa = (() => {
 
     const named = Object.fromEntries(OVERLAYS.filter((o) => overlays[o.key]).map((o) => [o.label, overlays[o.key]]));
     L.control.layers({ 'Mapa':osm, 'Satélite':sat }, control ? named : {}, { position:'topright', collapsed:true }).addTo(map);
-    return { map, overlays };
+    return { map, overlays, redes };
   }
 
   return { OVERLAYS, createMap, buildElements, syncMarkers };

@@ -14,3 +14,12 @@
   font: 800 13px/1 Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase;
   color: #a16207; text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 2px #fff;
 }
+/* Símbolos lidos da planta (hidrante, registro, hidrômetro de prédio) */
+.plan-pt { background: none; border: 0; }
+.plan-pt svg { display: block; filter: drop-shadow(0 1px 1px rgba(0,0,0,.45)); cursor: pointer; }
+.plan-pt .pt-lbl {
+  display: none; position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+  font: 700 10px/1.15 var(--mono, monospace); white-space: nowrap;
+  padding: 1px 4px; border-radius: 5px; background: rgba(255,255,255,.92); color: #0f172a;
+}
+.zoom-detail .plan-pt .pt-lbl { display: block; }
