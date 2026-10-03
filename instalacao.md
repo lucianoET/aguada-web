@@ -65,7 +65,7 @@ HTTP_PORT=80
 |---------|-----------|
 | `docker-compose.yml` | Stack padrão de release: app + mqtt + nginx |
 | `docker-compose.wifi.yml` | Variante equivalente para compatibilidade operacional |
-| `nginx.docker.conf` | nginx com proxy interno para `app:8000` |
+| `nginx.docker.conf` | nginx com proxy interno para `app:8001` |
 | `tools/mosquitto.conf` | Configuração do broker Mosquitto |
 | `frontend/` | Página estática servida pelo nginx |
 
@@ -102,6 +102,11 @@ docker compose down
 docker compose build --no-cache
 docker compose up -d
 ```
+
+> **Atualizando uma instalação antiga:** o `data/aguada.db` deixou de ser versionado.
+> Antes do primeiro `git pull` com essa mudança, faça `cp data/aguada.db data/aguada.db.bak`
+> — o git apaga o arquivo em clones onde ele não foi modificado. Depois do pull, se
+> `data/aguada.db` sumiu, `mv data/aguada.db.bak data/aguada.db`.
 
 ### Dados persistentes
 
@@ -191,7 +196,7 @@ O SQLite e os PDFs ficam em `DATA_DIR` (padrão: `./data/`):
 
 ```
 data/
-  aguada.db       # banco de leituras
+  aguada.db       # banco de leituras (fora do git; o app cria vazio se não existir)
   reports/        # PDFs diários gerados pelo scheduler (06h)
 ```
 

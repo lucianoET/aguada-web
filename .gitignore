@@ -22,3 +22,9 @@ __pycache__/
 data/*.db
 data/*.db-*
 data/reports/*.pdf
+
+# Banco vivo: versionar corrompe (checkout/pull reescreve o arquivo com o app gravando)
+data/aguada.db*
+
+# Dashboards gerados (dados operacionais)
+data/*.html
