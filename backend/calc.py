@@ -30,6 +30,36 @@ def calc_level(
     }
 
 
+# ponytail: tuning knob — o ultrassônico oscila entre dois cm vizinhos (na CIE, 1 cm ≈ 1 m³).
+# Uma variação só vira consumo/abastecimento quando acumula >= noise_cm desde o último
+# nível aceito: oscilação some, escoamento lento (< 1 cm/h) ainda é contado ao acumular.
+# noise_cm = max(NOISE_CM, ruído medido no dia) — sensor ruidoso (CB31, ±5 cm) sobe o limiar.
+NOISE_CM = 1.5
+
+
+def _noise_cm(groups: list[list[dict]]) -> float:
+    """σ robusto (1.4826·MAD) do nível em torno da mediana de cada grupo, com piso NOISE_CM."""
+    devs = []
+    for pts in groups:
+        med = _median_or_none([r.get("level_cm") for r in pts])
+        if med is not None:
+            devs += [abs(float(r["level_cm"]) - med) for r in pts if r.get("level_cm") is not None]
+    return max(NOISE_CM, 1.4826 * statistics.median(devs)) if devs else NOISE_CM
+
+
+def _moved(cur: dict, ref: dict, min_delta_l: float, noise_cm: float = NOISE_CM) -> bool:
+    if abs(cur["vol"] - ref["vol"]) < min_delta_l:
+        return False
+    if cur["lvl"] is None or ref["lvl"] is None:
+        return True  # leituras sem level_cm: só o limiar em litros
+    return abs(cur["lvl"] - ref["lvl"]) >= noise_cm
+
+
+def _median_or_none(values: list) -> Optional[float]:
+    vals = [float(v) for v in values if v is not None]
+    return float(statistics.median(vals)) if vals else None
+
+
 def _classify_delta(delta_l: float, min_delta_l: float) -> str:
     if delta_l <= -min_delta_l:
         return "consumption"
@@ -66,12 +96,21 @@ def calc_consumption_events(readings: list[dict], date: str, min_delta_l: float 
             "hour": f"{key[3]:02d}:00",
             "ts": pts[-1]["ts"],
             "vol": float(statistics.median(volumes)),
+            "lvl": _median_or_none([item.get("level_cm") for item in pts]),
         })
 
+    noise_cm = _noise_cm(list(buckets.values()))
+
     if len(bucket_states) == 1:
-        vol_start = float(valid[0]["volume_l"])
-        vol_end = float(valid[-1]["volume_l"])
+        # Uma hora só: mediana da 1ª metade vs 2ª metade (leitura crua isolada é ruído)
+        half = len(valid) // 2
+        head, tail = valid[:half], valid[half:]
+        vol_start = float(statistics.median(float(r["volume_l"]) for r in head))
+        vol_end = float(statistics.median(float(r["volume_l"]) for r in tail))
         delta_l = vol_end - vol_start
+        moved = _moved({"vol": vol_end, "lvl": _median_or_none([r.get("level_cm") for r in tail])},
+                       {"vol": vol_start, "lvl": _median_or_none([r.get("level_cm") for r in head])},
+                       min_delta_l, noise_cm)
         return [{
             "hour": datetime.datetime.fromtimestamp(valid[-1]["ts"]).strftime("%H:00"),
             "ts_start": valid[0]["ts"],
@@ -80,22 +119,33 @@ def calc_consumption_events(readings: list[dict], date: str, min_delta_l: float 
             "vol_start": round(vol_start, 1),
             "vol_end": round(vol_end, 1),
             "delta_l": round(delta_l, 1),
-            "type": _classify_delta(delta_l, min_delta_l),
+            "type": _classify_delta(delta_l, min_delta_l) if moved else "stable",
         }]
 
     raw_events = []
-    previous = bucket_states[0]
+    previous = ref = bucket_states[0]  # ref = último nível aceito
     for current in bucket_states[1:]:
-        delta_l = current["vol"] - previous["vol"]
+        if _moved(current, ref, min_delta_l, noise_cm):
+            # Variação acumulada desde ref: absorve os "stable" intermediários
+            while raw_events and raw_events[-1]["type"] == "stable" and raw_events[-1]["ts_start"] >= ref["ts"]:
+                raw_events.pop()
+            start = ref
+            delta_l = current["vol"] - ref["vol"]
+            kind = _classify_delta(delta_l, min_delta_l)
+            ref = current
+        else:
+            start = previous
+            delta_l = current["vol"] - previous["vol"]  # informativo, fora do resumo
+            kind = "stable"
         raw_events.append({
             "hour": current["hour"],
-            "ts_start": previous["ts"],
+            "ts_start": start["ts"],
             "ts_end": current["ts"],
-            "duration_min": round(max(0, current["ts"] - previous["ts"]) / 60.0, 1),
-            "vol_start": round(previous["vol"], 1),
+            "duration_min": round(max(0, current["ts"] - start["ts"]) / 60.0, 1),
+            "vol_start": round(start["vol"], 1),
             "vol_end": round(current["vol"], 1),
             "delta_l": round(delta_l, 1),
-            "type": _classify_delta(delta_l, min_delta_l),
+            "type": kind,
         })
         previous = current
 

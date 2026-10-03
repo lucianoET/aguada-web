@@ -32,7 +32,14 @@ docker compose up -d nginx
 
 # Subir stack completa (app + nginx)
 docker compose up -d
+
+# Testes dentro da imagem (Python 3.13, mesmas deps de produção)
+docker run --rm -v "$PWD":/app -w /app -e DATA_DIR=/tmp/d aguada-web-app python -m pytest -q
 ```
+
+- Frontend em `http://localhost:${HTTP_PORT}` (8090 neste host). nginx manda `Cache-Control: no-cache` no frontend.
+- **Origem dos dados:** `.env.gateway` (gitignored, `chmod 600`) define `GW_MQTT_HOST/PORT/USER/PASS` do broker do HA (192.168.0.8), onde o `aguada-bridge.service` republica `aguada/gateway/rx` e os `.../config`. Gerado a partir de `~/.config/aguada/bridge.env`. Sem ele, o app lê o mosquitto local do compose (sem dados).
+- **Docker Desktop (virtiofs):** arquivo do host trocado por substituição (`sed -i`, save atômico de editor, `os.replace`) fica invisível no container até `docker compose restart <serviço>`. Escrita in-place (`cp`, `>`) aparece na hora.
 
 ### Testes
 
@@ -62,15 +69,21 @@ O backend é um **FastAPI** com lifespan que inicializa:
 
 ### Módulos do backend
 
-- `bridge.py` — recepção MQTT do gateway WiFi, parse de pacotes, modo simulação. Carrega `reservoirs.yaml` para montar `RESERVOIR_INDEX` (chave: `(node_id, sensor_id)`)
+- `bridge.py` — recepção MQTT do gateway WiFi, parse de pacotes, dedup por `(node, sensor, seq)`, modo simulação. Carrega `reservoirs.yaml` em `RESERVOIR_INDEX` (chave: `(node_id, sensor_id)`) e `NODE_ALIASES`
 - `db.py` — schema SQLite e todas as queries (sem lógica de negócio). Tabelas: `readings`, `reservoir_state`, mais tabelas manuais (hidrometros, bombas, válvulas, reservatórios) e `nodes`
-- `calc.py` — cálculo de `level_cm`/`volume_l`/`pct` a partir de `distance_cm`, e agregação de eventos de consumo/abastecimento
+- `calc.py` — cálculo de `level_cm`/`volume_l`/`pct` a partir de `distance_cm`, e agregação de eventos de consumo/abastecimento (medianas por hora + deadband de ruído: variação só conta ao acumular >= max(1,5 cm, ruído medido do sensor))
 - `report.py` — geração de PDF diário via WeasyPrint
 - `main.py` — rotas FastAPI + servir SPA estática do `frontend/`
 
 ### Configuração de reservatórios
 
-`backend/reservoirs.yaml` é a fonte de verdade para o mapeamento `node_id → sensor_id → alias/nome/capacidade`. Qualquer novo reservatório físico deve ser adicionado aqui.
+Fonte de verdade: `luctronics_firmware/platformio/tools/reservoirs.yaml` (repo aguada-firmware), o mesmo arquivo que o bridge do Home Assistant lê e edita em runtime (offsets via entidades `number`). Novo reservatório físico entra **lá**.
+
+- `backend/reservoirs.yaml` é só uma cópia, sobrescrita por `tools/sync_reservoirs.sh` no firmware — não editar à mão.
+- `RESERVOIRS_FILE` aponta direto para o arquivo do firmware (o `docker-compose.yml` monta `../platformio/tools`, ou `RESERVOIRS_DIR`). Se não existir, cai na cópia com warning.
+- O backend recarrega o arquivo quando o mtime muda; YAML inválido loga erro e mantém a config anterior. Entrada sem `alias`/`name`/`sensor_offset_cm`/`volume_max_L` falha no load.
+- Offsets editados no HA também chegam por MQTT: o bridge HA publica retido `aguada/<node>/<sid>/config` e o backend aplica em memória (`apply_remote_config`). Necessário no Docker Desktop, que não propaga o `os.replace` do bridge para o container. Só funciona se o backend assinar o mesmo broker do bridge HA.
+- `also: ["0XEE02"]` = node alternativo do mesmo reservatório (node cabeado do CAV); é traduzido para o node principal, como `NODE_ALIASES` no bridge HA.
 
 ### Frontend
 
@@ -87,7 +100,8 @@ Páginas HTML puras em `frontend/` servidas como SPA pelo FastAPI (fallback para
 - `MQTT_HOST`, `MQTT_PORT`, `MQTT_USER`, `MQTT_PASS` — broker MQTT opcional
 - `TZ` — fuso horário para o scheduler (padrão: `America/Sao_Paulo`)
 - `HTTP_PORT` — porta do nginx (padrão: 80)
+- `RESERVOIRS_FILE` — caminho do `reservoirs.yaml` (padrão: `backend/reservoirs.yaml`)
 
 ### Testes
 
-Os testes usam `pytest-asyncio` no modo `auto`. O `conftest.py` provê fixture `db` com SQLite em memória temporária. `test_api.py` testa as rotas FastAPI diretamente sem bridge MQTT.
+Os testes usam `pytest-asyncio` no modo `auto`. O `conftest.py` provê fixture `db` com SQLite em memória temporária. `test_api.py` testa as rotas FastAPI diretamente sem bridge MQTT. `test_bridge.py` cobre o load/reload do `reservoirs.yaml`, alias `also` e dedup por seq.

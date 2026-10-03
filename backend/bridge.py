@@ -11,7 +11,6 @@ import queue
 import random
 import threading
 import time
-from collections import deque
 from glob import glob
 from pathlib import Path
 from typing import Callable, Optional
@@ -23,25 +22,98 @@ from .db import insert_reading, upsert_state, upsert_node, upsert_node_seen
 
 logger = logging.getLogger("bridge")
 
-# Carrega reservoirs.yaml uma vez. Fonte única: aguada-firmware/tools/reservoirs.yaml
-# (mesmo arquivo do bridge do Home Assistant). RESERVOIRS_FILE aponta direto para ele;
-# sem a variável, usa a cópia idêntica em backend/ (tools/sync_reservoirs.sh no firmware).
-_yaml_path = Path(os.getenv("RESERVOIRS_FILE") or Path(__file__).parent / "reservoirs.yaml")
-_raw = yaml.safe_load(_yaml_path.read_text())["reservoirs"]
+# Fonte única: luctronics_firmware/platformio/tools/reservoirs.yaml (repo aguada-firmware),
+# o mesmo arquivo que o bridge do Home Assistant lê e edita em runtime. RESERVOIRS_FILE
+# aponta direto para ele; sem a variável, usa a cópia em backend/ (tools/sync_reservoirs.sh).
+_yaml_path = Path(__file__).parent / "reservoirs.yaml"
+_env_yaml = os.getenv("RESERVOIRS_FILE")
+if _env_yaml:
+    if Path(_env_yaml).exists():
+        _yaml_path = Path(_env_yaml)
+    else:
+        logger.warning("RESERVOIRS_FILE=%s não existe — usando %s", _env_yaml, _yaml_path)
 
-# Índice: (node_id_lower, sensor_id) → dict de parâmetros
-RESERVOIR_INDEX: dict[tuple[str, int], dict] = {}
-for _node_id, _sensors in _raw.items():
-    for _s in _sensors:
-        if "level_max_cm" not in _s:
-            continue  # entradas sem nível (ex.: type: air_quality) são só do bridge HA
-        _s.setdefault("volume_max_l", _s.get("volume_max_L"))
-        # "also": node_ids alternativos que alimentam o mesmo reservatório (ex.: node cabeado)
-        for _nid in [_node_id, *_s.get("also", [])]:
-            RESERVOIR_INDEX[(str(_nid).lower(), _s["sensor_id"])] = _s
+_REQUIRED = ("alias", "name", "sensor_offset_cm", "volume_max_l")
+
+
+def _load_reservoirs(path: Path) -> tuple[dict, dict]:
+    """Lê reservoirs.yaml → (índice, aliases).
+
+    índice:  (node_id_lower, sensor_id) → params. Uma entrada por reservatório.
+    aliases: node_id alternativo ("also") → node_id principal (ex.: node cabeado
+             0xee02 → 0xc9c4), como NODE_ALIASES no bridge HA.
+    Entrada incompleta levanta ValueError — erro de config aparece no load, não vira None.
+    """
+    index: dict[tuple[str, int], dict] = {}
+    aliases: dict[str, str] = {}
+    for node_id, sensors in yaml.safe_load(path.read_text())["reservoirs"].items():
+        nid = str(node_id).lower()
+        for s in sensors:
+            if "level_max_cm" not in s:
+                continue  # entradas sem nível (ex.: type: air_quality) são só do bridge HA
+            s["volume_max_l"] = s.get("volume_max_l", s.get("volume_max_L"))
+            missing = [k for k in _REQUIRED if s.get(k) is None]
+            if missing:
+                raise ValueError(f"{path}: {nid}/{s.get('sensor_id')} sem {', '.join(missing)}")
+            index[(nid, int(s["sensor_id"]))] = s
+            for alt in s.get("also", []):
+                aliases[str(alt).lower()] = nid
+    return index, aliases
+
+
+_yaml_mtime = _yaml_path.stat().st_mtime
+RESERVOIR_INDEX, NODE_ALIASES = _load_reservoirs(_yaml_path)
+
+
+def _swap(target: dict, new: dict) -> None:
+    # ponytail: sem lock — atribuição/pop por chave são atômicas no GIL e leitores iteram
+    # sobre list(...). Lock se um dia houver leitor que itere o dict direto.
+    for k in target.keys() - new.keys():
+        target.pop(k, None)
+    target.update(new)
+
+
+# (chave no payload do bridge HA, chave no params, mínimo aceito)
+_REMOTE_PARAMS = (("level_max_cm", "level_max_cm", 1),
+                  ("sensor_offset_cm", "sensor_offset_cm", 0),
+                  ("volume_max_L", "volume_max_l", 1))
+
+
+def apply_remote_config(node_id: str, sensor_id: str, payload: bytes) -> None:
+    """Aplica os parâmetros editáveis que o bridge HA publica (retido) em
+    aguada/<node>/<sid>/config quando alguém muda um offset no HA. Cobre o caso em que
+    o arquivo não chega ao container (Docker Desktop não propaga os.replace)."""
+    params = RESERVOIR_INDEX.get((node_id.lower(), int(sensor_id)))
+    if params is None:
+        return
+    cfg = json.loads(payload)
+    for src, dst, lo in _REMOTE_PARAMS:
+        v = cfg.get(src)
+        if isinstance(v, (int, float)) and not isinstance(v, bool) and v >= lo and v != params.get(dst):
+            logger.info("Config remota %s %s: %s -> %s", params["alias"], dst, params.get(dst), v)
+            params[dst] = v
+
+
+def reload_reservoirs() -> None:
+    """Relê reservoirs.yaml se mudou no disco (o bridge HA edita offsets em runtime).
+    Arquivo inválido: loga uma vez e mantém a config anterior."""
+    global _yaml_mtime
+    try:
+        mtime = _yaml_path.stat().st_mtime
+        if mtime == _yaml_mtime:
+            return
+        _yaml_mtime = mtime
+        index, aliases = _load_reservoirs(_yaml_path)
+    except Exception as e:
+        logger.error("reservoirs.yaml inválido, mantendo config anterior: %s", e)
+        return
+    _swap(RESERVOIR_INDEX, index)
+    _swap(NODE_ALIASES, aliases)
+    logger.info("reservoirs.yaml recarregado: %d reservatórios", len(index))
 
 
 FLAG_SENSOR_ERROR = 1 << 2
+SEQ_DEDUP_TTL_S = 120  # mesmo valor do bridge HA
 
 
 def _detect_serial_port(configured_port: Optional[str]) -> str:
@@ -92,11 +164,13 @@ def _is_serial_available(configured_port: Optional[str]) -> bool:
 def _process_message(raw: dict) -> Optional[dict]:
     """Valida e enriquece uma mensagem do gateway. Retorna dict pronto para DB ou None."""
     try:
-        # Só processa pacotes SENSOR
-        if raw.get("type") != "SENSOR":
+        # Só processa pacotes SENSOR (node-eth publica "sensor" minúsculo)
+        if str(raw.get("type", "")).upper() != "SENSOR":
             return None
 
+        reload_reservoirs()
         node_id = raw.get("node_id", "").lower()
+        node_id = NODE_ALIASES.get(node_id, node_id)
         sensor_id = int(raw.get("sensor_id", 0))
         distance_cm = raw.get("distance_cm")
         rssi = raw.get("rssi")
@@ -104,7 +178,8 @@ def _process_message(raw: dict) -> Optional[dict]:
         seq = raw.get("seq", 0)
         # Timestamp sempre pelo servidor — gateway e nós não têm RTC confiável.
         ts = int(time.time())
-        vbat = vbat_raw / 10.0 if vbat_raw is not None else None
+        # vbat < 0 = sem medição (node-eth alimentado pela rede manda -1)
+        vbat = vbat_raw / 10.0 if vbat_raw is not None and vbat_raw >= 0 else None
 
         # Descarta leituras com erro de sensor
         flags = raw.get("flags", 0)
@@ -156,6 +231,7 @@ class Bridge:
         self._cmd_queue: queue.Queue = queue.Queue()
         self._active_transport: Optional[str] = None
         self._wifi_mqtt_client = None
+        self._seen_seq: dict[tuple, float] = {}
         self._gw_status: dict = {
             "connected": False,
             "port": None,
@@ -333,16 +409,21 @@ class Bridge:
                 logger.error("WiFi transport: MQTT connect negado rc=%s", rc)
             connected.set()
 
-        # O mesmo pacote pode chegar duas vezes em aguada/gateway/rx (espelho WiFi do
-        # gateway + republicação do bridge USB). As linhas levam seq/ts: igual = duplicado.
-        recent: deque = deque(maxlen=256)
-
         def on_message(client, userdata, msg):
             try:
-                if msg.payload in recent:
+                parts = msg.topic.split("/")
+                if len(parts) == 4 and parts[3] == "config":  # aguada/<node>/<sid>/config
+                    apply_remote_config(parts[1], parts[2], msg.payload)
                     return
-                recent.append(msg.payload)
-                raw = json.loads(msg.payload.decode("utf-8"))
+                # Retido = último estado reenviado no (re)subscribe, não pacote novo
+                if msg.retain:
+                    return
+                try:
+                    raw = json.loads(msg.payload)
+                except ValueError:
+                    return  # status em texto puro ("online"/"offline") no mesmo broker
+                if not isinstance(raw, dict) or "type" not in raw:
+                    return  # estado calculado pelo bridge HA (aguada/<node>/<sid>/state) etc.
                 self._gw_status["last_seen"] = int(time.time())
                 if raw.get("type") == "GATEWAY_STATUS":
                     if raw.get("mac"):
@@ -517,7 +598,7 @@ class Bridge:
         logger.info("Modo simulação ativo")
         # Estado simulado por alias
         aliases_params = {}
-        for (node_id, sensor_id), params in RESERVOIR_INDEX.items():
+        for (node_id, sensor_id), params in list(RESERVOIR_INDEX.items()):
             alias = params["alias"]
             aliases_params[alias] = {"node_id": node_id, "sensor_id": sensor_id, "params": params}
 
@@ -545,15 +626,37 @@ class Bridge:
                 self._handle(raw)
             time.sleep(30)
 
+    def _seen_before(self, raw: dict) -> bool:
+        """O mesmo pacote chega por dois caminhos (espelho WiFi do gateway + republicação
+        do bridge USB). Mesmo (node, sensor, seq) dentro de SEQ_DEDUP_TTL_S = duplicado."""
+        seq = raw.get("seq")
+        if seq is None:
+            return False
+        key = (str(raw.get("node_id", "")).lower(), str(raw.get("sensor_id")), seq)
+        now = time.monotonic()
+        last = self._seen_seq.get(key)
+        if last is not None and now - last < SEQ_DEDUP_TTL_S:
+            return True
+        self._seen_seq[key] = now
+        if len(self._seen_seq) > 512:
+            self._seen_seq = {k: t for k, t in self._seen_seq.items() if now - t < SEQ_DEDUP_TTL_S}
+        return False
+
     def _handle(self, raw: dict) -> None:
-        msg_type = raw.get("type", "?")
+        msg_type = str(raw.get("type", "?")).upper()
         if msg_type == "SENSOR":
+            if self._seen_before(raw):
+                logger.debug("SENSOR duplicado ignorado: %s", raw)
+                return
             logger.info(
                 "SENSOR recebido: node=%s sensor=%s dist=%s rssi=%s ts=%s",
                 raw.get("node_id"), raw.get("sensor_id"),
                 raw.get("distance_cm"), raw.get("rssi"), raw.get("ts"),
             )
         elif msg_type == "HELLO":
+            # Node reiniciou: seq recomeça, esquece as entradas de dedup dele
+            nid = str(raw.get("node_id", "")).lower()
+            self._seen_seq = {k: t for k, t in self._seen_seq.items() if k[0] != nid}
             asyncio.run_coroutine_threadsafe(self._handle_hello(raw), self._loop)
             return
         elif msg_type not in ("GATEWAY_READY", "GATEWAY_STATUS", "CMD_ACK"):

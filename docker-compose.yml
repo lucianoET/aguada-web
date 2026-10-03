@@ -4,12 +4,20 @@ services:
     restart: unless-stopped
     volumes:
       - ./data:/data
-    env_file: .env
+      # reservoirs.yaml do firmware; o backend recarrega quando muda (edição manual / sync).
+      # Pasta, não arquivo: bind de arquivo fica preso no inode antigo. No Docker Desktop
+      # nem a pasta vê o os.replace do bridge HA — offsets do HA chegam via MQTT .../config.
+      - ${RESERVOIRS_DIR:-../platformio/tools}:/reservoirs:ro
+    env_file:
+      - .env
+      # GW_MQTT_HOST/PORT/USER/PASS do broker onde o bridge HA publica (aguada/gateway/rx).
+      # Sem o arquivo, o gateway é lido do mosquitto local (MQTT_HOST abaixo).
+      - path: .env.gateway
+        required: false
     environment:
       - DATA_DIR=/data
+      - RESERVOIRS_FILE=/reservoirs/reservoirs.yaml
       - GATEWAY_TRANSPORT=wifi
-      - GW_MQTT_HOST=mqtt
-      - GW_MQTT_PORT=1883
       - MQTT_HOST=mqtt
       - MQTT_PORT=1883
     depends_on:
