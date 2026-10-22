@@ -213,7 +213,8 @@ function renderAtual(data) {
   const c = document.getElementById('tableContainer');
   if (!data.length) { c.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)">Nenhum reservatório.</div>'; return; }
   const rows = data.map(r => {
-    const pct = r.pct ?? 0, col = gc(pct);
+    const semLeitura = r.pct == null;
+    const pct = r.pct ?? 0, col = semLeitura ? 'var(--text3)' : gc(pct);
     const vol = formatVolumeM3(r.volume_l, 3);
     const cap = r.volume_max_l != null ? formatVolumeM3(r.volume_max_l, 1) : (r.capacity_l != null ? formatVolumeM3(r.capacity_l, 1) : '—');
     const badge = r.online ? '<span class="badge-online">● Online</span>' : '<span class="badge-offline">● Offline</span>';
@@ -223,7 +224,7 @@ function renderAtual(data) {
       <td>${badge}</td>
       <td><div style="display:flex;align-items:center">
         <div class="pct-bar"><div class="pct-bar-fill" style="width:${pct}%;background:${col}"></div></div>
-        <span style="font-weight:600;color:${col}">${pct.toFixed(1)}%</span>
+        <span style="font-weight:600;color:${col}">${semLeitura ? '—' : pct.toFixed(1) + '%'}</span>
       </div></td>
       <td style="text-align:center;"><span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500;${resumoStatusStyle(r.pct)}">${resumoStatusLabel(r.pct)}</span></td>
       <td>${vol}</td><td style="color:var(--text3)">${cap}</td>

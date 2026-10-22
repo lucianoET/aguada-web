@@ -49,10 +49,10 @@
   <div x-data="dashApp()" x-init="init()" x-cloak class="dash2">
 
     <!-- Banner de alerta crítico -->
-    <template x-if="critical > 0">
+    <template x-if="critical > 0 || offline > 0">
       <div class="ha-alert ha-alert-crit">
-        <strong x-text="critical + ' reservatório(s) em estado crítico'"></strong>
-        Nível ≤ 20% ou sem comunicação. Verifique a aba Alertas.
+        <strong x-text="bannerTitle"></strong>
+        <span x-text="bannerText"></span> Verifique a aba Alertas.
       </div>
     </template>
 
@@ -76,9 +76,9 @@
       </div>
       <div class="ha-stat">
         <span class="ha-stat-label">Alertas Ativos</span>
-        <span class="ha-stat-value" :style="critical > 0 ? 'color:var(--red)' : (warning > 0 ? 'color:var(--yellow)' : 'color:var(--green)')" x-text="critical + warning">0</span>
-        <span class="ha-stat-delta" :class="critical > 0 ? 'down' : 'up'"
-              x-text="critical > 0 ? (critical + ' crítico') : (warning > 0 ? (warning + ' atenção') : 'Tudo normal')"></span>
+        <span class="ha-stat-value" :style="critical > 0 ? 'color:var(--red)' : (warning > 0 ? 'color:var(--yellow)' : 'color:var(--green)')" x-text="critical + warning + offline">0</span>
+        <span class="ha-stat-delta" :class="(critical + offline) > 0 ? 'down' : 'up'"
+              x-text="alertSummary"></span>
       </div>
     </div>
 
@@ -142,7 +142,27 @@ function dashApp() {
       const r = (this.reservoirs || []).filter(x => x.online);
       return r.length ? Math.round(r.reduce((s, x) => s + (x.pct || 0), 0) / r.length) : 0;
     },
-    get critical() { return (this.reservoirs || []).filter(r => !r.online || (r.pct != null && r.pct <= 20)).length; },
+    // Nível crítico só com leitura válida; sem comunicação é contado à parte (não é nível 0).
+    get critical() { return (this.reservoirs || []).filter(r => r.online && r.pct != null && r.pct <= 20).length; },
+    get offline() { return (this.reservoirs || []).filter(r => !r.online).length; },
+    get bannerTitle() {
+      const p = [];
+      if (this.critical) p.push(this.critical + ' reservatório(s) em nível crítico');
+      if (this.offline) p.push(this.offline + ' sem comunicação');
+      return p.join(' · ');
+    },
+    get bannerText() {
+      if (this.offline && this.offline === this.reservoirCount) return 'Nenhum sensor está enviando leitura — verifique o gateway e o servidor MQTT.';
+      if (this.critical) return 'Nível ≤ 20%.';
+      return 'Sensor(es) sem leitura há mais de 10 min.';
+    },
+    get alertSummary() {
+      const p = [];
+      if (this.critical) p.push(this.critical + ' crítico');
+      if (this.offline) p.push(this.offline + ' offline');
+      if (!p.length && this.warning) p.push(this.warning + ' atenção');
+      return p.length ? p.join(' · ') : 'Tudo normal';
+    },
     get warning() { return (this.reservoirs || []).filter(r => r.online && r.pct != null && r.pct > 20 && r.pct <= 35).length; },
     get sortedReservoirs() {
       const order = ['CON', 'CAV', 'CIE', 'CB3', 'CBIF'];

@@ -25,7 +25,15 @@ async def test_get_reservoirs_empty(set_test_db):
     async with AsyncClient(transport=ASGITransport(app=m.app), base_url="http://test") as client:
         r = await client.get("/api/reservoirs")
     assert r.status_code == 200
-    assert r.json() == []
+    # Sem leitura nenhuma, os reservatórios cadastrados continuam na lista (offline, sem valor),
+    # para as telas desenharem os elementos mesmo antes do gateway mandar dados.
+    data = r.json()
+    from backend.bridge import RESERVOIR_INDEX
+    assert {d["alias"] for d in data} == {p["alias"] for p in RESERVOIR_INDEX.values()}
+    for d in data:
+        assert d["online"] is False and d["never_seen"] is True
+        assert d["pct"] is None and d["volume_l"] is None and d["level_cm"] is None  # nunca 0
+        assert d["capacity_l"] and d["name"]
 
 
 @pytest.mark.asyncio
@@ -85,10 +93,13 @@ async def test_get_reservoirs_with_data(set_test_db):
     async with AsyncClient(transport=ASGITransport(app=m.app), base_url="http://test") as client:
         r = await client.get("/api/reservoirs")
     assert r.status_code == 200
-    data = r.json()
-    assert len(data) == 1
-    assert data[0]["alias"] == "CON"
-    assert data[0]["online"] is True
+    data = {d["alias"]: d for d in r.json()}
+    assert data["CON"]["online"] is True
+    assert data["CON"]["pct"] == 56.7
+    assert "never_seen" not in data["CON"]
+    # os demais cadastrados aparecem uma única vez, sem leitura
+    assert len(data) == len(r.json())
+    assert all(d["never_seen"] and not d["online"] for a, d in data.items() if a != "CON")
 
 
 @pytest.mark.asyncio

@@ -278,7 +278,36 @@ def _with_meta(states: list[dict]) -> list[dict]:
     for s in states:
         meta = alias_to_meta.get(s.get("alias", ""), {})
         s.update(meta)
-    return states
+    return states + _never_seen(states)
+
+
+def _never_seen(states: list[dict]) -> list[dict]:
+    """Reservatórios cadastrados no reservoirs.yaml que ainda não mandaram leitura.
+
+    Sem isso, num servidor novo (ou após trocar o banco) a API devolve [] e as telas
+    não desenham nada — nem mapa, nem cartões. O elemento existe fisicamente; só não
+    tem medição. Valores ficam null (o front mostra "—"), nunca 0, que pareceria
+    reservatório vazio e dispararia leitura errada de falta d'água."""
+    known = {s.get("alias") for s in states}
+    out: list[dict] = []
+    for (node_id, sensor_id), params in list(RESERVOIR_INDEX.items()):
+        alias = params.get("alias")
+        if not alias or alias in known:
+            continue
+        known.add(alias)
+        item = {
+            "alias": alias, "node_id": node_id, "sensor_id": sensor_id,
+            "name": params.get("name", alias), "ts": None,
+            "level_cm": None, "volume_l": None, "pct": None,
+            "level_max_cm": params.get("level_max_cm"), "volume_max_l": params.get("volume_max_l"),
+            "rssi": None, "online": False, "out_of_range": 0, "never_seen": True,
+        }
+        if params.get("volume_max_l") is not None:
+            item["capacity_l"] = params["volume_max_l"]
+        if "lat" in params and "lng" in params:
+            item["lat"], item["lng"] = params["lat"], params["lng"]
+        out.append(item)
+    return out
 
 
 @app.get("/api/reservoirs")
