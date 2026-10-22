@@ -1679,7 +1679,7 @@
         <div class="modal-grid">
           <div class="modal-kpi">
             <div class="modal-kpi-label">Percentual</div>
-            <div class="modal-kpi-value" x-text="(modal.pct ?? 0).toFixed(1) + '%' "></div>
+            <div class="modal-kpi-value" x-text="modal.pct != null ? Number(modal.pct).toFixed(1) + '%' : '—'"></div>
           </div>
           <div class="modal-kpi">
             <div class="modal-kpi-label">Volume</div>
@@ -2177,11 +2177,13 @@
       },
 
       reservoirVolumeM3(alias) {
-        const value = Number(this.getReservoir(alias)?.volume_l);
+        const raw = this.getReservoir(alias)?.volume_l;
+        const value = raw == null ? NaN : Number(raw);
         return Number.isFinite(value) ? `${(value / 1000).toFixed(1)}` : '—';
       },
 
       reservoirPctLabel(alias) {
+        if (this.getReservoir(alias)?.pct == null) return '—';
         const value = this.reservoirPct(alias);
         return Number.isFinite(value) ? `${value.toFixed(1)}%` : '—';
       },

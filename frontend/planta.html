@@ -172,7 +172,7 @@ function plantaApp() {
       if (item.type !== 'res') return item.summary?.detail || `<b>${item.name}</b>`;
       const site = aguadaMapa.buildElements(this.data, 19).find((e) => e.key === item.key) || item;
       return (site.tanks || [site]).map((t) => {
-        const vol = Number.isFinite(Number(t.volume_l)) ? `${(t.volume_l / 1000).toFixed(1)} m³` : '—';
+        const vol = t.volume_l != null && Number.isFinite(Number(t.volume_l)) ? `${(t.volume_l / 1000).toFixed(1)} m³` : '—';
         const pct = t.pct != null ? `${Math.round(t.pct)}%` : '—';
         return `<b>${t.name || t.alias}</b> (${t.alias})<br>${pct} · ${vol}<br>${t.online ? 'online' : 'offline'} · ${t.ts ? timeAgo(t.ts) : 'sem leitura'}`;
       }).join('<hr style="border:0;border-top:1px solid #e2e8f0;margin:6px 0">');

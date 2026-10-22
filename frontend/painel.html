@@ -653,7 +653,7 @@
         <div class="modal-grid">
           <div class="modal-kpi">
             <div class="modal-kpi-label">Percentual</div>
-            <div class="modal-kpi-value" x-text="(modal.pct ?? 0).toFixed(1) + '%' "></div>
+            <div class="modal-kpi-value" x-text="modal.pct != null ? Number(modal.pct).toFixed(1) + '%' : '—'"></div>
           </div>
           <div class="modal-kpi">
             <div class="modal-kpi-label">Volume</div>
