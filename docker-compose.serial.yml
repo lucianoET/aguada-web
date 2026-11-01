@@ -1,0 +1,16 @@
+# Gateway ESP-NOW por USB (serial) no lugar do gateway WiFi.
+# Uso (variáveis em deploy/<site>.env):
+#   docker compose --env-file deploy/cmasm.env -f docker-compose.yml -f docker-compose.serial.yml up -d
+services:
+  app:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    devices:
+      - source: ${GATEWAY_DEVICE:?defina GATEWAY_DEVICE (ls /dev/serial/by-id/)}
+        target: /dev/ttyGW
+        permissions: rwm
+    environment:
+      - GATEWAY_TRANSPORT=serial
+      - SERIAL_PORT=/dev/ttyGW
+      - MQTT_HOST=${MQTT_HOST:-mqtt}
+      - MQTT_PORT=${MQTT_PORT:-1883}
