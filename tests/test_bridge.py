@@ -178,3 +178,22 @@ def test_config_set_rejeita_fora_da_faixa(tmp_path, monkeypatch):
     br._on_config_set("aguada/0xcccc/1/config/level_max_cm/set", b"nan")
     assert index[("0xcccc", 1)]["level_max_cm"] == 100
     assert f.read_text() == YAML2
+
+
+def test_air_temp_decodifica_canal_t_ext():
+    from backend.bridge import air_temp_c
+    assert air_temp_c(1253, 0) == 25.3
+    assert air_temp_c(950, 0) == -5.0
+    assert air_temp_c(0xFFFF, 4) is None
+    assert air_temp_c(1253, 4) is None
+
+
+def test_air_temp_publica_no_alias_do_reservatorio(tmp_path, monkeypatch):
+    br, f, index = _bridge_with(tmp_path, monkeypatch)
+    monkeypatch.setattr(b, "NODE_ALIASES", {"0xdddd": "0xaaaa"})
+    br._air_temp_discovery = set()
+    br._handle({"type": "HEARTBEAT", "node_id": "0xDDDD", "sensor_id": 241,
+                "distance_cm": 1281, "flags": 0})
+    topics = dict(br._mqtt_client.pub)
+    assert "homeassistant/sensor/aguada_aaa_temp_ar/config" in topics
+    assert '"temp_c": 28.1' in topics["aguada/0xaaaa/air_temp/state"]

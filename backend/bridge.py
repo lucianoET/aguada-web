@@ -177,6 +177,14 @@ def reload_reservoirs() -> None:
 
 
 FLAG_SENSOR_ERROR = 1 << 2
+SENSOR_ID_T_EXT = 0xF1  # HEARTBEAT: distance_cm = °C*10 + 1000 (firmware temp_enc)
+
+
+def air_temp_c(raw, flags) -> Optional[float]:
+    """Decodifica o canal T_EXT; None = sonda sem leitura (erro/ausente)."""
+    if raw is None or flags & FLAG_SENSOR_ERROR or raw == 0xFFFF:
+        return None
+    return round((int(raw) - 1000) / 10.0, 1)
 
 # (chave, rótulo, value_template, unidade, device_class, ícone) — espelha publish_discovery
 # do bridge HA (aguada-firmware/tools/bridge.py), adaptado ao payload deste bridge.
@@ -335,6 +343,7 @@ class Bridge:
             "transport": None,
         }
         self._discovery_sent: set = set()
+        self._air_temp_discovery: set = set()
         self._init_mqtt()
 
     def _init_mqtt(self) -> None:
@@ -843,6 +852,9 @@ class Bridge:
             self._seen_seq = {k: t for k, t in self._seen_seq.items() if k[0] != nid}
             asyncio.run_coroutine_threadsafe(self._handle_hello(raw), self._loop)
             return
+        elif msg_type == "HEARTBEAT" and int(raw.get("sensor_id", 0)) == SENSOR_ID_T_EXT:
+            self._handle_air_temp(raw)
+            return
         elif msg_type not in ("GATEWAY_READY", "GATEWAY_STATUS", "CMD_ACK"):
             logger.debug("Mensagem tipo=%s: %s", msg_type, raw)
         record = _process_message(raw)
@@ -854,6 +866,36 @@ class Bridge:
                 )
             return
         asyncio.run_coroutine_threadsafe(self._save_and_notify(record), self._loop)
+
+    def _handle_air_temp(self, raw: dict) -> None:
+        """Temperatura do ar do reservatório (sonda da compensação do ultrassom)."""
+        node_id = str(raw.get("node_id", "")).lower()
+        node_id = NODE_ALIASES.get(node_id, node_id)
+        params = RESERVOIR_INDEX.get((node_id, 1))
+        if params is None or not self._mqtt_client:
+            return
+        temp = air_temp_c(raw.get("distance_cm"), raw.get("flags", 0))
+        logger.info("Temperatura do ar %s: %s °C", params["alias"], temp)
+        topic = f"aguada/{node_id}/air_temp/state"
+        if node_id not in self._air_temp_discovery:
+            a = params["alias"].lower()
+            cfg = {
+                "name": f"{params['name']} - Temperatura do ar",
+                "unique_id": f"aguada_{a}_temp_ar",
+                "default_entity_id": f"sensor.aguada_{a}_temp_ar",
+                "state_topic": topic,
+                "value_template": "{{ value_json.temp_c }}",
+                "unit_of_measurement": "°C",
+                "device_class": "temperature",
+                "state_class": "measurement",
+                "device": {"name": params["alias"], "identifiers": [f"aguada_{a}"],
+                           "manufacturer": "Aguada"},
+            }
+            self._mqtt_client.publish(f"homeassistant/sensor/aguada_{a}_temp_ar/config",
+                                      json.dumps(cfg), retain=True)
+            self._air_temp_discovery.add(node_id)
+        self._mqtt_client.publish(topic, json.dumps({"temp_c": temp, "ts": int(time.time())}),
+                                  retain=True)
 
     async def _handle_hello(self, raw: dict) -> None:
         import aiosqlite
