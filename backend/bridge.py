@@ -161,6 +161,21 @@ def _is_serial_available(configured_port: Optional[str]) -> bool:
     return False
 
 
+def _vbat_volts(v) -> Optional[float]:
+    """vbat em volts. O pacote leva décimos (50 = 5,0 V; -1 = sem medição), mas o
+    gateway já converte para volts no JSON (5.0, que o ArduinoJson pode imprimir
+    como 5). Valor < 10 = já em volts; >= 10 = décimos."""
+    if v is None or isinstance(v, bool):
+        return None
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return None
+    if f < 0:
+        return None
+    return round(f if f < 10 else f / 10.0, 2)
+
+
 def _process_message(raw: dict) -> Optional[dict]:
     """Valida e enriquece uma mensagem do gateway. Retorna dict pronto para DB ou None."""
     try:
@@ -179,7 +194,7 @@ def _process_message(raw: dict) -> Optional[dict]:
         # Timestamp sempre pelo servidor — gateway e nós não têm RTC confiável.
         ts = int(time.time())
         # vbat < 0 = sem medição (node-eth alimentado pela rede manda -1)
-        vbat = vbat_raw / 10.0 if vbat_raw is not None and vbat_raw >= 0 else None
+        vbat = _vbat_volts(vbat_raw)
 
         # Descarta leituras com erro de sensor
         flags = raw.get("flags", 0)
@@ -683,7 +698,7 @@ class Bridge:
             "fw_version": raw.get("fw_version"),
             "last_seen": int(time.time()),
             "last_rssi": raw.get("rssi"),
-            "last_vbat": (raw.get("vbat") / 10.0) if raw.get("vbat") is not None else None,
+            "last_vbat": _vbat_volts(raw.get("vbat")),
             "flags": raw.get("flags", 0),
         }
         try:

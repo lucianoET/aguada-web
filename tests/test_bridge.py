@@ -102,3 +102,14 @@ def test_apply_remote_config(swap_yaml):
     b.apply_remote_config("0XAAAA", "1", b'{"level_max_cm": 0, "volume_max_L": "x", "sensor_offset_cm": true}')
     assert (p["level_max_cm"], p["sensor_offset_cm"], p["volume_max_l"]) == (320, 0, 32000)
     b.apply_remote_config("0XFFFF", "1", b'{"level_max_cm": 999}')  # reservatório desconhecido: no-op
+
+
+def test_vbat_volts_aceita_volts_e_decimos():
+    from backend.bridge import _vbat_volts
+    assert _vbat_volts(5.0) == 5.0      # gateway já converteu
+    assert _vbat_volts(5) == 5.0        # ArduinoJson imprime 5.0 como 5
+    assert _vbat_volts(4.9) == 4.9
+    assert _vbat_volts(50) == 5.0       # décimos crus
+    assert _vbat_volts(33) == 3.3
+    assert _vbat_volts(-1) is None
+    assert _vbat_volts(None) is None
