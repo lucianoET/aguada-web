@@ -1,16 +1,22 @@
 # Gateway ESP-NOW por USB (serial) no lugar do gateway WiFi.
 # Uso (variáveis em deploy/<site>.env):
 #   docker compose --env-file deploy/cmasm.env -f docker-compose.yml -f docker-compose.serial.yml up -d
+#
+# O /dev do host entra inteiro (só leitura) em /hostdev e o bridge abre o gateway pelo
+# número de série a cada (re)conexão: replug ou ttyACM trocado não exigem recriar o
+# container, e outro ESP no USB (um nó) nunca é tomado por gateway. `devices:` não
+# serve: fixa o ttyACM que o by-id apontava quando o container foi criado.
 services:
   app:
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    devices:
-      - source: ${GATEWAY_DEVICE:?defina GATEWAY_DEVICE (ls /dev/serial/by-id/)}
-        target: /dev/ttyGW
-        permissions: rwm
+    volumes:
+      - /dev:/hostdev:ro
+    device_cgroup_rules:
+      - "c 166:* rwm"   # ttyACM* (USB CDC: ESP32-C3/S3)
+      - "c 188:* rwm"   # ttyUSB* (CH340/CP210x)
     environment:
       - GATEWAY_TRANSPORT=serial
-      - SERIAL_PORT=/dev/ttyGW
+      - SERIAL_PORT=/hostdev/serial/by-id/${GATEWAY_SERIAL:?defina GATEWAY_SERIAL (ls /dev/serial/by-id/)}
       - MQTT_HOST=${MQTT_HOST:-mqtt}
       - MQTT_PORT=${MQTT_PORT:-1883}

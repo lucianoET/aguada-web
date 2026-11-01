@@ -197,3 +197,11 @@ def test_air_temp_publica_no_alias_do_reservatorio(tmp_path, monkeypatch):
     topics = dict(br._mqtt_client.pub)
     assert "homeassistant/sensor/aguada_aaa_temp_ar/config" in topics
     assert '"temp_c": 28.1' in topics["aguada/0xaaaa/air_temp/state"]
+
+
+def test_porta_by_id_nao_cai_em_outro_dispositivo(monkeypatch):
+    from backend.bridge import _detect_serial_port, _is_serial_available
+    gw = "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_GW-if00"
+    monkeypatch.setattr(b, "glob", lambda pat: ["/dev/ttyACM0"] if "ttyACM" in pat else [])
+    assert _detect_serial_port(gw) == gw
+    assert _is_serial_available(gw) is False

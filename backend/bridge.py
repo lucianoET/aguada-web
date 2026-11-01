@@ -201,7 +201,15 @@ _DISCOVERY_ENTITIES = (
 SEQ_DEDUP_TTL_S = 120  # mesmo valor do bridge HA
 
 
+def _pinned(configured_port: Optional[str]) -> bool:
+    """Porta por número de série (/dev/serial/by-id/...): só ela serve. Sem fallback,
+    senão outro ESP plugado (ex.: um nó no USB) vira "gateway" e é resetado."""
+    return bool(configured_port) and "/serial/by-id/" in configured_port
+
+
 def _detect_serial_port(configured_port: Optional[str]) -> str:
+    if _pinned(configured_port):
+        return configured_port
     candidates: list[str] = []
     if configured_port:
         candidates.append(configured_port)
@@ -239,6 +247,8 @@ def _is_serial_available(configured_port: Optional[str]) -> bool:
     """Verifica rapidamente se há porta serial disponível, sem abrir o dispositivo."""
     if configured_port and Path(configured_port).exists():
         return True
+    if _pinned(configured_port):
+        return False
     for pattern in ["/dev/serial/by-id/*", "/dev/ttyACM*", "/dev/ttyUSB*"]:
         for p in glob(pattern):
             if Path(p).exists():
