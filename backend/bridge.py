@@ -113,6 +113,19 @@ def reload_reservoirs() -> None:
 
 
 FLAG_SENSOR_ERROR = 1 << 2
+
+# (chave, rótulo, value_template, unidade, device_class, ícone) — espelha publish_discovery
+# do bridge HA (aguada-firmware/tools/bridge.py), adaptado ao payload deste bridge.
+_DISCOVERY_ENTITIES = (
+    ("nivel", "Nível", "{{ value_json.level_cm }}", "cm", "distance", "mdi:water-level"),
+    ("pct", "Volume %", "{{ value_json.pct }}", "%", None, "mdi:percent"),
+    ("volume", "Volume", "{{ value_json.volume_l }}", "L", None, "mdi:water"),
+    ("distancia", "Distância", "{{ value_json.distance_cm }}", "cm", "distance", "mdi:ruler"),
+    ("rssi", "RSSI", "{{ value_json.rssi }}", "dBm", "signal_strength", "mdi:wifi"),
+    ("bateria", "Bateria", "{{ value_json.vbat }}", "V", "voltage", "mdi:battery"),
+    ("last_update", "Último dado", "{{ as_datetime(value_json.ts).isoformat() }}", None,
+     "timestamp", "mdi:clock-outline"),
+)
 SEQ_DEDUP_TTL_S = 120  # mesmo valor do bridge HA
 
 
@@ -257,6 +270,7 @@ class Bridge:
             "last_seen": None,
             "transport": None,
         }
+        self._discovery_sent: set = set()
         self._init_mqtt()
 
     def _init_mqtt(self) -> None:
@@ -293,9 +307,36 @@ class Bridge:
         })
         topic = f"aguada/{node_id}/{sensor_id}/state"
         try:
+            if (node_id, sensor_id) not in self._discovery_sent:
+                self._publish_discovery(alias, record.get("name") or alias, topic)
+                self._discovery_sent.add((node_id, sensor_id))
             self._mqtt_client.publish(topic, payload, retain=True)
         except Exception as e:
             logger.warning("MQTT publish error: %s", e)
+
+    def _publish_discovery(self, alias: str, name: str, state_topic: str) -> None:
+        """HA MQTT Discovery com os mesmos entity_ids do bridge HA (sensor.aguada_<alias>_*),
+        que o package aguada do Home Assistant consome. Retido: sobrevive a restart do HA."""
+        a = alias.lower()
+        dev = {"name": alias, "identifiers": [f"aguada_{a}"], "manufacturer": "Aguada"}
+        for key, label, vt, uom, dc, icon in _DISCOVERY_ENTITIES:
+            cfg = {
+                "name": f"{name} - {label}",
+                "unique_id": f"aguada_{a}_{key}",
+                "default_entity_id": f"sensor.aguada_{a}_{key}",
+                "state_topic": state_topic,
+                "value_template": vt,
+                "device": dev,
+                "icon": icon,
+            }
+            if uom:
+                cfg["unit_of_measurement"] = uom
+                cfg["state_class"] = "measurement"
+            if dc:
+                cfg["device_class"] = dc
+            self._mqtt_client.publish(f"homeassistant/sensor/aguada_{a}_{key}/config",
+                                      json.dumps(cfg), retain=True)
+        logger.info("HA Discovery publicado: %s", alias)
 
     def get_status(self) -> dict:
         """Retorna status atual do gateway USB (thread-safe)."""
