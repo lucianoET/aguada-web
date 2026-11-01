@@ -9,6 +9,8 @@ import logging
 import os
 import queue
 import random
+import re
+import tempfile
 import threading
 import time
 from glob import glob
@@ -77,6 +79,68 @@ def _swap(target: dict, new: dict) -> None:
 _REMOTE_PARAMS = (("level_max_cm", "level_max_cm", 1),
                   ("sensor_offset_cm", "sensor_offset_cm", 0),
                   ("volume_max_L", "volume_max_l", 1))
+
+
+# Editáveis no HA (number): param do YAML -> (rótulo, sufixo da entidade, unidade, mín, máx, ícone).
+# Mesmos nomes/ids do bridge HA (aguada-firmware/tools/bridge.py RESERVOIR_PARAMS).
+EDITABLE_PARAMS = {
+    "level_max_cm":     ("Altura útil", "altura_util", "cm", 50, 1000, "mdi:arrow-expand-vertical"),
+    "sensor_offset_cm": ("Offset do sensor", "offset_sensor", "cm", 0, 200, "mdi:arrow-collapse-down"),
+    "volume_max_L":     ("Volume máximo", "volume_maximo", "L", 1, 500000, "mdi:cup-water"),
+}
+_PARAM_KEY = {"volume_max_L": "volume_max_l"}  # params normaliza volume_max_L -> volume_max_l
+
+
+def param_value(params: dict, param: str):
+    return params.get(_PARAM_KEY.get(param, param))
+
+
+def persist_param(node_id: str, alias: str, param: str, value: int) -> bool:
+    """Troca só a linha `param: N` do reservatório no YAML (comentários sobrevivem).
+    Retorna False se não achou a linha ou o arquivo é só leitura."""
+    path = os.path.realpath(_yaml_path)
+    with open(path, encoding="utf-8") as f:
+        lines = f.read().splitlines(keepends=True)
+    node_re = re.compile(r'^\s*["\']?%s["\']?\s*:' % re.escape(node_id), re.IGNORECASE)
+    alias_re = re.compile(r'^\s*(?:-\s+)?alias:\s*["\']?%s["\']?\s*(#.*)?$' % re.escape(alias))
+    param_re = re.compile(r"^(\s*(?:-\s+)?%s\s*:\s*)(-?\d+(?:\.\d+)?)(.*)$" % re.escape(param))
+    start = next((i for i, l in enumerate(lines) if node_re.match(l)), None)
+    if start is None:
+        return False
+    in_item, m = False, None
+    for i in range(start + 1, len(lines)):
+        body = lines[i].rstrip("\r\n")
+        if body.strip() and not body.startswith(" "):
+            break
+        if re.match(r'^\s*["\']?0[xX][0-9A-Fa-f]+["\']?\s*:', body):  # próximo node
+            break
+        if re.match(r"^\s*-\s", body):
+            in_item = bool(alias_re.match(body))
+        elif alias_re.match(body):
+            in_item = True
+        m = param_re.match(body) if in_item else None
+        if m:
+            lines[i] = m.group(1) + str(value) + m.group(3) + lines[i][len(body):]
+            break
+    if not m:
+        return False
+    st = os.stat(path)
+    try:
+        fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix=".reservoirs.", suffix=".tmp")
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write("".join(lines))
+        os.chmod(tmp, st.st_mode & 0o7777)
+        try:
+            os.chown(tmp, st.st_uid, st.st_gid)  # container roda como root; o arquivo é do host
+        except PermissionError:
+            pass
+        os.replace(tmp, path)
+    except OSError as e:
+        logger.error("Config não persistida em %s: %s", path, e)
+        return False
+    global _yaml_mtime
+    _yaml_mtime = os.stat(path).st_mtime  # já aplicado em memória; não recarregar
+    return True
 
 
 def apply_remote_config(node_id: str, sensor_id: str, payload: bytes) -> None:
@@ -284,6 +348,8 @@ class Bridge:
         if user:
             self._mqtt_client.username_pw_set(user, pwd)
         port = int(os.getenv("MQTT_PORT", "1883"))
+        self._mqtt_client.on_connect = lambda c, *_: self._on_mqtt_connect()
+        self._mqtt_client.on_message = lambda c, u, msg: self._on_config_set(msg.topic, msg.payload)
         self._mqtt_client.connect_async(host, port)
         self._mqtt_client.loop_start()
         logger.info("MQTT configurado: %s:%d", host, port)
@@ -337,6 +403,67 @@ class Bridge:
             self._mqtt_client.publish(f"homeassistant/sensor/aguada_{a}_{key}/config",
                                       json.dumps(cfg), retain=True)
         logger.info("HA Discovery publicado: %s", alias)
+
+    def _on_mqtt_connect(self) -> None:
+        """Campos editáveis no HA para todo reservatório do YAML, com ou sem leitura."""
+        self._mqtt_client.subscribe("aguada/+/+/config/+/set")
+        for (node_id, sensor_id), params in list(RESERVOIR_INDEX.items()):
+            self._publish_param_discovery(node_id, sensor_id, params)
+            self._publish_params(node_id, sensor_id, params)
+
+    def _publish_param_discovery(self, node_id: str, sensor_id: int, params: dict) -> None:
+        a = params["alias"].lower()
+        config_tp = f"aguada/{node_id}/{sensor_id}/config"
+        dev = {"name": params["alias"], "identifiers": [f"aguada_{a}"], "manufacturer": "Aguada"}
+        for param, (label, ent, unit, lo, hi, icon) in EDITABLE_PARAMS.items():
+            uid = f"aguada_{a}_cfg_{param}"
+            cfg = {
+                "name": f"{params['name']} - {label}",
+                "unique_id": uid,
+                "default_entity_id": f"number.aguada_{a}_{ent}",
+                "state_topic": config_tp,
+                "value_template": "{{ value_json.%s }}" % param,
+                "command_topic": f"{config_tp}/{param}/set",
+                "min": lo, "max": hi, "step": 1, "mode": "box",
+                "entity_category": "config",
+                "unit_of_measurement": unit,
+                "icon": icon,
+                "device": dev,
+            }
+            self._mqtt_client.publish(f"homeassistant/number/{uid}/config", json.dumps(cfg), retain=True)
+
+    def _publish_params(self, node_id: str, sensor_id: int, params: dict) -> None:
+        state = {p: param_value(params, p) for p in EDITABLE_PARAMS}
+        self._mqtt_client.publish(f"aguada/{node_id}/{sensor_id}/config", json.dumps(state), retain=True)
+
+    def _on_config_set(self, topic: str, payload: bytes) -> None:
+        """Edição no HA: valida, aplica em memória (vale na próxima leitura), grava no YAML."""
+        parts = topic.split("/")  # aguada/<node>/<sid>/config/<param>/set
+        if len(parts) != 6 or parts[3] != "config" or parts[5] != "set":
+            return
+        node_id, param = parts[1].lower(), parts[4]
+        try:
+            sensor_id = int(parts[2])
+        except ValueError:
+            return
+        params = RESERVOIR_INDEX.get((node_id, sensor_id))
+        if params is None or param not in EDITABLE_PARAMS:
+            logger.warning("Config set ignorado: %s", topic)
+            return
+        lo, hi = EDITABLE_PARAMS[param][3], EDITABLE_PARAMS[param][4]
+        try:
+            v = float(payload.decode(errors="replace").strip())
+        except ValueError:
+            v = float("nan")
+        if not (lo <= v <= hi):  # NaN também cai aqui
+            logger.warning("Config rejeitada: %s %s=%r", params["alias"], param, payload)
+        else:
+            new = int(round(v))
+            logger.info("Config %s %s: %s -> %s", params["alias"], param, param_value(params, param), new)
+            params[_PARAM_KEY.get(param, param)] = new
+            if not persist_param(node_id, params["alias"], param, new):
+                logger.warning("Config %s %s só em memória (YAML não gravado)", params["alias"], param)
+        self._publish_params(node_id, sensor_id, params)
 
     def get_status(self) -> dict:
         """Retorna status atual do gateway USB (thread-safe)."""

@@ -113,3 +113,68 @@ def test_vbat_volts_aceita_volts_e_decimos():
     assert _vbat_volts(33) == 3.3
     assert _vbat_volts(-1) is None
     assert _vbat_volts(None) is None
+
+
+YAML2 = """reservoirs:
+  "0XAAAA":
+    - sensor_id: 1
+      alias: AAA
+      name: Tanque A
+      level_max_cm: 300   # medido
+      volume_max_L: 30000
+      sensor_offset_cm: 10
+    - sensor_id: 2
+      alias: AAB
+      name: Tanque B
+      level_max_cm: 200
+      volume_max_L: 20000
+      sensor_offset_cm: 10
+  "0XCCCC":
+    - sensor_id: 1
+      alias: CCC
+      name: Tanque C
+      level_max_cm: 100
+      volume_max_L: 1000
+      sensor_offset_cm: 10
+"""
+
+
+class _FakeMqtt:
+    def __init__(self):
+        self.pub = []
+
+    def publish(self, topic, payload, retain=False):
+        self.pub.append((topic, payload))
+
+
+def _bridge_with(tmp_path, monkeypatch):
+    f = tmp_path / "reservoirs.yaml"
+    f.write_text(YAML2)
+    monkeypatch.setattr(b, "_yaml_path", f)
+    index, _ = _load_reservoirs(f)
+    monkeypatch.setattr(b, "RESERVOIR_INDEX", index)
+    br = Bridge.__new__(Bridge)
+    br._mqtt_client = _FakeMqtt()
+    return br, f, index
+
+
+def test_config_set_aplica_e_grava_so_a_linha_certa(tmp_path, monkeypatch):
+    br, f, index = _bridge_with(tmp_path, monkeypatch)
+    br._on_config_set("aguada/0xaaaa/2/config/sensor_offset_cm/set", b"35")
+    br._on_config_set("aguada/0xaaaa/1/config/volume_max_L/set", b"31000")
+    assert index[("0xaaaa", 2)]["sensor_offset_cm"] == 35
+    assert index[("0xaaaa", 1)]["volume_max_l"] == 31000
+    txt = f.read_text()
+    assert "level_max_cm: 300   # medido" in txt          # comentário preservado
+    assert txt.count("sensor_offset_cm: 35") == 1          # só o AAB mudou
+    assert "volume_max_L: 31000" in txt and "volume_max_L: 1000\n" in txt
+    topic, payload = br._mqtt_client.pub[-1]
+    assert topic == "aguada/0xaaaa/1/config" and '"volume_max_L": 31000' in payload
+
+
+def test_config_set_rejeita_fora_da_faixa(tmp_path, monkeypatch):
+    br, f, index = _bridge_with(tmp_path, monkeypatch)
+    br._on_config_set("aguada/0xcccc/1/config/level_max_cm/set", b"5")
+    br._on_config_set("aguada/0xcccc/1/config/level_max_cm/set", b"nan")
+    assert index[("0xcccc", 1)]["level_max_cm"] == 100
+    assert f.read_text() == YAML2
