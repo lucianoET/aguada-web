@@ -526,7 +526,7 @@ class Bridge:
 
             if try_wifi:
                 try:
-                    self._run_wifi_transport()
+                    self._run_wifi_transport(serial_port if transport_mode == "auto" else None)
                     continue
                 except Exception as e:
                     self._gw_status["connected"] = False
@@ -575,7 +575,7 @@ class Bridge:
         self._send_settime(ser)
         self._read_loop(ser)
 
-    def _run_wifi_transport(self) -> None:
+    def _run_wifi_transport(self, serial_port: Optional[str] = None) -> None:
         """Subscreve MQTT do gateway WiFi e processa mensagens até desconectar."""
         import paho.mqtt.client as mqtt
 
@@ -659,7 +659,11 @@ class Bridge:
                 raise RuntimeError(f"Timeout ao conectar MQTT WiFi {host}:{port}")
             if not self._gw_status.get("connected"):
                 raise RuntimeError(f"MQTT WiFi negou conexão {host}:{port}")
-            disconnected.wait()  # bloqueia até desconexão
+            # auto: o WiFi é reserva — volta ao USB assim que o gateway reaparecer nele
+            while not disconnected.wait(timeout=5):
+                if serial_port and _is_serial_available(serial_port):
+                    logger.info("Gateway de volta no USB — saindo do WiFi")
+                    return
             raise RuntimeError("MQTT WiFi desconectado")
         finally:
             self._wifi_mqtt_client = None

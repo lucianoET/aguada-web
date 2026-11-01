@@ -16,7 +16,7 @@ services:
       - "c 166:* rwm"   # ttyACM* (USB CDC: ESP32-C3/S3)
       - "c 188:* rwm"   # ttyUSB* (CH340/CP210x)
     environment:
-      - GATEWAY_TRANSPORT=serial
+      - GATEWAY_TRANSPORT=${GATEWAY_TRANSPORT:-auto}
       - SERIAL_PORT=/hostdev/serial/by-id/${GATEWAY_SERIAL:?defina GATEWAY_SERIAL (ls /dev/serial/by-id/)}
       - MQTT_HOST=${MQTT_HOST:-mqtt}
       - MQTT_PORT=${MQTT_PORT:-1883}
